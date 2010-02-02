@@ -41,6 +41,7 @@
   $break =
   fuse.$break = function $break() { };
 
+  addArrayMethods =
   emptyFunction =
   fuse.emptyFunction = function emptyFunction() { };
 
