@@ -1,3 +1,5 @@
+* Simplify private function toInteger(). [Asen Bozhilov, jddalton]
+
 * Give private function addArrayMethods() a default value of emptyFunction() so that the Array extensions aren't needed for other modules to call it. [jddalton]
 
 * Ensure new fuse.Object() is instanceof fuse.Object. [jddalton]

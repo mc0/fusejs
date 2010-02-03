@@ -70,20 +70,15 @@
   })();
 
   // ECMA-5 9.4 ToInteger implementation
-  toInteger = (function() {
-    var abs = Math.abs, floor = Math.floor,
-     maxBitwiseNumber = Math.pow(2, 31);
-
-    return function(object) {
-      var number = +object; // fast coerce to number
-      if (number == 0 || !isFinite(number)) return number || 0;
-
-      // avoid issues with large numbers against bitwise operators
-      return number < maxBitwiseNumber
-        ? number | 0
-        : (number < 0 ? -1 : 1) * floor(abs(number));
-    };
-  })();
+  toInteger = function(object) {
+    // fast coerce to number
+    var number = +object;
+    // avoid issues with numbers larger than
+    // Math.pow(2, 31) against bitwise operators
+    return number == 0 || !isFinite(number)
+      ? number || 0
+      : number < 2147483648 ? number | 0 : number - (number % 1);
+  };
 
   // global.document.createDocumentFragment() nodeType
   DOCUMENT_FRAGMENT_NODE = 11;
