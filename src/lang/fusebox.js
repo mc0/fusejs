@@ -101,6 +101,8 @@
     })(),
 
     createFusebox = function(instance) {
+      // Most methods try to follow ECMA spec but may differ from
+      // the documented method.length value or allow null callbacks.
       var Array, Boolean, Date, Function, Number, Object, RegExp, String,
        glSlice     = global.Array.prototype.slice,
        glFunction  = global.Function,
