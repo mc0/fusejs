@@ -1,3 +1,15 @@
+* Update the fuse.Class API. [jddalton, T.J. Crowder]
+  - Created fuse.Class.statics and fuse.Class.mixins objects
+  - Moved the callSuper() method onto the Class.mixins object
+  - Added addMixins(), addPlugins(), addStatics() methods to fuse.Class.statics object
+  - fuse.Class argument order is now ($super, plugins, mixins, statics) or (plugins, mixins, statics)
+  - Class extend() argument order is now (plugins, mixins, statics)
+  - Call a super method one of the following:
+    this.callSuper(arguments); // OR
+    this.callSuper(method, arg1, arg2, ...); // OR
+    method.$super.call(this, arg1, arg2, ...); // OR
+    arguments.callee.$super.call(this, arg1, arg2, ...);
+
 * Simplify private function toInteger(). [Asen Bozhilov, jddalton]
 
 * Give private function addArrayMethods() a default value of emptyFunction() so that the Array extensions aren't needed for other modules to call it. [jddalton]
@@ -194,12 +206,7 @@
 
 * Optimize Element className methods by removing support for edge case whitespace such as newlines and tabs. [jddalton, kangax]
 
-* Changed the Class API for calling a super method in favor of T.J. Crowder's approach. [jddalton, kangax, T.J. Crowder]
-  Note: A subclassed method may call it's super by:
-    Subclass.callSuper(this, 'subMethod', arg1, arg2, ...); // OR
-    Subclass.callSuper(this, arguments, arg1, arg2, ...);   // OR
-    subMethod.$super.call(this, arg2, arg2, ...);           // OR
-    arguments.callee.$super.call(this, arg2, arg2, ...);
+* Update the Class API for calling super methods to T.J. Crowder's implementation. [jddalton, kangax, T.J. Crowder]
 
 * unit test: Correct Element#getStyle width/height test in IE6. [jddalton]
 

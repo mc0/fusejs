@@ -4,9 +4,10 @@ new Test.Unit.Runner({
     this.assert(fuse.Object.isFunction(Fixtures.Animal),
       'Fixtures.Animal is not a constructor');
 
-    this.assertEnumEqual([Fixtures.Cat,
-      Fixtures.Dog, Fixtures.Mouse, Fixtures.Ox],
-      Fixtures.Animal.subclasses);
+    this.assertEqual(4,
+      fuse.Array(Fixtures.Cat, Fixtures.Dog, Fixtures.Mouse, Fixtures.Ox)
+        .intersect(Fixtures.Animal.subclasses).length,
+      'Subclasses collection should have 4 classes.');
 
     Fixtures.Animal.subclasses.each(function(subclass) {
       this.assertEqual(Fixtures.Animal, subclass.superclass) }, this);
@@ -79,15 +80,17 @@ new Test.Unit.Runner({
     this.assertEqual('Tom: Yum!', tom.eat(new Fixtures.Mouse));
 
     // augment the constructor and test
-    var Dodo = fuse.Class(Fixtures.Animal, {
-      'initialize': function(name) {
-        Dodo.callSuper(this, 'initialize', name);
+    var Dodo = fuse.Class(Fixtures.Animal, function() {
+      function initialize(name) {
+        this.callSuper(initialize, name);
         this.extinct = true;
-      },
-
-      'say': function(message) {
-        return Dodo.callSuper(this, arguments, message) + ' honk honk';
       }
+
+      function say(message) {
+        return this.callSuper(say, message) + ' honk honk';
+      }
+
+      return { 'initialize': initialize, 'say': say };
     });
 
     var gonzo = new Dodo('Gonzo');
@@ -102,59 +105,72 @@ new Test.Unit.Runner({
   },
 
   'testClassExtend': function() {
-    var tom = new Fixtures.Cat('Tom'),
-     jerry  = new Fixtures.Mouse('Jerry');
+    var tom = new Fixtures.Cat('Tom'), jerry = new Fixtures.Mouse('Jerry');
 
-    Fixtures.Animal.extend({
+    Fixtures.Animal.addPlugins({
       'sleep': function() { return this.say('ZZZ'); }
     });
 
     Fixtures.Mouse.extend(
-      {
-        'staticTest': function() {
-          return 'static';
-        }
-      },
-      {
-        'sleep': function() {
-          return Fixtures.Mouse.callSuper(this, 'sleep') +
+      /* plugins - test passing a closure */
+      function() {
+        function sleep() {
+          return this.callSuper(sleep, 'sleep') +
             ' ... no, can\'t sleep! Gotta steal cheese!';
-        },
+        }
 
-        'escape': function(cat) {
+        function escape(cat) {
           return this.say('(from a mousehole) Take that, ' + cat.name + '!');
         }
-      }
-    );
+
+        return { 'sleep': sleep, 'escape': escape };
+      },
+
+      /* mixins */
+      null,
+
+      /* statics */
+      { 'staticTest': function() { return 'static'; }
+    });
 
     this.assertEqual('function', typeof Fixtures.Mouse.staticTest,
-      'Class.extend(static, plugin) should have added a static method to Fixtures.Mouse');
+      'Class.extend(plugins, null, statics) should have added a static method to Fixtures.Mouse');
+
+    Fixtures.Mouse.addStatics({
+      'staticTest': function() { return 'static too'; }
+    });
+
+    this.assertEqual('static too', Fixtures.Mouse.staticTest(),
+      'Class.addStatics(statics) should have updated the static method on Fixtures.Mouse');
 
     this.assertEqual('Tom: ZZZ', tom.sleep(),
       'added instance method not available to subclass');
 
-    this.assertEqual('Jerry: ZZZ ... no, can\'t sleep! Gotta steal cheese!',
+    this.assertEqual(
+      'Jerry: ZZZ ... no, can\'t sleep! Gotta steal cheese!',
       jerry.sleep());
 
-    this.assertEqual('Jerry: (from a mousehole) Take that, Tom!',
+    this.assertEqual(
+      'Jerry: (from a mousehole) Take that, Tom!',
       jerry.escape(tom));
 
     // insure that a method has not propagated *up* the prototype chain:
     this.assertUndefined(tom.escape);
-    this.assertUndefined(new Fixtures.Animal().escape);
+    this.assertUndefined((new Fixtures.Animal()).escape);
 
-    Fixtures.Animal.extend({
+    Fixtures.Animal.extend([{
       'sleep': function() { return this.say('zZzZ') }
-    });
+    }]);
 
-    this.assertEqual('Jerry: zZzZ ... no, can\'t sleep! Gotta steal cheese!',
+    this.assertEqual(
+      'Jerry: zZzZ ... no, can\'t sleep! Gotta steal cheese!',
       jerry.sleep());
   },
 
   'testBaseClassWithMixin': function() {
     var grass = new Fixtures.Plant('grass', 3);
     this.assertRespondsTo('getValue', grass);
-    this.assertEqual('#<Plant: grass>', grass.inspect());
+    this.assertEqual('#<Sellable: 3kg>', grass.inspect());
   },
 
   'testSubclassWithMixin': function() {
@@ -164,9 +180,16 @@ new Test.Unit.Runner({
 
   'testSubclassWithMixins': function() {
     var cow = new Fixtures.Ox('cow', 400, 'female');
-    this.assertEqual('#<Ox: cow>', cow.inspect());
+    this.assertEqual('#<Sellable: 400kg>', cow.inspect());
     this.assertRespondsTo('reproduce', cow);
     this.assertRespondsTo('getValue', cow);
+  },
+
+  'testMixinHasNoSuper': function() {
+    var flower = fuse.Class(Fixtures.Sellable);
+    this.assert(Fixtures.Sellable.getValue._isMixin);
+    this.assert((new flower).getValue);
+    this.assertUndefined((new flower).getValue.$super);
   },
 
   'testClassWithToStringAndValueOfMethods': function() {
@@ -181,8 +204,8 @@ new Test.Unit.Runner({
     }),
 
     Child = fuse.Class(Parent, {
-      'm1': function() { return Child.callSuper(this, 'm1') + ' child' },
-      'm2': function() { return Child.callSuper(this, 'm2') + ' child' }
+      'm1': function() { return this.callSuper(arguments) + ' child' },
+      'm2': function() { return this.callSuper(arguments) + ' child' }
     });
 
     if (fuse.env.test('FUNCTION_TO_STRING_RETURNS_SOURCE'))
@@ -201,13 +224,13 @@ new Test.Unit.Runner({
 
     Child = fuse.Class(Parent, {
       'say': function() {
-        return 'Child#say > ' + Child.callSuper(this, 'say');
+        return 'Child#say > ' + this.callSuper(arguments);
       }
     }),
 
     GrandChild = fuse.Class(Child, {
       'say': function() {
-        return 'GrandChild#say > ' + GrandChild.callSuper(this, 'say');
+        return 'GrandChild#say > ' + this.callSuper(arguments);
       }
     });
 
