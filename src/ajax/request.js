@@ -4,11 +4,11 @@
     function Decorator() { }
 
     function Request(url, options) {
-      var decorated  = this[expando] || new Decorator,
+      var decorated  = __instance || new Decorator,
        onStateChange = decorated.onStateChange,
        onTimeout     = decorated.onTimeout;
 
-      delete this[expando];
+      __instance = null;
 
       decorated.raw = fuse.ajax.create();
 
@@ -22,16 +22,16 @@
       return decorated;
     }
 
-    var __apply = Request.apply, __call = Request.call,
+    var __instance, __apply = Request.apply, __call = Request.call,
      Request = Class(fuse.ajax.Base, { 'constructor': Request });
 
     Request.call = function(thisArg) {
-      thisArg[expando] = thisArg;
+      __instance = thisArg;
       return __call.apply(this, arguments);
     };
 
     Request.apply = function(thisArg, argArray) {
-      thisArg[expando] = thisArg;
+      __instance = thisArg;
       return __apply.call(this, thisArg, argArray);
     };
 
