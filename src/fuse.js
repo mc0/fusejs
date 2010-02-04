@@ -77,7 +77,7 @@
     // Math.pow(2, 31) against bitwise operators
     return number == 0 || !isFinite(number)
       ? number || 0
-      : number < 2147483648 ? number | 0 : number - (number % 1);
+      : Math.abs(number) < 2147483648 ? number | 0 : number - (number % 1);
   };
 
   // global.document.createDocumentFragment() nodeType
