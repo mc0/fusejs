@@ -1,3 +1,5 @@
+* Remove unused functionality from fuse.addNS(). [jddalton]
+
 * Update the fuse.Class API. [jddalton, T.J. Crowder]
   - Created fuse.Class.statics and fuse.Class.mixins objects
   - Moved the callSuper() method onto the Class.mixins object

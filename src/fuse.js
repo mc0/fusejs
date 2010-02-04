@@ -119,22 +119,14 @@
     }
 
     function addNS(path) {
-      var Klass, Parent, key, i = 0,
-       object     = this,
-       keys       = path.split('.'),
-       length     = keys.length,
-       properties = slice.call(arguments, 1);
-
-      if (typeof properties[0] === 'function')
-        Parent = properties.shift();
+      var Klass, key, i = 0,
+       object = this,
+       keys   = path.split('.'),
+       length = keys.length;
 
       while (key = keys[i++]) {
         if (!object[key]) {
-          if (i === length) {
-            if (!hasKey(properties, 'constructor')) properties.constructor = key;
-            Klass = Class(Parent || object, properties);
-          }
-          else Klass = Class(object, { 'constructor': key });
+          Klass = Class(object, { 'constructor': key });
           object = object[key] = new Klass;
         }
         else object = object[key];
