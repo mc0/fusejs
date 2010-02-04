@@ -4,7 +4,7 @@ function prime(value) {
   return true;
 }
 
-var EnumObject = fuse.Class(fuse.Enumerable, {
+var EnumObject = fuse.Class({
   'initialize': function(interior) {
     this.interior = interior;
   },
@@ -15,7 +15,7 @@ var EnumObject = fuse.Class(fuse.Enumerable, {
         callback(this.interior[key], key, this);
     }
   }
-});
+}, fuse.Enumerable);
 
 /*--------------------------------------------------------------------------*/
 

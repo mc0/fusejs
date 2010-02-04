@@ -396,7 +396,7 @@ new Test.Unit.Runner({
     this.assertNotEqual(form.serialize,
       $('input_enabled').serialize);
 
-    // ensure button elements are extended with Form.Element.Methods
+    // ensure button elements are extended with fuse.dom.FormElement methods
     this.assertNothingRaised(function() { $('button_submit').getValue() });
 
     fuse.dom.InputElement.extend(

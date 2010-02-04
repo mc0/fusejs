@@ -39,7 +39,7 @@ new Test.Unit.Runner({
   },
 
   'testEnumerableInspect': function() {
-    var EnumObject = fuse.Class(fuse.Enumerable, {
+    var EnumObject = fuse.Class({
       'initialize': function(interior) {
         this.interior = interior;
       },
@@ -50,7 +50,7 @@ new Test.Unit.Runner({
             callback(this.interior[key], key, this);
         }
       }
-    });
+    }, fuse.Enumerable);
 
     this.assertEqual('#<Enumerable:[]>', new EnumObject({ }).inspect());
 

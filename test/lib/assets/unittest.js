@@ -499,7 +499,7 @@
     }
   })();
 
-  Test.Unit.Testcase = fuse.Class(Test.Unit.Assertions, {
+  Test.Unit.Testcase = fuse.Class([Test.Unit.Assertions, {
     'initialize': function(name, test, setup, teardown) {
       this.name     = name;
       this.test     = test     || emptyFunction;
@@ -591,6 +591,6 @@
          iterations + ' iterations in ' + (timeTaken/1000) + 's' );
       return timeTaken;
     }
-  });
+  }]);
 
 })(this);
