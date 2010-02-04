@@ -433,13 +433,14 @@ new Test.Unit.Runner({
     this.assertEnumEqual(['a'],       fuse.Object.keys({ 'a': 'A' }));
     this.assertEnumEqual($w('a b c'), fuse.Object.keys({ 'a':'A', 'b':'B', 'c':'C' }).sort());
 
-    // ensure functions work
+    // Browsers are inconsistent whether `prototype` is or is not enumerable.
+    // We force it to *not* be enumerable.
     var result, foo = function() { this.a = 'a' };
-    foo.prototype.b = 'b';
+    foo.prototype = { 'b': 'b' };
     foo.prop = 'blah';
 
     this.assertNothingRaised(function() { result = fuse.Object.keys(foo) });
-    this.assertEnumEqual(['prop', 'prototype'], result.sort());
+    this.assertEnumEqual(['prop'], result.sort());
 
     this.assertNothingRaised(function() { result = fuse.Object.keys(new foo) });
     this.assertEnumEqual(['a'], result);

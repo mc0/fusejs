@@ -4,26 +4,34 @@
 
   eachKey =
   Obj._each = (function() {
-    // use switch statement to avoid creating a temp variable
     var _each;
+
+    // use switch statement to avoid creating a temp variable
     switch (function() {
       var key, count = 0, klass = function() { this.toString = 1; };
       klass.prototype.toString = 1;
       for (key in new klass()) count++;
       return count;
     }()) {
+
       case 0: // IE
-        var dontEnumProperties = ['constructor', 'hasOwnkey', 'isPrototypeOf',
-          'propertyIsEnumerable', 'prototype', 'toLocaleString', 'toString', 'valueOf'];
+        var shadowed = [
+          'constructor', 'hasOwnkey',
+          'isPrototypeOf', 'propertyIsEnumerable',
+          'toLocaleString', 'toString', 'valueOf'
+        ];
+
         return _each = function _each(object, callback) {
           if (object) {
-            var key, i = 0;
-            for (key in object)
+            var key, i = -1, skipProto = isFunction(object);
+            for (key in object) {
+              if (skipProto && key === 'prototype') continue;
               callback(object[key], key, object);
-
-            while(key = dontEnumProperties[i++])
+            }
+            while(key = shadowed[++i]) {
               if (hasKey(object, key))
                 callback(object[key], key, object);
+            }
           }
           return object;
         };
@@ -32,16 +40,22 @@
         // Tobie Langel: Safari 2 broken for-in loop
         // http://tobielangel.com/2007/1/29/for-in-loop-broken-in-safari/
         return _each = function _each(object, callback) {
-          var key, keys = { };
-          for (key in object)
+          var key, keys = { }, skipProto = isFunction(object);
+          for (key in object) {
+            if (skipProto && key === 'prototype') continue;
             if (!hasKey(keys, key) && (keys[key] = 1))
               callback(object[key], key, object);
+          }
           return object;
         };
 
       default: // Others
         return _each = function _each(object, callback) {
-          for (var key in object) callback(object[key], key, object);
+          var key, skipProto = isFunction(object);
+          for (key in object) {
+            if (skipProto && key === 'prototype') continue;
+            callback(object[key], key, object);
+          }
           return object;
         };
     }
@@ -109,7 +123,7 @@
   _extend =
   Obj._extend = function _extend(destination, source) {
     for (var key in source)
-       destination[key] = source[key];
+      destination[key] = source[key];
     return destination;
   };
 
@@ -226,8 +240,7 @@
     };
 
     Obj.extend = function extend(destination, source) {
-      if (source)
-        eachKey(source, function(value, key) { destination[key] = value; });
+      eachKey(source, function(value, key) { destination[key] = value; });
       return destination;
     };
 
