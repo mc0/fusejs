@@ -165,14 +165,14 @@
         : element;
     }
 
-    function extendByTag(tagName, statics, plugins, mixins) {
+    function extendByTag(tagName, plugins, mixins, statics) {
       if (isArray(tagName)) {
-        var i = 0;
-        while (tagName[i])
-          extendByTag(tagName[i++], statics, plugins, mixins);
+        var i = -1;
+        while (tagName[++i])
+          extendByTag(tagName[i], plugins, mixins, statics);
+      } else {
+        getOrCreateTagClass(tagName).extend(plugins, mixins, statics);
       }
-      else getOrCreateTagClass(tagName)
-        .extend(statics, plugins, mixins);
     }
 
     function Decorator(element) {
