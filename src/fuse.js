@@ -64,9 +64,9 @@
   };
 
   escapeRegExpChars = (function() {
-    var matchSpecialChars = /([.*+?^=!:${}()|[\]\/\\])/g;
+    var reSpecialChars = /([.*+?^=!:${}()|[\]\/\\])/g;
     return function(string) {
-      return String(string).replace(matchSpecialChars, '\\$1');
+      return String(string).replace(reSpecialChars, '\\$1');
     };
   })();
 

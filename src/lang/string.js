@@ -197,22 +197,22 @@
 
   (function(plugin) {
 
-    var replace         = plugin.replace,
-     matchBlank         = fuse.RegExp('^\\s*$'),
-     matchCapped        = /([A-Z]+)([A-Z][a-z])/g,
-     matchCamelCases    = /([a-z\d])([A-Z])/g,
-     matchDoubleColons  = /::/g,
-     matchHyphens       = /-/g,
-     matchHyphenated    = /-+(.)?/g,
-     matchOpenScriptTag = /<script/i,
-     matchUnderscores   = /_/g,
-     matchScripts       = new RegExp(fuse.scriptFragment, 'gi'),
-     matchHTMLComments  = new RegExp('<!--[\\x20\\t\\n\\r]*' +
+    var replace      = plugin.replace,
+     reBlank         = fuse.RegExp('^\\s*$'),
+     reCapped        = /([A-Z]+)([A-Z][a-z])/g,
+     reCamelCases    = /([a-z\d])([A-Z])/g,
+     reDoubleColons  = /::/g,
+     reHyphens       = /-/g,
+     reHyphenated    = /-+(.)?/g,
+     reOpenScriptTag = /<script/i,
+     reUnderscores   = /_/g,
+     reScripts       = new RegExp(fuse.scriptFragment, 'gi'),
+     reHTMLComments  = new RegExp('<!--[\\x20\\t\\n\\r]*' +
        fuse.scriptFragment + '[\\x20\\t\\n\\r]*-->', 'gi');
 
     plugin.blank = function blank() {
       if (this == null) throw new TypeError;
-      return matchBlank.test(this);
+      return reBlank.test(this);
     };
 
     plugin.camelize = (function() {
@@ -224,7 +224,7 @@
         if (this == null) throw new TypeError;
         var string = String(this), expandoKey = expando + string;
         return cache[expandoKey] ||
-          (cache[expandoKey] = replace.call(string, matchHyphenated, toUpperCase));
+          (cache[expandoKey] = replace.call(string, reHyphenated, toUpperCase));
       }
 
       var cache = { };
@@ -279,17 +279,17 @@
       var match, script, striptTags,
        string = String(this), results = fuse.Array();
 
-      if (!matchOpenScriptTag.test(string)) return results;
+      if (!reOpenScriptTag.test(string)) return results;
 
-      matchHTMLComments.lastIndex =
-      matchScripts.lastIndex      = 0;
-      scriptTags = string.replace(matchHTMLComments, '');
+      reHTMLComments.lastIndex =
+      reScripts.lastIndex      = 0;
+      scriptTags = string.replace(reHTMLComments, '');
 
       if (callback) {
-        while (match = matchScripts.exec(scriptTags))
+        while (match = reScripts.exec(scriptTags))
           if (script = match[1]) { callback(script); results.push(script); }
       } else {
-        while (match = matchScripts.exec(scriptTags))
+        while (match = reScripts.exec(scriptTags))
           if (script = match[1]) results.push(script);
       }
       return results;
@@ -297,8 +297,8 @@
 
     plugin.hyphenate = function hyphenate() {
       if (this == null) throw new TypeError;
-      matchUnderscores.lastIndex = 0;
-      return fuse.String(String(this).replace(matchUnderscores, '-'));
+      reUnderscores.lastIndex = 0;
+      return fuse.String(String(this).replace(reUnderscores, '-'));
     };
 
     plugin.startsWith = function startsWith(pattern) {
@@ -310,8 +310,8 @@
 
     plugin.stripScripts = function stripScripts() {
       if (this == null) throw new TypeError;
-      matchScripts.lastIndex = 0;
-      return fuse.String(String(this).replace(matchScripts, ''));
+      reScripts.lastIndex = 0;
+      return fuse.String(String(this).replace(reScripts, ''));
     };
 
     plugin.times = (function() {
@@ -393,16 +393,16 @@
 
     plugin.underscore = function underscore() {
       if (this == null) throw new TypeError;
-      matchDoubleColons.lastIndex =
-      matchCapped.lastIndex       =
-      matchCamelCases.lastIndex   =
-      matchHyphens.lastIndex      = 0;
+      reDoubleColons.lastIndex =
+      reCapped.lastIndex       =
+      reCamelCases.lastIndex   =
+      reHyphens.lastIndex      = 0;
 
       return fuse.String(String(this)
-        .replace(matchDoubleColons, '/')
-        .replace(matchCapped,       '$1_$2')
-        .replace(matchCamelCases,   '$1_$2')
-        .replace(matchHyphens,      '_').toLowerCase());
+        .replace(reDoubleColons, '/')
+        .replace(reCapped,       '$1_$2')
+        .replace(reCamelCases,   '$1_$2')
+        .replace(reHyphens,      '_').toLowerCase());
     };
 
     // aliases
@@ -430,7 +430,7 @@
 
     // Tag parsing instructions:
     // http://www.w3.org/TR/REC-xml-names/#ns-using
-    var matchTags = (function() {
+    var reTags = (function() {
       var name   = '[-\\w]+',
        space     = '[\\x20\\t\\n\\r]',
        eq        = space + '?=' + space + '?',
@@ -445,14 +445,14 @@
     })();
 
     function define() {
-      var tags      = [],
-       count        = 0,
-       div          = fuse._div,
-       container    = fuse._doc.createElement('pre'),
-       textNode     = container.appendChild(fuse._doc.createTextNode('')),
-       replace      = plugin.replace,
-       matchTagEnds = />/g,
-       matchTokens  = /@fusetoken/g;
+      var tags   = [],
+       count     = 0,
+       div       = fuse._div,
+       container = fuse._doc.createElement('pre'),
+       textNode  = container.appendChild(fuse._doc.createTextNode('')),
+       replace   = plugin.replace,
+       reTagEnds = />/g,
+       reTokens  = /@fusetoken/g;
 
        escapeHTML = function escapeHTML() {
          if (this == null) throw new TypeError;
@@ -480,14 +480,14 @@
         // tokenize tags before setting innerHTML then swap them after
         if (tokenized = string.indexOf('<') > -1) {
           tags.length = count = 0;
-          string = replace.call(string, matchTags, swapTagsToTokens);
+          string = replace.call(string, reTags, swapTagsToTokens);
         }
 
         div.innerHTML = '<pre>' + string + '<\/pre>';
         result = getText();
 
         return fuse.String(tokenized
-          ? replace.call(result, matchTokens, swapTokensToTags)
+          ? replace.call(result, reTokens, swapTokensToTags)
           : result);
       }
 
@@ -505,7 +505,7 @@
         escapeHTML = function escapeHTML() {
           if (this == null) throw new TypeError;
           textNode.data = String(this);
-          return fuse.String(container.innerHTML.replace(matchTagEnds, '&gt;'));
+          return fuse.String(container.innerHTML.replace(reTagEnds, '&gt;'));
         };
 
       if (!envTest('ELEMENT_TEXT_CONTENT')) {
@@ -541,7 +541,7 @@
 
     plugin.stripTags = function stripTags() {
       if (this == null) throw new TypeError;
-      return fuse.String(String(this).replace(matchTags, ''));
+      return fuse.String(String(this).replace(reTags, ''));
     };
 
     // prevent JScript bug with named function expressions

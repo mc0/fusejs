@@ -99,8 +99,8 @@
         // called normally fuse.String(...).inspect()
         var string = fuse.String(this);
         return fuse.String(useDoubleQuotes
-          ? '"' + string.replace(matchWithDoubleQuotes, escapeSpecialChars) + '"'
-          : "'" + string.replace(matchWithSingleQuotes, escapeSpecialChars) + "'");
+          ? '"' + string.replace(reWithDoubleQuotes, escapeSpecialChars) + '"'
+          : "'" + string.replace(reWithSingleQuotes, escapeSpecialChars) + "'");
       }
 
       var specialChar = {
@@ -115,10 +115,10 @@
       },
 
       // charCodes 0-31 and \ and '
-      matchWithSingleQuotes = /[\x00-\x1f\\']/g,
+      reWithSingleQuotes = /[\x00-\x1f\\']/g,
 
       // charCodes 0-31 and \ and "
-      matchWithDoubleQuotes = /[\x00-\x1f\\"]/g;
+      reWithDoubleQuotes = /[\x00-\x1f\\"]/g;
 
       // set fuse.String.plugin.inspect and return a reference
       return (plugin.inspect = inspect);

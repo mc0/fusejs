@@ -24,9 +24,9 @@
 
     camelize = fuse.String.plugin.camelize,
 
-    matchOpacity = /opacity:\s*(\d?\.?\d*)/,
+    nullHandlers = [],
 
-    nullHandlers = [];
+    reOpacity = /opacity:\s*(\d?\.?\d*)/;
 
     function getComputedStyle(element, name) {
       name = FLOAT_TRANSLATIONS[name] || name;
@@ -69,7 +69,7 @@
       if (isString(styles)) {
         elemStyle.cssText += ';' + styles;
         return styles.indexOf('opacity') > -1
-          ? plugin.setOpacity.call(this, styles.match(matchOpacity)[1])
+          ? plugin.setOpacity.call(this, styles.match(reOpacity)[1])
           : this;
       }
 
@@ -215,8 +215,8 @@
   // http://www.w3.org/TR/html5/infrastructure.html#space-character
   (function(plugin) {
     var split = fuse.String.plugin.split,
-     matchEdgeSpaces = /[\t\n\r\f]/g,
-     matchExtraSpaces = /\x20{2,}/g;
+     reEdgeSpaces = /[\t\n\r\f]/g,
+     reExtraSpaces = /\x20{2,}/g;
 
     plugin.addClassName = function addClassName(className) {
       if (!plugin.hasClassName.call(this, className)) {
@@ -230,8 +230,8 @@
       var element = this.raw || this, cn = element.className, original = cn;
       if (cn.length) {
         // normalize to optimize future calls
-        matchEdgeSpaces.lastIndex = matchExtraSpaces.lastIndex = 0;
-        cn = cn.replace(matchEdgeSpaces, ' ').replace(matchExtraSpaces, ' ');
+        reEdgeSpaces.lastIndex = reExtraSpaces.lastIndex = 0;
+        cn = cn.replace(reEdgeSpaces, ' ').replace(reExtraSpaces, ' ');
         if (cn !== original) element.className = cn;
 
         return split.call(cn, ' ');
@@ -241,9 +241,9 @@
 
     plugin.hasClassName = function hasClassName(className) {
       var element = this.raw || this, cn = element.className, original = cn;
-      matchEdgeSpaces.lastIndex = 0;
+      reEdgeSpaces.lastIndex = 0;
       if (cn.length && (cn === className ||
-          (' ' + (cn = cn.replace(matchEdgeSpaces, ' ')) + ' ')
+          (' ' + (cn = cn.replace(reEdgeSpaces, ' ')) + ' ')
             .indexOf(' ' + className + ' ') > -1)) {
         // normalize to optimize future calls
         if (cn !== original) element.className = cn;
@@ -257,8 +257,8 @@
        cn = element.className, i = 0, result = [];
 
       if (cn.length) {
-        matchEdgeSpaces.lastIndex = 0;
-        classNames = cn.replace(matchEdgeSpaces, ' ').split(' ');
+        reEdgeSpaces.lastIndex = 0;
+        classNames = cn.replace(reEdgeSpaces, ' ').split(' ');
         length = classNames.length;
 
         while (i < length) {
@@ -319,7 +319,7 @@
     })();
 
     plugin.setOpacity = (function() {
-      var matchAlpha = /alpha\([^)]*\)/i,
+      var reAlpha = /alpha\([^)]*\)/i,
 
       setOpacity = function setOpacity(value) {
         this.style.opacity = (value == 1 || value == '' && isString(value)) ? '' :
@@ -362,7 +362,7 @@
           var element = this.raw || this,
            elemStyle  = element.style,
            currStyle  = element.currentStyle,
-           filter     = plugin.getStyle.call(this, 'filter').replace(matchAlpha, ''),
+           filter     = plugin.getStyle.call(this, 'filter').replace(reAlpha, ''),
            zoom       = elemStyle.zoom;
 
           // hasLayout is false then force it

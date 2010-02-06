@@ -106,7 +106,7 @@
       var Array, Boolean, Date, Function, Number, Object, RegExp, String,
        glSlice     = global.Array.prototype.slice,
        glFunction  = global.Function,
-       matchStrict = /^\s*(['"])use strict\1/,
+       reStrict    = /^\s*(['"])use strict\1/,
        sandbox     = createSandbox(),
        toString    = global.Object.prototype.toString,
        __Array     = sandbox.Array,
@@ -235,7 +235,7 @@
           argN = args.join(',');
 
           // ensure we aren't in strict mode and map arguments.callee to the wrapper
-          if (body && body.search(matchStrict) < 0)
+          if (body && body.search(reStrict) < 0)
             body = 'arguments.callee = arguments.callee.' + expando + '; ' + body;
 
           // create function using global.Function constructor
@@ -451,7 +451,7 @@
       RegExp = (function(RE) {
         var character,
          RegExp = RE,
-         matchCharClass = /\\s/g,
+         reCharClass = /\\s/g,
          newCharClass = [],
          charMap = RE.SPECIAL_CHARS.s;
 
@@ -469,7 +469,7 @@
           RegExp = function RegExp(pattern, flags) {
             return new RE((toString.call(pattern) === '[object RegExp]' ?
               pattern.source : String(pattern))
-                .replace(matchCharClass, newCharClass), flags);
+                .replace(reCharClass, newCharClass), flags);
           };
 
           // associate properties of old RegExp to the redefined one

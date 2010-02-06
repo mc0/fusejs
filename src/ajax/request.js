@@ -45,7 +45,7 @@
   /*--------------------------------------------------------------------------*/
 
   (function(plugin) {
-    var matchHTTP = /^https?:/,
+    var reHTTP = /^https?:/,
       Responders = fuse.ajax.Responders;
 
     plugin._useStatus   = true;
@@ -153,9 +153,9 @@
 
       // non-http requests don't use http status codes
       // return true if request url is http(s) or, if relative, the pages url is http(s)
-      this._useStatus = matchHTTP.test(url) ||
+      this._useStatus = reHTTP.test(url) ||
         (url.slice(0, 6).indexOf(':') < 0 ?
-          matchHTTP.test(global.location.protocol) : false);
+          reHTTP.test(global.location.protocol) : false);
 
       // start timeout timer if provided
       if (timeout != null)

@@ -196,7 +196,7 @@
       var domainIndex, urlDomain,
        result    = true,
        docDomain = fuse._doc.domain,
-       parts     = String(url).match(matchUrlParts) || [];
+       parts     = String(url).match(reUrlParts) || [];
 
       if (parts[0]) {
         urlDomain = parts[2];
@@ -209,7 +209,7 @@
     }
 
     var loc = global.location, protocol = loc.protocol, port = loc.port,
-     matchUrlParts = /([^:]+:)\/\/(?:[^:]+(?:\:[^@]+)?@)?([^\/:$]+)(?:\:(\d+))?/,
+     reUrlParts = /([^:]+:)\/\/(?:[^:]+(?:\:[^@]+)?@)?([^\/:$]+)(?:\:(\d+))?/,
      defaultPort = protocol === 'ftp:' ? 21 : protocol === 'https:' ? 443 : 80;
 
     return isSameOrigin;

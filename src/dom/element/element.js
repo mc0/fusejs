@@ -98,11 +98,11 @@
 
     getFuseId = Node.getFuseId,
 
-    matchComplexTag = /^<([A-Za-z]+)>$/,
+    reComplexTag = /^<([A-Za-z]+)>$/,
 
-    matchStartsWithTableRow = /^<[tT][rR]/,
+    reStartsWithTableRow = /^<[tT][rR]/,
 
-    matchTagName= /^<([^> ]+)/,
+    reTagName= /^<([^> ]+)/,
 
     dom = fuse.dom;
 
@@ -126,7 +126,7 @@
         context = attributes;
 
         // support `<div>x</div>` format tags
-        if (!(complexTag = tagName.match(matchComplexTag))) {
+        if (!(complexTag = tagName.match(reComplexTag))) {
           fragment = dom.getFragmentFromString(tagName, context);
           length = fragment.childNodes.length;
 
@@ -266,7 +266,7 @@
        cache = cache || getFragmentCache(context.ownerDocument || context);
        var node = cache.node,
         nodeName = context.nodeType === DOCUMENT_NODE
-          ? FROM_STRING_CHILDRENS_PARENT_KEYS[html.match(matchTagName)[1].toUpperCase()]
+          ? FROM_STRING_CHILDRENS_PARENT_KEYS[html.match(reTagName)[1].toUpperCase()]
           : getNodeName(context),
 
         wrapping = FROM_STRING_PARENT_WRAPPERS[nodeName];
@@ -279,7 +279,7 @@
 
       // skip auto-inserted tbody
       if (ELEMENT_TABLE_INNERHTML_INSERTS_TBODY &&
-          nodeName === 'TABLE' && matchStartsWithTableRow.test(html))
+          nodeName === 'TABLE' && reStartsWithTableRow.test(html))
         node = node.firstChild;
 
       return getFragmentFromChildNodes(node, cache);

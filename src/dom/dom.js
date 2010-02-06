@@ -36,13 +36,13 @@
   // set the debug flag based on the fuse.js debug query parameter
   fuse.debug = (function() {
     var script, i = 0,
-     matchDebug = /(^|&)debug=(1|true)(&|$)/,
-     matchFilename = /(^|\/)fuse\.js\?/,
+     reDebug = /(^|&)debug=(1|true)(&|$)/,
+     reFilename = /(^|\/)fuse\.js\?/,
      scripts = fuse._doc.getElementsByTagName('script');
 
     while (script = scripts[i++])
-      if (matchFilename.test(script.src) &&
-          matchDebug.test(script.src.split('?')[1])) return true;
+      if (reFilename.test(script.src) &&
+          reDebug.test(script.src.split('?')[1])) return true;
     return false;
   })();
 
