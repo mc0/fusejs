@@ -1,3 +1,5 @@
+* Remove `new` operator from Function constructor calls and minify code strings used in compiled methods. [jddalton]
+
 * Simplify extending fuse.dom.NodeList and fuse.dom.RawList and conform more to the jQuery syntax for list getters/setters. [jddalton]
 
 * Force fuse.Object._each() to skip the `prototype` property on functions because browsers are not consistent one way or the other. [jddalton]

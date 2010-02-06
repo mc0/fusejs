@@ -898,13 +898,13 @@
        SKIPPED_KEYS = { 'constructor': 1 };
 
       function createGeneric(proto, methodName) {
-        return new Function('proto, slice',
-          'function ' + methodName + '(thisArg) {' +
-          'var args = arguments;' +
-          'return args.length ? proto.' + methodName +
-          '.apply(thisArg, slice.call(args, 1)) : ' +
-          'proto.' + methodName + '.call(thisArg); }' +
-          'return ' + methodName)(proto, slice);
+        return Function('o,s',
+          'function ' + methodName + '(thisArg){' +
+          'var a=arguments,m=o.' + methodName +
+          ';return a.length' +
+          '?m.apply(thisArg,s.call(a,1))' +
+          ':m.call(thisArg)' +
+          '}return ' + methodName)(proto, slice);
       }
 
       function updateGenerics(deep) {

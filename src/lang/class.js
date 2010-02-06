@@ -7,10 +7,11 @@
     function Subclass() { };
 
     function createNamedClass(name) {
-      return new Function(
-        'function ' + name + '() {' +
-        'return this.initialize && this.initialize.apply(this, arguments);' +
-        '} return ' + name)();
+      return Function(
+        'function ' + name + '(){' +
+        'var i,c=this;' +
+        'return (i=c.initialize)&&i.apply(c,arguments)' +
+        '}return ' + name)();
     }
 
     function Class(Parent, plugins, mixins, statics) {
