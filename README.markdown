@@ -1,5 +1,7 @@
-FuseJS
-======
+<a href="http://fusejs.com">
+<img title="FuseJS - Fuse to win!" alt="FuseJS Logo" style="border:0;" src="fusejs/raw/master/logo.png">
+</a>
+
 About Alpha
 -----------
 
@@ -60,10 +62,15 @@ Check out the FuseJS source with
     $ git submodule init
     $ git submodule update
 
+Community
+---------
+  Discuss all things FuseJS in the IRC channel
+  [#fusejs on irc.freenode.net](irc://irc.freenode.net/#fusejs).
+
 Gotchas
 -------
-  - Firefox 3.6 changed the default value for `security.fileuri.strict_origin_policy` to true.
-    You may need to change this to `false` in the `about:config` for running unit tests without `Rake`.
+  Firefox 3.6 changed the default value for `security.fileuri.strict_origin_policy` to `true`.
+  You may need to change this to `false` in the `about:config` for running unit tests without `Rake`.
 
 Footnotes
 ---------
@@ -78,4 +85,4 @@ Footnotes
      7. Sly
 
   2. PrototypeJS emulation will be supported in the `beta` release.
-     <a name="fn1" title="Jump back to footnote 1 in the text." href="#fnref1">&#8617;</a>
+     <a name="fn2" title="Jump back to footnote 2 in the text." href="#fnref2">&#8617;</a>
