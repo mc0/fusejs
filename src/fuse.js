@@ -207,14 +207,14 @@
    'lang/inspect.js',
    'lang/json.js',
 
+   'dom/event/event.js',
+   'dom/event/dom-loaded.js',
+
    'dom/raw-list.js',
    'dom/node-list.js',
    'dom/selector/selector.js',
    'dom/selector/nwmatcher.js',
    'dom/element/traversal.js',
-
-   'dom/event/event.js',
-   'dom/event/dom-loaded.js',
 
    'ajax/ajax.js',
    'ajax/responders.js',

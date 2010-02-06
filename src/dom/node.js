@@ -57,9 +57,10 @@
           plugin[key] = Function('o,am',
             'function ' + key + '(){' +
             'var a=arguments,m=o.' + key + ',es=this;' +
-            (isBool ? 'return ' : '') + 'a.length' +
-            '?am.apply(es,function(e){return m.apply(e,a)})' +
-            ':am.call(es,function(e){return m.call(e)})' +
+            (isBool ? 'return ' : '') +
+            'am.call(es,a.length' +
+            '?function(e){return m.apply(e,a)}' +
+            ':function(e){return m.call(e)})' +
             (isBool ? '' : ';return es') +
             '}return ' + key)(object,
              isBool ? (key.indexOf('is') ? arrSome : arrEvery) : arrEach);
@@ -179,14 +180,13 @@
     var SKIPPED_KEYS = { 'constructor': 1, 'getFuseId': 1 };
 
     function createGeneric(proto, methodName) {
-      return new Function('proto, slice',
-        'function ' + methodName + '(node) {' +
-        'node = fuse.get(node);' +
-        'var args = arguments;' +
-        'return args.length ? proto.' + methodName +
-        '.apply(node, slice.call(args, 1)) : ' +
-        'proto.' + methodName + '.call(node); }' +
-        'return ' + methodName)(proto, slice);
+      return Function('o,s',
+        'function ' + methodName + '(node){' +
+        'var a=arguments,n=fuse.get(node),m=o.' + methodName +
+        ';return a.length' +
+        '?m.apply(n,s.call(a,1))' +
+        ':m.call(n)' +
+        '}return ' + methodName)(proto, slice);
     }
 
     function updateGenerics(deep) {
