@@ -6,7 +6,7 @@ new Test.Unit.Runner({
         this.pattern = pattern;
       },
       'test': function(element) {
-        return fuse.dom.Selector.match(element, this.pattern);
+        return fuse.dom.selector.match(element, this.pattern);
       }
     });
 
@@ -40,7 +40,7 @@ new Test.Unit.Runner({
       },
 
       'test': function(element) {
-        return fuse.dom.Selector.match(element, this.pattern);
+        return fuse.dom.selector.match(element, this.pattern);
       }
     });
 

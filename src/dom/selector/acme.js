@@ -1,18 +1,36 @@
   /*----------------------------- SELECTOR: ACME -----------------------------*/
 
-  (function(Selector, NodeList) {
-    Selector.match = function match(element, selector) {
-      var item, i = 0,
-       results = acme.query(String(selector || ''), fuse.getDocument(element));
-      while (item = results[i++])
-        if (item === element) return true;
+  (function(object, NodeList, RawList) {
+    function match(element, selectors) {
+      element = element.raw || fuse.get(element).raw;
+      var node, i = -1, results = acme.query(String(selectors || ''),
+        fuse.getDocument(element));
+
+      while (node = results[++i]) {
+        if (node === element) return true;
+      }
       return false;
-    };
+    }
 
-    Selector.select = function select(selector, context) {
-      return toList(acme.query(String(selector || ''),
-        context && context.raw || context || fuse._doc));
-    };
+    function query(selectors, context, callback, toList) {
+      var node, i = -1, results = toList(acme.query(String(selectors || ''),
+        context && fuse.get(context).raw || fuse._doc));
+      if (callback) {
+        while (node = results[++i]) callback(node);
+      }
+      return results;
+    }
 
-    var toList = NodeList.fromNodeList, match = nil, select = nil;
-  })(fuse.dom.Selector, fuse.dom.NodeList);
+    function rawSelect(selectors, context, callback) {
+      return query(selectors, context, callback, RawList.fromNodeList);
+    }
+
+    function select(selectors, context, callback) {
+      return query(selectors, context, callback, NodeList.fromNodeList);
+    }
+
+    object.match = match;
+    object.rawSelect = rawSelect;
+    object.select = select;
+
+  })(fuse.dom.selector, fuse.dom.NodeList, fuse.dom.RawList);

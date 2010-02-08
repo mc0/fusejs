@@ -1,15 +1,30 @@
   /*----------------------------- SELECTOR: SLY ------------------------------*/
 
-  (function(Selector, NodeList) {
-    Selector.match = function match(element, selector) {
-      return Sly(String(selector || '')).match(element);
-    };
+  (function(object, NodeList, RawList) {
+    function match(element, selectors) {
+      return Sly(String(selectors || ''))
+        .match(element.raw || fuse.get(element).raw);
+    }
 
-    Selector.select = function select(selector, context) {
-      return Sly(String(selector || ''),
-        context && context.raw || context || fuse._doc, NodeList());
-    };
+    function query(selectors, context, callback, toList) {
+      var node, i = -1, results = toList(Sly(String(selectors || ''),
+        context && fuse.get(context).raw || fuse._doc));
+      if (callback) {
+        while (node = results[++i]) callback(node);
+      }
+      return results;
+    }
 
-    // prevent JScript bug with named function expressions
-    var match = nil, select = nil;
-  })(fuse.dom.Selector, fuse.dom.NodeList);
+    function rawSelect(selectors, context, callback) {
+      return query(selectors, context, callback, RawList.fromNodeList);
+    }
+
+    function select(selectors, context, callback) {
+      return query(selectors, context, callback, NodeList.fromNodeList);
+    }
+
+    object.match = match;
+    object.rawSelect = rawSelect;
+    object.select = select;
+
+  })(fuse.dom.selector, fuse.dom.NodeList, fuse.dom.RawList);

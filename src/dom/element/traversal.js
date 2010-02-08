@@ -1,6 +1,6 @@
   /*--------------------------- ELEMENT: TRAVERSAL ---------------------------*/
 
-  (function(plugin, Selector) {
+  (function(plugin, selector) {
 
     // support W3C ElementTraversal interface
     var firstNode = 'firstChild',
@@ -26,23 +26,23 @@
 
         element = fromElement(element);
         return !selectors || !selectors.length ||
-            selectors && Selector.match(element, selectors)
+            selectors && selector.match(element, selectors)
           ? prependList(plugin.getNextSiblings.call(element, selectors), element, NodeList())
           : plugin.getNextSiblings.call(element, selectors);
       };
 
       plugin.match = function match(selectors) {
         return isString(selectors)
-          ? Selector.match(this, selectors)
+          ? selector.match(this, selectors)
           : selectors.match(this);
       };
 
       plugin.query = function query(selectors, callback) {
-        return Selector.select(selectors, this.raw || this, callback);
+        return selector.select(selectors, this, callback);
       };
 
       plugin.rawQuery = function rawQuery(selectors, callback) {
-        return Selector.rawSelect(selectors, this.raw || this, callback);
+        return selector.rawSelect(selectors, this, callback);
       };
 
       plugin.getSiblings = function getSiblings(selectors) {
@@ -51,7 +51,7 @@
 
         if (element = element.parentNode && element.parentNode[firstNode]) {
           if (selectors && selectors.length) {
-            match = Selector.match;
+            match = selector.match;
             do {
               if (element.nodeType === ELEMENT_NODE &&
                   element !== original && match(element, selectors))
@@ -79,7 +79,7 @@
          nodes = (this.raw || this).getElementsByTagName('*');
 
         if (selectors && selectors.length) {
-          match = Selector.match;
+          match = selector.match;
           while (node = nodes[i++])
             if (match(node, selectors))
               results.push(fromElement(node));
@@ -94,7 +94,7 @@
            nodes = (this.raw || this).getElementsByTagName('*');
 
           if (selectors && selectors.length) {
-            match = Selector.match;
+            match = selector.match;
             while (node = nodes[i++])
               if (node.nodeType === ELEMENT_NODE && match(element, selectors))
                 results.push(fromElement(node));
@@ -157,7 +157,7 @@
       }
 
       function getNthBySelector(nodes, selectors, index) {
-        var count = 0, i = 0, match = Selector.match;
+        var count = 0, i = 0, match = selector.match;
         while (node = nodes[i++])
           if (match(node, selectors) && count++ === index)
             return fromElement(node);
@@ -174,7 +174,7 @@
         };
 
         getNthBySelector = function(nodes, selectors, index) {
-          var count = 0, i = 0, match = Selector.match;
+          var count = 0, i = 0, match = selector.match;
           while (node = nodes[i++])
             if (node.nodeType === ELEMENT_NODE &&
                 match(node, selectors) && count++ === index)
@@ -229,7 +229,7 @@
 
         if (element = element[property]) {
           if (selectors && selectors.length) {
-            match = Selector.match;
+            match = selector.match;
             do {
               if (element.nodeType === ELEMENT_NODE &&
                   match(element, selectors) && count++ === index)
@@ -272,7 +272,7 @@
 
         if (element = element[property]) {
           if (selectors && selectors.length) {
-            match = Selector.match;
+            match = selector.match;
             do {
               if (element.nodeType === ELEMENT_NODE && match(element, selectors))
                 results[i++] = fromElement(element);
@@ -303,4 +303,4 @@
       var getAncestors = nil, getNextSiblings = nil, getPreviousSiblings = nil;
     })();
 
-  })(Element.plugin, fuse.dom.Selector);
+  })(Element.plugin, fuse.dom.selector);

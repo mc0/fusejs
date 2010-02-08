@@ -1,15 +1,30 @@
   /*---------------------------- SELECTOR: SIZZLE ----------------------------*/
 
-  (function(Selector, NodeList) {
-    Selector.match = function match(element, selector) {
-      return Sizzle(String(selector || ''), null, null, [element]).length === 1;
-    };
+  (function(object, NodeList, RawList) {
+    function match(element, selectors) {
+      return Sizzle(String(selectors || ''), null, null,
+        [element.raw || fuse.get(element).raw]).length === 1;
+    }
 
-    Selector.select = function select(selector, context) {
-      return Sizzle(String(selector || ''), 
-        context && context.raw || context || fuse._doc, NodeList());
-    };
+    function query(selectors, context, callback, List) {
+      var node, i = -1, results = Sizzle(String(selectors || ''),
+        context && fuse.get(context).raw || fuse._doc, List);
+      if (callback) {
+        while (node = results[++i]) callback(node);
+      }
+      return results;
+    }
 
-    // prevent JScript bug with named function expressions
-    var match = nil, select = nil;
-  })(fuse.dom.Selector, fuse.dom.NodeList);
+    function rawSelect(selectors, context, callback) {
+      return query(selectors, context, callback, RawList());
+    }
+
+    function select(selectors, context, callback) {
+      return query(selectors, context, callback, NodeList());
+    }
+
+    object.match = match;
+    object.rawSelect = rawSelect;
+    object.select = select;
+
+  })(fuse.dom.selector, fuse.dom.NodeList, fuse.dom.RawList);

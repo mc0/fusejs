@@ -1,19 +1,36 @@
   /*---------------------------- SELECTOR: SLICK -----------------------------*/
 
-  (function(Selector, NodeList) {
-    Selector.match = function match(element, selector) {
-      var item, i = 0,
-       results = Slick(fuse.getDocument(element), String(selector || ''));
-      while (item = results[i++])
-        if (item === element) return true;
+  (function(object, NodeList, RawList) {
+    function match(element, selectors) {
+      element = element.raw || fuse.get(element).raw;
+      var node, i = -1, results = Slick(fuse.getDocument(element),
+        String(selectors || ''));
+
+      while (node = results[++i]) {
+        if (node === element) return true;
+      }
       return false;
-    };
+    }
 
-    Selector.select = function select(selector, context) {
-      return Slick(context && context.raw || context || fuse._doc,
-        String(selector || ''), NodeList());
-    };
+    function query(selectors, context, callback, List) {
+      var node, i = -1, results = Slick(context && fuse.get(context).raw || fuse._doc,
+        String(selectors || ''), List);
+      if (callback) {
+        while (node = results[++i]) callback(node);
+      }
+      return results;
+    }
 
-    // prevent JScript bug with named function expressions
-    var match = nil, select = nil;
-  })(fuse.dom.Selector, fuse.dom.NodeList);
+    function rawSelect(selectors, context, callback) {
+      return query(selectors, context, callback, RawList());
+    }
+
+    function select(selectors, context, callback) {
+      return query(selectors, context, callback, NodeList());
+    }
+
+    object.match = match;
+    object.rawSelect = rawSelect;
+    object.select = select;
+
+  })(fuse.dom.selector, fuse.dom.NodeList, fuse.dom.RawList);

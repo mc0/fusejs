@@ -2,9 +2,9 @@
 
   fuse.addNS('util');
 
-  fuse.addNS('dom.Selector');
+  fuse.addNS('dom.selector');
 
-  (function(Selector) {
+  (function(object) {
     function $$(selectors) {
       var callback, context, args = slice.call(arguments, 0);
       if (typeof args[args.length - 1] === 'function')
@@ -21,19 +21,17 @@
       if (typeof context === 'function') {
         callback = context; context = null;
       }
-      return Selector.select(selectors,
-        context && fuse.get(context).raw || fuse._doc, callback);
+      return object.select(selectors, context, callback);
     }
 
     function rawQuery(selectors, context, callback) {
       if (typeof context === 'function') {
         callback = context; context = null;
       }
-      return Selector.rawSelect(selectors,
-        context && fuse.get(context).raw || fuse._doc, callback);
+      return object.rawSelect(selectors, context, callback);
     }
 
     fuse.util.$$  = $$;
     fuse.query    = query;
     fuse.rawQuery = rawQuery;
-  })(fuse.dom.Selector);
+  })(fuse.dom.selector);

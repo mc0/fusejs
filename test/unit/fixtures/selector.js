@@ -10,11 +10,11 @@ var Selector = fuse.Class({
   },
 
   'findElements': function(context) {
-     return fuse.dom.Selector.select(this.selector, $(context).raw);
+     return fuse.dom.selector.select(this.selector, $(context).raw);
   },
 
   'match': function(element) {
-    return fuse.dom.Selector.match($(element), this.selector);
+    return fuse.dom.selector.match($(element), this.selector);
   },
 
   'toString': function() {
@@ -31,7 +31,7 @@ fuse.Object.extend(Selector, {
   },
 
   'findChildElements': function(element, selectors) {
-    return fuse.dom.Selector
+    return fuse.dom.selector
       .select(Selector.split(selectors.join(',')).join(','), $(element));
   },
 
@@ -39,7 +39,7 @@ fuse.Object.extend(Selector, {
     elements = fuse.Array.fromNodeList(elements);
     var element, i = 0, results = [];
     while (element = $(elements[i++]))
-      if (fuse.dom.Selector.match(element, selector))
+      if (fuse.dom.selector.match(element, selector))
         results.push(element);
     return results;
   },

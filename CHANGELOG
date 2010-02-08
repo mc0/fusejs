@@ -1,3 +1,5 @@
+* Make fuse.dom.Selector namespace lowercase and update selector engine adapters to support an optional `callback` argument. [jddalton]
+
 * Remove `new` operator from Function constructor calls and minify code strings used in compiled methods. [jddalton]
 
 * Simplify extending fuse.dom.NodeList and fuse.dom.RawList and conform more to the jQuery syntax for list getters/setters. [jddalton]
