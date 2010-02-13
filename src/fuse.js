@@ -28,9 +28,12 @@
 
   /*--------------------------------------------------------------------------*/
 
-  // Host objects have a range of typeof values. For example:
-  // document.createElement('div').offsetParent -> unknown
-  // document.createElement -> object
+  // Host objects can return type values that are different from their actual data type.
+  // The objects we are concerned with are usally of types object, function, or unknown.
+  // For example:
+  // typeof document.createElement('div').offsetParent -> unknown
+  // typeof document.createElement -> object
+  // typeof Image.create -> string
   isHostObject = (function() {
     var NON_HOST_TYPES = { 'boolean': 1, 'number': 1, 'string': 1, 'undefined': 1 };
     return function(object, property) {
@@ -210,11 +213,11 @@
    'dom/event/event.js',
    'dom/event/dom-loaded.js',
 
-   'dom/raw-list.js',
-   'dom/node-list.js',
    'dom/selector/selector.js',
    'dom/selector/nwmatcher.js',
    'dom/element/traversal.js',
+   'dom/raw-list.js',
+   'dom/node-list.js',
 
    'ajax/ajax.js',
    'ajax/responders.js',
