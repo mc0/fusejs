@@ -1,3 +1,5 @@
+* Remove fuse.Enumerable mixins from fuse.Hash. [FuseJS LH #28] [jddalton]
+
 * Update DOM traversal API. [Joe Gornick, jddalton]
   Note: Backwards compatibility warning.
   - Renamed firstDescendant -> first

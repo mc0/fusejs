@@ -92,12 +92,6 @@
       return pair;
     }
 
-    plugin._each = function _each(callback) {
-      var pair, i = 0, pairs = this._pairs;
-      while (pair = pairs[i]) callback(_returnPair(pair), i++, this);
-      return this;
-    };
-
     plugin.first = function first(callback, thisArg) {
       var pair, i = 0, pairs = this._pairs;
       if (callback == null) {
@@ -282,14 +276,6 @@
 
       return zip;
     })();
-
-    // assign any missing Enumerable methods
-    if (Enumerable) {
-      eachKey(Enumerable, function(value, key, object) {
-        if (hasKey(object, key) && typeof plugin[key] !== 'function')
-          plugin[key] = value;
-      });
-    }
 
     // prevent JScript bug with named function expressions
     var clear =      nil,
