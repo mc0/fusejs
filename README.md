@@ -64,8 +64,15 @@ Check out the FuseJS source with
 
 Community
 ---------
-  Discuss all things FuseJS in the IRC channel
-  [#fusejs on irc.freenode.net](irc://irc.freenode.net/#fusejs).
+  - Discuss all things FuseJS in the IRC channel
+    [#fusejs on irc.freenode.net](irc://irc.freenode.net/#fusejs).
+
+  - Use the [FuseJS issue tracker](https://fusejs.lighthouseapp.com/projects/24813-fusejs/tickets?q=all)
+    to report a bug or share an awesome enhancement. Before posting please read this
+    [text formatting guide](http://help.lighthouseapp.com/faqs/getting-started/how-do-i-format-text).
+    Lighthouse lacks the GUI to edit comments. However, you may install
+    [this Greasemonkey script](http://userscripts.org/scripts/show/63702) or use
+    [this bookmarklet](http://gist.github.com/251306) to insert the missing `edit` links.
 
 Gotchas
 -------
