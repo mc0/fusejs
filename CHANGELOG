@@ -1,3 +1,5 @@
+* Ensure native fuse.String#trim works properly and add fuse.env.test('STRING_TRIM_INCOMPLETE'). [FuseJS LH #55] [jddalton, kangax]
+
 * Micro-optimize fuse.Object.keys() and fuse.Object.values() by avoiding results.push(). [Garrett Smith]
 
 * Remove fuse.Enumerable mixins from fuse.Hash. [FuseJS LH #28] [jddalton]

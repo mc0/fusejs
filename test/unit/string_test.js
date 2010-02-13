@@ -437,27 +437,21 @@ new Test.Unit.Runner({
     this.assertEqual('hello world',      fuse.String('   hello world  ').trim());
     this.assertEqual('hello world',      fuse.String('hello world').trim());
     this.assertEqual('hello  \n  world', fuse.String('  hello  \n  world  ').trim());
-    this.assertEqual('',                 fuse.String(' ').trim());
-
-    // Ensure trim removes all whitespace and line terminators
-    // IE doesn't understand '\v' so replace it with '\x0B'
-    this.assertEqual('hello', fuse.String(' \n\r\t\x0B\f\xA0 hello \xA0\n \r\t\f\x0B').trim());
+    this.assertEqual('',                 fuse.String(whitespaceChars).trim());
   },
 
   'testTrimLeft': function() {
     this.assertEqual('hello world  ',      fuse.String('   hello world  ').trimLeft());
     this.assertEqual('hello world',        fuse.String('hello world').trimLeft());
     this.assertEqual('hello  \n  world  ', fuse.String('  hello  \n  world  ').trimLeft());
-    this.assertEqual('',                   fuse.String(' ').trimLeft());
-    this.assertEqual('hello', fuse.String(' \n\r\t\x0B\f\xA0 hello').trimLeft());
+    this.assertEqual('',                   fuse.String(whitespaceChars).trimLeft());
   },
 
   'testTrimRight': function() {
     this.assertEqual('   hello world',     fuse.String('   hello world  ').trimRight());
     this.assertEqual('hello world',        fuse.String('hello world').trimRight());
     this.assertEqual('  hello  \n  world', fuse.String('  hello  \n  world  ').trimRight());
-    this.assertEqual('',                   fuse.String(' ').trimRight());
-    this.assertEqual('hello', fuse.String('hello \xA0\n \r\t\f\x0B').trimRight());
+    this.assertEqual('',                   fuse.String(whitespaceChars).trimRight());
   },
 
   'testStripTags': function() {

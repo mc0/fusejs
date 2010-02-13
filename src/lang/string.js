@@ -22,12 +22,9 @@
   /*--------------------------------------------------------------------------*/
 
   (function(plugin) {
-
-    var sMap = fuse.RegExp.SPECIAL_CHARS.s;
-
     // ECMA-5 15.5.4.11
     // For IE
-    if (envTest('STRING_METHODS_WRONGLY_SET_REGEXP_LAST_INDEX'))
+    if (envTest('STRING_METHODS_WRONGLY_SET_REGEXP_LAST_INDEX')) {
       plugin.replace = (function(__replace) {
         function replace(pattern, replacement) {
           var __replacement, result;
@@ -46,12 +43,13 @@
 
         return replace;
       })(plugin.replace);
+    }
 
     // For Safari 2.0.2- and Chrome 1+
     // Based on work by Dean Edwards:
     // http://code.google.com/p/base2/source/browse/trunk/lib/src/base2-legacy.js?r=239#174
     if (envTest('STRING_REPLACE_COERCE_FUNCTION_TO_STRING') ||
-        envTest('STRING_REPLACE_BUGGY_WITH_GLOBAL_FLAG_AND_EMPTY_PATTERN'))
+        envTest('STRING_REPLACE_BUGGY_WITH_GLOBAL_FLAG_AND_EMPTY_PATTERN')) {
       plugin.replace = (function(__replace) {
         function replace(pattern, replacement) {
           if (typeof replacement !== 'function')
@@ -97,10 +95,10 @@
         var exec = RegExp.prototype.exec;
         return replace;
       })(plugin.replace);
-
+    }
 
     // ECMA-5 15.5.4.8
-    if (!plugin.lastIndexOf)
+    if (!plugin.lastIndexOf) {
       plugin.lastIndexOf = function lastIndexOf(searchString, position) {
         if (this == null) throw new TypeError;
         searchString = String(searchString);
@@ -126,9 +124,10 @@
             return fuse.Number(position);
         return fuse.Number(-1);
       };
+    }
 
     // For Chome 1+
-    if (envTest('STRING_LAST_INDEX_OF_BUGGY_WITH_NEGATIVE_POSITION'))
+    if (envTest('STRING_LAST_INDEX_OF_BUGGY_WITH_NEGATIVE_POSITION')) {
       plugin.lastIndexOf = (function(__lastIndexOf) {
         function lastIndexOf(searchString, position) {
           position = +position;
@@ -137,11 +136,11 @@
 
         return lastIndexOf;
       })(plugin.lastIndexOf);
-
+    }
 
     // ECMA-5 15.5.4.10
     // For IE
-    if (envTest('STRING_METHODS_WRONGLY_SET_REGEXP_LAST_INDEX'))
+    if (envTest('STRING_METHODS_WRONGLY_SET_REGEXP_LAST_INDEX')) {
       plugin.match = (function(__match) {
         function match(pattern) {
           var result = __match.call(this, pattern);
@@ -151,10 +150,12 @@
 
         return match;
       })(plugin.match);
-
+    }
 
     // ECMA-5 15.5.4.20
-    if (!plugin.trim)
+    if (envTest('STRING_TRIM_INCOMPLETE')) {
+      var sMap = fuse.RegExp.SPECIAL_CHARS.s;
+
       plugin.trim = function trim() {
         if (this == null) throw new TypeError;
         var string = String(this), start = -1, end = string.length;
@@ -167,8 +168,7 @@
         return fuse.String(string.slice(start, end + 1));
       };
 
-    // non-standard
-    if (!plugin.trimLeft)
+      // non-standard
       plugin.trimLeft = function trimLeft() {
         if (this == null) throw new TypeError;
         var string = String(this), start = -1;
@@ -178,8 +178,7 @@
         return fuse.String(string.slice(start));
       };
 
-    // non-standard
-    if (!plugin.trimRight)
+      // non-standard
       plugin.trimRight = function trimRight() {
         if (this == null) throw new TypeError;
         var string = String(this), end = string.length;
@@ -188,6 +187,7 @@
         while (sMap[string.charAt(--end)]);
         return fuse.String(string.slice(0, end + 1));
       };
+    }
 
     // prevent JScript bug with named function expressions
     var lastIndexOf = nil, match = nil, trim = nil, trimLeft = nil, trimRight = nil;

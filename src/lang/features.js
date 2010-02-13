@@ -31,7 +31,7 @@
     envTest =
     env.test = test;
 
-    env.removeText = removeTest;
+    env.removeTest = removeTest;
   })(fuse.env);
 
   /*----------------------------- LANG FEATURES ------------------------------*/
@@ -108,5 +108,12 @@
       return !(string.replace(/()/g, 'o') === 'oxoyo' &&
         string.replace(new RegExp('', 'g'), replacement) === 'oxoyo' &&
         string.replace(/(y|)/g, replacement) === 'oxoo');
+    },
+
+    'STRING_TRIM_INCOMPLETE': function() {
+      // true for Firefox
+      var key, sMap = fuse.RegExp.SPECIAL_CHARS.s, whitespace = '';
+      for (key in sMap) whitespace += key;
+      return typeof whitespace.trim !== 'function' || !!whitespace.trim();
     }
   });
