@@ -172,13 +172,15 @@
          length = object.length >>> 0;
 
         if (callback == null) {
-          for ( ; i < length; i++)
+          for ( ; i < length; i++) {
             if (i in object) return object[i];
+          }
         }
         else if (typeof callback === 'function') {
-          for ( ; i < length; i++)
+          for ( ; i < length; i++) {
             if (callback.call(thisArg, object[i], i))
               return object[i];
+          }
         }
         else {
           var count = +callback; // fast coerce to number
@@ -255,17 +257,18 @@
         if (this == null) throw new TypeError;
         var object = Object(this), length = object.length >>> 0;
 
-        if (callback == null)
+        if (callback == null) {
           return object[length && length - 1];
+        }
         if (typeof callback === 'function') {
-          while (length--)
+          while (length--) {
             if (callback.call(thisArg, object[length], length, object))
               return object[length];
+          }
         }
         else {
           var results = List(), count = +callback;
           if (isNaN(count)) return results;
-
           count = count < 1 ? 1 : count > length ? length : count;
           return plugin.slice.call(object, length - count);
         }

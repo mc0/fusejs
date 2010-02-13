@@ -1,3 +1,16 @@
+* Update DOM traversal API. [Joe Gornick, jddalton]
+  Note: Backwards compatibility warning.
+  - Renamed firstDescendant -> first
+  - Added/changed API functionality
+    up/down/next/previous/first/last():
+      Returns parentNode/firstElementChild/nextElementSibling/previousElementSibling/lastElementChild
+    up/down/next/previous/first/last(selectors):
+      Returns relevant element element matched by specified selector
+    up/down/next/previous/first/last(callback, thisArg):
+      Returns first relevant element that callback returns true for
+    up/down/next/previous/first/last(n):
+      Returns an nth length fuse.dom.NodeList of relevant elements
+
 * Make fuse.dom.Selector namespace lowercase and update selector engine adapters to support an optional `callback` argument. [jddalton]
 
 * Remove `new` operator from Function constructor calls and minify code strings used in compiled methods. [jddalton]

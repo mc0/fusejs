@@ -241,13 +241,20 @@
 
     plugin.hasClassName = function hasClassName(className) {
       var element = this.raw || this, cn = element.className, original = cn;
+      className = ' ' + className.replace(/\\/g, '') + ' ';
       reEdgeSpaces.lastIndex = 0;
-      if (cn.length && (cn === className ||
-          (' ' + (cn = cn.replace(reEdgeSpaces, ' ')) + ' ')
-            .indexOf(' ' + className + ' ') > -1)) {
-        // normalize to optimize future calls
-        if (cn !== original) element.className = cn;
-        return true;
+
+      if (cn.length) {
+        if (cn == className) {
+          return true;
+        }
+        if ((' ' + (cn = cn.replace(reEdgeSpaces, ' ')) + ' ').indexOf(className) > -1) {
+          // normalize to optimize future calls
+          if (cn !== original) {
+            element.className = cn;
+          }
+          return true;
+        }
       }
       return false;
     };

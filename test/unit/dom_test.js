@@ -682,7 +682,7 @@ new Test.Unit.Runner({
       getInnerHTML('i_am_a_td'),
       'Failed simple update in table row.');
 
-    $('third_row').update('<td id="i_am_a_td">another <span>test</span></td>');
+    $('third_row').update('<td id="i_am_a_td">another <span>test<\/span></td>');
 
     this.assertEqual('another <span>test</span>',
       getInnerHTML('i_am_a_td'),
@@ -937,17 +937,15 @@ new Test.Unit.Runner({
     var parent = $('identification');
     this.assertEqual(parent.down().identify(),  'predefined_id');
 
-    var id = parent.down(1).identify().match(/\d+$/)[0];
-    this.assertEqual(parent.down(2).identify(), 'anonymous_element_' + (++id));
-    this.assertEqual(parent.down(3).identify(), 'anonymous_element_' + (++id));
+    var id = parent.down(2)[1].identify().match(/\d+$/)[0];
+    this.assertEqual(parent.down(3)[2].identify(), 'anonymous_element_' + (++id));
+    this.assertEqual(parent.down(4)[3].identify(), 'anonymous_element_' + (++id));
 
-    this.assert(parent.down(3).raw.id !== parent.down(2).raw.id);
+    this.assert(parent.down(4)[3].raw.id !== parent.down(3)[2].raw.id);
   },
 
   'testElementGetAncestors': function() {
     var ancestors = $('navigation_test_f').getAncestors();
-
-    this.assertElementsMatch(ancestors.last().getAncestors());
 
     this.assertElementsMatch(ancestors,
       'ul', 'li', 'ul#navigation_test', 'div#nav_tests_isolator', 'body', 'html');
@@ -974,11 +972,6 @@ new Test.Unit.Runner({
       'Did not return an array.');
   },
 
-  'testElementFirstDescendant': function() {
-    this.assertElementMatches($('navigation_test').firstDescendant(), 'li.first');
-    this.assertNull($('navigation_test_next_sibling').firstDescendant());
-  },
-
   'testElementGetChildren': function() {
     this.assertElementsMatch($('navigation_test').getChildren(),
       'li.first', 'li', 'li#navigation_test_c', 'li.last');
@@ -1002,7 +995,7 @@ new Test.Unit.Runner({
 
     var dummy = fuse('<div>');
     dummy.raw.innerHTML = fuse.String.times('<div></div>', 3);
-    this.assertRespondsTo('show', dummy.down(1).getPreviousSiblings()[0]);
+    this.assertRespondsTo('show', dummy.down(2)[1].getPreviousSiblings()[0]);
   },
 
   'testElementGetNextSiblings': function() {
@@ -1042,35 +1035,71 @@ new Test.Unit.Runner({
       'should not match siblings children');
   },
 
+  'testElementFirst': function() {
+    this.assertElementMatches($('navigation_test').first(), 'li.first');
+    this.assertNull($('navigation_test_next_sibling').first());
+    this.assertEqual(
+      $('navigation_test_c'),
+      $('navigation_test').first(function(el) { return el.raw.id === 'navigation_test_c'; }),
+      'Callback argument failed');
+  },
+
+  'testElementLast': function() {
+    this.assertElementMatches($('navigation_test').last(), 'li.last');
+    this.assertNull($('navigation_test_next_sibling').last());
+    this.assertEqual(
+      $('navigation_test_c'),
+      $('navigation_test').last(function(el) { return el.raw.id === 'navigation_test_c'; }),
+      'Callback argument failed');
+  },
+
   'testElementUp': function() {
     var element = $('navigation_test_f');
 
-    this.assertElementMatches(element.up(), 'ul');
+    // specify a count
+    this.assertElementMatches(element.up(),  'ul');
     this.assertElementMatches(element.up(0), 'ul');
-    this.assertElementMatches(element.up(1), 'li');
-    this.assertElementMatches(element.up(2), 'ul#navigation_test');
-    this.assertElementMatches(element.up('ul', 1), 'ul#navigation_test');
+    this.assertElementMatches(element.up(1), 'ul');
 
-    this.assertEqual(undef, element.up('garbage'));
-    this.assertEqual(undef, element.up(6));
+    this.assertEnumEqual(
+      [fuse(element.raw.parentNode), fuse(element.raw.parentNode.parentNode)],
+      element.up(2),
+      'Should return an array of 2 parent elements');
+
+    this.assertElementMatches(element.up(3)[2], 'ul#navigation_test');
+    this.assertElementMatches(element.up('ul', 2)[1], 'ul#navigation_test');
+
+    this.assertEqual(null, element.up('garbage'));
+    this.assertEqual(6, element.up(7).length);
 
     this.assertElementsMatch(element.up('li').getSiblings(), 'li.first', 'li', 'li.last');
     this.assertElementMatches(element.up('.non-existant, ul'), 'ul');
 
+    this.assertEqual(
+      $('navigation_test'),
+      element.up(function(el) { return el.raw.id === 'navigation_test'; }),
+      'Callback argument failed');
+
     var dummy = fuse('<div>');
-    dummy.raw.innerHTML = fuse.String.times('<div></div>', 3);
+    dummy.raw.innerHTML = fuse.String.times('<div><\div>', 3);
     this.assertRespondsTo('show', dummy.down().up());
   },
 
   'testElementDown': function() {
     var element = $('navigation_test');
 
-    this.assertElementMatches(element.down(), 'li.first');
+    this.assertElementMatches(element.down(),  'li.first');
     this.assertElementMatches(element.down(0), 'li.first');
-    this.assertElementMatches(element.down(1), 'em');
-    this.assertElementMatches(element.down('li', 5), 'li.last');
-    this.assertElementMatches(element.down('ul').down('li', 1), 'li#navigation_test_f');
+    this.assertElementMatches(element.down(1), 'li.first');
+    this.assertElementMatches(element.down(2)[1], 'em');
+    this.assertElementMatches(element.down('li', 6)[5], 'li.last');
+    this.assertElementMatches(element.down('ul').down('li', 2)[1], 'li#navigation_test_f');
     this.assertElementMatches(element.down('.non-existant, .first'), 'li.first');
+
+    this.assertEqual(
+      $('navigation_test_f'),
+      element.down(function(el) { return el.raw.id === 'navigation_test_f'; }),
+      'Callback argument failed');
 
     var dummy = fuse('<div>');
     dummy.raw.innerHTML = fuse.String.times('<div></div>', 3);
@@ -1086,29 +1115,39 @@ new Test.Unit.Runner({
     var element = $('navigation_test').down('li.last');
 
     this.assertElementMatches(element.previous(), 'li#navigation_test_c');
-    this.assertElementMatches(element.previous(1), 'li');
+    this.assertElementMatches(element.previous(2)[1], 'li');
     this.assertElementMatches(element.previous('.first'), 'li.first');
     this.assertElementMatches(element.previous('.non-existant, .first'), 'li.first');
 
-    this.assertEqual(undef, element.previous(3));
+    this.assertEqual(undef, element.previous(4)[3]);
     this.assertEqual(undef, $('navigation_test').down().previous());
+
+    this.assertEqual(
+      $$('li.first')[0],
+      element.previous(function(el) { return el.hasClassName('first'); }),
+      'Callback argument failed');
 
     var dummy = fuse('<div>');
     dummy.raw.innerHTML = fuse.String.times('<div></div>', 3);
-    this.assertRespondsTo('show', dummy.down(1).previous());
+    this.assertRespondsTo('show', dummy.down(2)[1].previous());
   },
 
   'testElementNext': function() {
     var element = $('navigation_test').down('li.first');
 
     this.assertElementMatches(element.next(), 'li');
-    this.assertElementMatches(element.next(1), 'li#navigation_test_c');
-    this.assertElementMatches(element.next(2), 'li.last');
+    this.assertElementMatches(element.next(2)[1], 'li#navigation_test_c');
+    this.assertElementMatches(element.next(3)[2], 'li.last');
     this.assertElementMatches(element.next('.last'), 'li.last');
     this.assertElementMatches(element.next('.non-existant, .last'), 'li.last');
 
-    this.assertEqual(undef, element.next(3));
-    this.assertEqual(undef, element.next(2).next());
+    this.assertEqual(undef, element.next(4)[3]);
+    this.assertEqual(undef, element.next(3)[2].next());
+
+    this.assertEqual(
+      $$('li.last')[0],
+      element.next(function(el) { return el.hasClassName('last'); }),
+      'Callback argument failed');
 
     var dummy = fuse('<div>');
     dummy.raw.innerHTML = fuse.String.times('<div></div>', 3);
@@ -2625,7 +2664,7 @@ new Test.Unit.Runner({
     });
 
     if (window.Node) {
-      constants.each(function(pair) {
+      constants.toArray().each(function(pair) {
         this.assertEqual(fuse.dom.Node[pair.key], pair.value);
       }, this);
     }
