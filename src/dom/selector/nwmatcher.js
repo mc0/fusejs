@@ -6,7 +6,7 @@
         return __match(
           element.raw || fuse.get(element).raw,
           String(selectors || ''),
-          context && fuse.get(context).raw || fuse._doc);
+          context && fuse.get(context).raw);
       }
 
       __match = NW.Dom.match;
@@ -18,7 +18,7 @@
         var i = -1, results = RawList();
         __select(
           String(selectors || ''),
-          context && fuse.get(context).raw || fuse._doc,
+          context && fuse.get(context).raw,
           function(node) {
             results[++i] = node;
             callback && callback(node);
@@ -36,7 +36,7 @@
         var i = -1, results = NodeList();
         __select(
           String(selectors || ''),
-          context && fuse.get(context).raw || fuse._doc,
+          context && fuse.get(context).raw,
           function(node) {
             node = results[++i] = Node(node);
             callback && callback(node);
