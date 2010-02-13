@@ -248,9 +248,9 @@
     if (!Obj.keys) Obj.keys = function keys(object) {
       if (isPrimitive(object)) throw new TypeError;
 
-      var results = fuse.Array();
+      var results = fuse.Array(), i = -1;
       eachKey(object, function(value, key) {
-        hasKey(object, key) && results.push(key);
+        if (hasKey(object, key)) results[++i] = key;
       });
       return results;
     };
@@ -258,9 +258,9 @@
     Obj.values = function values(object) {
       if (isPrimitive(object)) throw new TypeError;
 
-      var results = fuse.Array();
+      var results = fuse.Array(), i = -1;
       eachKey(object, function(value, key) {
-        hasKey(object, key) && results.push(value);
+        if (hasKey(object, key)) results[++i] = value;
       });
       return results;
     };

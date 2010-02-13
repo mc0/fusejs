@@ -1,3 +1,5 @@
+* Micro-optimize fuse.Object.keys() and fuse.Object.values() by avoiding results.push(). [Garrett Smith]
+
 * Remove fuse.Enumerable mixins from fuse.Hash. [FuseJS LH #28] [jddalton]
 
 * Update DOM traversal API. [Joe Gornick, jddalton]
