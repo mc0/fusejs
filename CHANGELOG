@@ -1,3 +1,5 @@
+* Remove one closure around fuse.Array extensions. [jddalton]
+
 * Add get() method to fuse.dom.NodeList.plugin and remove fuse.dom.RawList and fuse.rawQuery(), making fuse.query() act like fuse.rawQuery(). [jddalton]
   Note: Backwards compatibility warning.
 
