@@ -45,7 +45,7 @@ new Test.Unit.Runner({
 
     // test control groups
     var self = this, container = $('form_with_control_groups'),
-     radios = [container.down(), container.down(1), container.down(2)];
+     radios = [container.down(), container.down(2)[1], container.down(3)[2]];
 
     var observerB = Field.EventObserver(radios[0], function() {
       self.assertEqual(radios[0], '2r');
@@ -224,7 +224,9 @@ new Test.Unit.Runner({
 
     fuse.Array('form', 'button_elements').each(function(container) {
       $(container).query('*[type="button"],*[type="submit"],*[type="reset"]')
-        .each(function(element) { this.assertEqual('', getSelection(element.activate())) }, this);
+        .each(function(element) {
+          this.assertEqual('', getSelection($(element).activate()));
+        }, this);
     }, this);
 
     // Form.Element.activate should select text on text input elements
@@ -377,7 +379,7 @@ new Test.Unit.Runner({
 
     // test selectboxes with no selected value
     expected = { 'vm[]': 3 };
-    $('selects_wrapper').rawQuery('select').each(function(element) { element.selectedIndex = -1 });
+    $('selects_wrapper').query('select').each(function(element) { element.selectedIndex = -1 });
     $('multiSel1').raw.selectedIndex = 2;
 
     this.assertEqual('vm%5B%5D=3', serialize('selects_wrapper'));
@@ -456,12 +458,12 @@ new Test.Unit.Runner({
       // Form.Element#clear should NOT clear button
       // values of any kind.
 
-      $(container).query('button,input,select,textarea').each(function(decorator) {
-        var element = decorator.raw,
-         asserted   = element.value,
-         backup     = asserted,
-         prop       = 'value',
-         tagName    = element.tagName.toUpperCase();
+      $(container).query('button,input,select,textarea').each(function(element) {
+        var asserted = element.value,
+         backup      = asserted,
+         decorator   = $(element),
+         prop        = 'value',
+         tagName     = element.tagName.toUpperCase();
 
         if (tagName == 'BUTTON' ||
            fuse.Array('button', 'image', 'reset', 'submit').contains(element.type)) {

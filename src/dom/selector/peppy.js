@@ -1,6 +1,6 @@
   /*---------------------------- SELECTOR: PEPPY -----------------------------*/
 
-  (function(object, NodeList, RawList) {
+  (function(object, NodeList) {
     function match(element, selectors) {
       element = element.raw || fuse.get(element).raw;
       var node, i = -1, results = peppy.query(String(selectors || ''),
@@ -21,16 +21,11 @@
       return results;
     }
 
-    function rawSelect(selectors, context, callback) {
-      return query(selectors, context, callback, RawList.fromNodeList);
-    }
-
     function select(selectors, context, callback) {
       return query(selectors, context, callback, NodeList.fromNodeList);
     }
 
     object.match = match;
-    object.rawSelect = rawSelect;
     object.select = select;
 
-  })(fuse.dom.selector, fuse.dom.NodeList, fuse.dom.RawList);
+  })(fuse.dom.selector, fuse.dom.NodeList);

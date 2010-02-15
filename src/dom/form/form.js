@@ -28,13 +28,13 @@
     };
 
     function eachElement(decorator, callback) {
-      var node, i = 1,
+      var node, i = 0,
        nodes = (decorator.raw || decorator).getElementsByTagName('*');
 
       if (node = nodes[0]) {
         do {
           FIELD_NODE_NAMES[node.nodeName.toUpperCase()] && callback(node);
-        } while (node = nodes[i++]);
+        } while (node = nodes[++i]);
       }
     }
 
@@ -78,14 +78,14 @@
     };
 
     plugin.getElements = function getElements() {
-      var node, i = 1, results = NodeList(),
+      var node, results = NodeList(), i = 0, j = -1,
        nodes = (this.raw || this).getElementsByTagName('*');
 
       if (node = nodes[0]) {
         do {
-          FIELD_NODE_NAMES[node.nodeName.toUpperCase()] &&
-            results.push(node);
-        } while (node = nodes[i++]);
+          if (FIELD_NODE_NAMES[node.nodeName.toUpperCase()])
+            results[++j] = fromElement(node);
+        } while (node = nodes[++i]);
       }
       return results;
     };
@@ -95,19 +95,24 @@
       name = String(typeName || '');
 
       var input, inputs = (this.raw || this).getElementsByTagName('input'),
-       results = fuse.Array(), i = 0;
+       results = NodeList(), i = -1, j = i;
 
       if (!typeName && !name) {
-        while (input = inputs[i]) results[i++] = fromElement(input);
+        while (input = inputs[++i]) {
+          results[i] = fromElement(input);
+        }
       }
       else if (typeName && !name) {
-        while (input = inputs[i++])
-          if (typeName === input.type) results.push(fromElement(input));
+        while (input = inputs[++i]) {
+          if (typeName === input.type)
+            results[++j] = fromElement(input);
+        }
       }
       else {
-        while (input = inputs[i++])
+        while (input = inputs[++i]) {
           if ((!typeName || typeName === input.type) && (!name || name === input.name))
-            results.push(fromElement(input));
+            results[++j] = fromElement(input);
+        }
       }
       return results;
     };
@@ -148,7 +153,7 @@
         options.hash = true;
 
       var element, key, value, isImageType, isSubmitButton,
-       nodeName, submitSerialized, type, i = 1,
+       nodeName, submitSerialized, type, i = 0,
        element     = this.raw || this,
        checkString = !!elements,
        doc         = fuse._doc,
@@ -216,7 +221,7 @@
           }
           else result[key] = value;
         }
-        while (element = elements[i++]);
+        while (element = elements[++i]);
       }
 
       return options.hash

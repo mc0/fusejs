@@ -309,10 +309,10 @@
     (function() {
       var count = 0,
        el = $('field_event_observer_group'),
-       radios = fuse.Array.from(el.query('input[type="radio"]'));
+       radios = el.query('input[type="radio"]');
 
       new fuse.dom.InputElement.EventObserver(radios[1], function(){ count++ });
-      radios.invoke('observe', 'click', function() {
+      radios.observe('click', function() {
         radios.invoke('stopObserving', 'click', arguments.callee);
         fuse.Function.defer(function() { el[count ? 'passed' : 'failed']() });
       });

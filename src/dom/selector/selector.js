@@ -14,7 +14,7 @@
 
       return query(args.length
         ? slice.call(args).join(',')
-        : selectors, context, callback);
+        : selectors, context, callback).get();
     }
 
     function query(selectors, context, callback) {
@@ -24,14 +24,6 @@
       return object.select(selectors, context, callback);
     }
 
-    function rawQuery(selectors, context, callback) {
-      if (typeof context === 'function') {
-        callback = context; context = null;
-      }
-      return object.rawSelect(selectors, context, callback);
-    }
-
-    fuse.util.$$  = $$;
-    fuse.query    = query;
-    fuse.rawQuery = rawQuery;
+    fuse.util.$$ = $$;
+    fuse.query   = query;
   })(fuse.dom.selector);

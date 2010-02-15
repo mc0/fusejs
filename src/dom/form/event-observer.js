@@ -10,18 +10,22 @@
           var eventObserver = this, onElementEvent = this.onElementEvent;
           this.onElementEvent = function() { onElementEvent.call(eventObserver); };
 
-          if (getNodeName(element) === 'FORM')
+          if (getNodeName(element) === 'FORM') {
             return this.registerFormCallbacks();
+          }
 
-          var member, name = element.name, i = 0;
-          this.group = (name && fuse.query(element.nodeName +
-            '[name="' + name + '"]', getDocument(this.element))) || NodeList(this.element);
+          var member, name = element.name, i = -1;
+          this.group =
+            (name && fuse.query(element.nodeName +
+            '[name="' + name + '"]', getDocument(element)).get()) ||
+            NodeList(fuse.get(element));
 
           this.callback = callback;
           this.lastValue = this.getValue();
 
-          while (member = this.group[i++])
+          while (member = this.group[++i]) {
             this.registerCallback(member);
+          }
         }
         return BaseEventObserver;
       })()

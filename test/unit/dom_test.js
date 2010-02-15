@@ -929,8 +929,8 @@ new Test.Unit.Runner({
     var results = $('container').query('p.test');
 
     this.assertEqual(results.length, 4);
-    this.assertEqual($('intended'), results[0]);
-    this.assertEqual($$('#container p.test')[0], results[0]);
+    this.assertEqual($('intended'), results.get(0));
+    this.assertEqual($$('#container p.test')[0], results.get(0));
   },
 
   'testElementIdentify': function() {
@@ -1040,7 +1040,7 @@ new Test.Unit.Runner({
     this.assertNull($('navigation_test_next_sibling').first());
     this.assertEqual(
       $('navigation_test_c'),
-      $('navigation_test').first(function(el) { return el.raw.id === 'navigation_test_c'; }),
+      $('navigation_test').first(function(el) { return el.id === 'navigation_test_c'; }),
       'Callback argument failed');
   },
 
@@ -1049,7 +1049,7 @@ new Test.Unit.Runner({
     this.assertNull($('navigation_test_next_sibling').last());
     this.assertEqual(
       $('navigation_test_c'),
-      $('navigation_test').last(function(el) { return el.raw.id === 'navigation_test_c'; }),
+      $('navigation_test').last(function(el) { return el.id === 'navigation_test_c'; }),
       'Callback argument failed');
   },
 
@@ -1077,7 +1077,7 @@ new Test.Unit.Runner({
 
     this.assertEqual(
       $('navigation_test'),
-      element.up(function(el) { return el.raw.id === 'navigation_test'; }),
+      element.up(function(el) { return el.id === 'navigation_test'; }),
       'Callback argument failed');
 
     var dummy = fuse('<div>');
@@ -1098,7 +1098,7 @@ new Test.Unit.Runner({
 
     this.assertEqual(
       $('navigation_test_f'),
-      element.down(function(el) { return el.raw.id === 'navigation_test_f'; }),
+      element.down(function(el) { return el.id === 'navigation_test_f'; }),
       'Callback argument failed');
 
     var dummy = fuse('<div>');
@@ -1106,9 +1106,9 @@ new Test.Unit.Runner({
     this.assertRespondsTo('show', dummy.down());
 
     // Test INPUT elements because Element#down calls Element#select
-    var input = $$('input')[0];
-    this.assertNothingRaised(function(){ input.down('span') });
-    this.assertNull(input.down('span'));
+    var inputs = $$('input');
+    this.assertNothingRaised(function(){ inputs.down('span') });
+    this.assertNull(inputs.down('span'));
   },
 
   'testElementPrevious': function() {
@@ -1123,8 +1123,8 @@ new Test.Unit.Runner({
     this.assertEqual(undef, $('navigation_test').down().previous());
 
     this.assertEqual(
-      $$('li.first')[0],
-      element.previous(function(el) { return el.hasClassName('first'); }),
+      $$('li.first').get(0),
+      element.previous(function(el) { return $(el).hasClassName('first'); }),
       'Callback argument failed');
 
     var dummy = fuse('<div>');
@@ -1145,8 +1145,8 @@ new Test.Unit.Runner({
     this.assertEqual(undef, element.next(3)[2].next());
 
     this.assertEqual(
-      $$('li.last')[0],
-      element.next(function(el) { return el.hasClassName('last'); }),
+      $$('li.last').get(0),
+      element.next(function(el) { return $(el).hasClassName('last'); }),
       'Callback argument failed');
 
     var dummy = fuse('<div>');

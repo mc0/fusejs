@@ -3,14 +3,13 @@
 
   // private vars
   var DOCUMENT_FRAGMENT_NODE, DOCUMENT_NODE, ELEMENT_NODE, TEXT_NODE, Class,
-   Data, Document, Element, Enumerable, Form, Func, Obj, Node, NodeList,
-   RawList, $break, _extend, fuse, addArrayMethods, addNodeListMethods, bind,
-   capitalize, clone, concatList, defer, eachKey, emptyFunction, envAddTest,
-   envTest, escapeRegExpChars, expando, fromElement, getDocument, getNodeName,
-   getWindow, hasKey, inspect, isArray, isElement, isEmpty, isHash, isHostObject,
-   isFunction, isNumber, isPrimitive, isRegExp, isSameOrigin, isString,
-   isUndefined, K, nil, prependList, returnOffset, slice, toInteger, toString,
-   undef, userAgent;
+   Data, Document, Element, Enumerable, Form, Func, Obj, Node, NodeList, $break,
+   _extend, fuse, addArrayMethods, bind, capitalize, clone,concatList, defer,
+   eachKey, emptyFunction, envAddTest, envTest, escapeRegExpChars, expando,
+   fromElement, getDocument, getNodeName, getWindow, hasKey, inspect, isArray,
+   isElement, isEmpty, isHash, isHostObject, isFunction, isNumber, isPrimitive,
+   isRegExp, isSameOrigin, isString, isUndefined, K, nil, prependList,
+   returnOffset, slice, toInteger, toString, undef, userAgent;
 
   fuse =
   global.fuse = function fuse() { };
@@ -216,7 +215,6 @@
    'dom/selector/selector.js',
    'dom/selector/nwmatcher.js',
    'dom/element/traversal.js',
-   'dom/raw-list.js',
    'dom/node-list.js',
 
    'ajax/ajax.js',

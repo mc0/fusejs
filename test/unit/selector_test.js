@@ -1,14 +1,14 @@
 new Test.Unit.Runner({
 
   'testSelectorWithTagName': function() {
-    this.assertEnumEqual($A(document.getElementsByTagName('li')), fuse.rawQuery('li'));
+    this.assertEnumEqual($A(document.getElementsByTagName('li')), fuse.query('li'));
     this.assertEnumEqual([$('strong')], $$('strong'));
     this.assertEnumEqual([], $$('nonexistent'));
 
     var allNodes = $A(document.getElementsByTagName('*'))
       .filter(function(node) { return node.nodeType === 1 });
 
-    this.assertEnumEqual(allNodes, fuse.rawQuery('*'));
+    this.assertEnumEqual(allNodes, fuse.query('*'));
   },
 
   'testSelectorWithId': function() {
@@ -258,6 +258,23 @@ new Test.Unit.Runner({
       'comma-joined selector with two complex selector');
   },
 
+  'testQueryGet': function() {
+    this.assertEqual($('list'), fuse.query('#list').get(0),
+      'Passing index should return the correct decorated element.');
+
+    this.assertEqual($('item_2'), fuse.query('#list li').get(-2),
+      'Negative index should return the correct decorated element.');
+
+    this.assertEqual($('item_1'), fuse.query('#list li').get(-99),
+      'Negative index larger than array length should be treated as index 0.');
+
+    this.assertEqual($('item_3'), fuse.query('#list li').get(99),
+      'Index larger than array length should be treated as index with value of length.');
+
+    this.assertEnumEqual($('item_1', 'item_2', 'item_3'), fuse.query('#list li').get(),
+      'Passing no arguments should return all results decorated');
+  },
+
   'testSelectorWithSpaceInAttributeValue': function() {
     this.assertEnumEqual([$('with_title')], $$('cite[title="hello world!"]'));
   },
@@ -297,12 +314,12 @@ new Test.Unit.Runner({
     this.assertEnumEqual([], $$('#level3_1 + em'));
     this.assertEnumEqual([], $$('#level2_2 + span'));
 
-    this.assertEqual($('level2_2'), $$('#level2_1+span').first());
-    this.assertEqual($('level2_2'), $$('#level2_1 + span').first());
-    this.assertEqual($('level2_2'), $$('#level2_1 + *').first());
+    this.assertEqual($('level2_2'), $$('#level2_1+span').get(0));
+    this.assertEqual($('level2_2'), $$('#level2_1 + span').get(0));
+    this.assertEqual($('level2_2'), $$('#level2_1 + *').get(0));
 
-    this.assertEqual($('level3_2'), $$('#level3_1 + span').first());
-    this.assertEqual($('level3_2'), $$('#level3_1 + *').first());
+    this.assertEqual($('level3_2'), $$('#level3_1 + span').get(0));
+    this.assertEqual($('level3_2'), $$('#level3_1 + *').get(0));
 
     $RunBenchmarks && this.wait(500, function() {
       this.benchmark(function() { $$('#level3_1 + span') }, 1000);
@@ -310,7 +327,7 @@ new Test.Unit.Runner({
   },
 
   'testSelectorWithLaterSibling': function() {
-    this.assertEqual($('level2_2'), $$('#level2_1 ~ span').first());
+    this.assertEqual($('level2_2'), $$('#level2_1 ~ span').get(0));
 
     this.assertEnumEqual([$('list')], $$('h1 ~ ul'));
     this.assertEnumEqual($('level2_2', 'level2_3'), $$('#level2_1 ~ *'));

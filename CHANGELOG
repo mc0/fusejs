@@ -1,3 +1,6 @@
+* Add get() method to fuse.dom.NodeList.plugin and remove fuse.dom.RawList and fuse.rawQuery(), making fuse.query() act like fuse.rawQuery(). [jddalton]
+  Note: Backwards compatibility warning.
+
 * Ensure native fuse.String#trim works properly and add fuse.env.test('STRING_TRIM_INCOMPLETE'). [FuseJS LH #55] [jddalton, kangax]
 
 * Micro-optimize fuse.Object.keys() and fuse.Object.values() by avoiding results.push(). [Garrett Smith]

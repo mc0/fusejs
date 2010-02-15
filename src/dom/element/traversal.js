@@ -43,10 +43,6 @@
       return fuse.dom.selector.select(selectors, this, callback);
     };
 
-    plugin.rawQuery = function rawQuery(selectors, callback) {
-      return fuse.dom.selector.rawSelect(selectors, this, callback);
-    };
-
     plugin.getSiblings = function getSiblings(selectors) {
       var match, element = this.raw || this, i = 0,
        original = element, results = NodeList();
@@ -81,9 +77,8 @@
       if (typeof selectors === 'function') {
         nodes = element.getElementsByTagName('*');
         while (node = nodes[i++]) {
-          if (node.nodeType === ELEMENT_NODE &&
-              selectors.call(count, node = fromElement(node)))
-            return node;
+          if (node.nodeType === ELEMENT_NODE && selectors.call(count, node))
+            return fromElement(node);
         }
       }
       else {
@@ -147,9 +142,8 @@
       // thisArg = count, callback = selectors;
       if (typeof selectors === 'function') {
         do {
-          if (element.nodeType === ELEMENT_NODE &&
-              selectors.call(count, element = fromElement(element)))
-            return element;
+          if (element.nodeType === ELEMENT_NODE && selectors.call(count, element))
+            return fromElement(element);
         } while (element = (element.raw || element)[property]);
       }
       else {
@@ -255,7 +249,6 @@
      next =                nil,
      previous =            nil,
      query =               nil,
-     rawQuery =            nil,
      up =                  nil;
   })(Element.plugin);
 
