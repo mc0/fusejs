@@ -2,22 +2,17 @@
 
   (function(plugin) {
 
-    var OFFSET_PARENT_EXIT_BEFORE_NODES = {
-      'BODY': 1,
-      'HTML': 1
-    },
+    var OFFSET_PARENT_EXIT_BEFORE_NODES = { 'BODY': 1, 'HTML': 1 },
 
-    OFFSET_PARENT_EXIT_ON_NODES = {
-      'TABLE': 1,
-      'TD':    1,
-      'TH':    1
-    },
+    OFFSET_PARENT_EXIT_ON_NODES = { 'TABLE': 1, 'TD': 1, 'TH': 1 },
 
     BODY_OFFSETS_INHERIT_ITS_MARGINS = nil,
 
     ELEMENT_COORD_OFFSETS_DONT_INHERIT_ANCESTOR_BORDER_WIDTH = nil,
 
     getDimensions = plugin.getDimensions,
+
+    getFuseId     = Node.getFuseId,
 
     getHeight     = plugin.getHeight,
 
@@ -27,21 +22,21 @@
 
     isDetached    = plugin.isDetached,
 
-    isVisible     = plugin.isVisible;
+    isVisible     = plugin.isVisible,
 
-    function ensureLayout(decorator) {
+    ensureLayout  = function(decorator) {
       var element = (decorator.raw || decorator),
        currStyle  = element.currentStyle,
        elemStyle  = element.style,
        zoom       = elemStyle.zoom;
 
       if (decorator.getStyle('position') == 'static' &&
-          !(zoom && zoom !== 'normal' || currStyle && currStyle.hasLayout))
+          !(zoom && zoom !== 'normal' || currStyle && currStyle.hasLayout)) {
         elemStyle.zoom = 1;
+      }
       return element;
-    }
+    };
 
-    /*------------------------------------------------------------------------*/
 
     plugin.makeAbsolute = function makeAbsolute() {
       if (getStyle.call(this, 'position') != 'absolute') {
@@ -52,7 +47,7 @@
          width     = getWidth.call(this,  'content'),
          height    = getHeight.call(this, 'content'),
          offsets   = plugin.getPositionedOffset.call(this),
-         backup    = Data[Node.getFuseId(this)].madeAbsolute = {
+         backup    = Data[getFuseId(element)].madeAbsolute = {
            'position':   elemStyle.position,
            'left':       elemStyle.left,
            'top':        elemStyle.top,
@@ -79,7 +74,7 @@
     plugin.undoAbsolute = function undoAbsolute() {
       if (getStyle.call(this, 'position') == 'absolute') {
         var element = this.raw || this,
-         data = Data[Node.getFuseId(this)],
+         data = Data[getFuseId(element)],
          backup = data.madeAbsolute,
          elemStyle = element.style;
 
@@ -102,7 +97,7 @@
     plugin.makeClipping = function makeClipping() {
       if (getStyle.call(this, 'overflow') != 'hidden') {
         var element = this.raw || this;
-        Data[Node.getFuseId(this)].madeClipped = getStyle.call(this, 'overflow') || 'auto';
+        Data[getFuseId(element)].madeClipped = getStyle.call(this, 'overflow') || 'auto';
         element.style.overflow = 'hidden';
       }
       return this;
@@ -111,7 +106,7 @@
     plugin.undoClipping = function undoClipping() {
       if (getStyle.call(this, 'overflow') == 'hidden') {
         var element = this.raw || this,
-         data = Data[Node.getFuseId(this)],
+         data = Data[getFuseId(element)],
          overflow = data.madeClipped;
 
         if (!overflow)
@@ -129,7 +124,7 @@
        pos = getStyle.call(this, 'position');
 
       if (!pos || pos == 'static') {
-        Data[Node.getFuseId(this)].madePositioned = {
+        Data[getFuseId(element)].madePositioned = {
           'position': elemStyle.position,
           'left':     elemStyle.left,
           'top':      elemStyle.top
@@ -146,7 +141,7 @@
     plugin.undoPositioned = function undoPositioned() {
       if (getStyle.call(this, 'position') == 'relative') {
         var element = this.raw || this,
-        data = Data[Node.getFuseId(this)],
+        data = Data[getFuseId(element)],
         backup = data.madePositioned,
         elemStyle = element.style;
 

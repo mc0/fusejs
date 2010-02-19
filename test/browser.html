@@ -155,7 +155,7 @@
       this.browser = browser;
       this.name    = fuse.String(name);
       this.value   = value;
-      this.id      = 'inspector_' + new Date();
+      this.id      = 'inspector_' + new Date;
       this.history = this.browser.history.toArray();
       this.history.push(this);
       this.createElement();
@@ -163,9 +163,13 @@
     },
 
     'properties': function() {
-      var properties = fuse.Array();
-      for (var property in this.value)
-        properties.push(property);
+      var property, properties = fuse.Array();
+      try {
+        for (property in this.value) {
+          properties.push(property);
+        }
+      } catch (e) { }
+
       properties.sort();
       return properties;
     },

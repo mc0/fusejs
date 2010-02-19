@@ -158,7 +158,7 @@ new Test.Unit.Runner({
     span.fire('test:somethingElseHappened');
     this.assertEqual(0, count);
 
-    this.assertEqual(window, Event.stopObserving(window));
+    this.assertEqual($(window), Event.stopObserving(window));
 
     // test element with no observers
     this.assertNothingRaised(function() { $(document.body).stopObserving() });
@@ -406,11 +406,10 @@ new Test.Unit.Runner({
 
   'testDocumentAndWindowFuseId': function() {
     fuse.Array(document, window).each(function(object) {
-      Event.observe(object, 'test:somethingHappened', fuse.emptyFunction);
-
+      $(object).observe('test:somethingHappened', fuse.emptyFunction);
       this.assertUndefined(object.getFuseId);
 
-      Event.stopObserving(object, 'test:somethingHappened');
+      $(object).stopObserving('test:somethingHappened');
     }, this);
   },
 

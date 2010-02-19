@@ -25,9 +25,11 @@
   });
 
   function log(obj) {
-    var line, all = [];
+    var line, prop, all = [];
     for (prop in obj) {
-      if (typeof obj[prop] == 'function' || /^[A-Z]|[XY]$/.test(prop)) continue;
+      if (typeof obj[prop] == 'function' || /^[A-Z]|[XY]$/.test(prop)) {
+        continue;
+      }
       line = fuse.String(prop + ': ' + fuse.Object.inspect(obj[prop]));
       all.push(line.escapeHTML());
     }
@@ -42,9 +44,9 @@
   <script type="text/javascript">
     (function() {
       var pointer = $('pointer');
-      //Event.observe(document.documentElement, 'mousemove', function(e) {
-      //  pointer.innerHTML = 'x:' +e.pageX +', y:'+ e.pointerY();
-      //});
+      $(document.documentElement).observe('mousemove', function(e) {
+        pointer.update('x:' + e.pageX + ', y:' + e.pointerY());
+      });
     })();
   </script>
 
@@ -56,18 +58,18 @@
   <p id="inline_test" onclick="Event.stop(event); $(this).passed();"><strong>click</strong> to ensure generic Event methods work on inline handlers</p>
 
   <script type="text/javascript">
-    var basic_callback = function(e){
+    var basic_callback = function(e) {
       $('basic').passed();
-      if ($('basic_remove')) $('basic_remove').show()
-      else $('basic').failed()
+      if ($('basic_remove')) $('basic_remove').show();
+      else $('basic').failed();
       log(e);
     }
     $('basic').observe('click', basic_callback)
-    $('basic_remove').observe('click', function(e){
-      var el = $('basic')
-      el.passed('This test should now be inactive (try clicking)')
-      el.stopObserving('click')
-      $('basic_remove').remove()
+    $('basic_remove').observe('click', function(e) {
+      var el = $('basic');
+      el.passed('This test should now be inactive (try clicking)');
+      el.stopObserving('click');
+      $('basic_remove').remove();
       log(e);
     }).hide()
   </script>
@@ -96,7 +98,7 @@
   <p><a href="#wrong" id="hijack">Hijack link test</a> (preventDefault)</p>
 
   <script type="text/javascript">
-    $('hijack').observe('click', function(e){
+    $('hijack').observe('click', function(e) {
       var el = this.up();
       log(e); // this makes it fail?!?
       e.preventDefault();
@@ -117,9 +119,9 @@
 
   <script type="text/javascript">
     fuse.util.$w('left middle right').each(function(button) {
-      Event.observe(button, 'mousedown', function(e) {
+      $(button).observe('mousedown', function(e) {
         if (Event['is' + fuse.String(this.raw.id).capitalize() + 'Click'](e))
-          this.passed('Squeak!')
+          this.passed('Squeak!');
         else this.failed('OH NO!');
         log(e);
       });
@@ -129,9 +131,9 @@
   <p id="context">Context menu event (tries to prevent default)</p>
 
   <script type="text/javascript">
-    $('context').observe('contextmenu', function(e){
+    $('context').observe('contextmenu', function(e) {
       this.passed();
-      Event.stop(e);
+      e.stop();
       log(e);
     })
   </script>
@@ -173,7 +175,7 @@
   <p id="currentTarget"><span>Event.currentTarget test</span></p>
 
   <script type="text/javascript">
-    $('currentTarget').observe('click', function(e){
+    $('currentTarget').observe('click', function(e) {
       if (e.currentTarget !== this.raw) this.failed();
       else this.passed();
       log(e);
@@ -183,7 +185,7 @@
   <p id="findElement"><span>Event.findElement() test</span></p>
 
   <script type="text/javascript">
-    $('findElement').observe('click', function(e){
+    $('findElement').observe('click', function(e) {
       if (e.findElement('p') == this && e.findElement('body').raw == document.body &&
          e.findElement('foo') == null) this.passed();
       else this.failed();
@@ -194,12 +196,12 @@
   <div id="container"><p id="stop"><strong>Stop propagation</strong> test (bubbling)</p></div>
 
   <script type="text/javascript">
-    $('stop').observe('click', function(e){
+    $('stop').observe('click', function(e) {
       e.stop();
       this.passed();
       log(e);
     })
-    $('container').observe('click', function(e){
+    $('container').observe('click', function(e) {
       $('stop').failed();
       log(e);
     })
@@ -211,9 +213,9 @@
   </div>
 
   <script type="text/javascript">
-    $('keyup').observe('keyup', function(e){
+    $('keyup').observe('keyup', function(e) {
       var el = $('keyup_log');
-      el.passed('Key captured: the length is ' + $('keyup').raw.value.length);
+      el.passed('Key captured: the length is ' + $('keyup').getValue().length);
       log(e);
     })
   </script>
@@ -222,8 +224,8 @@
 
   <script type="text/javascript">
     $('bind').observe('click', fuse.Function.bindAsEventListener(
-      function(e, str, arr){
-        var el = $('bind')
+      function(e, str, arr) {
+        var el = $('bind');
         try {
           if (arguments.length != 3) throw arguments.length + ' arguments: ' + $A(arguments).inspect();
           if (str != 'foo') throw 'wrong string: ' + str;
@@ -238,7 +240,7 @@
   <p id="obj_inspect"><code>fuse.Object.inspect(event)</code> test</p>
 
   <script type="text/javascript">
-    $('obj_inspect').observe('click', function(e){
+    $('obj_inspect').observe('click', function(e) {
       var el = $('obj_inspect')
       try { el.passed(fuse.Object.inspect(e)) }
       catch (err) { el.failed('Failed! Error thrown') }
@@ -249,11 +251,11 @@
   <p id="addunload">Add unload events</p>
 
   <script type="text/javascript">
-    $('addunload').observe('click', function(e){
+    $('addunload').observe('click', function(e) {
       if (this._done) return;
 
-      window.onunload = function(){ alert('inline unload fired!') }
-      Event.observe(window, 'unload', function(){ alert('observed unload fired!') })
+      window.onunload = function() { alert('inline unload fired!') }
+      $(window).observe('unload', function() { alert('observed unload fired!') })
 
       this.update('Registered two unload events, one inline ("onunload") and one regular - try to refresh, both should fire')
       this._done = true;
@@ -269,6 +271,7 @@
       fuse.Number(2).times(function(n) {
         el.observe('click', function(evt) { count = n; log(evt); })
       });
+
       el.observe('click', function() {
         fuse.Function.defer(function() { (count == 1) ? el.passed() : el.failed() });
       });
@@ -288,7 +291,7 @@
        el = $('field_event_observer_single'),
        input = el.down('input');
 
-      new fuse.dom.InputElement.EventObserver(input, function(){ count++ });
+      new fuse.dom.InputElement.EventObserver(input, function() { count++ });
       input.observe('change', function() {
         this.stopObserving('change', arguments.callee);
         fuse.Function.defer(function() { el[count ? 'passed' : 'failed']() });
@@ -310,11 +313,10 @@
       var count = 0,
        el = $('field_event_observer_group'),
        radios = el.query('input[type="radio"]');
-
-      new fuse.dom.InputElement.EventObserver(radios[1], function(){ count++ });
+      new fuse.dom.InputElement.EventObserver(radios[1], function() { count++ });
       radios.observe('click', function() {
-        radios.invoke('stopObserving', 'click', arguments.callee);
-        fuse.Function.defer(function() { el[count ? 'passed' : 'failed']() });
+        radios.stopObserving('click', arguments.callee);
+        el[count ? 'passed' : 'failed']();
       });
     })();
   </script>
@@ -328,7 +330,7 @@
        elFire  = $(frame.document.getElementById('element-fire'));
 
       // test pointer methods
-      Event.observe(frame.document.documentElement, 'mousemove', function(e) {
+      $(frame.document.documentElement).observe('mousemove', function(e) {
         pointer.innerHTML = 'x:' +e.pageX +', y:'+ e.pointerY();
       });
 

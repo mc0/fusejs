@@ -136,6 +136,13 @@
     'ELEMENT_TEXT_CONTENT': function() {
       // true for all but IE and Safari 2
       return typeof fuse._div.textContent === 'string';
+    },
+
+    'ELEMENT_UNIQUE_NUMBER': function() {
+      // true for IE
+      return typeof fuse._div.uniqueNumber === 'number' &&
+        typeof fuse._docEl.uniqueNumber === 'number' &&
+        fuse._div.uniqueNumber != fuse._docEl.uniqueNumber;
     }
   });
 

@@ -180,7 +180,7 @@
           match = fuse.dom.selector.match;
 
           // handle returning first match
-          if (count === 1) {
+          if (count == 1) {
             do {
               if (element.nodeType === ELEMENT_NODE && match(element, selectors))
                 return fromElement(element);
@@ -212,15 +212,15 @@
     };
 
     plugin.first = function first(selectors, count) {
-      return getSome((this.raw || this)[firstNode], nextNode, selectors, count)
+      return getSome((this.raw || this)[firstNode], nextNode, selectors, count);
     };
 
     plugin.last = function last(selectors, count) {
-      return getSome((this.raw || this)[lastNode], prevNode, selectors, count)
+      return getSome((this.raw || this)[lastNode], prevNode, selectors, count);
     };
 
     plugin.getAncestors = function getAncestors(selectors) {
-      return getSome((this.raw || this).parentNode, 'parentNode', selectors, Infinity);
+      return getSome((this.raw || this).parentNode, 'parentNode', selectors, Infinity) || NodeList();
     };
 
     plugin.getDescendants = function getDescendants(selectors) {
@@ -228,11 +228,11 @@
     };
 
     plugin.getNextSiblings = function getNextSiblings(selectors) {
-      return getSome((this.raw || this)[nextNode], nextNode, selectors, Infinity);
+      return getSome((this.raw || this)[nextNode], nextNode, selectors, Infinity) || NodeList();
     };
 
     plugin.getPreviousSiblings = function getPreviousSiblings(selectors) {
-      return getSome((this.raw || this)[prevNode], prevNode, selectors, Infinity);
+      return getSome((this.raw || this)[prevNode], prevNode, selectors, Infinity) || NodeList();
     };
 
     // prevent JScript bug with named function expressions

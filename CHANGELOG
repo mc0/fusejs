@@ -1,3 +1,13 @@
+* Add a cache flag argument to fuse.dom.Element.create() to allow devs to specify that the dom decorator is not cached. [jddalton]
+
+* Add fuse.dom.Window decorator. [jddalton]
+
+* Stop extending elements with the getFuseId() method and use `uniqueNumber` if available. [jddalton]
+
+* Move fuse.dom.extendByTag() to fuse.dom.Element.extendByTag(). [jddalton]
+
+* Split element.js into modification.js and create.js. [jddalton]
+
 * Remove one closure around fuse.Array extensions. [jddalton]
 
 * Add get() method to fuse.dom.NodeList.plugin and remove fuse.dom.RawList and fuse.rawQuery(), making fuse.query() act like fuse.rawQuery(). [jddalton]

@@ -129,15 +129,15 @@ fuse.dom.Element.extend({
   'hashBrowns': function(element) { return 'hash browns' }
 });
 
-fuse.dom.extendByTag('LI', {
+fuse.dom.Element.extendByTag('LI', {
   'pancakes': function(element) { return 'pancakes' }
 });
 
-fuse.dom.extendByTag('DIV', {
+fuse.dom.Element.extendByTag('DIV', {
   'waffles': function(element) { return 'waffles' }
 });
 
-fuse.dom.extendByTag($w('li div'), {
+fuse.dom.Element.extendByTag($w('li div'), {
   'orangeJuice': function(element) { return 'orange juice' }
 });
 

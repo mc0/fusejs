@@ -2,7 +2,8 @@
 
   addArrayMethods = function(List) {
 
-    var plugin = List.plugin;
+    var plugin = List.plugin,
+     funcProto = Function.prototype;
 
     List.from = function from(iterable) {
       if (!iterable || iterable == '') return List();
@@ -237,7 +238,7 @@
     plugin.invoke = function invoke(method) {
       if (this == null) throw new TypeError;
       var args, i = 0, results = fuse.Array(), object = Object(this),
-       length = object.length >>> 0, funcProto = Function.prototype;
+       length = object.length >>> 0;
 
       if (arguments.length < 2) {
         while (length--) if (length in object)

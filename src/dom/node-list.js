@@ -81,7 +81,7 @@
 
   /*--------------------------------------------------------------------------*/
 
-  (function(plugin) {
+  (function(plugin, elemProto, funcProto) {
     plugin.get = function get(index) {
       var results, object = Object(this), length = object.length >>> 0;
       if (index == null) {
@@ -103,8 +103,7 @@
     plugin.invoke = function invoke(method) {
       if (this == null) throw new TypeError;
       var args, item, i = 0, results = fuse.Array(), object = Object(this),
-       length = object.length >>> 0, elemProto = Element.prototype,
-       funcProto = Function.prototype;
+       length = object.length >>> 0;
 
       if (arguments.length < 2) {
         while (length--) {
@@ -127,4 +126,4 @@
 
     // prevent JScript bug with named function expressions
     var get = nil, invoke = nil;
-  })(NodeList.plugin);
+  })(NodeList.plugin, Element.prototype, Function.prototype);

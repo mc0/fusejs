@@ -23,9 +23,12 @@
           return new ActiveXObject('MSXML2.XMLHTTP');
         };
       } catch (e) {
-        create = function create() {
-          return new ActiveXObject('Microsoft.XMLHTTP');
-        };
+        try {
+          new ActiveXObject('Microsoft.XMLHTTP');
+          create = function create() {
+            return new ActiveXObject('Microsoft.XMLHTTP');
+          };
+        } catch (e) { }
       }
     } else if (isHostObject(global, 'XMLHttpRequest')) {
       create = function create() {

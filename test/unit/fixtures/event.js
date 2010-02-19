@@ -43,7 +43,7 @@ $(document).observe('dom:loaded', function(event) {
 
 /*--------------------------------------------------------------------------*/
 
-Event.observe(window, 'load', function(event) {
+$(window).observe('load', function(event) {
   eventResults.windowLoad = {
     'endOfDocument':      eventResults.endOfDocument,
     'contentLoaded':      eventResults.contentLoaded,

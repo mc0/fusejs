@@ -5,7 +5,7 @@
     function Decorator() { }
 
     function Document(node) {
-      // bail if empty, already decorated, or not a document node
+      // quick return if empty, decorated, or not a document node
       if (!node || node.raw || node.nodeType !== DOCUMENT_NODE)
         return node;
 
@@ -22,7 +22,6 @@
       pluginViewport = Document.plugin.viewport;
       viewport = decorated.viewport = { };
 
-      data.node =
       viewport.ownerDocument =
       decorated.raw = node;
       decorated.nodeName = node.nodeName;

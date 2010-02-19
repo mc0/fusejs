@@ -9,56 +9,62 @@
 
   (function(plugin) {
     var ATTRIBUTE_NODES_PERSIST_ON_CLONED_ELEMENTS =
-      envTest('ATTRIBUTE_NODES_PERSIST_ON_CLONED_ELEMENTS');
+      envTest('ATTRIBUTE_NODES_PERSIST_ON_CLONED_ELEMENTS'),
 
-    plugin.hasAttribute = (function() {
-      var hasAttribute = function hasAttribute(attribute) {
-        return (this.raw || this).hasAttribute(attribute);
+    hasAttribute = function hasAttribute(attribute) {
+      return (this.raw || this).hasAttribute(attribute);
+    };
+
+    if (!isHostObject(fuse._docEl, 'hasAttribute')) {
+      hasAttribute = function hasAttribute(attribute) {
+        var node =(this.raw || this)
+          .getAttributeNode(Element.Attribute.names[attribute] || attribute);
+        return !!node && node.specified;
       };
+    }
 
-      if (!isHostObject(fuse._docEl, 'hasAttribute'))
-        hasAttribute = function hasAttribute(attribute) {
-          var node =(this.raw || this)
-            .getAttributeNode(Element.Attribute.names[attribute] || attribute);
-          return !!node && node.specified;
-        };
+    plugin.hasAttribute = hasAttribute;
 
-      return hasAttribute;
-    })();
-
-    plugin.getAttribute= function getAttribute(name) {
+    plugin.getAttribute = function getAttribute(name) {
       var result, element = this.raw || this, T = Element.Attribute;
       name = T.names[name] || name;
 
-      if (T.read[name])
+      if (T.read[name]) {
         result = T.read[name](element, name);
-      else result = (result = element.getAttributeNode(name)) && result.value;
+      } else {
+        result = (result = element.getAttributeNode(name)) && result.value;
+      }
       return fuse.String(result || '');
     };
 
     plugin.setAttribute = function setAttribute(name, value) {
-      var node, contentName, attr,
+      var attr, contentName, node,
        element = this.raw || this, attributes = { }, T = Element.Attribute;
 
-      if (isHash(name)) attributes = name._object;
-      else if (!isString(name)) attributes = name;
-      else attributes[name] = (typeof value === 'undefined') ? true : value;
+      if (isHash(name)) {
+        attributes = name._object;
+      } else if (!isString(name)) {
+        attributes = name;
+      } else {
+        attributes[name] = (typeof value === 'undefined') ? true : value;
+      }
 
       for (attr in attributes) {
         name = T.names[attr] || attr;
         contentName = T.contentNames[attr] || attr;
         value = attributes[attr];
 
-        if (T.write[name])
+        if (T.write[name]) {
           T.write[name](element, value);
-        else if (value === false || value == null)
+        } else if (value === false || value == null) {
           element.removeAttribute(contentName);
-        else if (value === true)
+        } else if (value === true) {
           element.setAttribute(contentName, contentName);
-        else {
+        } else {
           if (ATTRIBUTE_NODES_PERSIST_ON_CLONED_ELEMENTS &&
-              plugin.hasAttribute.call(name))
+              plugin.hasAttribute.call(name)) {
             element.removeAttribute(contentName);
+          }
           element.setAttribute(contentName, String(value));
         }
       }
@@ -66,10 +72,8 @@
     };
 
     // prevent JScript bug with named function expressions
-    var getAttribute = nil, setAttribute= nil;
+    var getAttribute = nil, setAttribute = nil;
   })(Element.plugin);
-
-
 
   /*--------------------------------------------------------------------------*/
 

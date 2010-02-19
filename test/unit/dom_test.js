@@ -63,7 +63,7 @@ new Test.Unit.Runner({
     fuse.dom.Element.extend({ 'cheeseCake': function() { return 'Cheese cake' } });
     this.assertRespondsTo('cheeseCake', fuse('<div>'));
 
-    fuse.dom.extendByTag('DIV', { 'toOutput': fuse.dom.Element.plugin.inspect });
+    fuse.dom.Element.extendByTag('DIV', { 'toOutput': fuse.dom.Element.plugin.inspect });
     this.assertEqual('<div id="testdiv">', $('testdiv').toOutput(),
       'Should extend element with a `toOutput` method.');
 
@@ -719,7 +719,7 @@ new Test.Unit.Runner({
 
   'testElementUpdateInTableColGroup': function() {
     var colgroup = $('table').down('colgroup');
-    colgroup.update('<col class="foo" /><col class="bar" />');
+    colgroup.update('<col class="foo"><col class="bar">');
 
     var children = colgroup.getChildren();
     this.assertEnumEqual(['foo', 'bar'],
@@ -743,7 +743,7 @@ new Test.Unit.Runner({
 
     // test passing object with "toElement" method
     var newTR = fuse('<tr>'), newTD = fuse('<td>');
-    newTR.insert(newTD).insert(document.createTextNode('something else'));
+    newTR.insert(newTD.insert(document.createTextNode('something else')));
 
     $('table').update({ 'toElement': function() { return newTR.raw; } });
 

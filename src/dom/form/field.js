@@ -2,9 +2,11 @@
 
   (function(dom) {
     (function() {
-      var tagName, i = 0,
+      var tagName, i = -1,
        tagNames = ['button', 'input', 'option', 'select', 'textarea'];
-      while (tagName = tagNames[i++]) dom.extendByTag(tagName);
+      while (tagName = tagNames[++i]) {
+        Element.extendByTag(tagName);
+      }
     })();
 
     var CHECKED_INPUT_TYPES = {
@@ -19,6 +21,14 @@
       'submit': 1
     },
 
+    PLUGINS = {
+      'BUTTON':   buttonPlugin,
+      'INPUT':    inputPlugin,
+      'OPTION':   optionPlugin,
+      'SELECT':   selectPlugin,
+      'TEXTAREA': textAreaPlugin
+    },
+
     buttonPlugin   = dom.ButtonElement.plugin,
 
     inputPlugin    = dom.InputElement.plugin,
@@ -28,14 +38,6 @@
     selectPlugin   = dom.SelectElement.plugin,
 
     textAreaPlugin = dom.TextAreaElement.plugin,
-
-    PLUGINS = {
-      'BUTTON':   buttonPlugin,
-      'INPUT':    inputPlugin,
-      'OPTION':   optionPlugin,
-      'SELECT':   selectPlugin,
-      'TEXTAREA': textAreaPlugin
-    },
 
     getOptionValue = function getValue() {
       var element = this.raw || this;

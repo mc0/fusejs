@@ -3,9 +3,9 @@
 
   // private vars
   var DOCUMENT_FRAGMENT_NODE, DOCUMENT_NODE, ELEMENT_NODE, TEXT_NODE, Class,
-   Data, Document, Element, Enumerable, Form, Func, Obj, Node, NodeList, $break,
-   _extend, fuse, addArrayMethods, bind, capitalize, clone,concatList, defer,
-   eachKey, emptyFunction, envAddTest, envTest, escapeRegExpChars, expando,
+   Data, Document, Element, Enumerable, Form, Func, Obj, Node, NodeList, Window,
+   $break, _extend, fuse, addArrayMethods, bind, capitalize, clone,concatList,
+   defer, eachKey, emptyFunction, envAddTest, envTest, escapeRegExpChars, expando,
    fromElement, getDocument, getNodeName, getWindow, hasKey, inspect, isArray,
    isElement, isEmpty, isHash, isHostObject, isFunction, isNumber, isPrimitive,
    isRegExp, isSameOrigin, isString, isUndefined, K, nil, prependList,
@@ -194,8 +194,11 @@
    'dom/features.js',
    'dom/node.js',
    'dom/document.js',
+   'dom/window.js',
 
    'dom/element/element.js',
+   'dom/element/create.js',
+   'dom/element/modification.js',
    'dom/element/attribute.js',
    'dom/element/style.js',
    'dom/element/position.js',
@@ -212,10 +215,10 @@
    'dom/event/event.js',
    'dom/event/dom-loaded.js',
 
-   'dom/selector/selector.js',
-   'dom/selector/nwmatcher.js',
    'dom/element/traversal.js',
    'dom/node-list.js',
+   'dom/selector/selector.js',
+   'dom/selector/nwmatcher.js',
 
    'ajax/ajax.js',
    'ajax/responders.js',

@@ -319,7 +319,7 @@
 
         var handlers, length,
          data = Data[id],
-         context = data.decorator || data.node,
+         context = data.decorator.raw,
          events = data.events,
          ec = events && events[event.eventName || eventName];
 
@@ -363,8 +363,8 @@
           // observe/stopObserving
           var data  = Data[id],
            ec       = data.events[eventName],
-           node     = data.node,
-           context  = data.decorator || node,
+           node     = data.decorator.raw,
+           context  = data.decorator,
            handlers = slice.call(ec.handlers, 0),
            length   = handlers.length;
 
@@ -453,7 +453,7 @@
 
         extend = (function(__extend) {
           function extend(event, element) {
-            if (event.constructor !== Event) {
+            if (!event.findElement) {
               return __extend(event, element);
             }
             return event && !event._extendedByFuse
@@ -467,25 +467,23 @@
         addMethods();
         addLevel2Methods(proto);
       }
-      else extend = (function(__extend) {
-        function extend(event, element) {
-          if (event.constructor !== Event) {
-            return __extend(event, element);
-          }
-          return event;
-        }
-        return extend;
-      })(extend);
+      else {
+        extend = function extend(event, element) {
+          return !event.findElement
+            ? addLevel2Methods(event)
+            : event;
+        };
+      }
     }
 
     // avoid Function#wrap for better performance esp.
     // in winLoadWrapper which could be called every 10ms
     domLoadDispatcher = createDispatcher(2, 'dom:loaded');
-    addObserver(fuse._doc, 'dom:loaded',
+    addObserver(fuse.get(fuse._doc).raw, 'dom:loaded',
       (getOrCreateCache(2, 'dom:loaded').dispatcher = domLoadWrapper));
 
     winLoadDispatcher = createDispatcher(1, 'load');
-    addObserver(global, 'load',
+    addObserver(fuse.get(global).raw, 'load',
       (getOrCreateCache(1, 'load').dispatcher = winLoadWrapper));
 
     /*------------------------------------------------------------------------*/
@@ -511,7 +509,7 @@
       var dispatcher, decorator = fuse.get(element);
       element = decorator.raw || decorator;
 
-      dispatcher = addCache(Node.getFuseId(decorator), eventName, handler);
+      dispatcher = addCache(Node.getFuseId(element), eventName, handler);
       if (!dispatcher) return decorator;
 
       addObserver(element, eventName, dispatcher);
@@ -525,7 +523,7 @@
       element = decorator.raw || decorator;
       eventName = isString(eventName) ? eventName : null;
 
-      id = Node.getFuseId(decorator);
+      id = Node.getFuseId(element);
       events = Data[id].events;
 
       if (!events) return decorator;
@@ -593,6 +591,12 @@
 
   _extend(Document.plugin, {
     'loaded':        false,
+    'fire':          Func.methodize(['fire', Event]),
+    'observe':       Func.methodize(['observe', Event]),
+    'stopObserving': Func.methodize(['stopObserving', Event])
+  });
+
+  _extend(Window.plugin, {
     'fire':          Func.methodize(['fire', Event]),
     'observe':       Func.methodize(['observe', Event]),
     'stopObserving': Func.methodize(['stopObserving', Event])

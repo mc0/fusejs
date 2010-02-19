@@ -26,63 +26,73 @@
   // make fuse() pass to fuse.get()
   fuse =
   global.fuse = (function(__fuse) {
-    function fuse(object, context) {
+    var fuse = function fuse(object, context) {
       return fuse.get(object, context);
-    }
-    return Obj.extend(Class({ 'constructor': fuse }), __fuse,
-      function(value, key, object) { if (hasKey(object, key)) object[key] = value; });
+    };
+
+    return Obj.extend(
+      Class({ 'constructor': fuse }), __fuse,
+      function(value, key, object) {
+        if (hasKey(object, key)) {
+          object[key] = value;
+        }
+      });
   })(fuse);
 
   // set the debug flag based on the fuse.js debug query parameter
   fuse.debug = (function() {
-    var script, i = 0,
+    var script, i = -1,
      reDebug = /(^|&)debug=(1|true)(&|$)/,
      reFilename = /(^|\/)fuse\.js\?/,
      scripts = fuse._doc.getElementsByTagName('script');
 
-    while (script = scripts[i++])
+    while (script = scripts[++i]) {
       if (reFilename.test(script.src) &&
-          reDebug.test(script.src.split('?')[1])) return true;
+          reDebug.test(script.src.split('?')[1])) {
+        return true;
+      }
+    }
     return false;
   })();
 
   (function() {
-    function $(element) {
-      var elements, args = arguments, length = args.length;
+    var doc = fuse._doc,
+
+    $ = function $(object) {
+      var objects, args = arguments, length = args.length;
       if (length > 1) {
-        elements = NodeList();
-        while (length--) elements[length] = $(args[length]);
-        return elements;
+        objects = NodeList();
+        while (length--) objects[length] = $(args[length]);
+        return objects;
       }
-      if (isString(element)) {
-        element = doc.getElementById(element || expando);
-        return element && fromElement(element);
-      }
-
-      return Node(element);
-    }
-
-    function get(object, attributes, context) {
       if (isString(object)) {
-        if (attributes && typeof attributes.nodeType !== 'string')
-          return Element.create(object, attributes, context);
+        object = doc.getElementById(object || expando);
+        return object && fromElement(object);
+      }
+      // attempt window decorator first, and then node decorator
+      return Node(Window(object));
+    },
 
+    get = function get(object, attributes, context) {
+      if (isString(object)) {
+        if (attributes && typeof attributes.nodeType !== 'string') {
+          return Element.create(object, attributes, context);
+        }
         context = attributes;
-        if (object.charAt(0) == '<')
+        if (object.charAt(0) == '<') {
           return Element.create(object, context);
+        }
         object = (context || doc).getElementById(object || expando);
         return object && fromElement(object);
       }
+      // attempt window decorator first, and then node decorator
+      return Node(Window(object));
+    },
 
-      return Node(object);
-    }
-
-    function getById(id, context) {
+    getById = function getById(id, context) {
       var element = (context || doc).getElementById(id || expando);
       return element && fromElement(element);
-    }
-
-    var doc = fuse._doc;
+    };
 
     fuse.get = get;
     fuse.getById = getById;
@@ -102,10 +112,13 @@
   // Based on work by Diego Perini
   getWindow =
   fuse.getWindow = function getWindow(element) {
-    var frame, i = 0, doc = getDocument(element), frames = global.frames;
-    if (fuse._doc !== doc)
-      while (frame = frames[i++])
-        if (frame.document === doc) return frame;
+    var frame, i = -1, doc = getDocument(element), frames = global.frames;
+    if (fuse._doc !== doc) {
+      while (frame = frames[++i]) {
+        if (frame.document === doc)
+          return frame;
+      }
+    }
     return global;
   };
 

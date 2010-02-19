@@ -2,26 +2,35 @@
 
   Node =
   fuse.dom.Node = (function() {
-    function Decorator() { }
 
-    function Node(node) {
-      // return if falsy or already decoratored
-      if (!node || node.raw) return node;
+    var fuseId = 3,
 
+    retWinId = true,
+
+    uid = envTest('ELEMENT_UNIQUE_NUMBER') ? 'uniqueNumber' : '_fuseId',
+
+    Decorator = function() { },
+
+    Node = function Node(node) {
+      // quick return if falsy or decorated
       var data, decorated, id, ownerDoc;
+      if (!node || node.raw) {
+        return node;
+      }
       if (node.nodeType !== TEXT_NODE) {
-
         // switch flag to bail early for window objects
-        retWindowId = false;
+        retWinId = false;
         id = getFuseId.call(node);
-        retWindowId = true;
+        retWinId = true;
 
         // return if window
-        if (!id) return node;
-
+        if (!id) {
+          return node;
+        }
         // return cached if available
-        if ((data = Data[id]).decorator) return data.decorator;
-
+        if ((data = Data[id]).decorator) {
+          return data.decorator;
+        }
         // pass to element decorator
         switch (node.nodeType) {
           case ELEMENT_NODE:  return fromElement(node);
@@ -29,63 +38,61 @@
         }
       }
 
+      // use new Decorator, which has Node.plugin mapped to Decorator.prototype,
+      // to avoid `new` operator with fuse.dom.Node
       decorated = new Decorator;
       decorated.raw = node;
       decorated.nodeName = node.nodeName;
 
-      if (data) {
-        data.node = node;
-        data.decorator = decorated;
-      }
+      // text node decorators are not cached
+      return data
+        ? (data.decorator = decorated)
+        : decorated;
+    },
 
-      return decorated;
-    }
+    getFuseId = function getFuseId() {
+      var win, node = this.raw || this, id = node[uid];
 
-    function createIdGetter() {
-      function getFuseId() {
-        // if cache doesn't match, request a new id
-        var c = Data[id];
-        if (c.node && c.node !== this)
-          return (this.getFuseId = createIdGetter())();
+      // quick return for nodes with ids
+      // IE can avoid adding an expando on each node and use the `uniqueNumber` property instead.
+      if (id) {
+        Data[id] || (Data[id] = { });
         return id;
       }
-      // private id variable
-      var id = String(fuseId);
-      Data[fuseId++] = { };
-      return getFuseId;
-    }
 
-    function getFuseId() {
-      // keep a loose match because frame object !== document.parentWindow
-      var id = false,
-       node  = this.raw || this,
-       win   = getWindow(node);
-
-      if (node.getFuseId) {
-        return node.getFuseId();
-      }
-      else if (node == win) {
-        if (retWindowId) {
+      // In IE window == document is true but not document == window.
+      // Use loose comparison because different `window` references for
+      // the same window may not strict equal each other.
+      win = getWindow(node);
+      if (node == win) {
+        // optimization flag is set in the Node factory to avoid
+        // resolving ids for windows when not needed
+        if (retWinId) {
           id = '1';
           if (node != global) {
             id = getFuseId(win.frameElement) + '-1';
             Data[id] || (Data[id] = { });
           }
+        } else {
+          id = false;
         }
         return id;
       }
       else if (node.nodeType === DOCUMENT_NODE) {
+        // quick return for common case
         if (node === fuse._doc) return '2';
+        // calculate id for foreign document objects
         id = getFuseId(win.frameElement) + '-2';
         Data[id] || (Data[id] = { 'nodes': { } });
         return id;
       }
-      return (node.getFuseId = createIdGetter())();
-    }
 
-    var fuseId = 3, retWindowId = true,
-     Node = Class({ 'constructor': Node });
+      id = node._fuseId = fuseId++;
+      Data[id] = { };
+      return id;
+    };
 
+    Node = Class({ 'constructor': Node });
     Decorator.prototype = Node.plugin;
     Node.plugin.getFuseId = getFuseId;
     return Node;
@@ -101,7 +108,7 @@
   })(Node.plugin.getFuseId);
 
   Node.updateGenerics = (function() {
-    var SKIPPED_KEYS = { 'constructor': 1, 'getFuseId': 1 };
+    var SKIPPED_KEYS = { 'constructor': 1, 'callSuper': 1, 'getFuseId': 1 };
 
     function createGeneric(proto, methodName) {
       return Function('o,s',

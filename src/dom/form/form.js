@@ -1,6 +1,6 @@
   /*---------------------------------- FORM ----------------------------------*/
 
-  fuse.dom.extendByTag('form');
+  Element.extendByTag('form');
 
   Form = fuse.dom.FormElement;
 
@@ -25,9 +25,9 @@
       'INPUT':    1,
       'SELECT':   1,
       'TEXTAREA': 1
-    };
+    },
 
-    function eachElement(decorator, callback) {
+    eachElement = function(decorator, callback) {
       var node, i = 0,
        nodes = (decorator.raw || decorator).getElementsByTagName('*');
 
@@ -36,7 +36,7 @@
           FIELD_NODE_NAMES[node.nodeName.toUpperCase()] && callback(node);
         } while (node = nodes[++i]);
       }
-    }
+    };
 
     plugin.initialize = function initialize() {
       this.options = this.raw.options;

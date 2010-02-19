@@ -65,11 +65,11 @@
     },
 
     'registerCallbacks': function() {
-      Event.observe(this.form, 'submit', fuse.Function.bind(
+      this.form.observe('submit', fuse.Function.bind(
         function(event) {
           this.eval(this.input.getValue());
           this.input.setValue('').activate();
-          Event.stop(event);
+          event.stop();
         }, this));
     },
 

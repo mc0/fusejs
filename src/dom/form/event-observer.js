@@ -34,7 +34,7 @@
     (function(plugin) {
       var INPUT_TYPES_FOR_CLICK = { 'checkbox': 1, 'radio': 1 };
 
-      plugin.onElementEvent = function onElementEvent() {
+      plugin.onElementEvent = function onElementEvent() {alert('hi');
         var value = this.getValue();
         if (this.lastValue === value) return;
         this.callback(this.element, value);

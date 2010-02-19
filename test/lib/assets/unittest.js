@@ -102,12 +102,13 @@
       '<thead><tr><th>Status</th><th>Test</th><th>Message</th></tr></thead>' +
       '<tbody class="loglines"></tbody>' +
       '</table>';
+
       this.element.innerHTML = html;
 
     },
 
     '_toHTML': function(txt) {
-      return fuse.String(txt).escapeHTML().replace(/\n/g,'<br />');
+      return fuse.String(txt).escapeHTML().replace(/\n/g,'<br>');
     }
   });
 
@@ -122,7 +123,8 @@
       }
     }
   };
-  Event.observe(window, 'load', Test.Unit.AutoRunner.run);
+
+  fuse(window).observe('load', Test.Unit.AutoRunner.run);
 
   Test.Unit.Runner = fuse.Class({
     'initialize': function(testcases) {

@@ -1,26 +1,16 @@
   /*----------------------------- ELEMENT: STYLE -----------------------------*/
 
   (function(plugin) {
-    var DIMENSION_NAMES = {
-      'height': 1,
-      'width':  1
-    },
+
+    var DIMENSION_NAMES = { 'height': 1, 'width': 1 },
 
     FLOAT_TRANSLATIONS = typeof fuse._docEl.style.styleFloat !== 'undefined'
       ? { 'float': 'styleFloat', 'cssFloat': 'styleFloat' }
       : { 'float': 'cssFloat' },
 
-    POSITION_NAMES = {
-      'bottom': 1,
-      'left':   1,
-      'right':  1,
-      'top':    1
-    },
+    POSITION_NAMES = { 'bottom': 1, 'left': 1, 'right': 1, 'top': 1 },
 
-    RELATIVE_CSS_UNITS = {
-      'em': 1,
-      'ex': 1
-    },
+    RELATIVE_CSS_UNITS = { 'em': 1, 'ex': 1 },
 
     camelize = fuse.String.plugin.camelize,
 
@@ -51,16 +41,18 @@
       return false;
     }
 
-    if (envTest('ELEMENT_COMPUTED_STYLE_DEFAULTS_TO_ZERO'))
+    if (envTest('ELEMENT_COMPUTED_STYLE_DEFAULTS_TO_ZERO')) {
       nullHandlers.push(function(element, name) {
         return POSITION_NAMES[name] &&
           getComputedStyle(element, 'position') === 'static';
       });
+    }
 
-    if (envTest('ELEMENT_COMPUTED_STYLE_HEIGHT_IS_ZERO_WHEN_HIDDEN'))
+    if (envTest('ELEMENT_COMPUTED_STYLE_HEIGHT_IS_ZERO_WHEN_HIDDEN')) {
       nullHandlers.push(function(element, name) {
         return DIMENSION_NAMES[name] && getComputedStyle(element, 'display') === 'none';
       });
+    }
 
 
     plugin.setStyle = function setStyle(styles) {
@@ -82,8 +74,9 @@
         delete styles.opacity;
       }
 
-      for (key in styles)
+      for (key in styles) {
         elemStyle[FLOAT_TRANSLATIONS[key] || key] = styles[key];
+      }
 
       if (hasOpacity) styles.opacity = opacity;
       return this;
@@ -91,14 +84,14 @@
 
 
     // fallback for browsers without computedStyle or currentStyle
-    if (!envTest('ELEMENT_COMPUTED_STYLE') && !envTest('ELEMENT_CURRENT_STYLE'))
+    if (!envTest('ELEMENT_COMPUTED_STYLE') && !envTest('ELEMENT_CURRENT_STYLE')) {
       plugin.getStyle = function getStyle(name) {
         var result = getValue(this, camelize.call(name));
         return result === null ? result : fuse.String(result);
       };
-
+    }
     // Opera 9.2x
-    else if (envTest('ELEMENT_COMPUTED_STYLE_DIMENSIONS_EQUAL_BORDER_BOX'))
+    else if (envTest('ELEMENT_COMPUTED_STYLE_DIMENSIONS_EQUAL_BORDER_BOX')) {
       plugin.getStyle = function getStyle(name) {
         name = camelize.call(name);
         var dim, result, element = this.raw || this;
@@ -116,9 +109,9 @@
         result = getComputedStyle(element, name);
         return result === null ? result : fuse.String(result);
       };
-
+    }
     // Firefox, Safari, Opera 9.5+
-    else if (envTest('ELEMENT_COMPUTED_STYLE'))
+    else if (envTest('ELEMENT_COMPUTED_STYLE')) {
       plugin.getStyle = function getStyle(name) {
         name = camelize.call(name);
         var result, element = this.raw || this;
@@ -128,9 +121,9 @@
         result = getComputedStyle(element, name);
         return result === null ? result : fuse.String(result);
       };
-
+    }
     // IE
-    else plugin.getStyle = (function() {
+    else {
       // We need to insert into element a span with the M character in it.
       // The element.offsetHeight will give us the font size in px units.
       // Inspired by Google Doctype:
@@ -139,7 +132,7 @@
       span.style.cssText = 'position:absolute;visibility:hidden;height:1em;lineHeight:0;padding:0;margin:0;border:0;';
       span.innerHTML = 'M';
 
-      function getStyle(name) {
+      plugin.getStyle = function getStyle(name) {
         var currStyle, element, elemStyle, runtimeStyle, runtimePos,
          stylePos, pos, result, size, unit;
 
@@ -200,10 +193,8 @@
           runtimeStyle[pos] = runtimePos;
         }
         return fuse.String(result);
-      }
-
-      return getStyle;
-    })();
+      };
+    }
 
     // prevent JScript bug with named function expressions
     var getStyle = nil, setStyle = nil;
@@ -293,11 +284,41 @@
   /*--------------------------------------------------------------------------*/
 
   (function(plugin) {
+    var getFuseId = Node.getFuseId;
+
     plugin.getDimensions = function getDimensions(options) {
       return {
         'width':  plugin.getWidth.call(this, options),
         'height': plugin.getHeight.call(this, options)
       };
+    };
+
+    plugin.hide = function hide() {
+      var element = this.raw || this,
+       elemStyle = element.style,
+       display = elemStyle.display;
+
+      if (display && display !== 'none')
+        Data[getFuseId(element)].madeHidden = display;
+      elemStyle.display = 'none';
+      return this;
+    };
+
+    plugin.show = function show() {
+      var element = this.raw || this,
+       data = Data[getFuseId(element)],
+       elemStyle = element.style,
+       display = elemStyle.display;
+
+      if (display === 'none')
+        elemStyle.display = data.madeHidden || '';
+
+      delete data.madeHidden;
+      return this;
+    };
+
+    plugin.toggle = function toggle() {
+      return plugin[plugin.isVisible.call(this) ? 'hide' : 'show'].call(this);
     };
 
     plugin.getOpacity = (function() {
@@ -424,12 +445,16 @@
         };
       }
 
-      // redefine method and execute
+      // redefine and execute
       return (Element.plugin.isVisible = isVisible).call(this);
     };
 
     // prevent JScript bug with named function expressions
-    var getDimensions = nil, isVisible = nil;
+    var getDimensions = nil,
+     hide =             nil,
+     isVisible =        nil,
+     show =             nil,
+     toggle =           nil;
   })(Element.plugin);
 
   /*--------------------------------------------------------------------------*/
@@ -437,7 +462,9 @@
   // define Element#getWidth and Element#getHeight
   (function(plugin) {
 
-    var PRESETS = {
+    var i = 0,
+
+    PRESETS = {
       'box':     { 'border':  1, 'margin':  1, 'padding': 1 },
       'visual':  { 'border':  1, 'padding': 1 },
       'client':  { 'padding': 1 },
@@ -455,9 +482,7 @@
         'margin':  ['marginLeft',      'marginRight'],
         'padding': ['paddingLeft',     'paddingRight']
       }
-    },
-
-    i = 0;
+    };
 
     while (i < 2) (function() {
       function getSum(decorator, name) {
@@ -518,5 +543,6 @@
       plugin['get' + dim] = getDimension;
     })();
 
+    // cleanup
     i = undef;
   })(Element.plugin);
