@@ -1,3 +1,5 @@
+* Make fuse.Function.bind() throw a TypeError if `fn` argument is not a function and refactor native bind branch. [jddalton]
+
 * Add a cache flag argument to fuse.dom.Element.create() to allow devs to specify that the dom decorator is not cached. [jddalton]
 
 * Add fuse.dom.Window decorator. [jddalton]

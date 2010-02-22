@@ -7,23 +7,28 @@
   bind =
   Func.bind = (function() {
     var bind = function bind(fn, thisArg) {
-      // allows lazy loading the target method
       var f, context, curried, name, reset, args = arguments;
+
+      // allows lazy loading the target method
       if (isArray(fn)) {
         name = fn[0]; context = fn[1];
-      } else f = fn;
-
-      if (typeof thisArg === 'undefined')
-        return f || context[name];
+      } else {
+        f = fn;
+      }
+      // follow spec and throw if fn is not callable
+      if (typeof (f || context[name]) !== 'function') {
+        throw new TypeError;
+      }
 
       // simple bind
-      if (args.length < 3 )
+      if (args.length < 3) {
         return function() {
           var args = arguments, fn = f || context[name];
           return args.length
             ? fn.apply(thisArg, args)
             : fn.call(thisArg);
         };
+      }
 
       // bind with curry
       curried = slice.call(args, 2);
@@ -38,10 +43,22 @@
     };
 
     // native support
-    if (typeof Func.prototype.bind === 'function') {
-      var plugin = Func.plugin;
+    if (isFunction(Func.prototype.bind)) {
+      var __bind = bind, plugin = Func.plugin;
+
       bind = function bind(fn, thisArg) {
-        return plugin.bind.call(f || context[name], thisArg);
+        var args = arguments, isLazy = isArray(fn); 
+
+        // simple bind
+        if (args.length < 3) {
+          return isLazy
+            ? __bind(fn, thisArg)
+            : plugin.bind.call(fn, thisArg);
+        }
+        // bind with curry
+        return isLazy
+          ? __bind.apply(null, args)
+          : plugin.bind.apply(fn, slice.call(args, 1));
       };
     }
 
@@ -148,7 +165,7 @@
 
     /*------------------------------------------------------------------------*/
 
-     if (!plugin.bind)
+     if (!plugin.bind) {
        plugin.bind = (function() {
          function bind(thisArg) {
            var args = arguments;
@@ -158,6 +175,7 @@
          }
          return bind;
        })();
+     }
 
      plugin.bindAsEventListener = function bindAdEventListener(thisArg) {
        var args = arguments;

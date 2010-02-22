@@ -6,9 +6,10 @@ new Test.Unit.Runner({
 
     var bind = fuse.Function.bind, func = fuse.emptyFunction;
 
-    this.assertIdentical(func, bind(func));
-    this.assertIdentical(func, bind(func, undef));
     this.assertNotIdentical(func, bind(func, null));
+
+    this.assertRaise('TypeError', function() { bind(null) },
+      'Should throw TypeError if `fn` is not callable.');
 
     this.assertEqual('without',
       bind(methodWithoutArguments, { 'hi': 'without' })());
