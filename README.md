@@ -76,8 +76,11 @@ Community
 
 Gotchas
 -------
-  Firefox 3.6 changed the default value for `security.fileuri.strict_origin_policy` to `true`.
-  You may need to change this to `false` in the `about:config` for running unit tests without `Rake`.
+  - Firefox 3.6 changed the default value for `security.fileuri.strict_origin_policy` to `true`.
+    You may need to change this to `false` in the `about:config` for running unit tests without `Rake`.
+
+  - If `$ git submodule update` fails try deleting the contents of the `vendor` folder and performing
+    `$ git submodule init` and `$ git submodule update` again.
 
 Footnotes
 ---------
