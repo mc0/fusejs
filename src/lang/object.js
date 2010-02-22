@@ -16,7 +16,7 @@
 
       case 0: // IE
         var shadowed = [
-          'constructor', 'hasOwnkey',
+          'constructor', 'hasOwnProperty',
           'isPrototypeOf', 'propertyIsEnumerable',
           'toLocaleString', 'toString', 'valueOf'
         ];
