@@ -53,15 +53,6 @@
         list['__proto__'] = backup;
         return result && typeof list.push === 'function';
       }
-    },
-
-    'OBJECT__COUNT__': function() {
-      // true for Gecko
-      if (envTest('OBJECT__PROTO__')) {
-        var o = { 'x':0 };
-        delete o['__count__'];
-        return typeof o['__count__'] === 'number' && o['__count__'] === 1;
-      }
     }
   });
 

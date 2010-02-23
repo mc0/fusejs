@@ -10,7 +10,7 @@
     switch (function() {
       var key, count = 0, klass = function() { this.toString = 1; };
       klass.prototype.toString = 1;
-      for (key in new klass()) count++;
+      for (key in new klass) { count++; }
       return count;
     }()) {
 
@@ -21,40 +21,50 @@
           'toLocaleString', 'toString', 'valueOf'
         ];
 
-        return _each = function _each(object, callback) {
+        _each = function _each(object, callback) {
           if (object) {
-            var key, i = -1, skipProto = isFunction(object);
+            var key, i = -1;
             for (key in object) {
-              if (skipProto && key === 'prototype') continue;
               callback(object[key], key, object);
             }
             while(key = shadowed[++i]) {
-              if (hasKey(object, key))
+              if (hasKey(object, key)) {
                 callback(object[key], key, object);
+              }
             }
           }
           return object;
         };
+
+        return _each;
 
       case 2:
         // Tobie Langel: Safari 2 broken for-in loop
         // http://tobielangel.com/2007/1/29/for-in-loop-broken-in-safari/
-        return _each = function _each(object, callback) {
+        _each = function _each(object, callback) {
           var key, keys = { }, skipProto = isFunction(object);
-          for (key in object) {
-            if (skipProto && key === 'prototype') continue;
-            if (!hasKey(keys, key) && (keys[key] = 1))
-              callback(object[key], key, object);
+          if (object)  {
+            for (key in object) {
+              if (!(skipProto && key === 'prototype') &&
+                  !hasKey(keys, key) && (keys[key] = 1)) {
+                callback(object[key], key, object);
+              }
+            }
           }
           return object;
         };
 
+        return _each;
+
       default: // Others
         return _each = function _each(object, callback) {
           var key, skipProto = isFunction(object);
-          for (key in object) {
-            if (skipProto && key === 'prototype') continue;
-            callback(object[key], key, object);
+          if (object) {
+            for (key in object) {
+              if (!(skipProto && key === 'prototype')) {
+                callback(object[key], key, object);
+              }
+            }
           }
           return object;
         };
@@ -122,8 +132,11 @@
 
   _extend =
   Obj._extend = function _extend(destination, source) {
-    for (var key in source)
-      destination[key] = source[key];
+    if (source) {
+      for (var key in source) {
+        destination[key] = source[key];
+      }
+    }
     return destination;
   };
 
@@ -143,22 +156,14 @@
   };
 
   isEmpty =
-  Obj.isEmpty = (function() {
-    var isEmpty = function isEmpty(object) {
-      for (var key in object)
+  Obj.isEmpty = function isEmpty(object) {
+    if (object) {
+      for (var key in object) {
         if (hasKey(object, key)) return false;
-      return true;
-    };
-
-    if (envTest('OBJECT__COUNT__')) {
-      // __count__ is buggy on arrays so we check for push because it's fast.
-      var _isEmpty = isEmpty;
-      isEmpty = function isEmpty(object) {
-        return !object || object.push ? _isEmpty(object) : !object['__count__'];
-      };
+      }
     }
-    return isEmpty;
-  })();
+    return true;
+  };
 
   isFunction =
   Obj.isFunction = function isFunction(value) {
