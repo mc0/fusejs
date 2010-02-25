@@ -26,7 +26,7 @@ new Test.Unit.Runner({
       'element with className only');
 
     this.assertEqual('<div>',
-      element.next(2).inspect(),
+      element.next(3)[2].inspect(),
       'element with no className or id');
 
     this.assertNothingRaised(
@@ -52,7 +52,7 @@ new Test.Unit.Runner({
       }
     }, fuse.Enumerable);
 
-    this.assertEqual('#<Enumerable:[]>', new EnumObject({ }).inspect());
+    this.assertEqual('#<Enumerable:[]>', (new EnumObject({ })).inspect());
 
     var many =  ['a', 'A', 'b', 'B', 'c', 'C', 'd', 'D#'];
     this.assertEqual("#<Enumerable:['a', 'A', 'b', 'B', 'c', 'C', 'd', 'D#']>",

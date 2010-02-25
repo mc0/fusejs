@@ -59,7 +59,7 @@
 
   // Allow a pre-sugared array to be passed
   prependList = function(list, value, results) {
-    (results = results || [])[0] = value;
+    (results || (results = []))[0] = value;
     var length = list.length;
     while (length--) results[1 + length] = list[length];
     return results;
@@ -208,12 +208,12 @@
    'dom/form/event-observer.js',
    'dom/form/timed-observer.js',
 
+   'dom/event/event.js',
+   'dom/event/dom-loaded.js',
+
    'lang/grep.js',
    'lang/inspect.js',
    'lang/json.js',
-
-   'dom/event/event.js',
-   'dom/event/dom-loaded.js',
 
    'dom/element/traversal.js',
    'dom/node-list.js',
@@ -225,7 +225,8 @@
    'ajax/base.js',
    'ajax/request.js',
    'ajax/updater.js',
-   'ajax/timed-updater.js') %>
+   'ajax/timed-updater.js'
+   ) %>
   /*--------------------------------------------------------------------------*/
 
   // update native generics and element methods
