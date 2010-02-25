@@ -149,7 +149,7 @@
   /*-------------------------------- DOM BUGS --------------------------------*/
 
   envAddTest({
-    'ATTRIBUTE_NODES_PERSIST_ON_CLONED_ELEMENTS': function() {
+    'ATTRIBUTE_NODES_SHARED_ON_CLONED_ELEMENTS': function() {
       // true for some IE6
       var node, clone, div = fuse._div;
       (node = document.createAttribute('id')).value = 'x';
@@ -198,6 +198,14 @@
       var result = body.offsetTop === 1;
       bs.cssText = backup;
       return result;
+    },
+
+    'BUTTON_VALUE_CHANGES_AFFECT_INNER_CONTENT': function() {
+      // true for IE6/7
+      var node, doc = fuse._doc, button = doc.createElement('button');
+      button.appendChild(doc.createTextNode('y'));
+      button.setAttribute('value', 'x');
+      return ((node = button.getAttributeNode('value')) && node.value) !== 'x';
     },
 
     'ELEMENT_COMPUTED_STYLE_DEFAULTS_TO_ZERO': function() {

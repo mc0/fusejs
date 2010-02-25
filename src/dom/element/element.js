@@ -19,7 +19,7 @@
     var idCounter = 0;
 
     plugin.identify = function identify() {
-      // use getAttributeto avoid issues with form elements and
+      // use getAttribute to avoid issues with form elements and
       // child controls with ids/names of "id"
       var element = this.raw || this,
        id = plugin.getAttribute.call(this, 'id');

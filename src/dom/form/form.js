@@ -59,7 +59,7 @@
       eachElement(this, function(node) {
         if (node.type !== 'hidden' && !node.disabled) {
           if (!firstNode) firstNode = node;
-          if (node.getAttributeNode('tabIndex') &&
+          if (node.getAttributeNode('tabindex') &&
               (tabIndex = node.tabIndex) > -1 && tabIndex < minTabIndex) {
             minTabIndex  = tabIndex;
             firstByIndex = node;
@@ -121,7 +121,7 @@
       options = clone(options);
 
       var params = options.parameters, submit = options.submit,
-       action = plugin.getAttribute.call(this, 'action');
+       element = this.raw || this, action = element.action;
 
       delete options.submit;
       options.parameters = plugin.serialize.call(this, { 'submit':submit, 'hash':true });
@@ -130,9 +130,9 @@
         if (isString(params)) params = fuse.String.toQueryParams(params);
         _extend(options.parameters, params);
       }
-
-      if (plugin.hasAttribute.call(this, 'method') && !options.method)
-        options.method = (this.raw || this).method;
+      if (element.method && !options.method) {
+        options.method = element.method;
+      }
 
       return fuse.ajax.Request(action, options);
     };

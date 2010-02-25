@@ -40,10 +40,8 @@
     textAreaPlugin = dom.TextAreaElement.plugin,
 
     getOptionValue = function getValue() {
-      var element = this.raw || this;
-      return fuse.String(element[optionPlugin.hasAttribute.call(this, 'value')
-        ? 'value'
-        : 'text']);
+      var element = this.raw || this, text = element.text, value = element.value;
+      return fuse.String(value || text);
     };
 
 
@@ -119,15 +117,6 @@
 
     /* define getValue/setValue for each field class */
 
-    buttonPlugin.getValue = function getValue() {
-      return buttonPlugin.getAttribute.call(this, 'value');
-    };
-
-    buttonPlugin.setValue = function setValue(value) {
-      buttonPlugin.setAttribute.call(this, 'value', value);
-      return this;
-    };
-
     inputPlugin.getValue = function getValue() {
       var element = this.raw || this;
       return CHECKED_INPUT_TYPES[element.type.toUpperCase()] && !element.checked
@@ -180,10 +169,12 @@
       return this;
     };
 
+    buttonPlugin.getValue   =
     textAreaPlugin.getValue = function getValue() {
       return fuse.String((this.raw || this).value);
     };
 
+    buttonPlugin.setValue   =
     textAreaPlugin.setValue =
     optionPlugin.setValue   = function setValue(value) {
       (this.raw || this).value  = value || '';
@@ -191,6 +182,17 @@
     };
 
     optionPlugin.getValue = getOptionValue;
+
+    // handle IE6/7 bug with button elements
+    if (envTest('BUTTON_VALUE_CHANGES_AFFECT_INNER_CONTENT')) {
+      buttonPlugin.getValue = function getValue() {
+        return buttonPlugin.getAttribute.call(this, 'value');
+      };
+
+      buttonPlugin.setValue = function setValue(value) {
+        return buttonPlugin.setAttribute.call(this, 'value', value);
+      };
+    }
 
     // prevent JScript bug with named function expressions
     var initialize = nil,

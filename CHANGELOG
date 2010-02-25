@@ -1,3 +1,7 @@
+* Refactor codebase to use dom attributes/properties correctly and make a clearer distinction between dom attributes and properties. [David Mark, jddalton]
+
+* Add fuse.dom.Element#removeAttribute method. [jddalton, Joe Gornick]
+
 * Optimize fuse.Function methods by removing `arg` variable aliases of the arguments object. [Andrea Giammarchi, jddalton]
 
 * Make fuse.Function.bind() throw a TypeError if `fn` argument is not a function and refactor native bind branch. [jddalton]

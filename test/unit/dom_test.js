@@ -757,13 +757,17 @@ new Test.Unit.Runner({
     var select = $('select_for_update');
     select.down('optgroup').update('<option value="C" selected="selected">option C</option><option value="D">option D</option>');
 
-    this.assertEqual('C', select.getValue(), 'Failed to update opt-group element');
+    this.assertEqual('C',
+      select.getValue(),
+      'Failed to update opt-group element');
 
     // test passing object with "toElement" method
     var newOption = fuse('option', { 'value': 'E', 'text': 'option E', 'selected': true });
-    select.down('optgroup').update({ 'toElement': function() { return newOption.raw; } });
+    select.down('optgroup').update({ 'toElement': function() { return newOption; } });
 
-    this.assertEqual('E', select.getValue(), 'Failed to update opt-group element via `toElement`.');
+    this.assertEqual('E',
+      select.getValue(),
+      'Failed to update opt-group element via `toElement`.');
   },
 
   'testElementUpdateInSelect': function() {
@@ -792,7 +796,8 @@ new Test.Unit.Runner({
   	var div = $('testdiv');
     div.update({ 'toElement': createParagraph.curry('foo') });
 
-    this.assertEqual('<p>foo</p>', getInnerHTML(div),
+    this.assertEqual('<p>foo</p>',
+      getInnerHTML(div),
       'Failed to update via `toElement`.');
 
     // test comment node
@@ -1680,48 +1685,49 @@ new Test.Unit.Runner({
     this.assertEqual('Home of Fuse', $('write_attribute_link').raw.title);
   },
 
-  'testElementsetAttributeWithBooleans': function() {
+  'testElementSetAttributeWithBooleans': function() {
     var input = $('write_attribute_input'),
      select   = $('write_attribute_select'),
-     checkbox = $('write_attribute_checkbox'),
-     checkedCheckbox = $('write_attribute_checked_checkbox');
+     checkbox = $('write_attribute_checkbox');
 
     this.assert(input.setAttribute('readonly')
       .hasAttribute('readonly'),
-      'input set "readonly" with no value');
-
-    this.assert(input.setAttribute('readonly', true)
-      .hasAttribute('readonly'),
-      'input set "readonly" with boolean true');
+      'Input should set "readonly" with no value.');
 
     this.assert(!input.setAttribute('readonly', false)
       .hasAttribute('readonly'),
-      'input set "readonly" with boolean false');
+      'Input should not set "readonly" with boolean false.');
+
+    this.assert(input.setAttribute('readonly', true)
+      .hasAttribute('readonly'),
+      'Input should set "readonly" with boolean true.');
 
     this.assert(!input.setAttribute('readonly', null)
       .hasAttribute('readonly'),
-      'input set "readonly" with null value');
+      'Input should not set "readonly" with null value.');
 
     this.assert(input.setAttribute('readonly', 'readonly')
       .hasAttribute('readonly'),
-      'input set "readonly" with string value');
+      'Input should set "readonly" with string value.');
 
     this.assert(select.setAttribute('multiple')
       .hasAttribute('multiple'),
-      'select element set "multiple" with string value');
+      'Select element should set "multiple" with string value.');
 
     this.assert(input.setAttribute('disabled')
       .hasAttribute('disabled'),
-      'input set "disabled" with no value');
+      'Input should set "disabled" with no value.');
 
-    this.assert(checkbox.setAttribute('checked').raw.checked,
-      'checkbox is checked when set with no value');
+    this.assert(checkbox.setAttribute('checked')
+      .hasAttribute('checked'),
+      'Input should set "checked" with no value.');
 
-    this.assert(!checkedCheckbox.setAttribute('checked', false).raw.checked,
-      'checkbox is not checked when set with false');
+    this.assert(!checkbox.setAttribute('checked', false)
+      .hasAttribute('checked'),
+      'Input should not be set "checked" with falsy value.');
   },
 
-  'testElementsetAttributeWithIssues': function() {
+  'testElementSetAttributeWithIssues': function() {
     var input = $('write_attribute_input').setAttribute(
       { 'maxlength': 90, 'tabindex': 10});
 
@@ -1770,13 +1776,39 @@ new Test.Unit.Runner({
     this.assertEqual('multipart/form-data', theForm.getAttribute('encType'));
   },
 
-  'testElementsetAttributeWithCustom': function() {
+  'testElementSetAttributeWithCustom': function() {
     var p = $('write_attribute_para').setAttribute(
       { 'name': 'martin', 'location': 'stockholm', 'age': 26});
 
     this.assertEqual('martin',    p.getAttribute('name'));
     this.assertEqual('stockholm', p.getAttribute('location'));
     this.assertEqual('26',        p.getAttribute('age'));
+  },
+
+  'testElementRemoveAttribute': function() {
+    var input = $('write_attribute_input'),
+     select   = $('write_attribute_select'),
+     checkbox = $('write_attribute_checkbox');
+
+    input.setAttribute('disabled');
+    input.setAttribute('readonly');
+    select.setAttribute('multiple');
+
+    this.assert(!input.removeAttribute('readonly')
+      .hasAttribute('readonly'),
+      'Should remove "readonly" attribute.');
+
+    this.assert(!select.removeAttribute('multiple')
+      .hasAttribute('multiple'),
+      'Should remove "multiple" attribute.');
+
+    this.assert(!input.removeAttribute('disabled')
+      .hasAttribute('disabled'),
+      'Should remove "disabled" attribute.');
+
+    this.assert(!checkbox.removeAttribute('checked')
+      .hasAttribute('checked'),
+      'Should remove "checked" attribute.');
   },
 
   'testElementHasAttribute': function() {

@@ -94,7 +94,7 @@
 
       if (index < 0) {
         if ((index += length) < 0) index = 0;
-      } else if (index > --length) {
+      } else if (index > (length && --length)) {
         index = length;
       }
       return Node(object[index]);

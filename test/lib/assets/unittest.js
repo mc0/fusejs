@@ -458,7 +458,7 @@
         message = buildMessage('assertElementsMatch', 'In index <?>: expected <?> but got ?', index, expression, element);
         this.flunk(message);
         pass = false;
-      }, this))
+      }, this));
 
       if (pass) this.assert(true, 'Expected all elements to match.');
     }
