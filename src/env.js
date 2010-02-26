@@ -2,10 +2,12 @@
 
   fuse.env = {
     'agent': {
-      'IE':           isHostObject(global, 'attachEvent') && userAgent.indexOf('Opera') < 0,
-      'Opera':        /Opera/.test(toString.call(global.opera)),
-      'WebKit':       userAgent.indexOf('AppleWebKit/') > -1,
       'Gecko':        userAgent.indexOf('Gecko') > -1 && userAgent.indexOf('KHTML') < 0,
-      'MobileSafari': userAgent.search(/AppleWebKit.*Mobile/) > -1
+      'Opera':        /Opera/.test(toString.call(global.opera)),
+      'MobileSafari': userAgent.search(/AppleWebKit.*Mobile/) > -1,
+      'WebKit':       userAgent.indexOf('AppleWebKit/') > -1
     }
   };
+
+  fuse.env.agent.IE = !fuse.env.agent.Opera && userAgent.indexOf('MSIE') > -1 &&
+    isHostObject(global, 'attachEvent');

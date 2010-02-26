@@ -1,3 +1,5 @@
+* Add UA sniff to the fuse.env.agent.IE flag to avoid cases where others have added a window.attachEvent method. [Prototype LH #997] [jddalton, PaulC]
+
 * Refactor codebase to use dom attributes/properties correctly and make a clearer distinction between dom attributes and properties. [David Mark, jddalton]
 
 * Add fuse.dom.Element#removeAttribute method. [jddalton, Joe Gornick]
