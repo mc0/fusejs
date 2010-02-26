@@ -1,6 +1,7 @@
   /*--------------------------------- FIELD ----------------------------------*/
 
   (function(dom) {
+    // create form control classes
     (function() {
       var tagName, i = -1,
        tagNames = ['button', 'input', 'option', 'select', 'textarea'];
@@ -9,9 +10,19 @@
       }
     })();
 
-    var CHECKED_INPUT_TYPES = {
-      'CHECKBOX': 1,
-      'RADIO':    1
+    var buttonPlugin = dom.ButtonElement.plugin,
+
+    inputPlugin      = dom.InputElement.plugin,
+
+    optionPlugin     = dom.OptionElement.plugin,
+
+    selectPlugin     = dom.SelectElement.plugin,
+
+    textAreaPlugin   = dom.TextAreaElement.plugin,
+
+    CHECKED_INPUT_TYPES = {
+      'checkbox': 1,
+      'radio':    1
     },
 
     INPUT_BUTTONS = {
@@ -29,155 +40,174 @@
       'TEXTAREA': textAreaPlugin
     },
 
-    buttonPlugin   = dom.ButtonElement.plugin,
-
-    inputPlugin    = dom.InputElement.plugin,
-
-    optionPlugin   = dom.OptionElement.plugin,
-
-    selectPlugin   = dom.SelectElement.plugin,
-
-    textAreaPlugin = dom.TextAreaElement.plugin,
-
     getOptionValue = function getValue() {
-      var element = this.raw || this, text = element.text, value = element.value;
-      return fuse.String(value || text);
+      return fuse.String((this.raw || this)[optionPlugin.hasAttribute.call(this, 'value')
+        ? 'value'
+        : 'text'] || '');
     };
 
 
     /* define common field class methods */
 
+    selectPlugin.initialize = function initialize() {
+      this.options = this.raw.options;
+    };
+
+    buttonPlugin.activate =
+    selectPlugin.activate = function activate() {
+      try { (this.raw || this).focus(); } catch(e) { }
+      return this;
+    };
+
+    textAreaPlugin.activate =
     inputPlugin.activate = function activate() {
       var element = this.raw || this;
       try { element.focus(); } catch(e) { }
-      if (element.select && getNodeName(element) !== 'BUTTON' &&
-          !INPUT_BUTTONS[element.type])
+      if (element.select && !INPUT_BUTTONS[element.type]) {
         element.select();
+      }
       return this;
+    };
+
+    selectPlugin.clear =
+    textAreaPlugin.clear = function clear() {
+      return PLUGINS[getNodeName(this.raw || this)].setValue.call(this, null);
     };
 
     inputPlugin.clear = function clear() {
-      var element = this.raw || this, nodeName = getNodeName(element);
-      if (nodeName !== 'BUTTON' && !INPUT_BUTTONS[element.type])
-        PLUGINS[nodeName].setValue.call(this, null);
+      var element = this.raw || this, type = element.type;
+      if (CHECKED_INPUT_TYPES[type]) {
+        element.checked = false;
+      } else if (!INPUT_BUTTONS[type]) {
+        PLUGINS[getNodeName(element)].setValue.call(this, null);
+      }
       return this;
     };
 
+    buttonPlugin.disable   =
+    selectPlugin.disable   =
+    textAreaPlugin.disable =
     inputPlugin.disable = function disable() {
       (this.raw || this).disabled = true;
       return this;
     };
 
+    buttonPlugin.enable   =
+    selectPlugin.enable   =
+    textAreaPlugin.enable =
     inputPlugin.enable = function enable() {
       (this.raw || this).disabled = false;
       return this;
     };
 
+    buttonPlugin.focus   =
+    selectPlugin.focus   =
+    textAreaPlugin.focus =
     inputPlugin.focus = function focus() {
-      // avoid IE errors when element
-      // or ancestors are not visible
+      // avoid IE errors when element or ancestors are not visible
       try { (this.raw || this).focus(); } catch(e) { }
       return this;
     };
 
+    textAreaPlugin.present =
     inputPlugin.present = function present() {
       return !!(this.raw || this).value;
     };
 
+    buttonPlugin.serialize   =
+    textAreaPlugin.serialize =
     inputPlugin.serialize = function serialize() {
-      var value, pair,
-       element = this.raw || this, nodeName = getNodeName(element);
-
-      if (!element.disabled && element.name) {
-        value = PLUGINS[nodeName].getValue.call(this);
-        if (isArray(value) && value.length < 2)
-          value = value[0];
-        if (value != null) {
-          pair = { };
-          pair[element.name] = value;
-          return Obj.toQueryString(pair);
-        }
+      var pair, name, nodeName, element = this.raw || this;
+      if (element.disabled || !(name = element.name)) {
+        return fuse.String('');
       }
-      return fuse.String('');
+      pair = { };
+      pair[name] = PLUGINS[getNodeName(element)].getValue.call(this);
+      return Obj.toQueryString(pair);
     };
 
+    selectPlugin.serialize = function serialize() {
+      var value, pair, name, nodeName, element = this.raw || this;
+      if (element.disabled || !(name = element.name) ||
+          element.selectedIndex === -1) {
+        return fuse.String('');
+      }
+      value = selectPlugin.getValue.call(this);
+      if (isArray(value) && value.length < 2) {
+        value = value[0];
+      }
+      pair = { };
+      pair[name] = value;
+      return Obj.toQueryString(pair);
+    };
+
+    textAreaPlugin.select =
     inputPlugin.select = function select() {
       (this.raw || this).select();
       return this;
     };
 
-    // copy InputElement methods to the other field classes
-    eachKey(inputPlugin, function(value, key, object) {
-      if (key !== 'constructor' && hasKey(object, key))
-        buttonPlugin[key]   =
-        selectPlugin[key]   =
-        textAreaPlugin[key] = value;
-    });
-
 
     /* define getValue/setValue for each field class */
 
-    inputPlugin.getValue = function getValue() {
-      var element = this.raw || this;
-      return CHECKED_INPUT_TYPES[element.type.toUpperCase()] && !element.checked
-        ? null
-        : fuse.String(element.value);
+    buttonPlugin.getValue   =
+    textAreaPlugin.getValue = function getValue() {
+      return fuse.String((this.raw || this).value || '');
     };
 
+    inputPlugin.getValue = function getValue() {
+      var element = this.raw || this,
+        fallback = CHECKED_INPUT_TYPES[element.type] ? 'on' : '';
+      return fuse.String(element.value || fallback);
+    };
+
+    buttonPlugin.setValue   =
+    textAreaPlugin.setValue =
+    optionPlugin.setValue   =
     inputPlugin.setValue = function setValue(value) {
-      var element = this.raw || this;
-      if (CHECKED_INPUT_TYPES[element.type.toUpperCase()])
-        element.checked = !!value;
-      else element.value = value || '';
+      (this.raw || this).value = value || '';
       return this;
     };
 
-    selectPlugin.initialize = function initialize() {
-      this.options = this.raw.options;
-    };
-
     selectPlugin.getValue = function getValue() {
-      var i, node, element = this.raw || this, result = null;
+      var i, node, result, element = this.raw || this;
       if (element.type === 'select-one') {
         var index = element.selectedIndex;
         if (index > -1) result = getOptionValue.call(element.options[index]);
       }
       else if (element.options.length) {
         result = fuse.Array(); i = 0;
-        while (node = element.options[i++])
+        while (node = element.options[i++]) {
           if (node.selected) result.push(getOptionValue.call(node));
+        }
+      }
+      else {
+        result = fuse.String('');
       }
       return result;
     };
 
     selectPlugin.setValue = function setValue(value) {
-      var node, i = 0, element = this.raw || this;
-      if (value === null)
+      var node, i = -1, element = this.raw || this;
+      if (value === null) {
         element.selectedIndex = -1;
-
+      }
       else if (isArray(value)) {
-        // quick of array#indexOf
-        value = expando + value.join(expando) + expando; i = 0;
-        while (node = element.options[i++])
+        // quick indexOf
+        value = expando + value.join(expando) + expando;
+        while (node = element.options[++i]) {
           node.selected = value.indexOf(expando + getOptionValue.call(node) + expando) > -1;
+        }
       }
       else {
         value = String(value);
-        while (node = element.options[i++])
-          if (getOptionValue.call(node) == value) { node.selected = true; break; }
+        while (node = element.options[++i]) {
+          if (getOptionValue.call(node) == value) {
+            node.selected = true;
+            break;
+          }
+        }
       }
-      return this;
-    };
-
-    buttonPlugin.getValue   =
-    textAreaPlugin.getValue = function getValue() {
-      return fuse.String((this.raw || this).value);
-    };
-
-    buttonPlugin.setValue   =
-    textAreaPlugin.setValue =
-    optionPlugin.setValue   = function setValue(value) {
-      (this.raw || this).value  = value || '';
       return this;
     };
 

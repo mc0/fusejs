@@ -18,22 +18,57 @@
 
   /*--------------------------------------------------------------------------*/
 
-  (function(plugin) {
+  (function(plugin, dom) {
 
-    var FIELD_NODE_NAMES = {
+    var buttonPlugin = dom.ButtonElement.plugin,
+
+    inputPlugin      = dom.InputElement.plugin,
+
+    optionPlugin     = dom.OptionElement.plugin,
+
+    selectPlugin     = dom.SelectElement.plugin,
+
+    textAreaPlugin   = dom.TextAreaElement.plugin,
+
+    CHECKED_INPUT_TYPES = {
+      'checkbox': 1,
+      'radio':    1
+    },
+
+    CONTROL_NODE_NAMES = {
       'BUTTON':   1,
       'INPUT':    1,
       'SELECT':   1,
       'TEXTAREA': 1
     },
 
-    eachElement = function(decorator, callback) {
+    INPUT_BUTTONS = {
+      'button': 1,
+      'image':  1,
+      'reset':  1,
+      'submit': 1
+    },
+
+    PLUGINS = {
+      'BUTTON':   buttonPlugin,
+      'INPUT':    inputPlugin,
+      'OPTION':   optionPlugin,
+      'SELECT':   selectPlugin,
+      'TEXTAREA': textAreaPlugin
+    },
+
+    SKIPPED_INPUT_TYPES = {
+      'file': 1,
+      'reset': 1
+    },
+
+    eachElement = function(element, callback) {
       var node, i = 0,
-       nodes = (decorator.raw || decorator).getElementsByTagName('*');
+       nodes = (element.raw || element).getElementsByTagName('*');
 
       if (node = nodes[0]) {
         do {
-          FIELD_NODE_NAMES[node.nodeName.toUpperCase()] && callback(node);
+          CONTROL_NODE_NAMES[getNodeName(node)] && callback(node);
         } while (node = nodes[++i]);
       }
     };
@@ -83,7 +118,7 @@
 
       if (node = nodes[0]) {
         do {
-          if (FIELD_NODE_NAMES[node.nodeName.toUpperCase()])
+          if (CONTROL_NODE_NAMES[node.nodeName.toUpperCase()])
             results[++j] = fromElement(node);
         } while (node = nodes[++i]);
       }
@@ -120,8 +155,9 @@
     plugin.request = function request(options) {
       options = clone(options);
 
-      var params = options.parameters, submit = options.submit,
-       element = this.raw || this, action = element.action;
+      var params = options.parameters,
+       submit = options.submit,
+       action = plugin.getAttribute.call(this, 'action');
 
       delete options.submit;
       options.parameters = plugin.serialize.call(this, { 'submit':submit, 'hash':true });
@@ -130,10 +166,9 @@
         if (isString(params)) params = fuse.String.toQueryParams(params);
         _extend(options.parameters, params);
       }
-      if (element.method && !options.method) {
-        options.method = element.method;
+      if (plugin.hasAttribute.call(this, 'method') && !options.method) {
+        options.method = plugin.getAttribute.call(this, 'method');
       }
-
       return fuse.ajax.Request(action, options);
     };
 
@@ -147,61 +182,59 @@
     };
 
     plugin.serializeElements = function serializeElements(elements, options) {
-      if (typeof options !== 'object')
+      if (typeof options !== 'object') {
         options = { 'hash': !!options };
-      else if (typeof options.hash === 'undefined')
+      } else if (typeof options.hash === 'undefined') {
         options.hash = true;
+      }
 
-      var element, key, value, isImageType, isSubmitButton,
-       nodeName, submitSerialized, type, i = 0,
+      var isImageType, isSubmitButton, key, nodeName, prefix,
+       submitSerialized, type, value, i = 0,
        element     = this.raw || this,
        checkString = !!elements,
        doc         = fuse._doc,
-       dom         = fuse.dom,
        result      = fuse.Object(),
        submit      = options.submit;
 
-      if (submit && submit.raw)
+      if (submit && submit.raw) {
         submit = submit.raw;
-      if (!elements)
+      }
+      if (!elements) {
         elements = element.getElementsByTagName('*');
-      if (!elements.length)
+      }
+      if (!elements.length) {
         elements = [element];
-
+      }
       if (element = elements[0]) {
         do {
           // avoid checking for element ids if we are iterating the default nodeList
-          if (checkString && isString(element) &&
-              !(element = doc.getElementById(element))) continue;
+          if (checkString && isString(element) &&                         
+             !(element = doc.getElementById(element))) {
+            continue;
+          } else {
+            element = element.raw || element;
+          }
 
-          // skip if a serializer does not exist for the element
-          nodeName = element.nodeName;
-          if (!FIELD_NODE_NAMES[nodeName.toUpperCase()]) continue;
-
-          value = element.getValue
-            ? element.getValue()
-            : fromElement(element).getValue();
-
-          element = element.raw || element;
-          key     = element.name;
-          type    = element.type;
-
-          isImageType = type === 'image';
-          isSubmitButton = type === 'submit' || isImageType;
-
-          // reduce array value
-          if (isArray(value) && value.length < 2)
-            value = value[0];
-
-          if (value == null    || // controls with null/undefined values are unsuccessful
-              element.disabled || // disabled elements are unsuccessful
-              type === 'file'  || // skip file inputs;
-              type === 'reset' || // reset buttons are unsuccessful
-              (isSubmitButton &&  // non-active submit buttons are unsuccessful
-              (submit === false || submitSerialized ||
-              (submit && !(key === submit || element === submit))))) {
+          // skip if not a form control 
+          nodeName = getNodeName(element);
+          if (!CONTROL_NODE_NAMES[nodeName]) {
             continue;
           }
+
+          key            = element.name;
+          type           = element.type;
+          isImageType    = type === 'image';
+          isSubmitButton = type === 'submit' || isImageType;
+
+          if (element.disabled ||                                         // skip disabled
+              SKIPPED_INPUT_TYPES[type] ||                                // skip file/reset controls
+              CHECKED_INPUT_TYPES[type] && !element.checked ||            // skip unchecked
+              nodeName === 'SELECT' && element.selectedIndex === -1 ||    // skip unselected
+              (isSubmitButton && (submit === false || submitSerialized || // skip non-active submit buttons
+                (submit && !(key === submit || element === submit))))) {
+            continue;
+          }
+
           if (isSubmitButton) {
             submitSerialized = true;
             if (isImageType) {
@@ -211,15 +244,24 @@
               result[prefix + 'y'] = y;
             }
           }
-          if (!key) continue;
+          // skip unnamed
+          if (!key) {
+            continue;
+          }
+
+          value = PLUGINS[nodeName].getValue.call(element);
+          if (isArray(value) && value.length < 2) {
+            value = value[0];
+          }
 
           // property exists and and belongs to result
           if (hasKey(result, key)) {
             // a key is already present; construct an array of values
             if (!isArray(result[key])) result[key] = [result[key]];
             result[key].push(value);
+          } else {
+            result[key] = value;
           }
-          else result[key] = value;
         }
         while (element = elements[++i]);
       }
@@ -241,4 +283,4 @@
      reset =             nil,
      serializeElements = nil,
      serialize =         nil;
-  })(Form.plugin);
+  })(Form.plugin, fuse.dom);

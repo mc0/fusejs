@@ -1,3 +1,5 @@
+* Cleanup and optimize form/field files and ensure the getValue/setValue methods are consistent across form control elements. [jddalton]
+
 * Add UA sniff to the fuse.env.agent.IE flag to avoid cases where others have added a window.attachEvent method. [Prototype LH #997] [jddalton, PaulC]
 
 * Refactor codebase to use dom attributes/properties correctly and make a clearer distinction between dom attributes and properties. [David Mark, jddalton]
@@ -1284,7 +1286,7 @@
 
 * Make $F return null for unknown/unsupported elements. [Rails Trac #8381] [Christophe Porteneuve, jddalton, Michael Stillwell]
 
-* Make Form.Element#clear uncheck checkboxes/radio buttons, clear text inputs, deselect dropdown lists options, and skip button elements. [jddalton]
+* Make Form.Element#clear uncheck checkboxes/radio buttons, clear text inputs, deselect dropdown lists options, and skip button elements. [Prototype LH #955] [jddalton, victor]
 
 * Extend BUTTON elements with Form.Element.Methods. [Rails Trac #9708] [jddalton, mensler]
 

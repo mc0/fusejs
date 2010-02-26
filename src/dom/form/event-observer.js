@@ -32,7 +32,7 @@
     });
 
     (function(plugin) {
-      var INPUT_TYPES_FOR_CLICK = { 'checkbox': 1, 'radio': 1 };
+      var CHECKED_INPUT_TYPES = { 'checkbox': 1, 'radio': 1 };
 
       plugin.onElementEvent = function onElementEvent() {
         var value = this.getValue();
@@ -46,7 +46,7 @@
         var type = element.type;
         if (type) {
           Event.observe(element,
-            INPUT_TYPES_FOR_CLICK[type] ? 'click' : 'change',
+            CHECKED_INPUT_TYPES[type] ? 'click' : 'change',
             this.onElementEvent);
         }
       };
@@ -78,15 +78,28 @@
       return FieldEventObserver;
     })();
 
-    Field.EventObserver.plugin.getValue = function getValue() {
-      if (this.group.length === 1)
-        return this.element.getValue();
-      var member, value, i = 0;
-      while (member = this.group[i++])
-        if (value = member.getValue())
-          return value;
-    };
-  
+    Field.EventObserver.plugin.getValue = (function() {
+      function getValue() {
+        var element, member, value, i = -1;
+        if (this.group.length === 1) {
+          return this.element.getValue();
+        }
+        while (member = this.group[++i]) {
+          element = member.raw || member;
+          if (CHECKED_INPUT_TYPES[element.type]) {
+            if (element.checked) {
+              return member.getValue();
+            }
+          } else if (value = member.getValue()) {
+            return value;
+          }
+        }
+      }
+
+      var CHECKED_INPUT_TYPES = { 'checkbox': 1, 'radio': 1 };
+      return getValue;
+    })();
+
     Form.EventObserver = (function() {
       function Klass() { }
 

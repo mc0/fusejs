@@ -45,7 +45,7 @@ new Test.Unit.Runner({
 
     // test control groups
     var self = this, container = $('form_with_control_groups'),
-     radios = [container.down(), container.down(2)[1], container.down(3)[2]];
+     radios = container.down(3);
 
     var observerB = Field.EventObserver(radios[0], function() {
       self.assertEqual(radios[0], '2r');
@@ -266,7 +266,7 @@ new Test.Unit.Runner({
 
   'testFormFindFirstElement': function() {
     this.assertEqual($('ffe_checkbox'),     $('ffe').findFirstElement());
-    this.assertEqual($('ffe_ti_submit'),    $('ffe_ti').findFirstElement());
+    this.assertEqual($('ffe_ti_checkbox'),  $('ffe_ti').findFirstElement());
     this.assertEqual($('ffe_ti2_checkbox'), $('ffe_ti2').findFirstElement());
   },
 
@@ -323,7 +323,7 @@ new Test.Unit.Runner({
     serialize('form', true));
 
     // should not eat empty values for duplicate names
-    $('checkbox_hack').checked = false;
+    $('checkbox_hack').raw.checked = false;
     var data = serialize('value_checks', true);
 
     this.assertEnumEqual(['', 'siamese'], data['twin']);
@@ -432,7 +432,6 @@ new Test.Unit.Runner({
     // test "PUT" method
     request = form.request({ 'method': 'put', 'parameters': { 'val2': 'hello' } });
 
-    //this.assert(request.url.endsWith('fixtures/empty.js'));
     this.assertEqual(4,       request.options.parameters['val1']);
     this.assertEqual('hello', request.options.parameters['val2']);
     this.assertEqual('post',  request.method);
@@ -450,23 +449,17 @@ new Test.Unit.Runner({
 
   'testFormElementClear': function() {
     fuse.Array('form','bigform').each(function(container) {
-
       // Form.Element#clear should clear text inputs,
       // uncheck checkboxes/radio buttons, and
       // deselect any options from a dropdown list
-
-      // Form.Element#clear should NOT clear button
-      // values of any kind.
-
-      $(container).query('button,input,select,textarea').each(function(element) {
+      $(container).query('input,select,textarea').each(function(element) {
         var asserted = element.value,
          backup      = asserted,
          decorator   = $(element),
          prop        = 'value',
          tagName     = element.tagName.toUpperCase();
 
-        if (tagName == 'BUTTON' ||
-           fuse.Array('button', 'image', 'reset', 'submit').contains(element.type)) {
+        if (fuse.Array('button', 'image', 'reset', 'submit').contains(element.type)) {
           // default values for "asserted" and "prop"
         }
         else if (tagName == 'INPUT' || tagName  == 'TEXTAREA') {
@@ -492,13 +485,18 @@ new Test.Unit.Runner({
 
         this.assertEqual(asserted, element[prop],
           decorator.inspect() + ';' + (element.name ? ' name="' +
-            element.name + '";' : '') +
-            (element.type ? ' type="' + element.type + '";' : ''));
+          element.name + '";' : '') +
+          (element.type ? ' type="' + element.type + '";' : ''));
 
         // restore original value
         element[prop] = backup;
       }, this);
     }, this);
+    
+    // Form.Element#clear should NOT clear button
+    // values of any kind.
+    this.assertUndefined(fuse.query('button').get(0).clear,
+      'BUTTON decorator should not have a clear() method.');
   },
 
   'testFormElementMethodsChaining': function() {
@@ -547,14 +545,8 @@ new Test.Unit.Runner({
 
     // checkbox
     input = $('checkbox_hack');
-    input.setValue(false);
-
-    this.assertEqual(null, input.getValue(),
-      'checkbox should be unchecked');
-
-    input.setValue(true);
-    this.assertEqual('1', input.getValue(),
-      'checkbox should be checked');
+    input.setValue('2');
+    this.assertEqual('2', input.getValue());
 
     // selectbox
     input = $($('bigform').raw['vu']);
