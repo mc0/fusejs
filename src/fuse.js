@@ -225,8 +225,7 @@
    'ajax/base.js',
    'ajax/request.js',
    'ajax/updater.js',
-   'ajax/timed-updater.js'
-   ) %>
+   'ajax/timed-updater.js') %>
   /*--------------------------------------------------------------------------*/
 
   // update native generics and element methods
