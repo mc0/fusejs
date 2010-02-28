@@ -34,18 +34,22 @@ new Test.Unit.Runner({
   },
 
   'testGsubWithReplacementString': function() {
-    var source = fuse.String('foo boo boz');
+    var expected,
+     source = fuse.String('foo boo boz');
 
     this.assertEqual('foobooboz',
       source.gsub(/\s+/, ''));
     this.assertEqual('  z',
       source.gsub(/(.)(o+)/, ''));
 
-    this.assertEqual('ウィメンズ2007<br/>クルーズコレクション',
-      fuse.String('ウィメンズ2007\nクルーズコレクション').gsub(/\n/,'<br/>'));
+    source = '\u00e3\u00a6\u00e3\u00a3\u00e3\u00a1\u00e3\u00b3\u00e3' +
+      '\u00ba2007\n\u00e3\u00af\u00e3\u00ab\u00e3\u00bc\u00e3\u00ba\u00e3' +
+      '\u00b3\u00e3\u00ac\u00e3\u00af\u00e3\u00b7\u00e3\u00a7\u00e3\u00b3';
 
-    this.assertEqual('ウィメンズ2007<br/>クルーズコレクション',
-      fuse.String('ウィメンズ2007\nクルーズコレクション').gsub('\n','<br/>'));
+    expected = source.replace(/\n/g, '<br/>');
+
+    this.assertEqual(expected, fuse.String(source).gsub(/\n/,'<br/>'));
+    this.assertEqual(expected, fuse.String(source).gsub('\n','<br/>'));
   },
 
   'testGsubWithReplacementTemplateString': function() {
@@ -513,10 +517,14 @@ new Test.Unit.Runner({
         'alert("Scripts work too");\n    \u003C/script\u003E\n  \u003C /div\u003E\n' +
         '\u003C/div\u003E\n').extractScripts());
 
-    var russianChars = '//�?º�?Ÿ�?Œ�?µ�?œÑ�?°Ñ�?ž�?¹\n',
-     longComment = '//' + Array(7000).join('.') + '\n',
-     longScript  = '\nvar foo = 1;\n' + russianChars + longComment,
-     longString  = 'foo <script type="text/javascript">' + longScript + '<'+'/script> bar';
+    var russianChars = '//\u00c3\u00c2\u00ba\u00c3\u00c5\u00b8\u00c3\u00c5\u00c3' +
+       '\u00c2\u00b5\u00c3\u00c5\u00c3\u00c2\u00c3\u00c2\u00b0\u00c3\u00c2\u00c3' +
+       '\u00c5\u00be\u00c3\u00c2\u00b9\n';
+
+    var longComment = '//' + Array(7000).join('.') + '\n',
+     longScript = '\nvar foo = 1;\n' + russianChars + longComment,
+     longString = 'foo <script type="text/javascript">' + longScript + '<'+'/script> bar';
+
     this.assertEnumEqual([longScript], fuse.String(longString).extractScripts());
 
     /*
@@ -544,13 +552,19 @@ new Test.Unit.Runner({
 
   'testEscapeHTML': function() {
     this.assertEqual('foo bar',    fuse.String('foo bar').escapeHTML());
-    this.assertEqual('foo ß bar', fuse.String('foo ß bar').escapeHTML());
+    
+    var expected = 'foo \u00c3\u00178 bar';
+    this.assertEqual(expected, fuse.String(expected).escapeHTML());
 
     this.assertEqual('foo &lt;span&gt;bar&lt;/span&gt;',
       fuse.String('foo <span>bar</span>').escapeHTML());
 
-    this.assertEqual('ウィメンズ2007\nクルーズコレクション',
-      fuse.String('ウィメンズ2007\nクルーズコレクション').escapeHTML());
+    expected = '\u00e3\u00a6\u00e3\u00a3\u00e3\u00a1\u00e3\u00b3\u00e3' +
+      '\u00ba2007\n\u00e3\u00af\u00e3\u00ab\u00e3\u00bc\u00e3\u00ba\u00e3' +
+      '\u00b3\u00e3\u00ac\u00e3\u00af\u00e3\u00b7\u00e3\u00a7\u00e3\u00b3';
+
+    this.assertEqual(expected,
+      fuse.String(expected).escapeHTML());
 
     this.assertEqual('a&lt;a href="blah"&gt;blub&lt;/a&gt;b&lt;span&gt;&lt;div&gt;&lt;/div&gt;&lt;/span&gt;cdef&lt;strong&gt;!!!!&lt;/strong&gt;g',
       fuse.String('a<a href="blah">blub</a>b<span><div></div></span>cdef<strong>!!!!</strong>g').escapeHTML());

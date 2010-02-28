@@ -289,7 +289,7 @@ new Test.Unit.Runner({
     var form = $('bigform').raw;
     form['tf_selectOne'].selectedIndex = 1;
     form['tf_textarea'].value   = 'boo hoo!';
-    form['tf_text'].value       = '123öäü';
+    form['tf_text'].value       = '123\u00c3\u00b6\u00c3\u00a4\u00c3\u00bc';
     form['tf_hidden'].value     = 'moo%hoo&test';
     form['tf_password'].value   = 'sekrit code';
     form['tf_checkbox'].checked = true;
@@ -299,7 +299,7 @@ new Test.Unit.Runner({
     expected = {
       'tf_selectOne': 1,
       'tf_textarea':  'boo hoo!',
-      'tf_text':      '123öäü',
+      'tf_text':      '123\u00c3\u00b6\u00c3\u00a4\u00c3\u00bc',
       'tf_hidden':    'moo%hoo&test',
       'tf_password':  'sekrit code',
       'tf_checkbox':  'on',
