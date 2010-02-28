@@ -1,3 +1,6 @@
+* Rename Form methods getElements() to getControls(), findFirstElement() to getFirstControl(), and focusFirstElement() to focusFirstControl(). [jddalton]
+  Note: Backwards compatibility warning.
+
 * Cleanup and optimize form/field files and ensure the getValue/setValue methods are consistent across form control elements. [jddalton]
 
 * Add UA sniff to the fuse.env.agent.IE flag to avoid cases where others have added a window.attachEvent method. [Prototype LH #997] [jddalton, PaulC]

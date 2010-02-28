@@ -87,15 +87,16 @@
       return this;
     };
 
-    plugin.findFirstElement = function findFirstElement() {
-      var firstByIndex, result, tabIndex, i = 0,
+    plugin.getFirstControl = function getFirstControl() {
+      var firstByIndex, result, tabIndex,
        firstNode = null, minTabIndex = Infinity;
 
       eachElement(this, function(node) {
         if (node.type !== 'hidden' && !node.disabled) {
-          if (!firstNode) firstNode = node;
-          if (node.getAttributeNode('tabindex') &&
-              (tabIndex = node.tabIndex) > -1 && tabIndex < minTabIndex) {
+          if (!firstNode) {
+            firstNode = node;
+          }
+          if ((tabIndex = node.tabIndex) > -1 && tabIndex < minTabIndex) {
             minTabIndex  = tabIndex;
             firstByIndex = node;
           }
@@ -106,13 +107,13 @@
       return result && fromElement(result);
     };
 
-    plugin.focusFirstElement = function focusFirstElement() {
-      var element = plugin.findFirstElement.call(this);
+    plugin.focusFirstControl = function focusFirstControl() {
+      var element = plugin.getFirstControl.call(this);
       element && element.focus();
       return this;
     };
 
-    plugin.getElements = function getElements() {
+    plugin.getControls = function getControls() {
       var node, results = NodeList(), i = 0, j = -1,
        nodes = (this.raw || this).getElementsByTagName('*');
 
@@ -275,9 +276,9 @@
     var initialize =     nil,
      disable =           nil,
      enable =            nil,
-     findFirstElement =  nil,
-     focusFirstElement = nil,
-     getElements =       nil,
+     getFirstControl =   nil,
+     focusFirstControl = nil,
+     getControls =       nil,
      getInputs =         nil,
      request =           nil,
      reset =             nil,

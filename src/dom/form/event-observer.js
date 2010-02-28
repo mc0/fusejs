@@ -52,7 +52,7 @@
       };
 
       plugin.registerFormCallbacks = function registerFormCallbacks() {
-        var element, elements = this.element.getElements(), i= 0;
+        var element, elements = this.element.getControls(), i= 0;
         while (element = elements[i++]) this.registerCallback(element);
       };
 

@@ -211,12 +211,12 @@ new Test.Unit.Runner({
       catch(e) { return '' }
     }
 
-    // Form.focusFirstElement shouldn't focus disabled elements
-    var element = $('bigform').findFirstElement();
+    // Form.focusFirstControl shouldn't focus disabled elements
+    var element = $('bigform').getFirstControl();
     this.assertEqual('submit', element.raw.id);
 
     // Test IE doesn't select text on buttons
-    $('bigform').focusFirstElement();
+    $('bigform').focusFirstControl();
     this.assertEqual('', getSelection(element));
 
     element = $('button_submit');
@@ -236,17 +236,17 @@ new Test.Unit.Runner({
 
     // Form.Element.activate shouldn't raise an exception when the form or field is hidden
     this.assertNothingRaised(function() {
-      $('form_focus_hidden').focusFirstElement();
+      $('form_focus_hidden').focusFirstControl();
     });
 
-    // Form.focusFirstElement should only call activate if the first element exists
+    // Form.focusFirstControl should only call activate if the first element exists
     this.assertNothingRaised(function() {
-      $('form_empty').focusFirstElement();
+      $('form_empty').focusFirstControl();
     });
   },
 
-  'testFormGetElements': function() {
-    var elements = fuse.dom.FormElement.getElements('various'),
+  'testFormGetControls': function() {
+    var elements = fuse.dom.FormElement.getControls('various'),
      names = $w('tf_selectOne tf_textarea tf_checkbox tf_selectMany tf_text tf_radio tf_hidden tf_password');
     this.assertEnumEqual(names, elements.map(function(element) { return element.raw.name; }))
   },
@@ -264,10 +264,10 @@ new Test.Unit.Runner({
       'Failed to convert nodeList to an array using private method `nodeListSlice`.');
   },
 
-  'testFormFindFirstElement': function() {
-    this.assertEqual($('ffe_checkbox'),     $('ffe').findFirstElement());
-    this.assertEqual($('ffe_ti_checkbox'),  $('ffe_ti').findFirstElement());
-    this.assertEqual($('ffe_ti2_checkbox'), $('ffe_ti2').findFirstElement());
+  'testFormGetFirstControl': function() {
+    this.assertEqual($('ffe_checkbox'),     $('ffe').getFirstControl());
+    this.assertEqual($('ffe_ti_checkbox'),  $('ffe_ti').getFirstControl());
+    this.assertEqual($('ffe_ti2_checkbox'), $('ffe_ti2').getFirstControl());
   },
 
   'testFormSerialize': function() {
@@ -501,10 +501,10 @@ new Test.Unit.Runner({
 
   'testFormElementMethodsChaining': function() {
     var methods = $w('clear activate disable enable'),
-      formElements = $('form').getElements();
+      formControls = $('form').getControls();
  
     methods.each(function(method) {
-      formElements.each(function(element) {
+      formControls.each(function(element) {
         var returned = element[method]();
         this.assertIdentical(element, returned);
       }, this);
@@ -570,7 +570,7 @@ new Test.Unit.Runner({
 
   'testFormMethodsReturnElement': function() {
     element = $('form');
-    $w('disable enable focusFirstElement reset').each(function(method) {
+    $w('disable enable focusFirstControl reset').each(function(method) {
       this.assert(element === $('form')[method](),
         'fuse.dom.FormElement#' + method + ' returned a non element value.');
     }, this);
