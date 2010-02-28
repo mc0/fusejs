@@ -1,47 +1,47 @@
 <form id="form" method="get" action="../fixtures/empty.js">
-  <input type="text" name="val1" id="input_enabled" value="4" />
+  <input type="text" name="val1" id="input_enabled" value="4">
   <div>This is not a form element</div>
-  <input type="text" name="val2" id="input_disabled" disabled="disabled" value="5" />
-  <input type="submit" name="first_submit" value="Commit it!" />
-  <input type="submit" name="second_submit" value="Delete it!" />
-  <input type="text" name="action" value="blah" />
+  <input type="text" name="val2" id="input_disabled" disabled="disabled" value="5">
+  <input type="submit" name="first_submit" value="Commit it!">
+  <input type="submit" name="second_submit" value="Delete it!">
+  <input type="text" name="action" value="blah">
 </form>
 
 <form id="bigform" method="get" action="fixtures/empty.js">
   <div id="inputs">
-    <input type="text"   name="dummy"  id="dummy_disabled" disabled="disabled"/>
-    <input type="submit" name="commit" id="submit" />
-    <input type="image"  name="commit_img" id="input_image" src="../fixtures/logo.gif" value="1" />
-    <input type="button" name="clicky" value="click me" />
-    <input type="reset"  name="revert" />
-    <input type="text"   name="greeting" id="focus_text" value="Hello" />
-    <input type="search" name="search" id="search" value="search" />
+    <input type="text"   name="dummy"  id="dummy_disabled" disabled="disabled">
+    <input type="submit" name="commit" id="submit">
+    <input type="image"  name="commit_img" id="input_image" src="../fixtures/logo.gif" value="1">
+    <input type="button" name="clicky" value="click me">
+    <input type="reset"  name="revert">
+    <input type="text"   name="greeting" id="focus_text" value="Hello">
+    <input type="search" name="search" id="search" value="search">
   </div>
 
   <!-- some edge cases in serialization -->
   <div id="value_checks">
-    <input name="twin" type="text" value="" /> 
-    <input name="twin" type="text" value="siamese" />
+    <input name="twin" type="text" value=""> 
+    <input name="twin" type="text" value="siamese">
     <!-- Rails checkbox hack with hidden input: -->
-    <input name="checky" type="checkbox" id="checkbox_hack" value="1" /> 
-    <input name="checky" type="hidden" value="0" />
+    <input name="checky" type="checkbox" id="checkbox_hack" value="1"> 
+    <input name="checky" type="hidden" value="0">
   </div>
 
   <div id="button_elements">
     <button type="button" id="button_button" name="bu_button" value="1">
-      <img src="../fixtures/logo.gif"/>
+      <img src="../fixtures/logo.gif">
       Button
     </button>
     <button type="button" id="button_novalue" name="bu_novalue" >
-      <img src="../fixtures/logo.gif"/>
+      <img src="../fixtures/logo.gif">
       No Value
     </button>
     <button type="submit" id="button_submit" name="bu_submit" value="1">
-      <img src="../fixtures/logo.gif"/>
+      <img src="../fixtures/logo.gif">
       Submit
     </button>
     <button type="reset" id="button_reset" name="bu_reset" value="1">
-      <img src="../fixtures/logo.gif"/>
+      <img src="../fixtures/logo.gif">
       Reset
     </button>
   </div>
@@ -86,62 +86,62 @@
   <div id="various">
     <select name="tf_selectOne"><option selected="selected"></option><option>1</option></select>
     <textarea name="tf_textarea"></textarea>
-    <input type="checkbox" name="tf_checkbox" value="on" />
+    <input type="checkbox" name="tf_checkbox" value="on">
     <select name="tf_selectMany" multiple="multiple"></select>
-    <input type="text" name="tf_text" />
+    <input type="text" name="tf_text">
     <div>This is not a form element</div>
-    <input type="radio" name="tf_radio" value="on" />
-    <input type="hidden" name="tf_hidden" />
-    <input type="password" name="tf_password" />
+    <input type="radio" name="tf_radio" value="on">
+    <input type="hidden" name="tf_hidden">
+    <input type="password" name="tf_password">
   </div>
 </form>
 
 <form id="form_with_control_groups">
-  <input type="radio" name="group_radio" value="1r" />
-  <input type="radio" name="group_radio" value="2r" checked />
-  <input type="radio" name="group_radio" value="3r" />
-  <input type="checkbox" name="group_checkbox" value="1c" />
-  <input type="checkbox" name="group_checkbox" value="2c" checked />
-  <input type="checkbox" name="group_checkbox" value="3c" />
+  <input type="radio" name="group_radio" value="1r">
+  <input type="radio" name="group_radio" value="2r" checked>
+  <input type="radio" name="group_radio" value="3r">
+  <input type="checkbox" name="group_checkbox" value="1c">
+  <input type="checkbox" name="group_checkbox" value="2c" checked>
+  <input type="checkbox" name="group_checkbox" value="3c">
 </form>
 
 <form id="form_focus_hidden" style="display: none">
-  <input type="text" />
+  <input type="text">
 </form>
 
 <form id="form_empty">
 </form>
 
 <form id="form_with_file_input">
-  <input type="file" name="file_name" value="foo" />
+  <input type="file" name="file_name" value="foo">
 </form>
 
 <form id="form_with_object_prototypes">
-  <input type="text" name="length"   />
-  <input type="text" name="toString" />
-  <input type="text" name="valueOf"  />
+  <input type="text" name="length">
+  <input type="text" name="toString">
+  <input type="text" name="valueOf">
 </form>
 
 <!-- tabindexed forms -->
 <div id="tabindex">
   <form id="ffe">
-    <p><input type="text" disabled="disabled" id="ffe_disabled" /></p>
-    <input type="hidden" id="ffe_hidden" />
-    <input type="checkbox" id="ffe_checkbox" />
+    <p><input type="text" disabled="disabled" id="ffe_disabled"></p>
+    <input type="hidden" id="ffe_hidden">
+    <input type="checkbox" id="ffe_checkbox">
   </form>
 
   <form id="ffe_ti">
-    <p><input type="text" disabled="disabled" id="ffe_ti_disabled" /></p>
-    <input type="hidden" id="ffe_ti_hidden" />
-    <input type="checkbox" id="ffe_ti_checkbox" />
-    <input type="submit" id="ffe_ti_submit" tabindex="1" />
+    <p><input type="text" disabled="disabled" id="ffe_ti_disabled"></p>
+    <input type="hidden" id="ffe_ti_hidden">
+    <input type="checkbox" id="ffe_ti_checkbox">
+    <input type="submit" id="ffe_ti_submit" tabindex="1">
   </form>
 
   <form id="ffe_ti2">
-    <p><input type="text" disabled="disabled" id="ffe_ti2_disabled" /></p>
-    <input type="hidden" id="ffe_ti2_hidden" />
-    <input type="checkbox" id="ffe_ti2_checkbox" tabindex="0" />
-    <input type="submit" id="ffe_ti2_submit" tabindex="1" />
+    <p><input type="text" disabled="disabled" id="ffe_ti2_disabled"></p>
+    <input type="hidden" id="ffe_ti2_hidden">
+    <input type="checkbox" id="ffe_ti2_checkbox" tabindex="0">
+    <input type="submit" id="ffe_ti2_submit" tabindex="1">
   </form>
   
 </div>
