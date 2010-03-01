@@ -1,3 +1,5 @@
+* Rename the fuse.dom.Data object to fuse.dom.data. [jddalton]
+
 * Avoid calling decorator instance method focus() in Form focusFirstControl(). [Diego Perini, jddalton]
 
 * Make fuse.dom.InputElement.EventObserver registerCallback() method use fuse.get() to resolve the `element` argument. [jddalton]

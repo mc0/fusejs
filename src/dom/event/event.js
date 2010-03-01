@@ -214,14 +214,14 @@
     }
 
     function getOrCreateCache(id, eventName) {
-      var data = Data[id], events = data.events || (data.events = { });
+      var data = domData[id], events = data.events || (data.events = { });
       return (events[eventName] = events[eventName] ||
         { 'handlers': [], 'dispatcher': false });
     }
 
     function removeCacheAtIndex(id, eventName, index) {
       // remove responders and handlers at the given index
-      var events = Data[id].events, ec = events[eventName];
+      var events = domData[id].events, ec = events[eventName];
       ec.handlers.splice(index, 1);
 
       // if no more handlers/responders then
@@ -262,10 +262,12 @@
 
     function winLoadWrapper(event) {
       event = event || global.event;
-      if (!fuse.get(fuse._doc).loaded)
+      if (!fuse.get(fuse._doc).loaded) {
         domLoadWrapper(event);
-      else if (Data['2'] && Data['2'].events['dom:loaded'])
+      }
+      else if (domData['2'] && domData['2'].events['dom:loaded']) {
         return setTimeout(function() { winLoadWrapper(event); }, 10);
+      }
 
       event.eventName = nil;
       winLoadDispatcher(event);
@@ -301,7 +303,7 @@
         addCache(id, eventName, element[attrName]);
       }
 
-      element[attrName] = Data[id].events[eventName].dispatcher;
+      element[attrName] = domData[id].events[eventName].dispatcher;
     },
 
     // DOM Level 0
@@ -318,9 +320,9 @@
         event = Event.extend(event || getWindow(this).event, this);
 
         var handlers, length,
-         data = Data[id],
+         data    = domData[id],
          context = data.decorator.raw,
-         events = data.events,
+         events  = data.events,
          ec = events && events[event.eventName || eventName];
 
         if (!ec) return false;
@@ -361,7 +363,7 @@
 
           // shallow copy handlers to avoid issues with nested
           // observe/stopObserving
-          var data  = Data[id],
+          var data  = domData[id],
            ec       = data.events[eventName],
            node     = data.decorator.raw,
            context  = data.decorator,
@@ -524,7 +526,7 @@
       eventName = isString(eventName) ? eventName : null;
 
       id = Node.getFuseId(element);
-      events = Data[id].events;
+      events = domData[id].events;
 
       if (!events) return decorator;
       ec = events[eventName];

@@ -11,7 +11,7 @@
       }
 
       // return cached if available
-      var decorated, id = Node.getFuseId(object), data = Data[id];
+      var decorated, id = Node.getFuseId(object), data = domData[id];
       if (data.decorator) return data.decorator;
 
       decorated =

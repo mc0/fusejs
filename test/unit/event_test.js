@@ -199,7 +199,7 @@ new Test.Unit.Runner({
     span.observe('test:somethingHappened', observer);
 
     fuseId = span.getFuseId();
-    data   = fuse.dom.Data[fuseId];
+    data   = fuse.dom.data[fuseId];
     events = data.events;
 
     this.assert(data);

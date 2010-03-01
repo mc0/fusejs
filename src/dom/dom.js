@@ -1,12 +1,10 @@
   /*---------------------------------- DOM -----------------------------------*/
 
-  fuse.addNS('dom');
+  domData =
+  fuse.addNS('dom.data');
 
-  Data =
-  fuse.dom.Data = { };
-
-  Data['1'] = { };
-  Data['2'] = { 'nodes': { } };
+  domData['1'] = { };
+  domData['2'] = { 'nodes': { } };
 
   fuse._doc   = global.document;
   fuse._div   = fuse._doc.createElement('DiV');

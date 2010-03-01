@@ -126,7 +126,7 @@
 
               // cache flag evaluation
               if (isCached !== false) {
-                Data[getFuseId(element)].decorator = decorated;
+                domData[getFuseId(element)].decorator = decorated;
               }
             }
           }
@@ -138,7 +138,7 @@
 
             // cache flag evaluation
             if (isCached !== false) {
-              Data[getFuseId(element)].decorator = result;
+              domData[getFuseId(element)].decorator = result;
             }
           }
           return result;
@@ -150,7 +150,7 @@
 
       context || (context = doc);
       id = context === doc ? '2' : getFuseId(getDocument(context));
-      data = Data[id].nodes;
+      data = domData[id].nodes;
       clone =
         (data[tagName] ||
         (data[tagName] = context.createElement(tagName)))
@@ -162,7 +162,7 @@
 
       // cache flag evaluation
       if ((attributes && attributes.cache) !== false) {
-        Data[getFuseId(clone)].decorator = decorated;
+        domData[getFuseId(clone)].decorator = decorated;
       }
 
       return attributes
@@ -186,7 +186,7 @@
       if (element.raw) return element;
 
       // return cached if available
-      var id = getFuseId(element), data = Data[id];
+      var id = getFuseId(element), data = domData[id];
       if (data.decorator) return data.decorator;
 
       Decorator.prototype = getOrCreateTagClass(element.tagName).plugin;
@@ -277,7 +277,7 @@
     },
 
     getFragmentCache = function(ownerDoc) {
-      var id = ownerDoc === doc ? '2' : getFuseId(ownerDoc), data = Data[id];
+      var id = ownerDoc === doc ? '2' : getFuseId(ownerDoc), data = domData[id];
       return data.fragmentCache || (data.fragmentCache = {
         'node':     ownerDoc.createElement('div'),
         'fragment': ownerDoc.createDocumentFragment()
@@ -293,7 +293,7 @@
 
             context || (context = doc);
             id = context === doc ? '2' : getFuseId(getDocument(context));
-            data = Data[id].nodes;
+            data = domData[id].nodes;
 
             tagName = '<' + tagName +
               (name ? ' name="' + name + '"' : '') +
@@ -309,7 +309,7 @@
 
             // may choose to avoid caching for performance/memory
             if (attributes.cache !== false) {
-              Data[getFuseId(clone)].decorator = decorated;
+              domData[getFuseId(clone)].decorator = decorated;
             }
 
             delete attributes.name; delete attributes.type; delete attributes.cache;
@@ -338,7 +338,7 @@
       };
 
       getFragmentCache = function(ownerDoc) {
-        var id = ownerDoc === doc ? '2' : getFuseId(ownerDoc), data = Data[id];
+        var id = ownerDoc === doc ? '2' : getFuseId(ownerDoc), data = domData[id];
         return data.fragmentCache || (data.fragmentCache = {
           'node':     ownerDoc.createElement('div'),
           'fragment': ownerDoc.createDocumentFragment(),

@@ -299,14 +299,14 @@
        display = elemStyle.display;
 
       if (display && display !== 'none')
-        Data[getFuseId(element)].madeHidden = display;
+        domData[getFuseId(element)].madeHidden = display;
       elemStyle.display = 'none';
       return this;
     };
 
     plugin.show = function show() {
       var element = this.raw || this,
-       data = Data[getFuseId(element)],
+       data = domData[getFuseId(element)],
        elemStyle = element.style,
        display = elemStyle.display;
 

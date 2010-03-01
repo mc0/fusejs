@@ -44,7 +44,6 @@
       plugin.registerCallback = function registerCallback(element) {
         var type, decorator = fuse.get(element);
         element = decorator.raw || decorator;
-
         if (type = element.type) {
           decorator.observe(CHECKED_INPUT_TYPES[type] ? 'click' : 'change',
             this.onElementEvent);

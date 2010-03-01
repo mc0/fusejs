@@ -47,7 +47,7 @@
          width     = getWidth.call(this,  'content'),
          height    = getHeight.call(this, 'content'),
          offsets   = plugin.getPositionedOffset.call(this),
-         backup    = Data[getFuseId(element)].madeAbsolute = {
+         backup    = domData[getFuseId(element)].madeAbsolute = {
            'position':   elemStyle.position,
            'left':       elemStyle.left,
            'top':        elemStyle.top,
@@ -74,13 +74,13 @@
     plugin.undoAbsolute = function undoAbsolute() {
       if (getStyle.call(this, 'position') == 'absolute') {
         var element = this.raw || this,
-         data = Data[getFuseId(element)],
+         data = domData[getFuseId(element)],
          backup = data.madeAbsolute,
          elemStyle = element.style;
 
-        if (!backup)
+        if (!backup) {
           throw new Error('Element#makeAbsolute must be called first.');
-
+        }
         elemStyle.position   = backup.position;
         elemStyle.left       = backup.left;
         elemStyle.top        = backup.top;
@@ -97,7 +97,7 @@
     plugin.makeClipping = function makeClipping() {
       if (getStyle.call(this, 'overflow') != 'hidden') {
         var element = this.raw || this;
-        Data[getFuseId(element)].madeClipped = getStyle.call(this, 'overflow') || 'auto';
+        domData[getFuseId(element)].madeClipped = getStyle.call(this, 'overflow') || 'auto';
         element.style.overflow = 'hidden';
       }
       return this;
@@ -106,12 +106,12 @@
     plugin.undoClipping = function undoClipping() {
       if (getStyle.call(this, 'overflow') == 'hidden') {
         var element = this.raw || this,
-         data = Data[getFuseId(element)],
+         data = domData[getFuseId(element)],
          overflow = data.madeClipped;
 
-        if (!overflow)
+        if (!overflow) {
           throw new Error('Element#makeClipping must be called first.');
-
+        }
         element.style.overflow = overflow == 'auto' ? '' : overflow;
         delete data.madeClipped;
       }
@@ -124,7 +124,7 @@
        pos = getStyle.call(this, 'position');
 
       if (!pos || pos == 'static') {
-        Data[getFuseId(element)].madePositioned = {
+        domData[getFuseId(element)].madePositioned = {
           'position': elemStyle.position,
           'left':     elemStyle.left,
           'top':      elemStyle.top
@@ -141,13 +141,13 @@
     plugin.undoPositioned = function undoPositioned() {
       if (getStyle.call(this, 'position') == 'relative') {
         var element = this.raw || this,
-        data = Data[getFuseId(element)],
-        backup = data.madePositioned,
-        elemStyle = element.style;
+         data = domData[getFuseId(element)],
+         backup = data.madePositioned,
+         elemStyle = element.style;
 
-        if (!backup)
+        if (!backup) {
           throw new Error('Element#makePositioned must be called first.');
-
+        }
         elemStyle.position = backup.position;
         elemStyle.top      = backup.top;
         elemStyle.left     = backup.left;

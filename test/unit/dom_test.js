@@ -551,7 +551,7 @@ new Test.Unit.Runner({
 
   'testElementHide': function(){
     var element = $('test-hide-visible'),
-     data = fuse.dom.Data[element.getFuseId()];
+     data = fuse.dom.data[element.getFuseId()];
 
     element.hide();
     this.assert(!element.isVisible());
@@ -563,7 +563,7 @@ new Test.Unit.Runner({
 
   'testHideAndShowWithInlineDisplay': function() {
     var element =  $('test-visible-inline'),
-     data = fuse.dom.Data[element.getFuseId()];
+     data = fuse.dom.data[element.getFuseId()];
 
     element.show();
     this.assertEqual('inline', element.style.display,

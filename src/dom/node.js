@@ -28,7 +28,7 @@
           return node;
         }
         // return cached if available
-        if ((data = Data[id]).decorator) {
+        if ((data = domData[id]).decorator) {
           return data.decorator;
         }
         // pass to element decorator
@@ -56,7 +56,7 @@
       // quick return for nodes with ids
       // IE can avoid adding an expando on each node and use the `uniqueNumber` property instead.
       if (id) {
-        Data[id] || (Data[id] = { });
+        domData[id] || (domData[id] = { });
         return id;
       }
 
@@ -71,7 +71,7 @@
           id = '1';
           if (node != global) {
             id = getFuseId(win.frameElement) + '-1';
-            Data[id] || (Data[id] = { });
+            domData[id] || (domData[id] = { });
           }
         } else {
           id = false;
@@ -83,12 +83,12 @@
         if (node === fuse._doc) return '2';
         // calculate id for foreign document objects
         id = getFuseId(win.frameElement) + '-2';
-        Data[id] || (Data[id] = { 'nodes': { } });
+        domData[id] || (domData[id] = { 'nodes': { } });
         return id;
       }
 
       id = node._fuseId = fuseId++;
-      Data[id] = { };
+      domData[id] = { };
       return id;
     };
 
