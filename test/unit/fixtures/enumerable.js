@@ -1,6 +1,7 @@
 function prime(value) {
-  for (var i = 2; i < value; i++)
+  for (var i = 2; i < value; i++) {
     if (value % i === 0) return false;
+  }
   return true;
 }
 
@@ -30,9 +31,7 @@ var Fixtures = {
   ]),
   
   'Nicknames': new EnumObject($w('sam- noradio htonl Ulysses')),
-  
-  'Emoticons': new EnumObject($w(';-) ;-( :-) :-P')),
-  
+
   'UndefinedValues': new EnumObject(['a', 'b', undef]),
   
   'NullValues': new EnumObject(['a', 'b', null]),
@@ -50,6 +49,8 @@ var Fixtures = {
   'Z': []
 };
 
-for (var i = 1; i < 101; i++)
+for (var i = 1; i < 101; i++) {
   Fixtures.Z.push(i);
+}
+
 Fixtures.Z = new EnumObject(Fixtures.Z);

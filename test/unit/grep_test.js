@@ -1,15 +1,6 @@
 new Test.Unit.Runner({
 
   'testArrayGrep': function() {
-    var Selector = fuse.Class({
-      'initialize': function(pattern) {
-        this.pattern = pattern;
-      },
-      'test': function(element) {
-        return fuse.dom.selector.match(element, this.pattern);
-      }
-    });
-
     // test empty pattern
     this.assertEqual('abc', fuse.Array('a', 'b', 'c').grep('').join(''));
     this.assertEqual('abc', fuse.Array('a', 'b', 'c').grep(new RegExp('')).join(''));
@@ -34,16 +25,6 @@ new Test.Unit.Runner({
 
 
   'testEnumerableGrep': function() {
-    var Selector = fuse.Class({
-      'initialize': function(pattern) {
-        this.pattern = pattern;
-      },
-
-      'test': function(element) {
-        return fuse.dom.selector.match(element, this.pattern);
-      }
-    });
-
     // test empty pattern
     this.assertEqual('abc',
       new EnumObject(['a', 'b', 'c']).grep('').join(''));
@@ -51,11 +32,11 @@ new Test.Unit.Runner({
     this.assertEqual('abc',
       new EnumObject(['a', 'b', 'c']).grep(new RegExp('')).join(''));
 
-    this.assertEqual('noradio, htonl',
-      Fixtures.Nicknames.grep(/o/).join(", "));
+    this.assertEqual('juanbond, jdd',
+      Fixtures.Nicknames.grep(/j/).join(', '));
 
-    this.assertEqual('NORADIO, HTONL',
-      Fixtures.Nicknames.grep(/o/, function(nickname) {
+    this.assertEqual('JUANBOND, JDD',
+      Fixtures.Nicknames.grep(/j/, function(nickname) {
         return nickname.toUpperCase();
       }).join(", "));
 

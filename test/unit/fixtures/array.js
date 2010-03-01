@@ -1,6 +1,7 @@
 function prime(value) {
-  for (var i = 2; i < value; i++)
+  for (var i = 2; i < value; i++) {
     if (value % i == 0) return false;
+  }
   return true;
 }
 
@@ -14,9 +15,7 @@ var Fixtures = {
     { 'name': 'Juriy Zaytsev',     'nickname': 'kangax' }
   ),
 
-  'Nicknames': fuse.util.$w('juanbond jdd dperini kangax'),
-
-  'Emoticons': fuse.util.$w(';-) ;-( :-) :-P'),
+  'Nicknames': $w('juanbond jdd dperini kangax'),
 
   'Basic': fuse.Array(1, 2, 3),
 
@@ -31,5 +30,6 @@ var Fixtures = {
   'Z': fuse.Array()
 };
 
-for (var i = 1; i < 101; i++)
+for (var i = 1; i < 101; i++) {
   Fixtures.Z.push(i);
+}
