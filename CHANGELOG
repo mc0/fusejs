@@ -1,3 +1,5 @@
+* Fix fuse.Fusebox wrappers for Number methods toExponential(), toFixed(), and toPrecision(). [jddalton]
+
 * Add `fractionDigits` argument to fuse.Number#round. [Prototype LH #830] [jddalton, Radoslav Stankov]
 
 * Ensure fuse.Fusebox Native methods that return arrays set index values in accending order so de facto order is preserved in for-in loops. [jddalton]

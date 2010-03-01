@@ -663,16 +663,16 @@
           return instance.String(__toJSON.call(this));
         };
 
-      numPlugin.toExponential = function toExponential() {
-        return Number(__toExponential.call(this));
+      numPlugin.toExponential = function toExponential(fractionDigits) {
+        return instance.String(__toExponential.call(this, fractionDigits));
       };
 
-      numPlugin.toFixed = function toFixed() {
-        return Number(__toFixed.call(this));
+      numPlugin.toFixed = function toFixed(fractionDigits) {
+        return instance.String(__toFixed.call(this, fractionDigits));
       };
 
-      numPlugin.toPrecision = function toPrecision() {
-        return Number(__toPrecision.call(this));
+      numPlugin.toPrecision = function toPrecision(precision) {
+        return instance.String(__toPrecision.call(this, precision));
       };
 
       rePlugin.exec = function exec(string) {
