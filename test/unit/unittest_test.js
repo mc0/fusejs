@@ -153,6 +153,6 @@ new Test.Unit.Runner({
   },
 
   'testMultipleTestRunner': function() {
-    this.assertEqual('passed', $('testlog_2').down('td', 1).raw.innerHTML);
+    this.assertEqual('passed', $('testlog_2').down('td', 2)[1].raw.innerHTML);
   }
 }, { 'testLog': 'testlog_2' });
