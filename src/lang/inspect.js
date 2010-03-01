@@ -3,7 +3,7 @@
   (function() {
     var objInspect, strInspect,
 
-    arrPlugin = fuse.Array.plugin,
+    arrPlugin   = fuse.Array.plugin,
 
     elemPlugin  = fuse.dom && fuse.dom.Element.plugin,
 

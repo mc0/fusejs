@@ -107,11 +107,13 @@
         };
       }
     }
-    else hasKey = function hasKey(object, property) {
-      // ECMA-5 15.2.4.5
-      if (object == null) throw new TypeError;
-      return hasOwnProperty.call(object, property);
-    };
+    else {
+      hasKey = function hasKey(object, property) {
+        // ECMA-5 15.2.4.5
+        if (object == null) throw new TypeError;
+        return hasOwnProperty.call(object, property);
+      };
+    }
 
     // Garrett Smith found an Opera bug that occurs with the window object and not the global
     if (typeof window !== 'undefined' && window.Object && !hasKey(window, 'Object')) {
