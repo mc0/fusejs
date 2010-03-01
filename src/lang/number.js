@@ -1,29 +1,30 @@
   /*------------------------------ LANG: NUMBER ------------------------------*/
 
   (function(plugin) {
-    plugin.abs = (function() {
-      function abs() { return fuse.Number(__abs(this)); }
-      var __abs = Math.abs;
-      return abs;
-    })();
+    var pad    = '000000',
+     __toFixed = (0).toFixed,
+     __abs     = Math.abs,
+     __ceil    = Math.ceil,
+     __floor   = Math.floor,
+     __round   = Math.round;
 
-    plugin.ceil = (function() {
-      function ceil() { return fuse.Number(__ceil(this)); }
-      var __ceil = Math.ceil;
-      return ceil;
-    })();
+    plugin.abs = function abs() {
+      return fuse.Number(__abs(this));
+    };
 
-    plugin.floor = (function() {
-      function floor() { return fuse.Number(__floor(this)); }
-      var __floor = Math.floor;
-      return floor;
-    })();
+    plugin.ceil = function ceil() {
+      return fuse.Number(__ceil(this));
+    };
 
-    plugin.round = (function() {
-      function round() { return fuse.Number(__round(this)); }
-      var __round = Math.round;
-      return round;
-    })();
+    plugin.floor = function floor() {
+      return fuse.Number(__floor(this));
+    };
+
+    plugin.round = function round(fractionDigits) {
+      return fuse.Number(fractionDigits
+        ? parseFloat(__toFixed.call(this, fractionDigits))
+        : __round(this));
+    };
 
     plugin.times = function times(callback, thisArg) {
       var i = 0, length = toInteger(this);
@@ -39,18 +40,19 @@
       return plugin.toPaddedString.call(this, 2, 16);
     };
 
-    plugin.toPaddedString = (function() {
-      function toPaddedString(length, radix) {
-        var string = toInteger(this).toString(radix || 10);
-        if (length <= string.length) return fuse.String(string);
-        if (length > pad.length) pad = new Array(length + 1).join('0');
-        return fuse.String((pad + string).slice(-length));
-      }
-
-      var pad = '000000';
-      return toPaddedString;
-    })();
+    plugin.toPaddedString = function toPaddedString(length, radix) {
+      var string = toInteger(this).toString(radix || 10);
+      if (length <= string.length) return fuse.String(string);
+      if (length > pad.length) pad = new Array(length + 1).join('0');
+      return fuse.String((pad + string).slice(-length));
+    };
 
     // prevent JScript bug with named function expressions
-    var times = nil, toColorPart = nil;
+    var abs =         nil,
+     ceil =           nil,
+     floor =          nil,
+     round =          nil,
+     times =          nil,
+     toColorPart =    nil,
+     toPaddedString = nil;
   })(fuse.Number.plugin);

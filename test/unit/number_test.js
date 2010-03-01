@@ -1,13 +1,24 @@
 new Test.Unit.Runner({
 
   'testNumberMathMethods': function() {
-    this.assertEqual(1,  fuse.Number(0.9).round());
-    this.assertEqual(-2, fuse.Number(-1.9).floor());
-    this.assertEqual(-1, fuse.Number(-1.9).ceil());
+    this.assertEqual(2,  fuse.Number(-2).abs(),     'abs() failed');
+    this.assertEqual(-2, fuse.Number(-1.9).floor(), 'floor() failed');
+    this.assertEqual(-1, fuse.Number(-1.9).ceil(),  'ceil() failed');
+    this.assertEqual(1,  fuse.Number(0.9).round(),  'round() failed');
+
+    this.assertEqual(0.13,  fuse.Number(0.129).round(2),
+      'round() with argument should round last digit');
+
+    this.assertEqual(0.350, fuse.Number(0.3499).round(3),
+      'round() with argument should round should cascade');
+
+    this.assertEqual(1.00,  fuse.Number(1).round(2),
+      'round() with argument should add decimal places to whole numbers');
 
     var PI = fuse.Number(Math.PI);
     $w('abs floor round ceil').each(function(method) {
-      this.assertEqual(Math[method](Math.PI), PI[method]());
+      this.assertEqual(Math[method](Math.PI), PI[method](),
+        'fuse.Number#' + method + ' result should be the same as Math methods.');
     }, this);
   },
 
