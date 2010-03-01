@@ -676,10 +676,10 @@
       };
 
       rePlugin.exec = function exec(string) {
-        var length, results, output = __exec.call(this, string);
+        var i, length, results, output = __exec.call(this, string);
         if (output) {
-          length = output.length; results = instance.Array();
-          while (length--) results[length] = instance.String(output[length]);
+          i = -1; length = output.length; results = instance.Array();
+          while (++i < length) results[i] = instance.String(output[i]);
         }
         return output && results;
       };
@@ -714,10 +714,10 @@
       };
 
       strPlugin.match = function match(pattern) {
-        var length, results, output = __match.call(this, pattern);
+        var i, length, results, output = __match.call(this, pattern);
         if (output) {
-          length = output.length; results = instance.Array();
-          while (length--) results[length] = String(output[length]);
+          i = -1; length = output.length; results = instance.Array();
+          while (++i < length) results[i] = String(output[i]);
         }
         return output && results;
       };
@@ -736,9 +736,9 @@
       };
 
       strPlugin.split = function split(separator, limit) {
-        var output = __split.call(this, separator, limit),
+        var i = -1, output = __split.call(this, separator, limit),
          length = output.length, results = instance.Array();
-        while (length--) results[length] = String(output[length]);
+        while (++i < length) results[i] = String(output[i]);
         return results;
       };
 

@@ -1,3 +1,5 @@
+* Ensure fuse.Fusebox Native methods that return arrays set index values in accending order so de facto order is preserved in for-in loops. [jddalton]
+
 * Rename the fuse.dom.Data object to fuse.dom.data. [jddalton]
 
 * Avoid calling decorator instance method focus() in Form focusFirstControl(). [Diego Perini, jddalton]
