@@ -42,11 +42,11 @@
       };
 
       plugin.registerCallback = function registerCallback(element) {
-        element = element.raw || element;
-        var type = element.type;
-        if (type) {
-          Event.observe(element,
-            CHECKED_INPUT_TYPES[type] ? 'click' : 'change',
+        var type, decorator = fuse.get(element);
+        element = decorator.raw || decorator;
+
+        if (type = element.type) {
+          decorator.observe(CHECKED_INPUT_TYPES[type] ? 'click' : 'change',
             this.onElementEvent);
         }
       };

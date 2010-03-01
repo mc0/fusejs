@@ -1,3 +1,7 @@
+* Avoid calling decorator instance method focus() in Form focusFirstControl(). [Diego Perini, jddalton]
+
+* Make fuse.dom.InputElement.EventObserver registerCallback() method use fuse.get() to resolve the `element` argument. [jddalton]
+
 * Rename Form methods getElements() to getControls(), findFirstElement() to getFirstControl(), and focusFirstElement() to focusFirstControl(). [jddalton]
   Note: Backwards compatibility warning.
 

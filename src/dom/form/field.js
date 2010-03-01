@@ -104,7 +104,7 @@
     selectPlugin.focus   =
     textAreaPlugin.focus =
     inputPlugin.focus = function focus() {
-      // avoid IE errors when element or ancestors are not visible
+      // avoid IE errors when element or ancestors are not rendered
       try { (this.raw || this).focus(); } catch(e) { }
       return this;
     };

@@ -109,7 +109,9 @@
 
     plugin.focusFirstControl = function focusFirstControl() {
       var element = plugin.getFirstControl.call(this);
-      element && element.focus();
+      if (element) {
+        try { (element.raw || element).focus(); } catch(e) { }
+      }
       return this;
     };
 
