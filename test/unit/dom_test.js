@@ -1302,6 +1302,11 @@ new Test.Unit.Runner({
     $('style_test_3').setStyle({ 'cssFloat': 'none' });
     this.assertEqual('none', $('style_test_3').getStyle('float'));
 
+    // test hyphenated properties
+    $('style_test_3').setStyle({ 'margin-top': '3px' });
+    this.assertEqual('3px',  $('style_test_3').getStyle('margin-top'),
+      'Should support setting hyphenated properties.');
+
     this.assertEqual(1, $('style_test_3').getStyle('opacity'));
 
     $('style_test_3').setStyle({ 'opacity': 0.5 });

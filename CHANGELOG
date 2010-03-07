@@ -1,3 +1,5 @@
+* Make fuse.dom.Element setStyle() method support hyphenated style properties. [Prototype LH #970] [jddalton, zeno]
+
 * Fix fuse.Fusebox wrappers for Number methods toExponential(), toFixed(), and toPrecision(). [jddalton]
 
 * Add `fractionDigits` argument to fuse.Number#round. [Prototype LH #830] [jddalton, Radoslav Stankov]

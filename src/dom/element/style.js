@@ -12,7 +12,18 @@
 
     RELATIVE_CSS_UNITS = { 'em': 1, 'ex': 1 },
 
-    camelize = fuse.String.plugin.camelize,
+    camelize = (function() {
+      var cache = { },
+      reHyphenated = /-([a-z])/gi,
+      toUpperCase = function(match, letter) { return letter.toUpperCase(); },
+      replace = envTest('STRING_REPLACE_COERCE_FUNCTION_TO_STRING') ?
+        fuse.String.plugin.replace : ''.replace;
+
+      return function(string) {
+        return cache[string] ||
+          (cache[string] = replace.call(string, reHyphenated, toUpperCase));
+      };
+    })(),
 
     nullHandlers = [],
 
@@ -56,7 +67,7 @@
 
 
     plugin.setStyle = function setStyle(styles) {
-      var hasOpacity, key, opacity, elemStyle = this.style;
+      var hasOpacity, key, value, opacity, elemStyle = this.style;
 
       if (isString(styles)) {
         elemStyle.cssText += ';' + styles;
@@ -65,20 +76,24 @@
           : this;
       }
 
-      if (isHash(styles)) styles = styles._object;
-      hasOpacity = 'opacity' in styles;
+      if (isHash(styles)) {
+        styles = styles._object;
+      }
 
-      if (hasOpacity) {
+      if (hasOpacity = 'opacity' in styles) {
         opacity = styles.opacity;
         plugin.setOpacity.call(this, opacity);
         delete styles.opacity;
       }
 
       for (key in styles) {
-        elemStyle[FLOAT_TRANSLATIONS[key] || key] = styles[key];
+        value = styles[key]; key = camelize(key);
+        elemStyle[FLOAT_TRANSLATIONS[key] || key] = value;
       }
 
-      if (hasOpacity) styles.opacity = opacity;
+      if (hasOpacity) {
+        styles.opacity = opacity;
+      }
       return this;
     };
 
@@ -86,14 +101,14 @@
     // fallback for browsers without computedStyle or currentStyle
     if (!envTest('ELEMENT_COMPUTED_STYLE') && !envTest('ELEMENT_CURRENT_STYLE')) {
       plugin.getStyle = function getStyle(name) {
-        var result = getValue(this, camelize.call(name));
+        var result = getValue(this, camelize(name));
         return result === null ? result : fuse.String(result);
       };
     }
     // Opera 9.2x
     else if (envTest('ELEMENT_COMPUTED_STYLE_DIMENSIONS_EQUAL_BORDER_BOX')) {
       plugin.getStyle = function getStyle(name) {
-        name = camelize.call(name);
+        name = camelize(name);
         var dim, result, element = this.raw || this;
 
         if (isNull(element, name))
@@ -113,7 +128,7 @@
     // Firefox, Safari, Opera 9.5+
     else if (envTest('ELEMENT_COMPUTED_STYLE')) {
       plugin.getStyle = function getStyle(name) {
-        name = camelize.call(name);
+        name = camelize(name);
         var result, element = this.raw || this;
 
         if (isNull(element, name)) return null;
@@ -144,7 +159,7 @@
         }
 
         element = this.raw || this;
-        name = camelize.call(name);
+        name = camelize(name);
 
         // get cascaded style
         name      = FLOAT_TRANSLATIONS[name] || name;
