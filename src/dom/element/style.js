@@ -87,7 +87,7 @@
       }
 
       for (key in styles) {
-        value = styles[key]; key = camelize(key);
+        value = String(styles[key] || ''); key = camelize(key);
         elemStyle[FLOAT_TRANSLATIONS[key] || key] = value;
       }
 

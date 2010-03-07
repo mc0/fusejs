@@ -1307,6 +1307,11 @@ new Test.Unit.Runner({
     this.assertEqual('3px',  $('style_test_3').getStyle('margin-top'),
       'Should support setting hyphenated properties.');
 
+    // test setting a falsy value (in IE)
+    this.assertNothingRaised(function() {
+      $('style_test_3').setStyle({ 'bottom': +'x' }); }, 
+      'Should not throw error when passing a falsy style value.');
+
     this.assertEqual(1, $('style_test_3').getStyle('opacity'));
 
     $('style_test_3').setStyle({ 'opacity': 0.5 });
