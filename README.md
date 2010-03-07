@@ -1,5 +1,5 @@
 <a href="http://fusejs.com">
-<img title="FuseJS - Fuse to win!" alt="FuseJS Logo" style="border:0;" src="fusejs/raw/master/logo.png">
+<img title="FuseJS - Fuse to win!" alt="http://fusejs.com" style="border:0;" src="fusejs/raw/master/logo.png">
 </a>
 
 About Alpha
@@ -18,9 +18,10 @@ DOM manipulation, event registration, and CSS selector engines. FuseJS
 attempts to incorporate the strengths of these frameworks into one stable, 
 efficient, and optimized core JavaScript framework. 
 
-FuseJS is the first JavaScript framework to use cross-browser/environment sandboxed 
-natives. This allows extending Array, String, Number, Date, and RegExp objects without
-polluting the native objects of the host environment.
+FuseJS is the first JavaScript framework to use cross-browser/environment
+<strong>[sandboxed natives](http://github.com/jdalton/fusebox#readme)</strong>. This allows
+extending Array, String, Number, Date, and RegExp objects without polluting
+the native objects of the host environment.
 
 FuseJS emphasizes browser capability testing, method forking, and lazy method 
 definition for maintainability/performance. Modules and adapters are designed to 
