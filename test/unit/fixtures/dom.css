@@ -1,4 +1,6 @@
 #style_test_1 { cursor: pointer; font-size:12px; }
+#style_test_6{ opacity:0.4; filter:alpha(opacity=40); }
+
 div.style-test { margin-left: 1px }
 
 #style_test_dimensions_container { 

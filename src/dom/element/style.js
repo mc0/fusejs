@@ -8,6 +8,8 @@
       ? { 'float': 'styleFloat', 'cssFloat': 'styleFloat' }
       : { 'float': 'cssFloat' },
 
+    NON_PX_NAMES = { 'fontWeight': 1, 'opacity': 1, 'zIndex': 1, 'zoom': 1 },
+
     POSITION_NAMES = { 'bottom': 1, 'left': 1, 'right': 1, 'top': 1 },
 
     RELATIVE_CSS_UNITS = { 'em': 1, 'ex': 1 },
@@ -179,7 +181,7 @@
         // set it on something we can grab a pixel value from.
         // Inspired by Dean Edwards' comment
         // http://erik.eae.net/archives/2007/07/27/18.54.15/#comment-102291
-        if (/^-?\d+(\.\d+)?(?!px)[%a-z]+$/i.test(result)) {
+        if (!NON_PX_NAMES[name] && /^-?\d+(\.\d+)?(?!px)[%a-z]+$/i.test(result)) {
           if (name == 'fontSize') {
             unit = result.match(/\D+$/)[0];
             if (unit === '%') {
@@ -353,8 +355,7 @@
       else if (envTest('ELEMENT_MS_CSS_FILTERS')) {
         getOpacity = function getOpacity() {
           var element = this.raw || this,
-           currStyle = element.currentStyle || element.style,
-           result = currStyle['filter'].match(/alpha\(opacity=(.*)\)/);
+           result = (element.currentStyle || element.style).filter.match(/alpha\(opacity=(.*)\)/);
           return fuse.Number(result && result[1] ? parseFloat(result[1]) / 100 : 1.0);
         };
       }
@@ -362,40 +363,42 @@
     })();
 
     plugin.setOpacity = (function() {
-      var reAlpha = /alpha\([^)]*\)/i,
+      var __setOpacity, setOpacity,
+       nearOne  = 0.99999,
+       nearZero = 0.00001,
+       reAlpha  = /alpha\([^)]*\)/i;
 
       setOpacity = function setOpacity(value) {
-        this.style.opacity = (value == 1 || value == '' && isString(value)) ? '' :
-          (value < 0.00001) ? '0' : value;
+        if (value > neatOne) {
+          value = 1;
+        } if (!isString(value) && value < nearZero) {
+          value = 0;
+        }
+        this.style.opacity = value;
         return this;
       };
 
       // TODO: Is this really needed or the best approach ?
       // Sniff for Safari 2.x
       if (fuse.env.agent.WebKit && (userAgent.match(/AppleWebKit\/(\d+)/) || [])[1] < 500) {
-        var __setOpacity = setOpacity;
+        __setOpacity = setOpacity;
 
         setOpacity = function setOpacity(value) {
-          __setOpacity.call(this, value);
-
-          if (value == 1) {
+          if (value > neatOne) {
             var element = this.raw || this;
+            element.style.opacity = 1;
+
             if (getNodeName(element) === 'IMG' && element.width) {
               element.width++; element.width--;
-            } else try {
-              element.removeChild(element.appendChild(element
-                .ownerDocument.createTextNode(' ')));
-            } catch (e) { }
+            } else {
+              try {
+                element.removeChild(element.appendChild(element
+                  .ownerDocument.createTextNode(' ')));
+              } catch (e) { }
+            }
+          } else {
+            __setOpacity.call(this, value);
           }
-          return this;
-        };
-      }
-      // Sniff Firefox 1.5.0.x
-      else if (fuse.env.agent.Gecko && /rv:1\.8\.0/.test(userAgent)) {
-        setOpacity = function setOpacity(value) {
-          this.style.opacity = (value == 1) ? 0.999999 :
-            (value == '' && isString(value)) ? '' :
-              (value < 0.00001) ? 0 : value;
           return this;
         };
       }
@@ -405,19 +408,27 @@
           var element = this.raw || this,
            elemStyle  = element.style,
            currStyle  = element.currentStyle,
-           filter     = plugin.getStyle.call(this, 'filter').replace(reAlpha, ''),
+           filter     = (currStyle || elemStyle).filter.replace(reAlpha, ''),
            zoom       = elemStyle.zoom;
 
           // hasLayout is false then force it
-          if (!(zoom && zoom !== 'normal' || currStyle && currStyle.hasLayout))
+          if (!(currStyle && currStyle.hasLayout || zoom && zoom !== 'normal')) {
             elemStyle.zoom = 1;
-
-          if (value == 1 || value == '' && isString(value)) {
-            if (filter) elemStyle.filter = filter;
-            else elemStyle.removeAttribute('filter');
           }
-          else {
-            if (value < 0.00001) value = 0;
+
+          if (value > neatOne) {
+            value = 1;
+          } if (!isString(value) && value < nearZero) {
+            value = new Number(0);
+          }
+
+          if (value === 1 || value == '') {
+            if (filter) {
+              elemStyle.filter = filter;
+            } else {
+              elemStyle.removeAttribute('filter');
+            }
+          } else {
             elemStyle.filter = filter + 'alpha(opacity=' + (value * 100) + ')';
           }
           return this;

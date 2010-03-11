@@ -1373,6 +1373,15 @@ new Test.Unit.Runner({
     this.assert(
       $('style_test_3').setOpacity(0.9999999).getStyle('opacity') > 0.999);
 
+    this.assertEqual(0.4, $('style_test_6').getStyle('opacity'),
+      'Should return opacity defined in stylesheet.');
+
+    this.assertEqual(0.5, $('style_test_6').setOpacity(0.5).getOpacity(),
+      'Should return opacity defined in the style properties.');
+
+    this.assertEqual(0.4, $('style_test_6').setOpacity('').getOpacity(),
+      'Should return opacity fefined in stylesheet when set to an empty string.');
+
     if (fuse.env.agent.IE) {
       var element = $('style_test_4');
       $('style_test_4').setOpacity(0.5);
@@ -1384,16 +1393,16 @@ new Test.Unit.Runner({
 
       this.assert(!noLayout);
 
-      this.assert(2, $('style_test_5').setOpacity(0.5)
+      this.assertNotEqual('normal', $('style_test_5').setOpacity(0.5)
         .getStyle('zoom'));
 
-      this.assert(0.5, fuse('<div>').setOpacity(0.5)
+      this.assertEqual(0.5, fuse('<div>').setOpacity(0.5)
         .getOpacity());
 
-      this.assert(2,   fuse('<div>').setOpacity(0.5)
+      this.assertEqual(2,   fuse('<div>').setOpacity(0.5)
         .setStyle('zoom: 2;').getStyle('zoom'));
 
-      this.assert(2,   fuse('<div>').setStyle('zoom: 2;').setOpacity(0.5)
+      this.assertEqual(2,   fuse('<div>').setStyle('zoom: 2;').setOpacity(0.5)
         .getStyle('zoom'));
     }
   },

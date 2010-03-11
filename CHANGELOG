@@ -1,3 +1,5 @@
+* Make fuse.dom.Element setOpacity() method treat a value of 1 and an empty string differently. [Prototype LH #684] [david brillard, jddalton] 
+
 * Make fuse.dom.Element setStyle() method avoid throwing errors when passing falsy values. [Prototype LH #558] [garrett, jddalton]
 
 * Make fuse.dom.Element setStyle() method support hyphenated style properties. [Prototype LH #970] [jddalton, zeno]
