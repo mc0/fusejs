@@ -24,9 +24,9 @@
     fuse(document).observe('dom:loaded', function() {
       function refresh() {
         var loc = window.location;
-        loc.href = loc.protocol + '//' + loc.hostname + loc.pathname +
+        loc.replace(loc.protocol + '//' + loc.hostname + loc.pathname +
           '?engine=' + engineEl.raw.options[engineEl.raw.selectedIndex].text +
-          '&debug='  + $F(debugEl);
+          '&debug='  + $F(debugEl));
       }
 
       function getQueryParam(key, defaultValue) {
