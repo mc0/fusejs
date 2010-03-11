@@ -14,17 +14,17 @@
         '}return ' + name)();
     }
 
-    function Class(Parent, plugins, mixins, statics) {
+    function Class(Superclass, plugins, mixins, statics) {
       var Klass, arg, plugin, i = 0,
        args = slice.call(arguments, 0),
        first = args[0];
 
       if (isString(first)) {
-        Parent = createNamedClass(args.shift());
+        Superclass = createNamedClass(args.shift());
       } else if (typeof first === 'function' && first.subclasses) {
-        Parent = args.shift();
+        Superclass = args.shift();
       } else {
-        Parent = null;
+        Superclass = null;
       }
 
       // auto execute plugins if they are closures and convert to array if not already
@@ -46,14 +46,14 @@
 
       Klass = Klass || createNamedClass('UnnamedClass');
 
-      if (Parent) {
+      if (Superclass) {
         // note: Safari 2, inheritance won't work with Klass.prototype = new Function;
-        Subclass.prototype = Parent.prototype;
+        Subclass.prototype = Superclass.prototype;
         Klass.prototype = new Subclass;
-        Parent.subclasses.push(Klass);
+        Superclass.subclasses.push(Klass);
       }
 
-      Klass.superclass = Parent;
+      Klass.superclass = Superclass;
       Klass.subclasses = fuse.Array();
       plugin = Klass.plugin = Klass.prototype;
 

@@ -32,15 +32,13 @@
 
     Field.Observer =
     Field.TimedObserver = (function() {
-      function Klass() { }
+      var Klass = function() { },
 
-      function FieldTimedObserver(element, callback, interval, options) {
-        var instance = new Klass;
-        BaseTimedObserver.call(instance, element, callback, interval, options);
-        return instance;
-      }
+      FieldTimedObserver = function FieldTimedObserver(element, callback, interval, options) {
+        return BaseTimedObserver.call(new Klass, element, callback, interval, options);
+      };
 
-      var FieldTimedObserver = Class(BaseTimedObserver, { 'constructor': FieldTimedObserver });
+      FieldTimedObserver = Class(BaseTimedObserver, { 'constructor': FieldTimedObserver });
       Klass.prototype = FieldTimedObserver.plugin;
       return FieldTimedObserver;
     })();
@@ -51,15 +49,13 @@
 
     Form.Observer =
     Form.TimedObserver = (function() {
-      function Klass() { }
+      var Klass = function() { },
 
-      function FormTimedObserver(element, callback, interval, options) {
-        var instance = new Klass;
-        BaseTimedObserver.call(instance, element, callback, interval, options);
-        return instance;
-      }
+      FormTimedObserver = function FormTimedObserver(element, callback, interval, options) {
+        return BaseTimedObserver.call(new Klass, element, callback, interval, options);
+      };
 
-      var FormTimedObserver = Class(BaseTimedObserver, { 'constructor': FormTimedObserver });
+      FormTimedObserver = Class(BaseTimedObserver, { 'constructor': FormTimedObserver });
       Klass.prototype = FormTimedObserver.plugin;
       return FormTimedObserver;
     })();

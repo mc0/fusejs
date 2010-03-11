@@ -31,13 +31,7 @@
     },
 
     escapeSpecialChars = function(match) {
-      var character = specialChars[match];
-      if (!character) {
-        character = match.charCodeAt(0).toString(16);
-        character =
-        specialChars[match] = '\\u00' + (character.length === 1 ? '0' : '') + character;
-      }
-      return character;
+      return specialChars[match];
     },
 
     inspectPlugin = function(plugin) {
@@ -47,6 +41,17 @@
       plugin.inspect = backup;
       return result;
     };
+
+    // populate specialChars
+    (function(i, key, character) {
+      while (--i) {
+        key = String.fromCharCode(i);
+        if (!specialChars[key]) {
+          character = i.toString(16);
+          specialChars[key] = '\\u00' + (character.length === 1 ? '0' : '') + character;
+        }
+      }
+    })(32);
 
     /*------------------------------------------------------------------------*/
 

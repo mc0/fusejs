@@ -231,6 +231,7 @@
   // update native generics and element methods
   fuse.updateGenerics(true);
 
-  if (global.Event && global.Event.Methods)
+  if (global.Event && global.Event.Methods) {
     Event.addMethods();
+  }
 })(this);

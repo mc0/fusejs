@@ -1,34 +1,37 @@
   /*-------------------------- FORM: EVENT OBSERVER --------------------------*/
 
   (function() {
-    var BaseEventObserver = Class({
-      'constructor': (function() {
-        function BaseEventObserver(element, callback) {
-          this.element = fuse.get(element);
-          element = element.raw || element;
+    var BaseEventObserver = Class(function() {
+      function BaseEventObserver(element, callback) {
+        var member, name, i = -1, 
+         eventObserver = this, onElementEvent = this.onElementEvent;
 
-          var eventObserver = this, onElementEvent = this.onElementEvent;
-          this.onElementEvent = function() { onElementEvent.call(eventObserver); };
+        this.element = fuse.get(element);
+        element = element.raw || element;
 
-          if (getNodeName(element) === 'FORM') {
-            return this.registerFormCallbacks();
-          }
+        this.onElementEvent = function() {
+          onElementEvent.call(eventObserver);
+        };
 
-          var member, name = element.name, i = -1;
-          this.group =
-            (name && fuse.query(element.nodeName +
-            '[name="' + name + '"]', getDocument(element)).get()) ||
-            NodeList(fuse.get(element));
-
-          this.callback = callback;
-          this.lastValue = this.getValue();
-
-          while (member = this.group[++i]) {
-            this.registerCallback(member);
-          }
+        if (getNodeName(element) === 'FORM') {
+          return this.registerFormCallbacks();
         }
-        return BaseEventObserver;
-      })()
+
+        name = element.name;
+        this.group =
+          (name && fuse.query(element.nodeName +
+          '[name="' + name + '"]', getDocument(element)).get()) ||
+          NodeList(fuse.get(element));
+
+        this.callback = callback;
+        this.lastValue = this.getValue();
+
+        while (member = this.group[++i]) {
+          this.registerCallback(member);
+        }
+      }
+
+      return {'constructor': BaseEventObserver };
     });
 
     (function(plugin) {
@@ -61,54 +64,50 @@
 
     /*------------------------------------------------------------------------*/
 
-    var Field = fuse.dom.InputElement, getValue = nil;
+    var CHECKED_INPUT_TYPES = { 'checkbox': 1, 'radio': 1 },
+
+    Field = fuse.dom.InputElement,
+
+    getValue = nil;
+
 
     Field.EventObserver = (function() {
-      function Klass() { }
+      var Klass = function() { },
 
-      function FieldEventObserver(element, callback) {
-        var instance = new Klass;
-        BaseEventObserver.call(instance, element, callback);
-        return instance;
-      }
+      FieldEventObserver = function FieldEventObserver(element, callback) {
+        return BaseEventObserver.call(new Klass, element, callback);
+      };
 
-      var FieldEventObserver = Class(BaseEventObserver, { 'constructor': FieldEventObserver });
+      Class(BaseEventObserver, { 'constructor': FieldEventObserver });
       Klass.prototype = FieldEventObserver.plugin;
       return FieldEventObserver;
     })();
 
-    Field.EventObserver.plugin.getValue = (function() {
-      function getValue() {
-        var element, member, value, i = -1;
-        if (this.group.length === 1) {
-          return this.element.getValue();
-        }
-        while (member = this.group[++i]) {
-          element = member.raw || member;
-          if (CHECKED_INPUT_TYPES[element.type]) {
-            if (element.checked) {
-              return member.getValue();
-            }
-          } else if (value = member.getValue()) {
-            return value;
+    Field.EventObserver.plugin.getValue = function getValue() {
+      var element, member, value, i = -1;
+      if (this.group.length === 1) {
+        return this.element.getValue();
+      }
+      while (member = this.group[++i]) {
+        element = member.raw || member;
+        if (CHECKED_INPUT_TYPES[element.type]) {
+          if (element.checked) {
+            return member.getValue();
           }
+        } else if (value = member.getValue()) {
+          return value;
         }
       }
-
-      var CHECKED_INPUT_TYPES = { 'checkbox': 1, 'radio': 1 };
-      return getValue;
-    })();
+    };
 
     Form.EventObserver = (function() {
-      function Klass() { }
+      var Klass = function() { },
 
-      function FormEventObserver(element, callback) {
-        var instance = new Klass;
-        BaseEventObserver.call(instance, element, callback);
-        return instance;
-      }
+      FormEventObserver = function FormEventObserver(element, callback) {
+        return BaseEventObserver.call(new Klass, element, callback);
+      };
 
-      var FormEventObserver = Class(BaseEventObserver, { 'constructor': FormEventObserver });
+      Class(BaseEventObserver, { 'constructor': FormEventObserver });
       Klass.prototype = FormEventObserver.plugin;
       return FormEventObserver;
     })();

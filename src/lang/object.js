@@ -36,7 +36,7 @@
           return object;
         };
 
-        return _each;
+        break;
 
       case 2:
         // Tobie Langel: Safari 2 broken for-in loop
@@ -54,10 +54,10 @@
           return object;
         };
 
-        return _each;
+        break;
 
       default: // Others
-        return _each = function _each(object, callback) {
+        _each = function _each(object, callback) {
           var key, skipProto = isFunction(object);
           if (object) {
             for (key in object) {
@@ -69,6 +69,8 @@
           return object;
         };
     }
+
+    return _each;
   })();
 
   /*--------------------------------------------------------------------------*/
@@ -127,6 +129,7 @@
         return __hasKey(object, property);
       };
     }
+
     return hasKey;
   })();
 

@@ -31,16 +31,19 @@
         // if no url is provided use the window's location data
         if (!url || url == '') {
           url = location.protocol + '//' + location.host + location.pathname;
-          if (!params || params == '')
+          if (!params || params == '') {
             params = location.search.slice(1);
+          }
         }
 
         // convert string/hash parameters to an object
-        if (isString(params))
+        if (isString(params)) {
           params = fuse.String(params).toQueryParams();
-        else if (isHash(params))
+        } else if (isHash(params)) {
           params = params.toObject();
-        else params = clone(params);
+        } else {
+          params = clone(params);
+        }
 
         // simulate other verbs over post
         if (!/^(get|post)$/.test(method)) {
@@ -50,8 +53,9 @@
 
         // when GET request, append parameters to URL
         queryString = Obj.toQueryString(params);
-        if ( method == 'get' && queryString != '')
+        if ( method == 'get' && queryString != '') {
           url += (url.indexOf('?') > -1 ? '&' : '?') + queryString;
+        }
 
         // add in user defined array/hash/object headers over the default
         if (typeof customHeaders === 'object') {
@@ -78,11 +82,14 @@
         // jQuery tickets #2570, #2865 report versions of Opera will display a
         // login prompt when passing null-like values for username/password when
         // no authorization is needed.
-        if (!options.username) options.username = options.password = '';
+        if (!options.username) {
+          options.username = options.password = '';
+        }
 
         // body is null for every method except POST
-        if (method == 'post')
+        if (method == 'post') {
           body = options.postBody || queryString;
+        }
 
         this.body       = body;
         this.method     = fuse.String(method);

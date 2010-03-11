@@ -197,8 +197,7 @@
 
   (function(plugin) {
 
-    var replace      = plugin.replace,
-     reBlank         = fuse.RegExp('^\\s*$'),
+    var reBlank      = fuse.RegExp('^\\s*$'),
      reCapped        = /([A-Z]+)([A-Z][a-z])/g,
      reCamelCases    = /([a-z\d])([A-Z])/g,
      reDoubleColons  = /::/g,
@@ -222,12 +221,9 @@
 
       function camelize() {
         if (this == null) throw new TypeError;
-        var string = String(this), expandoKey = expando + string;
-        return cache[expandoKey] ||
-          (cache[expandoKey] = replace.call(string, reHyphenated, toUpperCase));
+        return plugin.replace.call(String(this), reHyphenated, toUpperCase);
       }
 
-      var cache = { };
       return camelize;
     })();
 
@@ -450,7 +446,6 @@
        div       = fuse._div,
        container = fuse._doc.createElement('pre'),
        textNode  = container.appendChild(fuse._doc.createTextNode('')),
-       replace   = plugin.replace,
        reTagEnds = />/g,
        reTokens  = /@fusetoken/g;
 
@@ -480,14 +475,14 @@
         // tokenize tags before setting innerHTML then swap them after
         if (tokenized = string.indexOf('<') > -1) {
           tags.length = count = 0;
-          string = replace.call(string, reTags, swapTagsToTokens);
+          string = plugin.replace.call(string, reTags, swapTagsToTokens);
         }
 
         div.innerHTML = '<pre>' + string + '<\/pre>';
         result = getText();
 
         return fuse.String(tokenized
-          ? replace.call(result, reTokens, swapTokensToTags)
+          ? plugin.replace.call(result, reTokens, swapTokensToTags)
           : result);
       }
 

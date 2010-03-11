@@ -40,12 +40,13 @@
   fuse.Template.plugin.evaluate = (function() {
     function evaluate(object) {
       if (object) {
-        if (isHash(object))
+        if (isHash(object)) {
           object = object._object;
-        else if (typeof object.toTemplateReplacements === 'function')
+        } else if (typeof object.toTemplateReplacements === 'function') {
           object = object.toTemplateReplacements();
-        else if (typeof object.toObject === 'function')
+        } else if (typeof object.toObject === 'function') {
           object = object.toObject();
+        }
       }
 
       return this.template.replace(this.pattern, function(match, before, escaped, expr) {
