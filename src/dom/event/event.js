@@ -12,25 +12,37 @@
 
   (function(methods) {
 
-    var BUGGY_EVENT_TYPES = {
-      'error': 1,
-      'load':  1
-    },
+    var BUGGY_EVENT_TYPES = { 'error': 1, 'load': 1 },
+
+    BUTTON_MAP = { 'left': 1, 'middle': 2, 'right': 3 },
 
     // lazy define on first call
+    // compatibility charts found at http://unixpapa.com/js/mouse.html
     isButton = function(event, mouseButton) {
-      var property, buttonMap = { 'left': 1, 'middle': 2, 'right': 3 } ;
+      isButton = function(event, mouseButton) {
+        return event[property] === BUTTON_MAP[mouseButton];
+      };
 
-      if (typeof event.which === 'number')
-        property = 'which';
-      else if (typeof event.button === 'number') {
-        property = 'button';
-        buttonMap = { 'left': 1, 'middle': 4, 'right': 2 };
+      var property = 'which';
+      if (typeof event.which === 'number') {
+        // simulate a middle click by pressing the Apple key in Safari 2.x
+        if (typeof event.metaKey === 'boolean') {
+          isButton = function(event, mouseButton) {
+            var value = event.which;
+            return mouseButton === 'middle' && value == 1
+              ? event.metaKey
+              : value === BUTTON_MAP[mouseButton];
+          };
+        }
       }
-
-      isButton = property
-        ? function(event, mouseButton) { return event[property] === buttonMap[mouseButton]; }
-        : function() { return false; };
+      else if (typeof event.button === 'number') {
+        // for IE
+        property = 'button';
+        BUTTON_MAP = { 'left': 1, 'middle': 4, 'right': 2 };
+      }
+      else {
+        isButton = function() { return false; };
+      }
 
       return isButton(event, mouseButton);
     };
