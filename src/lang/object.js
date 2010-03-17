@@ -202,7 +202,7 @@
   // http://www.iana.org/assignments/port-numbers
   isSameOrigin =
   Obj.isSameOrigin = (function() {
-    function isSameOrigin(url) {
+    var isSameOrigin = function isSameOrigin(url) {
       var domainIndex, urlDomain,
        result    = true,
        docDomain = fuse._doc.domain,
@@ -216,11 +216,13 @@
             (parts[3] || defaultPort) === (port || defaultPort);
       }
       return result;
-    }
+    },
 
-    var loc = global.location, protocol = loc.protocol, port = loc.port,
-     reUrlParts = /([^:]+:)\/\/(?:[^:]+(?:\:[^@]+)?@)?([^\/:$]+)(?:\:(\d+))?/,
-     defaultPort = protocol === 'ftp:' ? 21 : protocol === 'https:' ? 443 : 80;
+    loc         = global.location,
+    protocol    = loc.protocol,
+    port        = loc.port,
+    reUrlParts  = /([^:]+:)\/\/(?:[^:]+(?:\:[^@]+)?@)?([^\/:$]+)(?:\:(\d+))?/,
+    defaultPort = protocol === 'ftp:' ? 21 : protocol === 'https:' ? 443 : 80;
 
     return isSameOrigin;
   })();
@@ -238,6 +240,11 @@
   /*--------------------------------------------------------------------------*/
 
   (function() {
+    var toQueryPair = function(key, value) {
+      return fuse.String(typeof value === 'undefined' ? key :
+        key + '=' + encodeURIComponent(value == null ? '' : value));
+    };
+
     Obj.each = function each(object, callback, thisArg) {
       try {
         eachKey(object, function(value, key, object) {
@@ -281,32 +288,28 @@
         : fuse.String.interpret(object);
     };
 
-    Obj.toQueryString = (function() {
-      function toQueryPair(key, value) {
-        return fuse.String(typeof value === 'undefined' ? key :
-          key + '=' + encodeURIComponent(value == null ? '' : value));
-      }
-
-      function toQueryString(object) {
-        var results = [];
-        eachKey(object, function(value, key) {
-          if (hasKey(object, key)) {
-            key = encodeURIComponent(key);
-            if (value && isArray(value)) {
-              var i = results.length, j = 0, length = i + value.length;
-              while (i < length) results[i++] = toQueryPair(key, value[j++]);
-            }
-            else if (!value || toString.call(value) !== '[object Object]') {
-              results.push(toQueryPair(key, value));
-            }
+    Obj.toQueryString = function toQueryString(object) {
+      var results = [];
+      eachKey(object, function(value, key) {
+        if (hasKey(object, key)) {
+          key = encodeURIComponent(key);
+          if (value && isArray(value)) {
+            var i = results.length, j = 0, length = i + value.length;
+            while (i < length) results[i++] = toQueryPair(key, value[j++]);
           }
-        });
-        return fuse.String(results.join('&'));
-      }
-
-      return toQueryString;
-    })();
+          else if (!value || toString.call(value) !== '[object Object]') {
+            results.push(toQueryPair(key, value));
+          }
+        }
+      });
+      return fuse.String(results.join('&'));
+    };
 
     // prevent JScript bug with named function expressions
-    var each = nil, extend = nil, keys = nil, values = nil, toHTML = nil;
+    var each =       nil,
+     extend =        nil,
+     keys =          nil,
+     values =        nil,
+     toHTML =        nil,
+     toQueryString = nil;
   })();

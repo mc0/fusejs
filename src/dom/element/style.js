@@ -14,6 +14,10 @@
 
     RELATIVE_CSS_UNITS = { 'em': 1, 'ex': 1 },
 
+    nullHandlers = [],
+
+    reOpacity = /opacity:\s*(\d?\.?\d*)/,
+
     camelize = (function() {
       var cache = { },
       reHyphenated = /-([a-z])/gi,
@@ -27,32 +31,28 @@
       };
     })(),
 
-    nullHandlers = [],
-
-    reOpacity = /opacity:\s*(\d?\.?\d*)/;
-
-    function getComputedStyle(element, name) {
+    getComputedStyle = function(element, name) {
       name = FLOAT_TRANSLATIONS[name] || name;
       var css = element.ownerDocument.defaultView.getComputedStyle(element, null);
       return getValue(element, name, css && css[name]);
-    }
+    },
 
-    function getValue(element, name, value) {
+    getValue = function(element, name, value) {
       name = FLOAT_TRANSLATIONS[name] || name;
       value = value || element.style[name];
       if (name == 'opacity')
         return value === '1' ? '1.0' : parseFloat(value) || '0';
       return value === 'auto' || value === '' ? null : value;
-    }
+    },
 
-    function isNull(element, name) {
+    isNull = function(element, name) {
       var length = nullHandlers.length;
       while (length--) {
         if (nullHandlers[length](element, name))
           return true;
       }
       return false;
-    }
+    };
 
     if (envTest('ELEMENT_COMPUTED_STYLE_DEFAULTS_TO_ZERO')) {
       nullHandlers.push(function(element, name) {
@@ -339,7 +339,10 @@
     };
 
     plugin.getOpacity = (function() {
-      var getOpacity = function getOpacity() {
+      var getOpacity,
+       reOpacity = /alpha\(opacity=(.*)\)/;
+
+      getOpacity = function getOpacity() {
         return fuse.Number(parseFloat(this.style.opacity));
       };
 
@@ -355,7 +358,7 @@
       else if (envTest('ELEMENT_MS_CSS_FILTERS')) {
         getOpacity = function getOpacity() {
           var element = this.raw || this,
-           result = (element.currentStyle || element.style).filter.match(/alpha\(opacity=(.*)\)/);
+           result = (element.currentStyle || element.style).filter.match(reOpacity);
           return fuse.Number(result && result[1] ? parseFloat(result[1]) / 100 : 1.0);
         };
       }
@@ -369,25 +372,25 @@
        reAlpha  = /alpha\([^)]*\)/i;
 
       setOpacity = function setOpacity(value) {
-        if (value > neatOne) {
+        if (value > nearOne) {
           value = 1;
-        } if (!isString(value) && value < nearZero) {
+        } if (value < nearZero && !isString(value)) {
           value = 0;
         }
         this.style.opacity = value;
         return this;
       };
 
-      // TODO: Is this really needed or the best approach ?
       // Sniff for Safari 2.x
       if (fuse.env.agent.WebKit && (userAgent.match(/AppleWebKit\/(\d+)/) || [])[1] < 500) {
         __setOpacity = setOpacity;
 
         setOpacity = function setOpacity(value) {
-          if (value > neatOne) {
+          if (value > nearOne) {
             var element = this.raw || this;
             element.style.opacity = 1;
 
+            // TODO: Is this really needed or the best approach ?
             if (getNodeName(element) === 'IMG' && element.width) {
               element.width++; element.width--;
             } else {
@@ -416,13 +419,13 @@
             elemStyle.zoom = 1;
           }
 
-          if (value > neatOne) {
+          if (value > nearOne || value == '' && isString(value)) {
             value = 1;
-          } if (!isString(value) && value < nearZero) {
-            value = new Number(0);
+          } if (value < nearZero) {
+            value = 0;
           }
 
-          if (value === 1 || value == '') {
+          if (value === 1) {
             if (filter) {
               elemStyle.filter = filter;
             } else {
@@ -441,7 +444,10 @@
     plugin.isVisible = function isVisible() {
       if (!fuse._body) return false;
 
-      var isVisible = function isVisible() {
+      var __isVisible, isVisible,
+       TABLE_ELEMENTS = { 'THEAD': 1, 'TBODY': 1, 'TR': 1 };
+
+      isVisible = function isVisible() {
         // handles IE and the fallback solution
         var element = this.raw || this, currStyle = element.currentStyle;
         return currStyle !== null && (currStyle || element.style).display !== 'none' &&
@@ -457,14 +463,14 @@
       }
 
       if (envTest('TABLE_ELEMENTS_RETAIN_OFFSET_DIMENSIONS_WHEN_HIDDEN')) {
-        var __isVisible = isVisible;
+        __isVisible = isVisible;
 
         isVisible = function isVisible() {
           if (__isVisible.call(this)) {
             var element = this.raw || this, nodeName = getNodeName(element);
-            if ((nodeName === 'THEAD' || nodeName === 'TBODY' || nodeName === 'TR') &&
-               (element = element.parentNode))
+            if (TABLE_ELEMENTS[nodeName] && (element = element.parentNode)) {
               return isVisible.call(element);
+            }
             return true;
           }
           return false;
@@ -472,7 +478,8 @@
       }
 
       // redefine and execute
-      return (Element.plugin.isVisible = isVisible).call(this);
+      plugin.isVisible = isVisible;
+      return isVisible.call(this);
     };
 
     // prevent JScript bug with named function expressions
@@ -488,9 +495,7 @@
   // define Element#getWidth and Element#getHeight
   (function(plugin) {
 
-    var i = 0,
-
-    PRESETS = {
+    var PRESETS = {
       'box':     { 'border':  1, 'margin':  1, 'padding': 1 },
       'visual':  { 'border':  1, 'padding': 1 },
       'client':  { 'padding': 1 },
@@ -508,23 +513,36 @@
         'margin':  ['marginLeft',      'marginRight'],
         'padding': ['paddingLeft',     'paddingRight']
       }
-    };
+    },
 
-    while (i < 2) (function() {
-      function getSum(decorator, name) {
+    i = -1;
+
+    while (++i < 2) (function() {
+      var dim = i ? 'Width' : 'Height',
+
+      property = 'offset' + dim,
+
+      STYLE_SUMS = HEIGHT_WIDTH_STYLE_SUMS[dim],
+
+      getSum = function(decorator, name) {
         var styles = STYLE_SUMS[name];
         return (parseFloat(decorator.getStyle(styles[0])) || 0) +
           (parseFloat(decorator.getStyle(styles[1])) || 0);
-      }
+      },
 
-      function getDimension(options) {
+      getDimension = function getDimension(options) {
         var backup, elemStyle, isGettingSum, result;
 
         // default to `visual` preset
-        if (!options) options = PRESETS.visual;
+        if (!options) {
+          options = PRESETS.visual;
+        }
         else if (options && isString(options)) {
-          if (STYLE_SUMS[options]) isGettingSum = true;
-          else options = PRESETS[options];
+          if (STYLE_SUMS[options]) {
+            isGettingSum = true;
+          } else {
+            options = PRESETS[options];
+          }
         }
 
         // First get our offset(Width/Height) (visual)
@@ -544,27 +562,26 @@
           result = (this.raw || this)[property];
           elemStyle.cssText = backup;
         }
-        else if (isGettingSum) return fuse.Number(getSum(this, options));
-
-        else result = (this.raw || this)[property];
+        else if (isGettingSum) {
+          return fuse.Number(getSum(this, options));
+        }
+        else {
+          result = (this.raw || this)[property];
+        }
 
         // add margins because they're excluded from the offset values
-        if (options.margin)
+        if (options.margin) {
           result += getSum(this, 'margin');
-
+        }
         // subtract border and padding because they're included in the offset values
-        if (!options.border)
+        if (!options.border) {
           result -= getSum(this, 'border');
-
-        if (!options.padding)
+        }
+        if (!options.padding) {
           result -= getSum(this, 'padding');
-
+        }
         return fuse.Number(result);
-      }
-
-      var dim = i++ ? 'Width' : 'Height',
-       property = 'offset' + dim,
-       STYLE_SUMS = HEIGHT_WIDTH_STYLE_SUMS[dim];
+      };
 
       plugin['get' + dim] = getDimension;
     })();

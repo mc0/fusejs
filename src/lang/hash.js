@@ -18,10 +18,10 @@
     },
 
     unset = function unset(key) {
-      var data = this._data, i = 0,
+      var data = this._data, i = -1,
        keys = isArray(key) ? key : arguments;
 
-      while (key = keys[i++])  {
+      while (key = keys[++i])  {
         if ((expando + key) in data)
           unsetByIndex(this, indexOfKey(this, key));
       }
@@ -30,9 +30,10 @@
 
     indexOfKey = function(hash, key) {
       key = String(key);
-      var index = 0, keys = hash._keys, length = keys.length;
-      for ( ; index < length; index++)
-        if (keys[index] == key) return index;
+      var i = -1, keys = hash._keys, length = keys.length;
+      while (++i < length) {
+        if (keys[i] == key) return i;
+      }
     },
 
     setValue = function(hash, key, value) {
@@ -40,8 +41,9 @@
       var data = hash._data, expandoKey = expando + key, keys = hash._keys;
 
       // avoid a method call to Hash#hasKey
-      if (expandoKey in data)
+      if (expandoKey in data) {
         unsetByIndex(hash, indexOfKey(hash, key));
+      }
 
       keys.push(key = fuse.String(key));
 
@@ -55,8 +57,8 @@
 
     setWithObject = function(hash, object) {
       if (isHash(object)) {
-        var pair, i = 0, pairs = object._pairs;
-        while (pair = pairs[i++]) setValue(hash, pair[0], pair[1]);
+        var pair, i = -1, pairs = object._pairs;
+        while (pair = pairs[++i]) setValue(hash, pair[0], pair[1]);
       }
       else {
         eachKey(object, function(value, key) {
@@ -76,7 +78,7 @@
       hash._values.splice(index, 1);
     };
 
-    Hash = Class({ 'constructor': Hash, 'merge': merge, 'set': set, 'unset': unset });
+    Class({ 'constructor': Hash, 'merge': merge, 'set': set, 'unset': unset });
     Klass.prototype = Hash.plugin;
     return Hash;
   })();
@@ -93,12 +95,12 @@
     }
 
     plugin.first = function first(callback, thisArg) {
-      var pair, i = 0, pairs = this._pairs;
+      var pair, i = -1, pairs = this._pairs;
       if (callback == null) {
         if (pairs.length) return _returnPair(pairs[0]);
       }
       else if (typeof callback === 'function') {
-        while (pair = pairs[i++]) {
+        while (pair = pairs[++i]) {
           if (callback.call(thisArg, pair[1], pair[0], this))
             return _returnPair(pair);
         }
@@ -107,13 +109,13 @@
         var count = +callback, results = fuse.Array();
         if (isNaN(count)) return results;
         count = count < 1 ? 1 : count;
-        while (i < count && (pair = pairs[i])) results[i++] = _returnPair(pair);
+        while (++i < count && (pair = pairs[i])) results[i] = _returnPair(pair);
         return results;
       }
     };
 
     plugin.last = function last(callback, thisArg) {
-      var pair, i = 0, pairs = this._pairs, length = pairs.length;
+      var pair, i = -1, pairs = this._pairs, length = pairs.length;
       if (callback == null) {
         if (length) return _returnPair(this._pairs.last());
       }
@@ -129,8 +131,8 @@
         if (isNaN(count)) return results;
         count = count < 1 ? 1 : count > length ? length : count;
         var  pad = length - count;
-        while (i < count)
-          results[i] = _returnPair(pairs[pad + i++]);
+        while (++i < count)
+          results[i] = _returnPair(pairs[pad + i]);
         return results;
       }
     };
@@ -157,8 +159,8 @@
     })();
 
     plugin.contains = function contains(value) {
-      var item, pair, i = 0, pairs = this._pairs;
-      while (pair = pairs[i++]) {
+      var item, pair, i = -1, pairs = this._pairs;
+      while (pair = pairs[++i]) {
         // basic strict match
         if ((item = pair[1]) === value) return true;
         // match String and Number object instances
@@ -168,10 +170,10 @@
     };
 
     plugin.filter = function filter(callback, thisArg) {
-      var key, pair, value, i = 0, pairs = this._pairs, result = new $H();
+      var key, pair, value, i = -1, pairs = this._pairs, result = new $H;
       callback = callback || function(value) { return value != null; };
 
-      while (pair = pairs[i++]) {
+      while (pair = pairs[++i]) {
         if (callback.call(thisArg, value = pair[1], key = pair[0], this))
           result.set(key, value);
       }
@@ -188,8 +190,8 @@
     })();
 
     plugin.keyOf = function keyOf(value) {
-      var pair, i = 0, pairs = this._pairs;
-      while (pair = pairs[i++]) {
+      var pair, i = -1, pairs = this._pairs;
+      while (pair = pairs[++i]) {
         if (value === pair[1])
           return pair[0];
       }
@@ -202,13 +204,13 @@
 
     plugin.map = function map(callback, thisArg) {
       if (!callback) return this;
-      var key, pair, i = 0, pairs = this._pairs, result = new $H();
+      var key, pair, i = -1, pairs = this._pairs, result = new $H;
 
       if (thisArg) {
-        while (pair = pairs[i++])
+        while (pair = pairs[++i])
           result.set(key = pair[0], callback.call(thisArg, pair[1], key, this));
       } else {
-        while (pair = pairs[i++])
+        while (pair = pairs[++i])
           result.set(key = pair[0], callback(pair[1], key, this));
       }
       return result;
@@ -216,12 +218,13 @@
 
     plugin.partition = function partition(callback, thisArg) {
       callback = callback || K;
-      var key, value, pair, i = 0, pairs = this._pairs,
-       trues = new $H(), falses = new $H();
+      var key, value, pair, i = -1, pairs = this._pairs,
+       trues = new $H, falses = new $H;
 
-      while (pair = pairs[i++])
+      while (pair = pairs[++i]) {
         (callback.call(thisArg, value = pair[1], key = pair[0], this) ?
           trues : falses).set(key, value);
+      }
       return fuse.Array(trues, falses);
     };
 
@@ -234,8 +237,8 @@
     };
 
     plugin.toObject = function toObject() {
-      var pair, i = 0, pairs = this._pairs, result = fuse.Object();
-      while (pair = pairs[i++]) result[pair[0]] = pair[1];
+      var pair, i = -1, pairs = this._pairs, result = fuse.Object();
+      while (pair = pairs[++i]) result[pair[0]] = pair[1];
       return result;
     };
 
@@ -247,35 +250,32 @@
       return fuse.Array.fromArray(this._values);
     };
 
-    plugin.zip = (function() {
-      function mapToHash(array) {
-        var results = [], length = array.length;
-        while (length--) results[length] = new $H(array[length]);
-        return results;
+    plugin.zip = function zip() {
+      var j, key, length, pair, pairs, values, i = -1,
+       args     = slice.call(arguments, 0),
+       callback = K,
+       hashes   = [this],
+       pairs    = this._pairs,
+       result   = new $H;
+
+      // if last argument is a function it is the callback
+      if (typeof args[args.length - 1] === 'function') {
+        callback = args.pop();
       }
 
-      function zip() {
-        var callback = K, args = slice.call(arguments, 0);
-
-        // if last argument is a function it is the callback
-        if (typeof args[args.length - 1] === 'function')
-          callback = args.pop();
-
-        var result = new $H(),
-         hashes = prependList(mapToHash(args), this),
-         length = hashes.length;
-
-        var j, key, pair, i = 0, pairs = this._pairs;
-        while (pair = pairs[i++]) {
-          j = 0; values = fuse.Array(); key = pair[0];
-          while (j < length) values[j] = hashes[j++]._data[expando + key];
-          result.set(key, callback(values, key, this));
-        }
-        return result;
+      length = args.length;
+      while (length--) {
+        hashes[length + 1] = new $H(args[length]);
       }
 
-      return zip;
-    })();
+      length = hashes.length;
+      while (pair = pairs[++i]) {
+        j = -1; values = fuse.Array(); key = pair[0];
+        while (++j < length) values[j] = hashes[j]._data[expando + key];
+        result.set(key, callback(values, key, this));
+      }
+      return result;
+    };
 
     // prevent JScript bug with named function expressions
     var clear =      nil,
@@ -290,7 +290,8 @@
      toArray =       nil,
      toObject =      nil,
      toQueryString = nil,
-     values =        nil;
+     values =        nil,
+     zip =           nil;
   })(fuse.Hash.plugin, fuse.Hash);
 
   /*--------------------------------------------------------------------------*/

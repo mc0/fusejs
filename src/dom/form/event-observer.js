@@ -2,7 +2,9 @@
 
   (function() {
     var BaseEventObserver = Class(function() {
-      function BaseEventObserver(element, callback) {
+      var CHECKED_INPUT_TYPES = { 'checkbox': 1, 'radio': 1 },
+
+      BaseEventObserver = function BaseEventObserver(element, callback) {
         var member, name, i = -1, 
          eventObserver = this, onElementEvent = this.onElementEvent;
 
@@ -29,42 +31,41 @@
         while (member = this.group[++i]) {
           this.registerCallback(member);
         }
-      }
-
-      return {'constructor': BaseEventObserver };
-    });
-
-    (function(plugin) {
-      var CHECKED_INPUT_TYPES = { 'checkbox': 1, 'radio': 1 };
-
-      plugin.onElementEvent = function onElementEvent() {
+        return this;
+      },
+      
+      onElementEvent = function onElementEvent() {
         var value = this.getValue();
         if (this.lastValue === value) return;
         this.callback(this.element, value);
         this.lastValue = value;
-      };
+      },
 
-      plugin.registerCallback = function registerCallback(element) {
+      registerCallback = function registerCallback(element) {
         var type, decorator = fuse.get(element);
         element = decorator.raw || decorator;
         if (type = element.type) {
           decorator.observe(CHECKED_INPUT_TYPES[type] ? 'click' : 'change',
             this.onElementEvent);
         }
-      };
+      },
 
-      plugin.registerFormCallbacks = function registerFormCallbacks() {
+      registerFormCallbacks = function registerFormCallbacks() {
         var element, elements = this.element.getControls(), i= 0;
         while (element = elements[i++]) this.registerCallback(element);
       };
 
-      // prevent JScript bug with named function expressions
-      var onElementEvent = nil, registerCallback = nil, registerFormCallbacks = nil;
-    })(BaseEventObserver.plugin);
+      return {
+        'constructor': BaseEventObserver,
+        'onElementEvent': onElementEvent,
+        'registerCallback': registerCallback,
+        'registerFormCallbacks': registerFormCallbacks
+      };
+    }),
 
     /*------------------------------------------------------------------------*/
 
-    var CHECKED_INPUT_TYPES = { 'checkbox': 1, 'radio': 1 },
+    CHECKED_INPUT_TYPES = { 'checkbox': 1, 'radio': 1 },
 
     Field = fuse.dom.InputElement,
 

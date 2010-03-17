@@ -2,19 +2,22 @@
 
   Document = 
   fuse.dom.Document = (function() {
-    function Decorator() { }
+    var Decorator = function() { },
 
-    function Document(node) {
+    Document = function Document(node) {
       // quick return if empty, decorated, or not a document node
-      if (!node || node.raw || node.nodeType !== DOCUMENT_NODE)
+      if (!node || node.raw || node.nodeType !== DOCUMENT_NODE) {
         return node;
+      }
 
       var decorated, pluginViewport, viewport,
        id = Node.getFuseId(node),
        data = domData[id];
 
       // return cached if available
-      if (data.decorator) return data.decorator;
+      if (data.decorator) {
+        return data.decorator;
+      }
 
       decorated =
       data.decorator = new Decorator;
@@ -31,9 +34,9 @@
       });
 
       return decorated;
-    }
+    };
 
-    var Document = Class(Node, { 'constructor': Document });
+    Class(Node, { 'constructor': Document });
     Decorator.prototype = Document.plugin;
     Document.updateGenerics = Node.updateGenerics;
     return Document;
@@ -41,29 +44,30 @@
 
   (function(plugin) {
     var viewport =
-    plugin.viewport = { };
+    plugin.viewport = { },
 
-    function define() {
-      function getHeight() {
-        return fuse.Number(dimensionNode.clientHeight);
-      }
-
-      function getWidth() {
-        return fuse.Number(dimensionNode.clientWidth);
-      }
+    define = function() {
+      var doc = this.ownerDocument,
 
       // Safari < 3 -> doc
       // Opera  < 9.5, Quirks mode -> body
       // Others -> docEl
-      var doc = this.ownerDocument,
-       dimensionNode = 'clientWidth' in doc ? doc : doc[fuse._info.root.property];
+      dimensionNode = 'clientWidth' in doc ? doc : doc[fuse._info.root.property],
+
+      getHeight = function getHeight() {
+        return fuse.Number(dimensionNode.clientHeight);
+      },
+
+      getWidth = function getWidth() {
+        return fuse.Number(dimensionNode.clientWidth);
+      };
 
       // lazy define methods
       this.getHeight = getHeight;
       this.getWidth  = getWidth;
 
       return this[arguments[0]]();
-    }
+    };
 
     plugin.getFuseId = function getFuseId() {
       return Node.getFuseId(this.raw || this);
@@ -86,12 +90,12 @@
         return returnOffset(global.pageXOffset, global.pageYOffset);
       };
 
-      if (typeof global.pageXOffset !== 'number')
+      if (typeof global.pageXOffset !== 'number') {
         getScrollOffsets = function getScrollOffsets() {
           var scrollEl = fuse._scrollEl;
           return returnOffset(scrollEl.scrollLeft, scrollEl.scrollTop);
         };
-
+      }
       return getScrollOffsets;
     })();
 

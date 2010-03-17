@@ -3,11 +3,81 @@
   (function(plugin) {
     // support W3C ElementTraversal interface
     var firstNode = 'firstChild',
-     lastNode     = 'lastChild',
-     nextNode     = 'nextSibling',
-     prevNode     = 'previousSibling',
-     nextElement  = 'nextElementSibling',
-     prevElement  = 'previousElementSibling';
+
+    lastNode      = 'lastChild',
+
+    nextNode      = 'nextSibling',
+
+    prevNode      = 'previousSibling',
+
+    nextElement   = 'nextElementSibling',
+
+    prevElement   = 'previousElementSibling',
+
+    getSome = function(element, property, selectors, count) {
+      var match, results = null, i = 0;
+      if (!element) return results;
+
+      // handle when a callback and optional thisArg is passed
+      // thisArg = count, callback = selectors;
+      if (typeof selectors === 'function') {
+        do {
+          if (element.nodeType === ELEMENT_NODE && selectors.call(count, element))
+            return fromElement(element);
+        } while (element = (element.raw || element)[property]);
+      }
+      else {
+        if (isNumber(selectors)) {
+          count = selectors;
+          selectors = null;
+        }
+
+        if (count > 1) {
+          results = NodeList();
+        } else {
+          count = 1;
+        }
+
+        // handle no arguments
+        if (selectors == null) {
+          // handle returning first match
+          if (count == 1) {
+            do {
+              if (element.nodeType === ELEMENT_NODE)
+                return fromElement(element);
+            } while (element = element[property]);
+          }
+          // handle returning a number of matches
+          else {
+            do {
+              if (i < count && element.nodeType === ELEMENT_NODE)
+                results[i++] = fromElement(element);
+            } while (element = element[property]);
+          }
+        }
+        // handle when selectors are passed
+        else if (isString(selectors)) {
+          match = fuse.dom.selector.match;
+
+          // handle returning first match
+          if (count == 1) {
+            do {
+              if (element.nodeType === ELEMENT_NODE && match(element, selectors))
+                return fromElement(element);
+            } while (element = element[property]);
+          }
+          // handle returning a number of matches
+          else {
+            do {
+              if (i < count && element.nodeType === ELEMENT_NODE &&
+                  match(element, selectors))
+                results[i++] = fromElement(element);
+            } while (element = element[property]);
+          }
+        }
+      }
+      return results;
+    };
 
     if (isHostObject(fuse._docEl, nextElement) &&
         isHostObject(fuse._docEl, prevElement)) {
@@ -16,6 +86,8 @@
       firstNode = 'firstElementChild';
       lastNode  = 'lastElementChild';
     }
+
+    /*------------------------------------------------------------------------*/
 
     plugin.getChildren = function getChildren(selectors) {
       var element = (this.raw || this)[firstNode];
@@ -65,8 +137,6 @@
       }
       return results;
     };
-
-    /*------------------------------------------------------------------------*/
 
     plugin.down = function down(selectors, count) {
       var match, node, nodes, results = null, i = 0, j = 0,
@@ -131,73 +201,6 @@
       }
       return results;
     };
-
-    /*------------------------------------------------------------------------*/
-
-    function getSome(element, property, selectors, count) {
-      var match, results = null, i = 0;
-      if (!element) return results;
-
-      // handle when a callback and optional thisArg is passed
-      // thisArg = count, callback = selectors;
-      if (typeof selectors === 'function') {
-        do {
-          if (element.nodeType === ELEMENT_NODE && selectors.call(count, element))
-            return fromElement(element);
-        } while (element = (element.raw || element)[property]);
-      }
-      else {
-        if (isNumber(selectors)) {
-          count = selectors;
-          selectors = null;
-        }
-
-        if (count > 1) {
-          results = NodeList();
-        } else {
-          count = 1;
-        }
-
-        // handle no arguments
-        if (selectors == null) {
-          // handle returning first match
-          if (count == 1) {
-            do {
-              if (element.nodeType === ELEMENT_NODE)
-                return fromElement(element);
-            } while (element = element[property]);
-          }
-          // handle returning a number of matches
-          else {
-            do {
-              if (i < count && element.nodeType === ELEMENT_NODE)
-                results[i++] = fromElement(element);
-            } while (element = element[property]);
-          }
-        }
-        // handle when selectors are passed
-        else if (isString(selectors)) {
-          match = fuse.dom.selector.match;
-
-          // handle returning first match
-          if (count == 1) {
-            do {
-              if (element.nodeType === ELEMENT_NODE && match(element, selectors))
-                return fromElement(element);
-            } while (element = element[property]);
-          }
-          // handle returning a number of matches
-          else {
-            do {
-              if (i < count && element.nodeType === ELEMENT_NODE &&
-                  match(element, selectors))
-                results[i++] = fromElement(element);
-            } while (element = element[property]);
-          }
-        }
-      }
-      return results;
-    }
 
     plugin.next = function next(selectors, count) {
       return getSome((this.raw || this)[nextNode], nextNode, selectors, count);

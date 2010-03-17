@@ -6,6 +6,10 @@
   (function(plugin) {
     var SKIPPED_KEYS = { 'callSuper': 1, 'constructor': 1, 'match': 1, 'select': 1 },
 
+    reBool = /^(?:(?:is|has)[A-Z]|contains)/,
+
+    reGetter = /^(?:get[A-Z]|down|first|identify|inspect|last|next|previous|read|scroll)/,
+
     arrProto = Array.prototype,
 
     arrEvery = arrProto.every ||
@@ -36,11 +40,7 @@
         return false;
       },
 
-    reBool = /^(?:(?:is|has)[A-Z]|contains)/,
-
-    reGetter = /^(?:get[A-Z]|down|first|identify|inspect|last|next|previous|read|scroll)/;
-
-    function addMethod(value, key, object) {
+    addMethod = function(value, key, object) {
       if (!SKIPPED_KEYS[key] && isFunction(value) && hasKey(object, key)) {
         if (reGetter.test(key)) {
           // getters return the value of the first element
@@ -67,7 +67,7 @@
              isBool ? (key.indexOf('is') ? arrSome : arrEvery) : arrEach);
         }
       }
-    }
+    };
 
     // Add fuse.dom.Element methods to fuse.dom.NodeList
     eachKey(Element.plugin, addMethod);

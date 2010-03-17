@@ -2,11 +2,11 @@
 
   Element =
   fuse.dom.Element = Class(Node, function() {
-    function Element(tagName, attributes, context) {
+    var Element = function Element(tagName, attributes, context) {
       return isString(tagName)
         ? Element.create(tagName, attributes, context)
         : fromElement(tagName);
-    }
+    };
 
     return { 'constructor': Element };
   });

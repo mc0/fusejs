@@ -1,9 +1,11 @@
   /*------------------------------ AJAX: UPDATER -----------------------------*/
 
   fuse.ajax.Updater = (function() {
-    function Klass() { }
+    var Request = fuse.ajax.Request,
 
-    function Updater(container, url, options) {
+    Klass = function() { },
+
+    Updater = function Updater(container, url, options) {
       var callbackName = 'on' + Request.Events[4],
        instance = __instance || new Klass,
        onDone = options[callbackName];
@@ -22,11 +24,11 @@
 
       // instance._super() equivalent
       fuse.ajax.Request.call(instance, url, options);
-    }
+    },
 
-    var __instance, __apply = Updater.apply, __call = Updater.call,
-     Request = fuse.ajax.Request,
-     Updater = Class(fuse.ajax.Request, { 'constructor': Updater });
+    __instance,
+    __apply = Updater.apply,
+    __call = Updater.call;
 
     Updater.call = function(thisArg) {
       __instance = thisArg;
@@ -38,29 +40,33 @@
       return __apply.call(this, thisArg, argArray);
     };
 
+    Class(fuse.ajax.Request, { 'constructor': Updater });
     Klass.prototype = Updater.plugin;
     return Updater;
   })();
 
   fuse.ajax.Updater.plugin.updateContent = (function() {
-    function updateContent(responseText) {
+    var updateContent = function updateContent(responseText) {
       var insertion,
        options = this.options,
        receiver = this.container[this.isSuccess() ? 'success' : 'failure'];
 
       if (receiver) {
-        if (!options.evalScripts)
+        if (!options.evalScripts) {
           responseText = responseText.stripScripts();
-
+        }
         if (options.insertion) {
           if (isString(options.insertion)) {
             insertion = { }; insertion[options.insertion] = responseText;
             receiver.insert(insertion);
+          } else {
+            options.insertion(receiver, responseText);
           }
-          else options.insertion(receiver, responseText);
+        } else {
+          receiver.update(responseText);
         }
-        else receiver.update(responseText);
       }
-    }
+    };
+
     return updateContent;
   })();

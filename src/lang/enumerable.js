@@ -10,8 +10,9 @@
         // basic strict match
         if (item === value && result++) throw $break; 
         // match String and Number object instances
-        try { if (item.valueOf() === value.valueOf() && result++) throw $break; }
-        catch (e) { }
+        try {
+          if (item.valueOf() === value.valueOf() && result++) throw $break;
+        } catch (e) { }
       });
 
       return !!result;
@@ -31,8 +32,9 @@
     mixin.eachSlice = function eachSlice(size, callback, thisArg) {
       var index = -size, slices = fuse.Array(), list = this.toArray();
       if (size < 1) return list;
-      while ((index += size) < list.length)
+      while ((index += size) < list.length) {
         slices[slices.length] = list.slice(index, index + size);
+      }
       return callback
         ? slices.map(callback, thisArg)
         : slices;
@@ -183,17 +185,23 @@
     };
 
     mixin.zip = function zip() {
-      var callback = K, args = slice.call(arguments, 0);
+      var j, length, lists, plucked, callback = K,
+       args = slice.call(arguments, 0);
 
       // if last argument is a function it is the callback
-      if (typeof args[args.length-1] === 'function')
+      if (typeof args[args.length-1] === 'function') {
         callback = args.pop();
+      }
 
-      var collection = prependList(fuse.Array.prototype.map.call(args, fuse.util.$A),
-        this.toArray(), fuse.Array());
+      lists = prependList(args, this.toArray());
+      length = lists.length;
 
       return this.map(function(value, index, iterable) {
-        return callback(collection.pluck(index), index, iterable);
+        j = -1; plucked = fuse.Array();
+        while (++j < length) {
+          if (j in lists) plucked[j] = lists[j][index];
+        }
+        return callback(plucked, index, iterable);
       });
     };
 

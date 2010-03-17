@@ -12,7 +12,9 @@
 
       // return cached if available
       var decorated, id = Node.getFuseId(object), data = domData[id];
-      if (data.decorator) return data.decorator;
+      if (data.decorator) {
+        return data.decorator;
+      }
 
       decorated =
       data.decorator = new Decorator;
@@ -20,7 +22,7 @@
       return decorated;
     };
 
-    Window = Class({ 'constructor': Window });
+    Class({ 'constructor': Window });
     Decorator.prototype = Window.plugin;
     Window.updateGenerics = Node.updateGenerics;
     return Window;

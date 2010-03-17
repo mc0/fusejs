@@ -3,47 +3,51 @@
   // Support for the "dom:loaded" event is based on work by Dan Webb,
   // Matthias Miller, Dean Edwards, John Resig and Diego Perini.
   (function() {
-    function Poller(method) {
-      function callback() {
+    var cssPoller, readyStatePoller,
+
+    FINAL_DOCUMENT_READY_STATES = { 'complete': 1, 'loaded': 1 },
+
+    doc = fuse._doc,
+
+    decoratedDoc = fuse.get(doc),
+
+    Poller = function(method) {
+      var poller = this,
+      setTimeout = global.setTimeout,
+      callback   = function() {
         if (!method() && poller.id != null)
           poller.id = setTimeout(callback, 10);
-      }
+      };
 
-      var poller = this,
-       setTimeout = global.setTimeout;
       this.id = setTimeout(callback, 10);
-    }
+    },
 
-    Poller.prototype.clear = function() {
-      this.id != null && (this.id = global.clearTimeout(this.id));
-    };
-
-    function cssDoneLoading() {
+    cssDoneLoading = function() {
       return (isCssLoaded = function() { return true; })();
-    }
+    },
 
-    function fireDomLoadedEvent() {
+    fireDomLoadedEvent = function() {
       readyStatePoller.clear();
       cssPoller && cssPoller.clear();
       return !decoratedDoc.loaded && !!decoratedDoc.fire('dom:loaded');
-    }
+    },
 
-    function checkCssAndFire() {
+    checkCssAndFire = function() {
       return decoratedDoc.loaded
         ? fireDomLoadedEvent()
         : !!(isCssLoaded() && fireDomLoadedEvent());
-    }
+    },
 
-    function getSheetElements() {
+    getSheetElements = function() {
       var i = 0, link, links = doc.getElementsByTagName('LINK'),
        results = fuse.Array.fromNodeList(doc.getElementsByTagName('STYLE'));
       while (link = links[i++])
         if (link.rel.toLowerCase() === 'stylesheet')
           results.push(link);
       return results;
-    }
+    },
 
-    function getSheetObjects(elements) {
+    getSheetObjects = function(elements) {
       for (var i = 0, results = [], element, sheet; element = elements[i++]; ) {
         sheet = getSheet(element);
         // bail when sheet is null/undefined on elements
@@ -55,15 +59,7 @@
         }
       }
       return results;
-    }
-
-    var cssPoller, readyStatePoller,
-
-    FINAL_DOCUMENT_READY_STATES = { 'complete': 1, 'loaded': 1 },
-
-    doc = fuse._doc,
-
-    decoratedDoc = fuse.get(doc),
+    },
 
     checkDomLoadedState = function(event) {
       if (decoratedDoc.loaded)
@@ -214,6 +210,10 @@
                   return done;
                 })();
           })();
+    };
+
+    Poller.prototype.clear = function() {
+      this.id != null && (this.id = global.clearTimeout(this.id));
     };
 
     /*------------------------------------------------------------------------*/

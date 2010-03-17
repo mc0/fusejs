@@ -92,7 +92,7 @@
       return id;
     };
 
-    Node = Class({ 'constructor': Node });
+    Class({ 'constructor': Node });
     Decorator.prototype = Node.plugin;
     Node.plugin.getFuseId = getFuseId;
     return Node;

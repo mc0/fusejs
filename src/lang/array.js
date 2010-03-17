@@ -413,9 +413,9 @@
     plugin.zip = function zip() {
       if (this == null) throw new TypeError;
       var lists, plucked, j, k, i = -1,
+       args     = slice.call(arguments, 0),
        callback = K,
        results  = fuse.Array(),
-       args     = slice.call(arguments, 0),
        object   = Object(this),
        length   = object.length >>> 0;
 
@@ -449,14 +449,13 @@
         if (this == null) throw new TypeError;
 
         var item, j, i = -1,
-         args    = arguments,
-         length  = args.length,
+         length  = arguments.length,
          object  = Object(this),
          results = isArray(object) ? List.fromArray(object) : List(object),
          n       = results.length;
 
         while (++i < length) {
-          item = args[i];
+          item = arguments[i];
           if (isArray(item)) {
             j = 0; itemLen = item.length;
             for ( ; j < itemLen; j++, n++) {

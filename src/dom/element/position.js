@@ -221,8 +221,12 @@
         // the getCumulativeOffset because Opera
         // will fumble the calculations if
         // you try to subtract the coords after
-        if (options.setLeft) elemStyle.left = elemStyle.marginLeft = '0';
-        if (options.setTop)  elemStyle.top  = elemStyle.marginTop  = '0';
+        if (options.setLeft) {
+          elemStyle.left = elemStyle.marginLeft = '0';
+        }
+        if (options.setTop){
+          elemStyle.top  = elemStyle.marginTop  = '0';
+        }
 
         // if an absolute element is a descendant of the source then
         // calculate its offset to the source and inverse it
@@ -242,16 +246,21 @@
         }
 
         // set position
-        if (options.setLeft) elemStyle.left = (coord.left + options.offsetLeft) + 'px';
-        if (options.setTop)  elemStyle.top  = (coord.top  + options.offsetTop)  + 'px';
+        if (options.setLeft) {
+          elemStyle.left = (coord.left + options.offsetLeft) + 'px';
+        }
+        if (options.setTop) {
+          elemStyle.top  = (coord.top  + options.offsetTop)  + 'px';
+        }
 
         // restore styles
         if (elemIsHidden) {
           elemStyle.display = elemDisplay;
           elemStyle.visibility = elemVis;
         }
-        if (srcIsHidden)
+        if (srcIsHidden) {
           srcStyle.cssText = srcBackup;
+        }
       }
 
       return this;
@@ -263,23 +272,26 @@
        original   = element,
        nodeName   = getNodeName(element);
 
-      if (nodeName === 'AREA')
+      if (nodeName === 'AREA') {
         return fromElement(element.parentNode);
+      }
 
       // IE throws an error if the element is not in the document.
       // Many browsers report offsetParent as null if the element's
       // style is display:none.
       if (isDetached.call(this) || element.nodeType === DOCUMENT_NODE ||
           OFFSET_PARENT_EXIT_BEFORE_NODES[nodeName] ||
-          !element.offsetParent && getStyle.call(this, 'display') != 'none')
+          !element.offsetParent && getStyle.call(this, 'display') != 'none') {
         return null;
+      }
 
       while (element = element.parentNode) {
         nodeName = getNodeName(element);
         if (OFFSET_PARENT_EXIT_BEFORE_NODES[nodeName]) break;
         if (OFFSET_PARENT_EXIT_ON_NODES[nodeName] ||
-            getStyle.call(element, 'position') != 'static')
+            getStyle.call(element, 'position') != 'static') {
           return fromElement(element);
+        }
       }
       return fromElement(getDocument(original).body);
     };
@@ -304,19 +316,22 @@
           result     = getOffset(this, ancestor);
           elemStyle.cssText  = backup;
         }
-        else result = getOffset(this, ancestor);
+        else {
+          result = getOffset(this, ancestor);
+        }
 
         return result;
       }
 
       var getOffset = function(element, ancestor) {
         var offsetParent, position, raw, valueT = 0, valueL = 0;
-        if (BODY_OFFSETS_INHERIT_ITS_MARGINS === null)
+        if (BODY_OFFSETS_INHERIT_ITS_MARGINS === null) {
           BODY_OFFSETS_INHERIT_ITS_MARGINS = envTest('BODY_OFFSETS_INHERIT_ITS_MARGINS');
-
-        if (ELEMENT_COORD_OFFSETS_DONT_INHERIT_ANCESTOR_BORDER_WIDTH === null)
+        }
+        if (ELEMENT_COORD_OFFSETS_DONT_INHERIT_ANCESTOR_BORDER_WIDTH === null) {
           ELEMENT_COORD_OFFSETS_DONT_INHERIT_ANCESTOR_BORDER_WIDTH =
             envTest('ELEMENT_COORD_OFFSETS_DONT_INHERIT_ANCESTOR_BORDER_WIDTH');
+        }
 
         do {
           raw = element.raw || element;
@@ -340,7 +355,7 @@
         return returnOffset(valueL, valueT);
       };
 
-      if (envTest('ELEMENT_BOUNDING_CLIENT_RECT'))
+      if (envTest('ELEMENT_BOUNDING_CLIENT_RECT')) {
         getOffset = (function(__getOffset) {
           return function(element, ancestor) {
             var doc, info, rect, raw, root, scrollEl, valueT, valueL;
@@ -364,6 +379,7 @@
             return returnOffset(valueL, valueT);
           };
         })(getOffset);
+      }
 
       return getCumulativeOffset;
     })();
@@ -384,8 +400,9 @@
           valueT += element.scrollTop  || 0;
           valueL += element.scrollLeft || 0;
 
-          if (element === scrollEl || getStyle.call(element, 'position') == 'fixed')
+          if (element === scrollEl || getStyle.call(element, 'position') == 'fixed') {
             break;
+          }
         }
         element = element.parentNode;
       } while (element && element.nodeType === ELEMENT_NODE);

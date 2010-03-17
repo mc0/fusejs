@@ -4,17 +4,17 @@
 
   Class =
   fuse.Class = (function() {
-    function Subclass() { };
+    var Subclass = function() { },
 
-    function createNamedClass(name) {
+    createNamedClass = function(name) {
       return Function(
         'function ' + name + '(){' +
         'var i,c=this;' +
         'return (i=c.initialize)&&i.apply(c,arguments)' +
         '}return ' + name)();
-    }
+    },
 
-    function Class(Superclass, plugins, mixins, statics) {
+    Class = function Class(Superclass, plugins, mixins, statics) {
       var Klass, arg, plugin, i = 0,
        args = slice.call(arguments, 0),
        first = args[0];
@@ -65,7 +65,7 @@
 
       plugin.constructor = Klass;
       return Klass;
-    }
+    };
 
     return Class;
   })();

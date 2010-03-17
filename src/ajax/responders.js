@@ -13,7 +13,7 @@
       // This pattern, based on work by Dean Edwards and John Resig, allows a
       // responder to error out without stopping the other responders from firing.
       // http://groups.google.com/group/jquery-dev/browse_thread/thread/2a14c2da6bcbb5f
-      function __dispatch(index, handlers, request, json) {
+      var __dispatch = function(index, handlers, request, json) {
         index = index || 0;
         var error, length = handlers.length;
         try {
@@ -27,12 +27,12 @@
         } finally {
           if (error) throw error;
         }
-      }
+      },
 
-      function dispatch(handlerName, request, json) {
+      dispatch = function dispatch(handlerName, request, json) {
         var handlers = this.responders[handlerName];
         if (handlers) __dispatch(0, handlers, request, json);
-      }
+      };
 
       return dispatch;
     })();

@@ -1,9 +1,9 @@
   /*------------------------ LANG: TIMER -----------------------*/
 
   fuse.Timer = (function() {
-    function Klass() { }
+    var Klass = function() { },
 
-    function Timer(callback, interval, options) {
+    Timer = function Timer(callback, interval, options) {
       var instance = __instance || new Klass;
       __instance = null;
 
@@ -14,9 +14,9 @@
       instance.onTimerEvent = function() { onTimerEvent.call(instance); };
       instance.options = _extend(clone(Timer.options), options);
       return instance;
-    }
+    },
 
-    function onTimerEvent() {
+    onTimerEvent = function() {
       if (!this.executing) {
         this.executing = true;
 
@@ -34,10 +34,11 @@
           throw e;
         }
       }
-    }
+    },
 
-    var __instance, __apply = Timer.apply, __call = Timer.call,
-     Timer = Class({ 'constructor': Timer });
+    __instance,
+    __apply = Timer.apply,
+    __call = Timer.call;
 
     Timer.call = function(thisArg) {
       __instance = thisArg;
@@ -49,6 +50,7 @@
       return __apply.call(this, thisArg, argArray);
     };
 
+    Class({ 'constructor': Timer });
     Klass.prototype = Timer.plugin;
     return Timer;
   })();

@@ -1,9 +1,9 @@
   /*----------------------------- LANG: TEMPLATE -----------------------------*/
 
   fuse.Template = (function() {
-    function Klass() { }
+    var Klass = function() { },
 
-    function Template(template, pattern) {
+    Template = function Template(template, pattern) {
       pattern = pattern || fuse.Template.Pattern;
       if (!isRegExp(pattern))
         pattern = fuse.RegExp(escapeRegExpChars(pattern));
@@ -16,10 +16,11 @@
       instance.template = fuse.String(template);
       instance.pattern  = pattern;
       return instance;
-    }
+    },
 
-    var __instance, __apply = Template.apply, __call = Template.call,
-     Template = Class({ 'constructor': Template });
+    __instance,
+    __apply = Template.apply,
+    __call = Template.call;
 
     Template.apply = function(thisArg, argArray) {
       __instance = thisArg;
@@ -31,6 +32,7 @@
       return __call.apply(this, arguments);
     };
 
+    Class({ 'constructor': Template });
     Klass.prototype = Template.plugin;
     return Template;
   })();

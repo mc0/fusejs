@@ -176,11 +176,11 @@
 
      if (!plugin.bind) {
        plugin.bind = (function() {
-         function bind(thisArg) {
+         var bind = function bind(thisArg) {
            return arguments.length > 1
              ? Func.bind.apply(Func, prependList(arguments, this))
              : Func.bind(this, thisArg);
-         }
+         };
          return bind;
        })();
      }

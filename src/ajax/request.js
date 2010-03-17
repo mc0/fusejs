@@ -1,9 +1,9 @@
   /*---------------------------- AJAX: REQUEST -------------------------------*/
 
   fuse.ajax.Request = (function() {
-    function Decorator() { }
+    var Decorator = function() { },
 
-    function Request(url, options) {
+    Request = function Request(url, options) {
       var decorated  = __instance || new Decorator,
        onStateChange = decorated.onStateChange,
        onTimeout     = decorated.onTimeout;
@@ -20,10 +20,11 @@
 
       decorated.request(url, options);
       return decorated;
-    }
+    },
 
-    var __instance, __apply = Request.apply, __call = Request.call,
-     Request = Class(fuse.ajax.Base, { 'constructor': Request });
+    __instance,
+    __apply = Request.apply,
+    __call = Request.call;
 
     Request.call = function(thisArg) {
       __instance = thisArg;
@@ -35,6 +36,7 @@
       return __apply.call(this, thisArg, argArray);
     };
 
+    Class(fuse.ajax.Base, { 'constructor': Request });
     Decorator.prototype = Request.plugin;
     return Request;
   })();

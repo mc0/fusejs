@@ -1,34 +1,34 @@
   /*-------------------------- FORM: TIMED OBSERVER --------------------------*/
 
   (function() {
-    var BaseTimedObserver = Class(fuse.Timer, {
-      'constructor': (function() {
-        function BaseTimedObserver(element, callback, interval, options) {
-          // this._super() equivalent
-          fuse.Timer.call(this, callback, interval, options);
+    var BaseTimedObserver = Class(fuse.Timer, function() {
+      var BaseTimedObserver = function BaseTimedObserver(element, callback, interval, options) {
+        // this._super() equivalent
+        fuse.Timer.call(this, callback, interval, options);
 
-          this.element = fuse.get(element);
-          this.lastValue = this.getValue();
-          this.start();
-        }
-        return BaseTimedObserver;
-      })(),
+        this.element = fuse.get(element);
+        this.lastValue = this.getValue();
+        this.start();
+        return this;
+      },
 
-      'execute': (function() {
-        function execute() {
-          var value = this.getValue();
-          if (String(this.lastValue) != String(value)) {
-            this.callback(this.element, value);
-            this.lastValue = value;
-          }
+      execute = function execute() {
+        var value = this.getValue();
+        if (String(this.lastValue) != String(value)) {
+          this.callback(this.element, value);
+          this.lastValue = value;
         }
-        return execute;
-      })()
-    });
+      };
+
+      return { 'constructor': BaseTimedObserver, 'execute': execute };
+    }),
 
     /*------------------------------------------------------------------------*/
 
-    var Field = fuse.dom.InputElement, getValue = nil;
+    Field = fuse.dom.InputElement,
+
+    getValue = nil;
+
 
     Field.Observer =
     Field.TimedObserver = (function() {
@@ -38,7 +38,7 @@
         return BaseTimedObserver.call(new Klass, element, callback, interval, options);
       };
 
-      FieldTimedObserver = Class(BaseTimedObserver, { 'constructor': FieldTimedObserver });
+      Class(BaseTimedObserver, { 'constructor': FieldTimedObserver });
       Klass.prototype = FieldTimedObserver.plugin;
       return FieldTimedObserver;
     })();
@@ -55,7 +55,7 @@
         return BaseTimedObserver.call(new Klass, element, callback, interval, options);
       };
 
-      FormTimedObserver = Class(BaseTimedObserver, { 'constructor': FormTimedObserver });
+      Class(BaseTimedObserver, { 'constructor': FormTimedObserver });
       Klass.prototype = FormTimedObserver.plugin;
       return FormTimedObserver;
     })();
