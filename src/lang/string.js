@@ -277,23 +277,27 @@
 
       if (!reOpenScriptTag.test(string)) return results;
 
-      reHTMLComments.lastIndex =
-      reScripts.lastIndex      = 0;
       scriptTags = string.replace(reHTMLComments, '');
+      // clear lastIndex because exec() uses it as a starting point
+      reScripts.lastIndex = 0;
 
       if (callback) {
-        while (match = reScripts.exec(scriptTags))
-          if (script = match[1]) { callback(script); results.push(script); }
+        while (match = reScripts.exec(scriptTags)) {
+          if (script = match[1]) {
+            callback(script);
+            results.push(script);
+          }
+        }
       } else {
-        while (match = reScripts.exec(scriptTags))
+        while (match = reScripts.exec(scriptTags)) {
           if (script = match[1]) results.push(script);
+        }
       }
       return results;
     };
 
     plugin.hyphenate = function hyphenate() {
       if (this == null) throw new TypeError;
-      reUnderscores.lastIndex = 0;
       return fuse.String(String(this).replace(reUnderscores, '-'));
     };
 
@@ -306,7 +310,6 @@
 
     plugin.stripScripts = function stripScripts() {
       if (this == null) throw new TypeError;
-      reScripts.lastIndex = 0;
       return fuse.String(String(this).replace(reScripts, ''));
     };
 
@@ -389,11 +392,6 @@
 
     plugin.underscore = function underscore() {
       if (this == null) throw new TypeError;
-      reDoubleColons.lastIndex =
-      reCapped.lastIndex       =
-      reCamelCases.lastIndex   =
-      reHyphens.lastIndex      = 0;
-
       return fuse.String(String(this)
         .replace(reDoubleColons, '/')
         .replace(reCapped,       '$1_$2')

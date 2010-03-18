@@ -176,7 +176,6 @@
               (name == 'width' ? 'Width' : 'Height')]('content') + 'px');
           return null;
         }
-
         // If the unit is something other than a pixel (em, pt, %),
         // set it on something we can grab a pixel value from.
         // Inspired by Dean Edwards' comment
@@ -223,7 +222,7 @@
   // http://www.w3.org/TR/html5/infrastructure.html#space-character
   (function(plugin) {
     var split = fuse.String.plugin.split,
-     reEdgeSpaces = /[\t\n\r\f]/g,
+     reEdgeSpaces  = /[\t\n\r\f]/g,
      reExtraSpaces = /\x20{2,}/g;
 
     plugin.addClassName = function addClassName(className) {
@@ -235,50 +234,31 @@
     };
 
     plugin.getClassNames = function getClassNames() {
-      var element = this.raw || this, cn = element.className, original = cn;
-      if (cn.length) {
-        // normalize to optimize future calls
-        reEdgeSpaces.lastIndex = reExtraSpaces.lastIndex = 0;
-        cn = cn.replace(reEdgeSpaces, ' ').replace(reExtraSpaces, ' ');
-        if (cn !== original) element.className = cn;
-
-        return split.call(cn, ' ');
-      }
-      return fuse.Array();
+      var element = this.raw || this, cn = element.className;
+      return cn.length
+        ? split.call(cn.replace(reEdgeSpaces, ' ').replace(reExtraSpaces, ' '), ' ')
+        : fuse.Array();
     };
 
     plugin.hasClassName = function hasClassName(className) {
-      var element = this.raw || this, cn = element.className, original = cn;
-      className = ' ' + className.replace(/\\/g, '') + ' ';
-      reEdgeSpaces.lastIndex = 0;
-
-      if (cn.length) {
-        if (cn == className) {
-          return true;
-        }
-        if ((' ' + (cn = cn.replace(reEdgeSpaces, ' ')) + ' ').indexOf(className) > -1) {
-          // normalize to optimize future calls
-          if (cn !== original) {
-            element.className = cn;
-          }
-          return true;
-        }
-      }
-      return false;
+      var element = this.raw || this, cn = element.className;
+      return !!cn.length &&
+        (cn == className ||
+        (' ' + cn.replace(reEdgeSpaces, ' ') + ' ')
+        .indexOf(' ' + className + ' ') > -1);
     };
 
     plugin.removeClassName = function removeClassName(className) {
       var classNames, length, element = this.raw || this,
-       cn = element.className, i = 0, result = [];
+       cn = element.className, i = -1, j = i, result = [];
 
       if (cn.length) {
-        reEdgeSpaces.lastIndex = 0;
         classNames = cn.replace(reEdgeSpaces, ' ').split(' ');
         length = classNames.length;
 
-        while (i < length) {
-          cn = classNames[i++];
-          if (cn != className) result.push(cn);
+        while (++i < length) {
+          cn = classNames[i];
+          if (cn != className) result[++j] = cn;
         }
         element.className = result.join(' ');
       }
