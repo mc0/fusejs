@@ -2,7 +2,11 @@
 
   (function(plugin) {
 
-    var DIMENSION_NAMES = { 'height': 1, 'width': 1 },
+    var CHECK_DIMENSION_IS_NULL =
+      envTest('ELEMENT_COMPUTED_STYLE_HEIGHT_IS_ZERO_WHEN_HIDDEN'),
+
+    CHECK_POSITION_IS_NULL =
+      envTest('ELEMENT_COMPUTED_STYLE_DEFAULTS_TO_ZERO'),
 
     FLOAT_TRANSLATIONS = typeof fuse._docEl.style.styleFloat !== 'undefined'
       ? { 'float': 'styleFloat', 'cssFloat': 'styleFloat' }
@@ -12,11 +16,17 @@
 
     POSITION_NAMES = { 'bottom': 1, 'left': 1, 'right': 1, 'top': 1 },
 
+    DIMENSION_NAMES = { 'height': 1, 'width': 1 },
+
     RELATIVE_CSS_UNITS = { 'em': 1, 'ex': 1 },
 
-    nullHandlers = [],
+    reOpacity   = /opacity:\s*(\d?\.?\d*)/,
 
-    reOpacity = /opacity:\s*(\d?\.?\d*)/,
+    reOverflow  = /overflow:\s*([^;]+)/,
+
+    reNonPxUnit = /^-?\d+(\.\d+)?(?!px)[%a-z]+$/i,
+
+    reUnit      = /\D+$/,
 
     camelize = (function() {
       var cache = { },
@@ -39,34 +49,23 @@
 
     getValue = function(element, name, value) {
       name = FLOAT_TRANSLATIONS[name] || name;
-      value = value || element.style[name];
-      if (name == 'opacity')
-        return value === '1' ? '1.0' : parseFloat(value) || '0';
+      value || (value = element.style[name]);
+      if (name == 'opacity') {
+        return value == '1' ? '1.0' : parseFloat(value) || '0';
+      }
       return value === 'auto' || value === '' ? null : value;
     },
 
     isNull = function(element, name) {
-      var length = nullHandlers.length;
-      while (length--) {
-        if (nullHandlers[length](element, name))
-          return true;
+      var result = false;
+      if (CHECK_POSITION_IS_NULL && POSITION_NAMES[name]) {
+        result = getComputedStyle(element, 'position') === 'static';
       }
-      return false;
+      else if (CHECK_DIMENSION_IS_NULL && DIMENSION_NAMES[name]) {
+        result = getComputedStyle(element, 'display') === 'none';
+      }
+      return result;
     };
-
-    if (envTest('ELEMENT_COMPUTED_STYLE_DEFAULTS_TO_ZERO')) {
-      nullHandlers.push(function(element, name) {
-        return POSITION_NAMES[name] &&
-          getComputedStyle(element, 'position') === 'static';
-      });
-    }
-
-    if (envTest('ELEMENT_COMPUTED_STYLE_HEIGHT_IS_ZERO_WHEN_HIDDEN')) {
-      nullHandlers.push(function(element, name) {
-        return DIMENSION_NAMES[name] && getComputedStyle(element, 'display') === 'none';
-      });
-    }
-
 
     plugin.setStyle = function setStyle(styles) {
       var hasOpacity, key, value, opacity, elemStyle = this.style;
@@ -111,19 +110,19 @@
     else if (envTest('ELEMENT_COMPUTED_STYLE_DIMENSIONS_EQUAL_BORDER_BOX')) {
       plugin.getStyle = function getStyle(name) {
         name = camelize(name);
-        var dim, result, element = this.raw || this;
+        var dim, element = this.raw || this, result = null;
 
-        if (isNull(element, name))
-          return null;
-
-        if (DIMENSION_NAMES[name]) {
-          dim = name == 'width' ? 'Width' : 'Height';
-          result = getComputedStyle(element, name);
-          if ((parseFloat(result) || 0) === element['offset' + dim])
-            return fuse.String(Element['get' + dim](element, 'content') + 'px');
+        if (!isNull(element, name)) {
+          if (DIMENSION_NAMES[name]) {
+            dim = name == 'width' ? 'Width' : 'Height';
+            result = getComputedStyle(element, name);
+            if ((parseFloat(result) || 0) === element['offset' + dim]) {
+              result = plugin['get' + dim].call(this, 'content') + 'px';
+            }
+          } else {
+            result = getComputedStyle(element, name);
+          }
         }
-
-        result = getComputedStyle(element, name);
         return result === null ? result : fuse.String(result);
       };
     }
@@ -131,11 +130,11 @@
     else if (envTest('ELEMENT_COMPUTED_STYLE')) {
       plugin.getStyle = function getStyle(name) {
         name = camelize(name);
-        var result, element = this.raw || this;
+        var element = this.raw || this, result = null;
 
-        if (isNull(element, name)) return null;
-
-        result = getComputedStyle(element, name);
+        if (!isNull(element, name)) {
+          result = getComputedStyle(element, name);
+        }
         return result === null ? result : fuse.String(result);
       };
     }
@@ -147,17 +146,18 @@
       // http://code.google.com/p/doctype/source/browse/trunk/goog/style/style.js#1146
       var span = fuse._doc.createElement('span');
       span.style.cssText = 'position:absolute;visibility:hidden;height:1em;lineHeight:0;padding:0;margin:0;border:0;';
-      span.innerHTML = 'M';
+      span.appendChild(fuse._doc.createTextNode('M'));
 
       plugin.getStyle = function getStyle(name) {
         var currStyle, element, elemStyle, runtimeStyle, runtimePos,
-         stylePos, pos, result, size, unit;
+         stylePos, pos, size, unit, result;
 
         // handle opacity
         if (name == 'opacity') {
           result = String(plugin.getOpacity.call(this));
-          if (result.indexOf('.') < 0) result += '.0';
-          return fuse.String(result);
+          return fuse.String(result.indexOf('.') < 0
+            ? result + '.0'
+            : result);
         }
 
         element = this.raw || this;
@@ -171,25 +171,28 @@
 
         // handle auto values
         if (result === 'auto') {
-          if (DIMENSION_NAMES[name] && currStyle.display !== 'none')
-            return fuse.String(this['get' +
-              (name == 'width' ? 'Width' : 'Height')]('content') + 'px');
-          return null;
+          if (DIMENSION_NAMES[name] && currStyle.display !== 'none') {
+            result = plugin['get' +
+              (name == 'width' ? 'Width' : 'Height')].call(this, 'content') + 'px';
+          } else {
+            return null;
+          }
         }
         // If the unit is something other than a pixel (em, pt, %),
         // set it on something we can grab a pixel value from.
         // Inspired by Dean Edwards' comment
         // http://erik.eae.net/archives/2007/07/27/18.54.15/#comment-102291
-        if (!NON_PX_NAMES[name] && /^-?\d+(\.\d+)?(?!px)[%a-z]+$/i.test(result)) {
+        else if (!NON_PX_NAMES[name] && reNonPxUnit.test(result)) {
           if (name == 'fontSize') {
-            unit = result.match(/\D+$/)[0];
+            unit = result.match(reUnit)[0];
             if (unit === '%') {
               size = element.appendChild(span).offsetHeight;
               element.removeChild(span);
               return fuse.String(Math.round(size) + 'px');
             }
-            else if (RELATIVE_CSS_UNITS[unit])
+            else if (RELATIVE_CSS_UNITS[unit]) {
               elemStyle = (element = element.parentNode).style;
+            }
           }
 
           runtimeStyle = element.runtimeStyle;
@@ -202,6 +205,8 @@
           // set runtimeStyle so no visible shift is seen
           runtimeStyle[pos] = stylePos;
           elemStyle[pos] = result;
+
+          // pixelLeft/pixelTop are not affected by runtimeStyle
           result = elemStyle['pixel' + (pos === 'top' ? 'Top' : 'Left')] + 'px';
 
           // revert changes
@@ -295,8 +300,9 @@
        elemStyle = element.style,
        display = elemStyle.display;
 
-      if (display && display !== 'none')
+      if (display && display !== 'none') {
         domData[getFuseId(element)].madeHidden = display;
+      }
       elemStyle.display = 'none';
       return this;
     };
@@ -307,8 +313,9 @@
        elemStyle = element.style,
        display = elemStyle.display;
 
-      if (display === 'none')
+      if (display === 'none') {
         elemStyle.display = data.madeHidden || '';
+      }
 
       delete data.madeHidden;
       return this;
@@ -390,14 +397,9 @@
           // strip alpha from filter style
           var element = this.raw || this,
            elemStyle  = element.style,
-           currStyle  = element.currentStyle,
-           filter     = (currStyle || elemStyle).filter.replace(reAlpha, ''),
-           zoom       = elemStyle.zoom;
-
-          // hasLayout is false then force it
-          if (!(currStyle && currStyle.hasLayout || zoom && zoom !== 'normal')) {
-            elemStyle.zoom = 1;
-          }
+           currStyle  = element.currentStyle || elemStyle,
+           filter     = currStyle.filter.replace(reAlpha, ''),
+           zoom       = currStyle.zoom;
 
           if (value > nearOne || value == '' && isString(value)) {
             value = 1;
@@ -412,6 +414,10 @@
               elemStyle.removeAttribute('filter');
             }
           } else {
+            // force layout for filters to work
+            if (!(currStyle && currStyle.hasLayout || zoom && zoom !== 'normal')) {
+              elemStyle.zoom = 1;
+            }
             elemStyle.filter = filter + 'alpha(opacity=' + (value * 100) + ')';
           }
           return this;
@@ -525,8 +531,7 @@
           }
         }
 
-        // First get our offset(Width/Height) (visual)
-        // offsetHeight/offsetWidth properties return 0 on elements
+        // the offsetHeight/offsetWidth properties return 0 on elements
         // with display:none, so show the element temporarily
         if (!plugin.isVisible.call(this)) {
           elemStyle = this.style;
