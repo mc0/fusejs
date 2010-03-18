@@ -1,10 +1,12 @@
+* Avoid setting style overflow via cssText in setStyle() because it causes bugs in IE and Konqueror. [jddalton, kangax]
+
 * Support fallback for Safari 2.x event.isMiddleClick() support. [Prototype LH #731] [Arthur Schreiber, Frank, jddalton]
 
-* Make fuse.dom.Element setOpacity() method treat a value of 1 and an empty string differently. [Prototype LH #684] [david brillard, jddalton] 
+* Make setOpacity() method treat a value of 1 and an empty string differently. [Prototype LH #684] [david brillard, jddalton] 
 
-* Make fuse.dom.Element setStyle() method avoid throwing errors when passing falsy values. [Prototype LH #558] [garrett, jddalton]
+* Make setStyle() method avoid throwing errors when passing falsy values. [Prototype LH #558] [garrett, jddalton]
 
-* Make fuse.dom.Element setStyle() method support hyphenated style properties. [Prototype LH #970] [jddalton, zeno]
+* Make setStyle() method support hyphenated style properties. [Prototype LH #970] [jddalton, zeno]
 
 * Fix fuse.Fusebox wrappers for Number methods toExponential(), toFixed(), and toPrecision(). [jddalton]
 

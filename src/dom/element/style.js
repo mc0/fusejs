@@ -71,10 +71,17 @@
       var hasOpacity, key, value, opacity, elemStyle = this.style;
 
       if (isString(styles)) {
+        if (styles.indexOf('opacity:') > -1) {
+          plugin.setOpacity.call(this, styles.match(reOpacity)[1]);
+          styles = styles.replace(reOpacity, '');
+        }
+        // IE and Konqueror bug-out when setting overflow via cssText
+        if (styles.indexOf('overflow:') > -1) {
+          elemStyle.overflow = styles.match(reOverflow)[1];
+          styles = styles.replace(reOverflow, '');
+        }
         elemStyle.cssText += ';' + styles;
-        return styles.indexOf('opacity') > -1
-          ? plugin.setOpacity.call(this, styles.match(reOpacity)[1])
-          : this;
+        return this;
       }
 
       if (isHash(styles)) {
