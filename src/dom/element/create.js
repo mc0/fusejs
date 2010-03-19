@@ -256,8 +256,12 @@
         tagClassName = TAG_NAME_CLASSES[upperCased];
 
         if (!tagClassName) {
+          // camel-cased name
+          tagClassName =
           TAG_NAME_CLASSES[upperCased] =
-          tagClassName = capitalize.call(tagName) + 'Element';
+            tagName.charAt(0).toUpperCase() +
+            tagName.slice(1).toLowerCase()  +
+            'Element';
         }
         TAG_NAME_CLASSES[tagName] = tagClassName;
       }

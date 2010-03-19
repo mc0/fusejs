@@ -4,8 +4,8 @@
   // private vars
   var DOCUMENT_FRAGMENT_NODE, DOCUMENT_NODE, ELEMENT_NODE, TEXT_NODE, Class,
    Document, Element, Enumerable, Form, Func, Obj, Node, NodeList, Window,
-   $break, _extend, fuse, addArrayMethods, bind, capitalize, clone, concatList,
-   defer, domData, eachKey, emptyFunction, envAddTest, envTest, escapeRegExpChars,
+   $break, _extend, fuse, addArrayMethods, bind, clone, concatList, defer,
+   domData, eachKey, emptyFunction, envAddTest, envTest, escapeRegExpChars,
    expando, fromElement, getDocument, getNodeName, getWindow, hasKey, inspect,
    isArray, isElement, isEmpty, isHash, isHostObject, isFunction, isNumber,
    isPrimitive, isRegExp, isSameOrigin, isString, isUndefined, K, nil,
@@ -102,10 +102,10 @@
   nil = null;
 
   // a quick way to copy an array slice.call(array, 0)
-  slice = global.Array.prototype.slice;
+  slice = [].slice;
 
   // used to access the an object's internal [[Class]] property
-  toString = global.Object.prototype.toString;
+  toString = {}.toString;
 
   // used for some required browser sniffing
   userAgent = global.navigator && navigator.userAgent || '';
@@ -114,20 +114,20 @@
 
   (function() {
 
-    function getNS(path) {
-      var key, i = 0, keys = path.split('.'), object = this;
-      while (key = keys[i++])
+    var getNS = function getNS(path) {
+      var key, i = -1, keys = path.split('.'), object = this;
+      while (key = keys[++i])
         if (!(object = object[key])) return false;
       return object;
-    }
+    },
 
-    function addNS(path) {
-      var Klass, key, i = 0,
+    addNS = function addNS(path) {
+      var Klass, key, i = -1,
        object = this,
        keys   = path.split('.'),
        length = keys.length;
 
-      while (key = keys[i++]) {
+      while (key = keys[++i]) {
         if (!object[key]) {
           Klass = Class(object, { 'constructor': key });
           object = object[key] = new Klass;
@@ -135,30 +135,30 @@
         else object = object[key];
       }
       return object;
-    }
+    },
 
-    function updateSubClassGenerics(object) {
-      var subclass, subclasses = object.subclasses || [], i = 0;
-      while (subclass = subclasses[i++]) {
+    updateSubClassGenerics = function(object) {
+      var subclass, subclasses = object.subclasses || [], i = -1;
+      while (subclass = subclasses[++i]) {
         subclass.updateGenerics && subclass.updateGenerics();
         updateSubClassGenerics(subclass);
       }
-    }
+    },
 
-    function updateGenerics(path, deep) {
-      var paths, object, i = 0;
+    updateGenerics = function updateGenerics(path, deep) {
+      var paths, object, i = -1;
       if (isString(paths)) paths = [paths];
       if (!isArray(paths)) deep  = path;
       if (!paths) paths = ['Array', 'Date', 'Number', 'Object', 'RegExp', 'String', 'dom.Node']; 
 
-      while (path = paths[i++]) {
+      while (path = paths[++i]) {
         object = isString(path) ? fuse.getNS(path) : path;
         if (object) {
           object.updateGenerics && object.updateGenerics();
           deep && updateSubClassGenerics(object);
         }
       }
-    }
+    };
 
     fuse.getNS =
     fuse.prototype.getNS = getNS;

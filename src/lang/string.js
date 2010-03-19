@@ -26,7 +26,7 @@
     // For IE
     if (envTest('STRING_METHODS_WRONGLY_SET_REGEXP_LAST_INDEX')) {
       plugin.replace = (function(__replace) {
-        function replace(pattern, replacement) {
+        var replace = function replace(pattern, replacement) {
           var __replacement, result;
           if (typeof replacement === 'function') {
             // ensure string `null` and `undefined` are returned
@@ -39,25 +39,29 @@
           result = __replace.call(this, pattern, replacement);
           if (isRegExp(pattern)) pattern.lastIndex = 0;
           return result;
-        }
+        };
 
         return replace;
       })(plugin.replace);
     }
-
     // For Safari 2.0.2- and Chrome 1+
     // Based on work by Dean Edwards:
     // http://code.google.com/p/base2/source/browse/trunk/lib/src/base2-legacy.js?r=239#174
-    if (envTest('STRING_REPLACE_COERCE_FUNCTION_TO_STRING') ||
+    else if (envTest('STRING_REPLACE_COERCE_FUNCTION_TO_STRING') ||
         envTest('STRING_REPLACE_BUGGY_WITH_GLOBAL_FLAG_AND_EMPTY_PATTERN')) {
       plugin.replace = (function(__replace) {
-        function replace(pattern, replacement) {
-          if (typeof replacement !== 'function')
-            return __replace.call(this, pattern, replacement);
+        var exec = /x/.exec,
 
-          if (this == null) throw new TypeError;
-          if (!isRegExp(pattern))
+        replace = function replace(pattern, replacement) {
+          if (typeof replacement !== 'function') {
+            return __replace.call(this, pattern, replacement);
+          }
+          if (this == null) {
+            throw new TypeError;
+          }
+          if (!isRegExp(pattern)) {
             pattern = new RegExp(escapeRegExpChars(pattern));
+          }
 
           // set pattern.lastIndex to 0 before we perform string operations
           var match, index = 0, nonGlobal = !pattern.global,
@@ -87,12 +91,12 @@
           }
 
           // append the remaining source to the result
-          if (lastIndex < srcLength)
+          if (lastIndex < srcLength) {
             result += source.slice(lastIndex, srcLength);
+          }
           return fuse.String(result);
-        }
+        };
 
-        var exec = RegExp.prototype.exec;
         return replace;
       })(plugin.replace);
     }
@@ -125,14 +129,12 @@
         return fuse.Number(-1);
       };
     }
-
-    // For Chome 1+
-    if (envTest('STRING_LAST_INDEX_OF_BUGGY_WITH_NEGATIVE_POSITION')) {
+    // For Chome 1 and 2
+    else if (envTest('STRING_LAST_INDEX_OF_BUGGY_WITH_NEGATIVE_POSITION')) {
       plugin.lastIndexOf = (function(__lastIndexOf) {
-        function lastIndexOf(searchString, position) {
-          position = +position;
-          return __lastIndexOf.call(this, searchString, position < 0 ? 0 : position);
-        }
+        var lastIndexOf = function lastIndexOf(searchString, position) {
+          return __lastIndexOf.call(this, searchString, +position < 0 ? 0 : position);
+        };
 
         return lastIndexOf;
       })(plugin.lastIndexOf);
@@ -142,11 +144,11 @@
     // For IE
     if (envTest('STRING_METHODS_WRONGLY_SET_REGEXP_LAST_INDEX')) {
       plugin.match = (function(__match) {
-        function match(pattern) {
+        var match = function match(pattern) {
           var result = __match.call(this, pattern);
           if (isRegExp(pattern)) pattern.lastIndex = 0;
           return result;
-        }
+        };
 
         return match;
       })(plugin.match);
@@ -227,20 +229,12 @@
       return camelize;
     })();
 
-    // set private reference
-    capitalize =
-    plugin.capitalize = (function() {
-      function capitalize() {
-        if (this == null) throw new TypeError;
-        var string = String(this), expandoKey = expando + string;
-        return cache[expandoKey] ||
-          (cache[expandoKey] = fuse.String(string.charAt(0).toUpperCase() +
-            string.slice(1).toLowerCase()));
-      }
-
-      var cache = { };
-      return capitalize;
-    })();
+    plugin.capitalize = function capitalize() {
+      if (this == null) throw new TypeError;
+      var string = String(this);
+      return fuse.String(string.charAt(0).toUpperCase() +
+        string.slice(1).toLowerCase());
+    };
 
     plugin.contains = function contains(pattern) {
       if (this == null) throw new TypeError;
@@ -404,6 +398,7 @@
 
     // prevent JScript bug with named function expressions
     var blank =        nil,
+      capitalize =     nil,
       contains =       nil,
       endsWith =       nil,
       evalScripts =    nil,

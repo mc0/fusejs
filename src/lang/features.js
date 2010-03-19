@@ -1,19 +1,21 @@
   /*--------------------------- FEATURE/BUG TESTER ---------------------------*/
 
   (function(env) {
-    function addTest(name, value) {
+    var cache = { },
+
+    addTest = function addTest(name, value) {
       if (typeof name === 'object') {
         for (var i in name) cache[i] = name[i];
       } else cache[name] = value;
-    }
+    },
 
-    function removeTest(name) {
+    removeTest = function removeTest(name) {
       name = name.valueOf();
       if (typeof name === 'string') delete cache[name];
       else { for (var i in name) delete cache[i]; }
-    }
+    },
 
-    function test(name) {
+    test = function test(name) {
       var i = 0;
       while (name = arguments[i++]) {
         if (typeof cache[name] === 'function')
@@ -21,9 +23,7 @@
         if (cache[name] !== true) return false;
       }
       return true;
-    }
-
-    var cache = { };
+    };
 
     envAddTest =
     env.addTest = addTest;
@@ -90,7 +90,7 @@
     'STRING_REPLACE_COERCE_FUNCTION_TO_STRING': function() {
       // true for Safari 2
       var func = function() { return ''; };
-      return 'a'.replace(/a/, func) === String(func);
+      return 'x'.replace(/x/, func) === String(func);
     },
 
     'STRING_REPLACE_BUGGY_WITH_GLOBAL_FLAG_AND_EMPTY_PATTERN': function() {
