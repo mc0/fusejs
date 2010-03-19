@@ -226,7 +226,7 @@
       this.parts = parts;
     },
 
-    'evaluate': function(params) {
+    'parse': function(params) {
       return this.parts.map(function(part) {
         return part === '?' ? Test.Unit.inspect(params.shift()) : part.replace(/\\\?/, '?');
       }).join('');
@@ -250,7 +250,7 @@
 
     function buildMessage(message, template) {
       var args = slice.call(arguments, 2);
-      return (message ? message + '\n' : '') + new MessageTemplate(template).evaluate(args);
+      return (message ? message + '\n' : '') + new MessageTemplate(template).parse(args);
     }
 
     function flunk(message) {

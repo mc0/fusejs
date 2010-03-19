@@ -1,3 +1,6 @@
+* Rewrite fuse.Template to parse the template once instead of each time parse() is called, rename evaluate() to parse(), and add support for replacing duplicate tokens. [jddalton, Mathias Baert, Yaffle]
+  Note: Backwards compatibility warning.
+
 * Pass event object to EventObserver callbacks. [Prototype LH #150] [jddalton, Morus Walter]
 
 * Confirm fuse.String#match and fuse.RegExp#exec don't return sparse arrays in Opera 9.25 or Safari 3.x. [Prototype LH #946] [jay, jddalton]

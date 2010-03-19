@@ -34,8 +34,8 @@ new Test.Unit.Runner({
   'testHashUsedInTemplate': function() {
     var template = fuse.Template('#{a} #{b}'), hash = $H({ 'a': 'hello', 'b': 'world' });
 
-    this.assertEqual('hello world', template.evaluate(hash.toObject()));
-    this.assertEqual('hello world', template.evaluate(hash));
+    this.assertEqual('hello world', template.parse(hash.toObject()));
+    this.assertEqual('hello world', template.parse(hash));
 
     this.assertEqual('hello', fuse.String.interpolate('#{a}', hash));
   },
