@@ -11,8 +11,8 @@
         this.element = fuse.get(element);
         element = element.raw || element;
 
-        this.onElementEvent = function() {
-          onElementEvent.call(eventObserver);
+        this.onElementEvent = function(event) {
+          onElementEvent.call(eventObserver, event);
         };
 
         if (getNodeName(element) === 'FORM') {
@@ -34,11 +34,12 @@
         return this;
       },
       
-      onElementEvent = function onElementEvent() {
+      onElementEvent = function onElementEvent(event) {
         var value = this.getValue();
-        if (this.lastValue === value) return;
-        this.callback(this.element, value);
-        this.lastValue = value;
+        if (String(this.lastValue) != String(value)) {
+          this.callback(this.element, value, event);
+          this.lastValue = value;
+        }
       },
 
       registerCallback = function registerCallback(element) {
@@ -113,7 +114,7 @@
       return FormEventObserver;
     })();
 
-    Form.plugin.getValue = function getValue() {
+    Form.EventObserver.plugin.getValue = function getValue() {
       return this.element.serialize();
     };
   })();

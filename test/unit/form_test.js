@@ -29,26 +29,39 @@ new Test.Unit.Runner({
   },
 
   'testFieldEventObserver': function() {
-    var Field = fuse.dom.InputElement,
+    var container, observerA, observerB, radios,
+     self = this,
+     fakeEvent = { 'isEvent': true },
+     Field = fuse.dom.InputElement,
      callbackCounter = 0;
 
-    var observerA = Field.EventObserver('input_enabled', function() {
+    observerA = Field.EventObserver('input_enabled', function(element, value, event) {
       callbackCounter++;
+
+      self.assertEqual($('input_enabled'), element,
+        'Should pass the element as the first argument to the callback.');
+
+      self.assertEqual('boo!', value,
+        'Should pass the new value as the second argument to the callback.');
+
+      self.assert(event && event.isEvent,
+        'Should pass the event object as the thrid argument to the callback.');
     });
 
     this.assertEqual(0, callbackCounter);
-    $('input_enabled').value = 'boo!';
+    $('input_enabled').setValue('boo!');
 
     // can't test the event directly, simulating
-    observerA.onElementEvent();
+    observerA.onElementEvent(fakeEvent);
     this.assertEqual(1, callbackCounter);
 
     // test control groups
-    var self = this, container = $('form_with_control_groups'),
-     radios = container.down(3);
+    container = $('form_with_control_groups'),
+    radios = container.down(3);
 
-    var observerB = Field.EventObserver(radios[0], function() {
-      self.assertEqual(radios[0], '2r');
+    observerB = Field.EventObserver(radios[0], function() {
+      // not executed
+      // self.assertEqual(radios[0], '2r');
     });
 
     this.assertEqual('2r', observerB.getValue());
