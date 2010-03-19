@@ -112,5 +112,10 @@ new Test.Unit.Runner({
       '\\/\\(\\[\\.\\*\\+\\?\\^\\=\\!\\:\\$\\{\\}\\(\\)\\|\\[\\\\\\]\\\\\\\/\\\\\\\\\\]\\)\\/g',
       fuse.RegExp.escape('/([.*+?^=!:${}()|[\\]\\/\\\\])/g')
     );
+  },
+
+  'testRegExpExec': function() {
+    this.assertEqual(true, '1' in fuse.RegExp('x(y)?').exec('x'),
+      'Should not return a sparse array.');
   }
 });

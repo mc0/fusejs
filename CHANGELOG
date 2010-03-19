@@ -1,3 +1,5 @@
+* Confirm fuse.String#match and fuse.RegExp#exec don't return sparse arrays in Opera 9.25 or Safari 3.x. [Prototype LH #946] [jay, jddalton]
+
 * Avoid setting style overflow via cssText in setStyle() because it causes bugs in IE and Konqueror. [jddalton, kangax]
 
 * Support fallback for Safari 2.x event.isMiddleClick() support. [Prototype LH #731] [Arthur Schreiber, Frank, jddalton]

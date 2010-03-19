@@ -91,13 +91,16 @@ new Test.Unit.Runner({
     source.match(pattern);
 
     this.assertEqual(0, pattern.lastIndex,
-      'wrongly set lastIndex on global pattern');
+      'Should not set lastIndex on global pattern.');
 
     pattern = /x/;
     source.match(pattern);
 
     this.assertEqual(0, pattern.lastIndex,
-      'wrongly set lastIndex on non-global pattern');
+      'Should not set lastIndex on non-global pattern.');
+
+    this.assertEqual(true, '1' in source.match(/x(y)?/),
+      'Should not return a sparse array.');
   },
 
   'testReplace': function() {
