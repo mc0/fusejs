@@ -72,9 +72,11 @@
       return array.slice && array.slice(0, 2).length === 1;
     },
 
-    'STRING_LAST_INDEX_OF_BUGGY_WITH_NEGATIVE_POSITION': function() {
-       // true for Chrome 1 and 2
-       return 'x'.lastIndexOf('x', -1) !== 0;
+    'STRING_LAST_INDEX_OF_BUGGY_WITH_NEGATIVE_OR_NAN_POSITION': function() {
+       // true for Chrome 1-2 and Opera 9.25
+       var string = 'xox';
+       return string.lastIndexOf('x', -1) !== 0 ||
+         string.lastIndexOf('x', +'x') !== 2
     },
 
     'STRING_METHODS_WRONGLY_SET_REGEXP_LAST_INDEX': function() {

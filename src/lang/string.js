@@ -106,34 +106,42 @@
       plugin.lastIndexOf = function lastIndexOf(searchString, position) {
         if (this == null) throw new TypeError;
         searchString = String(searchString);
-        position = +position;
 
         var string = String(this),
          len = string.length,
          searchLen = searchString.length;
 
-        if (searchLen > len)
+        if (searchLen > len) {
           return fuse.Number(-1);
+        }
 
-        if (position < 0) position = 0;
-        else if (isNaN(position) || position > len - searchLen)
+        if (position < 0) {
+          position = 0;
+        } else if (isNaN(position) || position > len - searchLen) {
           position = len - searchLen;
+        } else {
+          position = +position;
+        }
 
-        if (!searchLen)
+        if (!searchLen) {
           return fuse.Number(position);
+        }
 
         position++;
-        while (position--)
+        while (position--) {
           if (string.slice(position, position + searchLen) === searchString)
             return fuse.Number(position);
+        }
         return fuse.Number(-1);
       };
     }
-    // For Chome 1 and 2
-    else if (envTest('STRING_LAST_INDEX_OF_BUGGY_WITH_NEGATIVE_POSITION')) {
+    // For Chrome 1-2 and Opera 9.25
+    else if (envTest('STRING_LAST_INDEX_OF_BUGGY_WITH_NEGATIVE_OR_NAN_POSITION')) {
       plugin.lastIndexOf = (function(__lastIndexOf) {
         var lastIndexOf = function lastIndexOf(searchString, position) {
-          return __lastIndexOf.call(this, searchString, +position < 0 ? 0 : position);
+          return isNaN(position)
+            ? __lastIndexOf.call(this, searchString)
+            : __lastIndexOf.call(this, searchString, position < 0 ? 0 : position);
         };
 
         return lastIndexOf;
@@ -209,25 +217,21 @@
      reUnderscores   = /_/g,
      reScripts       = new RegExp(fuse.scriptFragment, 'gi'),
      reHTMLComments  = new RegExp('<!--[\\x20\\t\\n\\r]*' +
-       fuse.scriptFragment + '[\\x20\\t\\n\\r]*-->', 'gi');
+       fuse.scriptFragment + '[\\x20\\t\\n\\r]*-->', 'gi'),
+
+    toUpperCase = function(match, character) {
+      return character ? character.toUpperCase() : '';
+    };
 
     plugin.blank = function blank() {
       if (this == null) throw new TypeError;
       return reBlank.test(this);
     };
 
-    plugin.camelize = (function() {
-      function toUpperCase(match, character) {
-        return character ? character.toUpperCase() : '';
-      }
-
-      function camelize() {
-        if (this == null) throw new TypeError;
-        return plugin.replace.call(String(this), reHyphenated, toUpperCase);
-      }
-
-      return camelize;
-    })();
+    plugin.camelize = function camelize() {
+      if (this == null) throw new TypeError;
+      return plugin.replace.call(String(this), reHyphenated, toUpperCase);
+    },
 
     plugin.capitalize = function capitalize() {
       if (this == null) throw new TypeError;
@@ -398,6 +402,7 @@
 
     // prevent JScript bug with named function expressions
     var blank =        nil,
+      camelize =       nil,
       capitalize =     nil,
       contains =       nil,
       endsWith =       nil,
