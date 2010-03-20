@@ -601,7 +601,7 @@
         return instance.Number(__getMinutes.call(this));
       };
 
-      datePlugin.getMonth  = function getMonth () {
+      datePlugin.getMonth = function getMonth () {
         return instance.Number(__getMonth.call(this));
       };
 
@@ -676,10 +676,14 @@
       };
 
       rePlugin.exec = function exec(string) {
-        var i, length, results, output = __exec.call(this, string);
+        var output = __exec.call(this, string);
         if (output) {
-          i = -1; length = output.length; results = instance.Array();
-          while (++i < length) results[i] = instance.String(output[i]);
+          var item, i = -1, length = output.length, results = instance.Array();
+          while (++i < length) {
+            results[i] = (item = output[i]) == null ? item : instance.String(item);
+          }
+          results.index = output.index;
+          results.input = output.input;
         }
         return output && results;
       };
@@ -714,10 +718,12 @@
       };
 
       strPlugin.match = function match(pattern) {
-        var i, length, results, output = __match.call(this, pattern);
+        var output = __match.call(this, pattern);
         if (output) {
-          i = -1; length = output.length; results = instance.Array();
-          while (++i < length) results[i] = String(output[i]);
+          var item, i = -1, length = output.length, results = instance.Array();
+          while (++i < length) {
+            results[i] = (item = output[i]) == null ? item : instance.String(item);
+          }
         }
         return output && results;
       };
