@@ -1,3 +1,5 @@
+* Fix fuse.Template's cache and maintain compatibility with Prototype's Template class. [jddalton]
+
 * Fix fuse.Fusebox'ed String#match and RegExp#exec to allow returning arrays containing undefined values. [jddalton]
 
 * Fix Opera 9.25 bug with fuse.String#lastIndexOf and add new feature test `STRING_LAST_INDEX_OF_BUGGY_WITH_NEGATIVE_OR_NAN_POSITION`. [jddalton]

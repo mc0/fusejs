@@ -11,12 +11,15 @@
       if (!pattern.global) {
         pattern = fuse.RegExp.clone(pattern, { 'global': true });
       }
+      if (pattern.constructor !== fuse.RegExp) {
+        pattern = fuse.Object(pattern);
+      }
 
       var instance = __instance || new Klass;
       __instance = null;
 
-      instance.pattern  = pattern;
-      instance.template = template;
+      instance.pattern = pattern;
+      instance.template = fuse.String(template);
       instance.preparse();
       return instance;
     },
@@ -40,16 +43,14 @@
     return Template;
   })();
 
-  fuse.Template.defaultPattern = /(\\)?(#\{([^}]*)\})/;
+  fuse.Template.defaultPattern = /(\\)?(#\{([^}]*)\})/g;
 
   /*--------------------------------------------------------------------------*/
 
   (function(plugin) {
-    var cache,
+    var reBackslash = /\\/g,
 
     reDots = /\./g,
-
-    reEscaped = /\\/g,
 
     reSplitDots = /\b(?!\\)\./,
 
@@ -62,6 +63,7 @@
     replace = envTest('STRING_REPLACE_COERCE_FUNCTION_TO_STRING') ?
       fuse.String.plugin.replace : ''.replace,
 
+    // TODO: Fix fuse.String#split with a regexp as the separator in IE
     split = function(string, pattern) {
       var match, lastIndex = 0, results = [];
       pattern = new RegExp(pattern.source, 'g');
@@ -77,13 +79,14 @@
     };
 
     plugin.preparse = function preparse() {
-      var backslash, prop, chain, temp, token, j, i =1,
-       template = String(this.template),
-       parts    = split(template, this.pattern),
-       length   = parts.length;
+      var backslash, chain, escaped, prop, temp, token, tokens, j, i = 1,
+       template  = String(this.template),
+       parts     = split(template, this.pattern),
+       length    = parts.length;
 
-      // init cache
-      cache = { };
+      escaped = this._escaped = { };
+      tokens  = this._tokens  = { };
+      this._lastTemplate = this.template;
 
       for ( ; i < length; i += 4) {
         backslash = parts[i];
@@ -91,7 +94,10 @@
         chain     = parts[i + 2];
 
         // process non escaped tokens
-        if (!backslash) {
+        if (backslash != '\\') {
+          // avoid parsing duplicates
+          if (tokens[token]) continue;
+
           j = -1; temp = split(chain, reSplitDots); chain = [];
           while (prop = temp[++j]) {
             // convert bracket notation to dot notation then split and add
@@ -108,28 +114,52 @@
           // unescape property names
           j = -1;
           while (prop = chain[++j]) {
-            chain[j] = prop.replace(reEscaped, '');
+            chain[j] = prop.replace(reBackslash, '');
           }
 
-          // cache
-          cache[token] = {
+          // cache tokens
+          tokens[token] = {
             'chain': chain,
             'reToken': new RegExp(escapeRegExpChars(token), 'g')
           };
         }
         else {
-          // unescape tokens
-          template = template.replace(backslash + token, token);
+          // mark to unescape
+          escaped[token] = escapeRegExpChars(backslash + token);
         }
       }
 
-      this.template = fuse.String(template);
+      for (token in escaped) {
+        // unescape tokens that are not being replaced
+        if (!tokens[token]) {
+          template = template.replace(new RegExp(escaped[token], 'g'), token);
+          delete escaped[token];
+        }
+        // changed escaped tokens slightly so they aren't
+        // replaced like thier none-escaped duplicates
+        else {
+          tmp = Math.floor(token.length / 2);
+          tmp = token.slice(0, tmp) + expando + token.slice(tmp);
+          template = template.replace(new RegExp(escaped[token], 'g'), tmp);
+          escaped[token] = new RegExp(escapeRegExpChars(tmp), 'g');
+        }
+      }
+
+      // cache modified template
+      this._template = template;
       return this;
     };
 
     plugin.parse = function parse(object) {
+      // check if cache has expired
+      if (this.template !== this._lastTemplate) {
+        this.preparse();
+      }
+
       var i, o, c, chain, found, lastIndex, length, prop, token,
-       result = String(this.template);
+       escaped = this._escaped,
+       tokens  = this._tokens,
+       result  = String(this._template);
 
       if (object) {
         if (isHash(object)) {
@@ -142,8 +172,8 @@
       }
 
       object || (object = { });
-      for (token in cache) {
-        i = -1; found = false; c = cache[token]; o = object;
+      for (token in tokens) {
+        i = -1; found = false; c = tokens[token]; o = object;
         chain = c.chain;
         length = chain.length;
         lastIndex = length - 1;
@@ -156,6 +186,12 @@
         // replace token with property value if found and != null
         result = result.replace(c.reToken, found && o != null ? o : '');
       }
+
+      // unescape remianing tokens
+      for (token in escaped) {
+        result = result.replace(escaped[token], token);
+      }
+
       return fuse.String(result);
     };
 

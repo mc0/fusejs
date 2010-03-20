@@ -14,78 +14,6 @@ new Test.Unit.Runner({
     this.assertEqual('',      fuse.String.interpret(''));
   },
 
-  'testGsubWithReplacementFunction': function() {
-    var source = fuse.String('foo boo boz');
-
-    this.assertEqual('Foo Boo BoZ',
-      source.gsub(/[^o]+/, function(match) {
-        return match[0].toUpperCase()
-      }));
-
-    this.assertEqual('f2 b2 b1z',
-      source.gsub(/o+/, function(match) {
-        return match[0].length;
-      }));
-
-    this.assertEqual('f0 b0 b1z',
-      source.gsub(/o+/, function(match) {
-        return match[0].length % 2;
-      }));
-  },
-
-  'testGsubWithReplacementString': function() {
-    var expected,
-     source = fuse.String('foo boo boz');
-
-    this.assertEqual('foobooboz',
-      source.gsub(/\s+/, ''));
-    this.assertEqual('  z',
-      source.gsub(/(.)(o+)/, ''));
-
-    source = '\u00e3\u00a6\u00e3\u00a3\u00e3\u00a1\u00e3\u00b3\u00e3' +
-      '\u00ba2007\n\u00e3\u00af\u00e3\u00ab\u00e3\u00bc\u00e3\u00ba\u00e3' +
-      '\u00b3\u00e3\u00ac\u00e3\u00af\u00e3\u00b7\u00e3\u00a7\u00e3\u00b3';
-
-    expected = source.replace(/\n/g, '<br/>');
-
-    this.assertEqual(expected, fuse.String(source).gsub(/\n/,'<br/>'));
-    this.assertEqual(expected, fuse.String(source).gsub('\n','<br/>'));
-  },
-
-  'testGsubWithReplacementTemplateString': function() {
-    var source = fuse.String('foo boo boz');
-
-    this.assertEqual('-oo-#{1}- -oo-#{1}- -o-#{1}-z',
-      source.gsub(/(.)(o+)/, '-#{2}-\\#{1}-'));
-
-    this.assertEqual('-foo-f- -boo-b- -bo-b-z',
-      source.gsub(/(.)(o+)/, '-#{0}-#{1}-'));
-
-    this.assertEqual('-oo-f- -oo-b- -o-b-z',
-      source.gsub(/(.)(o+)/, '-#{2}-#{1}-'));
-
-    this.assertEqual('  z',
-      source.gsub(/(.)(o+)/, '#{3}'));
-  },
-
-  'testGsubEscapesRegExpSpecialCharacters': function() {
-    this.assertEqual('happy Smyle',
-      fuse.String('happy :-)').gsub(':-)', 'Smyle'));
-
-    this.assertEqual('sad Frwne',
-      fuse.String('sad >:($').gsub('>:($', 'Frwne'));
-
-    this.assertEqual('ab', fuse.String('a|b').gsub('|', ''));
-    this.assertEqual('ab', fuse.String('ab(?:)').gsub('(?:)', ''));
-    this.assertEqual('ab', fuse.String('ab()').gsub('()', ''));
-    this.assertEqual('ab', fuse.String('ab').gsub('^', ''));
-    this.assertEqual('ab', fuse.String('a?b').gsub('?', ''));
-    this.assertEqual('ab', fuse.String('a+b').gsub('+', ''));
-    this.assertEqual('ab', fuse.String('a*b').gsub('*', ''));
-    this.assertEqual('ab', fuse.String('a{1}b').gsub('{1}', ''));
-    this.assertEqual('ab', fuse.String('a.b').gsub('.', ''));
-  },
-
   'testMatch': function() {
     var source = fuse.String('oxo'), pattern = /x/g;
     source.match(pattern);
@@ -213,110 +141,6 @@ new Test.Unit.Runner({
 
     pattern = new RegExp('','g');
     this.assertEqual(expected, source.replace(pattern, replacement));
-  },
-
-  'testSubstitutionEdgeCases': function() {
-    var source = fuse.String('abc');
-
-    this.assertEqual('-a-b-c-',
-      source.gsub('', '-'),
-      'empty string');
-
-    this.assertEqual('--b-c-',
-      source.gsub(/a|/, '-'),
-      'empty matching pattern');
-
-    this.assertEqual('-bc',
-      source.gsub(/A/i, '-'),
-      'case insensitive flag');
-
-    this.assertEqual('-bc',
-      source.sub(/./g, '-'),
-      'sub with global flag');
-
-    this.assertEqual('anullc',
-      source.sub('b', function() { return null }),
-      '`null` not returned');
-
-    this.assertEqual('aundefinedc',
-      source.sub('b', fuse.emptyFunction),
-      '`undefined` not returned');
-
-    // test with empty pattern (String#gsub is used by String#sub)
-    source = fuse.String('ab');
-    var empty = new RegExp('');
-
-    this.assertEqual('xaxbx', source.gsub('', 'x'));
-    this.assertEqual('xaxbx', source.gsub(empty, 'x'));
-    this.assertEqual('xab',   source.sub('', 'x'));
-
-    this.assertEqual('abc', fuse.String('anullc').sub(null, 'b'));
-    this.assertEqual('abc', fuse.String('aundefinedc').gsub(undef, 'b'));
-    this.assertEqual('abc', fuse.String('a0c').sub(0, 'b'));
-    this.assertEqual('abc', fuse.String('atruec').gsub(true, 'b'));
-    this.assertEqual('abc', fuse.String('afalsec').sub(false, 'b'));
-
-    this.assertEqual('---a---b---', source.gsub(empty, '-#{0}-#{1}-'));
-    this.assertEqual('++a++b++',    source.gsub('', function(match) {
-      return '+' + match[0] + '+';
-    }));
-
-    // test using the global flag (should not hang)
-    this.assertEqual('abc',         fuse.String('axc').sub(/x/g, 'b'));
-    this.assertEqual('abbacadabba', fuse.String('axxacadaxxa').gsub(/x/g, 'b'));
-    this.assertEqual('abbacadabba', fuse.String('axxacadaxxa').gsub(new RegExp('x','g'), 'b'));
-  },
-
-  'testSubWithReplacementFunction': function() {
-    var source = fuse.String('foo boo boz');
-
-    this.assertEqual('Foo boo boz',
-      source.sub(/[^o]+/, function(match) {
-        return match[0].toUpperCase()
-      }), 1);
-
-    this.assertEqual('Foo Boo boz',
-      source.sub(/[^o]+/, function(match) {
-        return match[0].toUpperCase()
-      }, 2), 2);
-
-    this.assertEqual(source,
-      source.sub(/[^o]+/, function(match) {
-        return match[0].toUpperCase()
-      }, 0), 0);
-
-    this.assertEqual(source,
-      source.sub(/[^o]+/, function(match) {
-        return match[0].toUpperCase()
-      }, -1), -1);
-  },
-
-  'testSubWithReplacementString': function() {
-    var source = fuse.String('foo boo boz');
-
-    this.assertEqual('oo boo boz',
-      source.sub(/[^o]+/, ''));
-
-    this.assertEqual('oooo boz',
-      source.sub(/[^o]+/, '', 2));
-
-    this.assertEqual('-f-oo boo boz',
-      source.sub(/[^o]+/, '-#{0}-'));
-
-    this.assertEqual('-f-oo- b-oo boz',
-      source.sub(/[^o]+/, '-#{0}-', 2));
-  },
-
-  'testScan': function() {
-    var source  = fuse.String('foo boo boz');
-    var results = [];
-    var str     = source.scan(/[o]+/, function(match) {
-      results.push(match[0].length);
-    });
-
-    this.assertEnumEqual([2, 2, 1], results);
-    this.assertEqual(source, source.scan(/x/, this.fail));
-    this.assert(fuse.Object.isString(str));
   },
 
   'testToArray': function() {
@@ -610,17 +434,6 @@ new Test.Unit.Runner({
     this.assertEqual(sameInSameOut, sameInSameOut.escapeHTML().unescapeHTML());
 
     /* this.benchmark(function() { largeTextEscaped.unescapeHTML() }, 1000); */
-  },
-
-  'testInterpolate': function() {
-    var subject = { 'name': 'Stephan' },
-     pattern    = /(^|.|\r|\n)(#\((.*?)\))/;
-
-    this.assertEqual('#{name}: Stephan',
-      fuse.String('\\#{name}: #{name}').interpolate(subject));
-
-    this.assertEqual('#(name): Stephan',
-      fuse.String('\\#(name): #(name)').interpolate(subject, pattern));
   },
 
   'testToQueryParams': function() {
