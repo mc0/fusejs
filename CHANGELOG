@@ -1,3 +1,5 @@
+* Make the fuse.Fusebox'ed Object constructor, when called as a function and passed a native RegExp instance, return a Fuseboxed RegExp instance. [jddalton]
+
 * Fix fuse.Template's cache and maintain compatibility with Prototype's Template class. [jddalton]
 
 * Fix fuse.Fusebox'ed String#match and RegExp#exec to allow returning arrays containing undefined values. [jddalton]
