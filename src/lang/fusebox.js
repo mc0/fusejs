@@ -129,13 +129,13 @@
             break;
 
           case '[object RegExp]':
-           if (value.constructor !== instance.RegExp) {
-             return instance.RegExp(value.source,
-               (value.global     ? 'g' : '') +
-               (value.ignoreCase ? 'i' : '') +
-               (value.multiline  ? 'm' : ''));
-           }
-           break;
+            if (value.constructor !== instance.RegExp) {
+              return instance.RegExp(value.source,
+                (value.global     ? 'g' : '') +
+                (value.ignoreCase ? 'i' : '') +
+                (value.multiline  ? 'm' : ''));
+            }
+            break;
 
           case '[object Boolean]': return instance.Boolean(value);
           case '[object Number]':  return instance.Number(value);
@@ -489,20 +489,20 @@
 
       /*----------------------------------------------------------------------*/
 
-      if (!SKIP_METHODS_RETURNING_ARRAYS)
+      if (!SKIP_METHODS_RETURNING_ARRAYS) {
         arrPlugin.concat = function concat() {
           var args = arguments;
           return Array.fromArray(args.length
             ? __concat.apply(this, args)
             : __concat.call(this));
         };
-
-      if (arrPlugin.every)
+      }
+      if (arrPlugin.every) {
         arrPlugin.every = function every(callback, thisArg) {
           return __every.call(this, callback || K, thisArg);
         };
-
-      if (arrPlugin.filter)
+      }
+      if (arrPlugin.filter) {
         arrPlugin.filter = function filter(callback, thisArg) {
           var result = __filter.call(this, callback ||
             function(value) { return value != null; }, thisArg);
@@ -510,30 +510,66 @@
             ? Array.fromArray(result)
             : Array();
         };
-
-      arrPlugin.join = function join(separator) {
-        return String(__join.call(this, separator));
-      };
-
-      if (arrPlugin.indexOf)
+      }
+      if (arrPlugin.indexOf) {
         arrPlugin.indexOf = function indexOf(item, fromIndex) {
           return instance.Number(__indexOf.call(this, item,
             fromIndex == null ? 0 : fromIndex));
         };
-
-      if (arrPlugin.lastIndexOf)
+      }
+      if (arrPlugin.lastIndexOf) {
         arrPlugin.lastIndexOf = function lastIndexOf(item, fromIndex) {
           return instance.Number(__lastIndexOf.call(this, item,
             fromIndex == null ? this.length : fromIndex));
         };
-
-      if (arrPlugin.map && !SKIP_METHODS_RETURNING_ARRAYS)
+      }
+      if (arrPlugin.map && !SKIP_METHODS_RETURNING_ARRAYS) {
         arrPlugin.map = function map(callback, thisArg) {
           var result = __map.call(this, callback || K, thisArg);
           return result.length
             ? Array.fromArray(result)
             : Array();
         };
+      }
+      if (!SKIP_METHODS_RETURNING_ARRAYS) {
+        arrPlugin.reverse = function reverse() {
+          return this.length > 0
+            ? Array.fromArray(__reverse.call(this))
+            : Array();
+        };
+      }
+      if (!SKIP_METHODS_RETURNING_ARRAYS) {
+        arrPlugin.slice = function slice(start, end) {
+          var result = __slice.call(this, start, end == null ? this.length : end);
+          return result.length
+            ? Array.fromArray(result)
+            : Array();
+        };
+      }
+      if (arrPlugin.some) {
+        arrPlugin.some = function some(callback, thisArg) {
+          return __some.call(this, callback || K, thisArg);
+        };
+      }
+      if (!SKIP_METHODS_RETURNING_ARRAYS) {
+        arrPlugin.sort = function sort(compareFn) {
+          return this.length > 0
+            ? Array.fromArray(compareFn ? __sort.call(this, compareFn) : __sort.call(this))
+            : Array();
+        };
+      }
+      if (!SKIP_METHODS_RETURNING_ARRAYS) {
+        arrPlugin.splice = function splice(start, deleteCount) {
+          var result = __splice.apply(this, arguments);
+          return result.length
+            ? Array.fromArray(result)
+            : Array();
+        };
+      }
+
+      arrPlugin.join = function join(separator) {
+        return String(__join.call(this, separator));
+      };
 
       arrPlugin.push = function push(item) {
         var args = arguments;
@@ -542,47 +578,23 @@
           : __push.call(this, item));
       };
 
-      if (!SKIP_METHODS_RETURNING_ARRAYS)
-        arrPlugin.reverse = function reverse() {
-          return this.length > 0
-            ? Array.fromArray(__reverse.call(this))
-            : Array();
-        };
-
-    if (!SKIP_METHODS_RETURNING_ARRAYS)
-        arrPlugin.slice = function slice(start, end) {
-          var result = __slice.call(this, start, end == null ? this.length : end);
-          return result.length
-            ? Array.fromArray(result)
-            : Array();
-        };
-
-      if (arrPlugin.some)
-        arrPlugin.some = function some(callback, thisArg) {
-          return __some.call(this, callback || K, thisArg);
-        };
-
-      if (!SKIP_METHODS_RETURNING_ARRAYS)
-        arrPlugin.sort = function sort(compareFn) {
-          return this.length > 0
-            ? Array.fromArray(compareFn ? __sort.call(this, compareFn) : __sort.call(this))
-            : Array();
-        };
-
-      if (!SKIP_METHODS_RETURNING_ARRAYS)
-        arrPlugin.splice = function splice(start, deleteCount) {
-          var result = __splice.apply(this, arguments);
-          return result.length
-            ? Array.fromArray(result)
-            : Array();
-        };
-
       arrPlugin.unshift = function unshift(item) {
         var args = arguments;
         return instance.Number(args.length > 1
           ? __unshift.apply(this, args)
           : __unshift.call(this, item));
       };
+
+      if (datePlugin.toISOString) {
+        datePlugin.toISOString = function toISOString() {
+          return instance.String(__toISOString.call(this));
+        };
+      }
+      if (datePlugin.toJSON) {
+        datePlugin.toJSON= function toJSON() {
+          return instance.String(__toJSON.call(this));
+        };
+      }
 
       datePlugin.getDate = function getDate() {
         return instance.Number(__getDate.call(this));
@@ -660,16 +672,6 @@
         return instance.Number(__getYear.call(this));
       };
 
-      if (datePlugin.toISOString)
-        datePlugin.toISOString = function toISOString() {
-          return instance.String(__toISOString.call(this));
-        };
-
-      if (datePlugin.toJSON)
-        datePlugin.toJSON= function toJSON() {
-          return instance.String(__toJSON.call(this));
-        };
-
       numPlugin.toExponential = function toExponential(fractionDigits) {
         return instance.String(__toExponential.call(this, fractionDigits));
       };
@@ -694,6 +696,12 @@
         }
         return output && results;
       };
+
+      if (strPlugin.trim) {
+        strPlugin.trim = function trim() {
+          return String(__trim.call(this));
+        };
+      }
 
       strPlugin.charAt = function charAt(pos) {
         return String(__charAt.call(this, pos));
@@ -779,11 +787,6 @@
       strPlugin.toUpperCase = function toUpperCase() {
         return String(__toUpperCase.call(this));
       };
-
-      if (strPlugin.trim)
-        strPlugin.trim = function trim() {
-          return String(__trim.call(this));
-        };
 
       // point constructor properties to the native wrappers
       arrPlugin.constructor  = Array;

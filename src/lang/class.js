@@ -73,7 +73,7 @@
   /*--------------------------------------------------------------------------*/
 
   Class.mixins = (function() {
-    function callSuper(method) {
+    var callSuper = function callSuper(method) {
       var $super, args, callee = method.callee;
       if (callee) {
         args = method;
@@ -86,7 +86,7 @@
       return args.length
         ? $super.apply(this, args)
         : $super.call(this);
-    }
+    };
 
     return { 'callSuper': callSuper };
   })();
@@ -94,7 +94,7 @@
   /*--------------------------------------------------------------------------*/
 
   Class.statics = (function() {
-    function addMixins() {
+    var addMixins = function addMixins() {
       var arg, j, jmax,
        args = arguments, i = 0, imax = args.length,
        Klass = this, prototype = Klass.prototype;
@@ -116,9 +116,9 @@
         }
       }
       return Klass;
-    }
+    },
 
-    function addPlugins() {
+    addPlugins = function addPlugins() {
       var arg, j, jmax, k, plugins, otherMethod,
        args = arguments, i = 0, imax = args.length,
        Klass      = this,
@@ -159,9 +159,9 @@
         }
       }
       return Klass;
-    }
+    },
 
-    function addStatics() {
+    addStatics = function addStatics() {
       var arg, j, jmax, args = arguments,
        i = 0, imax = args.length, Klass = this;
 
@@ -178,15 +178,15 @@
         }
       }
       return Klass;
-    }
+    },
 
-    function extend(plugins, mixins, statics) {
+    extend = function extend(plugins, mixins, statics) {
       var Klass = this;
       plugins && Klass.addPlugins(plugins);
       mixins  && Klass.addMixins(mixins);
       statics && Klass.addStatics(statics);
       return Klass;
-    }
+    };
 
     return {
       'addMixins':  addMixins,
