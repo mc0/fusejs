@@ -30,18 +30,21 @@
         } catch (e) { }
       }
 
-      // true for JavaScriptCore, KJS, Rhino, SpiderMonkey, SquirrelFish, Tamarin, TraceMonkey, V8
+      // true for Carakan, JaegerMonkey, JavaScriptCore, KJS, Nitro, Rhino,
+      // SpiderMonkey, SquirrelFish (Extreme), Tamarin, TraceMonkey, V8
 
       // Check "OBJECT__PROTO__" first because Firefox will permanently screw up
       // other iframes on the page if an iframe is inserted and removed before the
       // dom has loaded.
-      if (envTest('OBJECT__PROTO__'))
+      if (envTest('OBJECT__PROTO__')) {
         return OBJECT__PROTO__;
+      }
 
       var doc = global.document;
       if (isHostObject(global, 'frames') && doc &&
-          isHostObject(doc, 'createElement'))
+          isHostObject(doc, 'createElement')) {
         return IFRAME;
+      }
     })(),
 
     createSandbox = (function() {
@@ -51,7 +54,7 @@
       // IE requires the iframe/htmlfile remain in the cache or it will be
       // marked for garbage collection
       var counter = 0, doc = global.document;
-      if (mode === ACTIVE_X_OBJECT)
+      if (mode === ACTIVE_X_OBJECT) {
         return function() {
           var htmlfile = new ActiveXObject('htmlfile');
           htmlfile.open();
@@ -60,8 +63,8 @@
           cache.push(htmlfile);
           return htmlfile.global;
         };
-
-      if (mode === IFRAME)
+      }
+      if (mode === IFRAME) {
         return function() {
           var idoc, iframe, result,
            parentNode = doc.body || doc.documentElement,
@@ -94,7 +97,7 @@
           cache.push(iframe);
           return result;
         };
-
+      }
       return function() {
         throw new Error('Fusebox failed to create a sandbox.');
       };

@@ -63,38 +63,9 @@
     replace = envTest('STRING_REPLACE_COERCE_FUNCTION_TO_STRING') ?
       fuse.String.plugin.replace : ''.replace,
 
-    split = ''.split;
+    split = envTest('STRING_SPLIT_BUGGY_WITH_REGEXP') ?
+      fuse.String.plugin.split : ''.split;
 
-    if (envTest('STRING_SPLIT_BUGGY_WITH_REGEXP')) {
-      split = function(pattern) {
-        var index, lastIndex, match,
-         lastLastIndex = 0, string = String(this), results = [];
-
-        if (!pattern.global) {
-          pattern = new RegExp(pattern.source, 'g' +
-            (pattern.ignoreCase ? 'i' : '') +
-            (pattern.multiline  ? 'm' : ''));
-        } else {
-          pattern.lastIndex = 0;
-        }
-        while (match = pattern.exec(string)) {
-          index = match.index;
-          lastIndex = index + match[0].length;
-          match[0] = string.slice(lastLastIndex, index);
-          lastLastIndex =
-          pattern.lastIndex = lastIndex;
-
-          results.push.apply(results, match);
-
-          // avoid infinite loop
-          if (lastLastIndex === index) {
-            pattern.lastIndex++;
-          }
-        }
-        results.push(string.slice(lastLastIndex));
-        return results;
-      };
-    }
 
     plugin.preparse = function preparse() {
       var backslash, chain, escaped, prop, temp, token, tokens, j, i = 1,

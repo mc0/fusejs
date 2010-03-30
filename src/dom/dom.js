@@ -108,8 +108,7 @@
   };
 
   // Based on work by Diego Perini
-  getWindow =
-  fuse.getWindow = function getWindow(element) {
+  getWindow = function getWindow(element) {
     var frame, i = -1, doc = getDocument(element), frames = global.frames;
     if (fuse._doc !== doc) {
       while (frame = frames[++i]) {
@@ -142,3 +141,5 @@
       return getDocument(element).parentWindow || element;
     };
   }
+
+  fuse.getWindow = getWindow;
