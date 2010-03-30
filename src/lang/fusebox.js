@@ -757,9 +757,11 @@
       };
 
       strPlugin.split = function split(separator, limit) {
-        var i = -1, output = __split.call(this, separator, limit),
+        var item, i = -1, output = __split.call(this, separator, limit),
          length = output.length, results = instance.Array();
-        while (++i < length) results[i] = String(output[i]);
+        while (++i < length) {
+          results[i] = (item = output[i]) == null ? item : String(item);
+        }
         return results;
       };
 

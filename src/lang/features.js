@@ -72,6 +72,20 @@
       return array.slice && array.slice(0, 2).length === 1;
     },
 
+    'REGEXP_EXEC_RETURNS_UNDEFINED_VALUES_AS_STRINGS': function() {
+      // true for IE; String#match is affected too
+      return typeof /x(y)?/.exec('x')[1] === 'string'; 
+    },
+
+    'REGEXP_INCREMENTS_LAST_INDEX_AFTER_ZERO_LENGTH_MATCHES': function() {
+      // true for IE
+      var pattern = /^/g, data = [];
+      data[0] = !!pattern.test('').lastIndex;
+      ''.match(pattern);
+      data[1] = !!pattern.lastIndex;
+      return data[0] || data[1];
+    },
+
     'STRING_LAST_INDEX_OF_BUGGY_WITH_NEGATIVE_OR_NAN_POSITION': function() {
        // true for Chrome 1-2 and Opera 9.25
        var string = 'xox';
@@ -86,7 +100,9 @@
       data[0] = !!pattern.lastIndex;
       string.match(pattern);
       data[1] = !!pattern.lastIndex;
-      return data[0] || data[1];
+      string.search(pattern);
+      data[2] = !!pattern.lastIndex;
+      return data[0] || data[1] || data[2];
     },
 
     'STRING_REPLACE_COERCE_FUNCTION_TO_STRING': function() {
@@ -101,6 +117,28 @@
       return !(string.replace(/()/g, 'o') === 'oxoyo' &&
         string.replace(new RegExp('', 'g'), replacement) === 'oxoyo' &&
         string.replace(/(y|)/g, replacement) === 'oxoo');
+    },
+
+    'STRING_REPLACE_PASSES_UNDEFINED_VALUES_AS_STRINGS': function() {
+      // true for Firefox
+      var result;
+      'x'.replace(/x(y)?/, function(x, y) { result = typeof y === 'string'; });
+      return result; 
+    },
+
+    'STRING_SPLIT_BUGGY_WITH_REGEXP': function() {
+      // true for IE
+      return 'x'.split(/x/).length !== 2 || 'oxo'.split(/x(y)?/).length !== 3;
+    },
+
+    'STRING_SPLIT_RETURNS_UNDEFINED_VALUES_AS_STRINGS': function() {
+      // true for Firefox
+      var result = 'oxo'.split(/x(y)?/);
+      return result.length === 3 && typeof result[1] === 'string'; 
+    },
+
+    'STRING_SPLIT_ZERO_LENGTH_MATCH_RETURNS_NON_EMPTY_ARRAY': function() {
+      return !!''.split(/^/).length;
     },
 
     'STRING_TRIM_INCOMPLETE': function() {

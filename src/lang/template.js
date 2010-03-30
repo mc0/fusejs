@@ -48,41 +48,59 @@
   /*--------------------------------------------------------------------------*/
 
   (function(plugin) {
-    var reBackslash = /\\/g,
-
-    reDots = /\./g,
-
-    reSplitDots = /\b(?!\\)\./,
+    var reBackslashs = /\\/g,
 
     reBrackets = /\[((?:(?!\])[^\\]|\\.)*)\]/g,
 
-    escapeDot = function(match, path) {
+    reDots = /\./g,
+
+    reSplitByDot = /\b(?!\\)\./g,
+
+    escapeDots = function(match, path) {
       return '.' + path.replace(reDots, '\\.');
     },
 
     replace = envTest('STRING_REPLACE_COERCE_FUNCTION_TO_STRING') ?
       fuse.String.plugin.replace : ''.replace,
 
-    // TODO: Fix fuse.String#split with a regexp as the separator in IE
-    split = function(string, pattern) {
-      var match, lastIndex = 0, results = [];
-      pattern = new RegExp(pattern.source, 'g');
+    split = ''.split;
 
-      while (match = pattern.exec(string)) {
-        match[0] = string.slice(lastIndex, match.index);
-        results.push.apply(results, match);
-        lastIndex = pattern.lastIndex;
-      }
-      // add end of string
-      results.push(string.slice(lastIndex));
-      return results;
-    };
+    if (envTest('STRING_SPLIT_BUGGY_WITH_REGEXP')) {
+      split = function(pattern) {
+        var index, lastIndex, match,
+         lastLastIndex = 0, string = String(this), results = [];
+
+        if (!pattern.global) {
+          pattern = new RegExp(pattern.source, 'g' +
+            (pattern.ignoreCase ? 'i' : '') +
+            (pattern.multiline  ? 'm' : ''));
+        } else {
+          pattern.lastIndex = 0;
+        }
+        while (match = pattern.exec(string)) {
+          index = match.index;
+          lastIndex = index + match[0].length;
+          match[0] = string.slice(lastLastIndex, index);
+          lastLastIndex =
+          pattern.lastIndex = lastIndex;
+
+          results.push.apply(results, match);
+
+          // avoid infinite loop
+          if (lastLastIndex === index) {
+            pattern.lastIndex++;
+          }
+        }
+        results.push(string.slice(lastLastIndex));
+        return results;
+      };
+    }
 
     plugin.preparse = function preparse() {
       var backslash, chain, escaped, prop, temp, token, tokens, j, i = 1,
-       template  = String(this.template),
-       parts     = split(template, this.pattern),
-       length    = parts.length;
+       template = String(this.template),
+       parts    = split.call(template, this.pattern),
+       length   = parts.length;
 
       escaped = this._escaped = { };
       tokens  = this._tokens  = { };
@@ -98,13 +116,13 @@
           // avoid parsing duplicates
           if (tokens[token]) continue;
 
-          j = -1; temp = split(chain, reSplitDots); chain = [];
+          j = -1; temp = split.call(chain, reSplitByDot); chain = [];
           while (prop = temp[++j]) {
             // convert bracket notation to dot notation then split and add
             if (prop.indexOf('[') > -1) {
-              prop = replace.call(prop, reBrackets, escapeDot);
+              prop = replace.call(prop, reBrackets, escapeDots);
               if (prop.charAt(0) === '.') prop = prop.slice(1);
-              chain.push.apply(chain, split(prop, reSplitDots));
+              chain.push.apply(chain, split.call(prop, reSplitByDot));
             }
             // simply add
             else {
@@ -114,7 +132,7 @@
           // unescape property names
           j = -1;
           while (prop = chain[++j]) {
-            chain[j] = prop.replace(reBackslash, '');
+            chain[j] = prop.replace(reBackslashs, '');
           }
 
           // cache tokens
@@ -138,10 +156,10 @@
         // changed escaped tokens slightly so they aren't
         // replaced like thier none-escaped duplicates
         else {
-          tmp = Math.floor(token.length / 2);
-          tmp = token.slice(0, tmp) + expando + token.slice(tmp);
-          template = template.replace(new RegExp(escaped[token], 'g'), tmp);
-          escaped[token] = new RegExp(escapeRegExpChars(tmp), 'g');
+          temp = Math.floor(token.length / 2);
+          temp = token.slice(0, temp) + expando + token.slice(temp);
+          template = template.replace(new RegExp(escaped[token], 'g'), temp);
+          escaped[token] = new RegExp(escapeRegExpChars(temp), 'g');
         }
       }
 
@@ -238,9 +256,8 @@
 
     plugin.sub = function sub(pattern, replacement, count) {
       if (this == null) throw new TypeError;
-      count = typeof count === 'undefined' ? 1 : count;
 
-      if (count === 1) {
+      if (count == null || count == 1) {
         if (!isRegExp(pattern)) {
           pattern = fuse.RegExp(escapeRegExpChars(pattern));
         }

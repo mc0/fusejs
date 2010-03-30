@@ -15,7 +15,14 @@ new Test.Unit.Runner({
   },
 
   'testMatch': function() {
-    var source = fuse.String('oxo'), pattern = /x/g;
+    var source = fuse.String(''), pattern = /^/g;
+    source.match(pattern);
+
+    this.assertEqual(0, pattern.lastIndex,
+      'Should not set lastIndex for zero length matches.');
+
+    source  = fuse.String('oxo');
+    pattern = /x/g;
     source.match(pattern);
 
     this.assertEqual(0, pattern.lastIndex,
@@ -32,46 +39,57 @@ new Test.Unit.Runner({
   },
 
   'testReplace': function() {
-    var source = fuse.String('321abc123'), expected = '321xyz123';
-    this.assertEqual(expected, source.replace('abc', 'xyz'),
-      'simple string pattern.');
+    var expected, pattern, replacement, source,
+     args = [], slice = [].slice;
 
-    var args = [], slice = Array.prototype.slice;
+    source   = fuse.String('321abc123');
+    expected = '321xyz123';
+
+    this.assertEqual(expected, source.replace('abc', 'xyz'),
+      'Should replace simple string pattern.');
+
     this.assertEqual('_abc_', source.replace(/\d+/g, function() {
       args.push(slice.call(arguments, 0));
       return '_';
-    }), 'function as replace.');
+    }), 'Should replace with function as replaceent.');
 
     this.assertEnumEqual(['321', 0, '321abc123'], args[0],
-      'Failed to pass the proper arguments to the replacement function.');
+      'Should pass proper arguments to the replacement function.');
 
     this.assertEqual(2, args.length,
-      'Failed to execute the function for each replacement.');
+      'Should execute the function for each replacement.');
+
+    fuse.String('xy').replace(/x(z)?/, function() {
+      args = slice.call(arguments, 0); 
+    });
+
+    this.assertEnumEqual(['x', undefined, 0, 'xy'], args,
+      'Should pass undefined values to replacement function.');
 
     // more regexp and function tests
-    var source = fuse.String('foo boo boz');
+    source = fuse.String('foo boo boz');
     this.assertEqual('Foo boo boz',
       source.replace(/[^o]+/, function(string) {
         return string.toUpperCase();
-      }), 'simple regexp pattern');
+      }), 'Should replace with simple regexp pattern.');
 
     this.assertEqual('Foo Boo BoZ',
       source.replace(/[^o]+/g, function(string) {
         return string.toUpperCase();
-      }), 'global flag');
+      }), 'Should replace with a global flag.');
 
     this.assertEqual('bar boo boz',
       source.replace(/FOO/i, function() {
         return 'bar';
-      }), 'case insensitive flag');
+      }), 'Should replace with a case insensitive flag.');
 
     this.assertEqual(source,
       source.replace('.*', fuse.emptyFunction),
-      'regular expression characters escaped');
+      'Should escape regular expression special characters.');
 
     this.assertEqual(source,
       source.replace('X', fuse.emptyFunction),
-      'no occurence to replace');
+      'Should not replace when a match is not found.');
 
     /*
     // crashes Safari 3.4 beta
@@ -88,59 +106,80 @@ new Test.Unit.Runner({
     */
 
     this.assertEqual('foo undefined boz',
-      source.replace('boo', fuse.emptyFunction), 'undefined return value');
+      source.replace('boo', fuse.emptyFunction),
+      'Should convert undefined value to "undefined".');
 
     this.assertEqual('foo null boz',
-      source.replace('boo', function() {
-        return null;
-      }), 'null return value');
+      source.replace('boo', function() { return null; }),
+      'Should convert null values to "null".');
 
-    this.assertEqual('-foo boo boz',
-      source.replace(/|/, function() {
-        return '-';
-      }), 'empty matching regexp');
-
-    this.assertEqual('-f-o-o- -- -b-o-z-',
-      source.replace(/boo|/g, function() {
-        return '-';
-    }), 'empty matching regexp with global flag');
-
-    var pattern = /boo/g;
+    pattern = /boo/g;
     pattern.lastIndex = source.length;
+
     this.assertEqual('foo bar boz',
-      source.replace(pattern, function() {
-        return 'bar';
-      }), 'lastIndex ignored');
+      source.replace(pattern, function() { return 'bar'; }),
+      'Should ignore regexp lastIndex.');
 
     // index and source
-    var source = fuse.String('foo boo boz');
-    this.assertEqual('f1 b5 b9z', source.replace(/o+/g, function(match, index) {
-      return index;
-    }), 'Given incorrect index argument');
+    source = fuse.String('foo boo boz');
+    this.assertEqual('f1 b5 b9z',
+      source.replace(/o+/g, function(match, index) { return index; }),
+      'Should return correct index argument');
 
     this.assertEqual('foo boo bofoo boo boz',
-      source.replace(/.$/, function(match, index, source) {
-        return source;
-      }), 'Given incorrect source argument');
+      source.replace(/.$/, function(match, index, source) { return source;}),
+      'Should return correct source argument.');
 
     // test empty
-    var expected, pattern,
-     source = fuse.String('awesome'), replacement = function() { return 'x' };
+    source   = fuse.String('foo boo boz');
+    expected = '-foo boo boz';
+    pattern  = new RegExp('|');
 
-    expected = 'xxsxoxmxex'; pattern = new RegExp('(awe|)', 'g');
-    this.assertEqual(expected, source.replace(pattern, replacement));
+    this.assertEqual(expected,
+      source.replace(pattern, function() { return '-'; }),
+      'Should work with regexps that match empty strings.');
 
-    expected = 'awesomex'; pattern = new RegExp('(awe|)$', 'g');
-    this.assertEqual(expected, source.replace(pattern, replacement));
+    expected = '-f-o-o- -- -b-o-z-';
+    pattern = new RegExp('boo|', 'g');
 
-    expected = 'xawesome'; pattern = /()/;
-    this.assertEqual(expected, source.replace(pattern, replacement));
+    this.assertEqual(expected,
+      source.replace(pattern, function() { return '-'; }),
+      'Should work with regexps with global flag that match empty strings.');
 
-    expected = 'xaxwxexsxoxmxex'; pattern = /()/g;
-    this.assertEqual(expected, source.replace(pattern, replacement));
+    source      = fuse.String('awesome');
+    replacement = function() { return 'x' };
+    expected    = 'xxsxoxmxex';
+    pattern     = new RegExp('(awe|)', 'g');
+
+    this.assertEqual(expected,
+      source.replace(pattern, replacement),
+      'Should work with regexps that match empty strings.');
+
+    expected = 'awesomex';
+    pattern  = new RegExp('(awe|)$', 'g');
+
+    this.assertEqual(expected,
+      source.replace(pattern, replacement),
+      'Should work with regexps that match empty strings.');
+
+    expected = 'xawesome';
+    pattern  = /()/;
+
+    this.assertEqual(expected,
+      source.replace(pattern, replacement),
+      'Should work with regexps that match empty strings.');
+
+    expected = 'xaxwxexsxoxmxex';
+    pattern  = /()/g;
+
+    this.assertEqual(expected,
+      source.replace(pattern, replacement),
+      'Should work with regexps that match empty strings.');
 
     pattern = new RegExp('','g');
-    this.assertEqual(expected, source.replace(pattern, replacement));
+    this.assertEqual(expected,
+      source.replace(pattern, replacement),
+      'Should work with regexps that match empty strings.');
   },
 
   'testToArray': function() {
@@ -235,6 +274,125 @@ new Test.Unit.Runner({
       fuse.String('border_bottom_width').hyphenate());
   },
 
+  'testSearch': function() {
+    var pattern = /^/g;
+    fuse.String('').search(pattern);
+
+    this.assertEqual(0, pattern.lastIndex,
+      'Should not set lastIndex for zero length matches.');
+  },
+
+  'testSplitWithRegExp': function() {
+    this.assertEnumEqual([''],                 fuse.String('').split());
+    this.assertEnumEqual([''],                 fuse.String('').split(/./));
+    this.assertEnumEqual([],                   fuse.String('').split(/.?/));
+    this.assertEnumEqual([],                   fuse.String('').split(/.??/));
+    this.assertEnumEqual(['', 'b'],            fuse.String('ab').split(/a*/));
+    this.assertEnumEqual(['a', 'b'],           fuse.String('ab').split(/a*?/));
+    this.assertEnumEqual(['', ''],             fuse.String('ab').split(/(?:ab)/));
+    this.assertEnumEqual(['', ''],             fuse.String('ab').split(/(?:ab)*/));
+    this.assertEnumEqual(['a', 'b'],           fuse.String('ab').split(/(?:ab)*?/));
+    this.assertEnumEqual(['t', 'e', 's', 't'], fuse.String('test').split(''));
+    this.assertEnumEqual(['test'],             fuse.String('test').split());
+    this.assertEnumEqual(['', '', '', ''],     fuse.String('111').split(1));
+
+    this.assertEnumEqual(['t', 'e'],           fuse.String('test').split(/(?:)/, 2));
+    this.assertEnumEqual(['t', 'e', 's', 't'], fuse.String('test').split(/(?:)/, -1));
+    this.assertEnumEqual(['t', 'e', 's', 't'], fuse.String('test').split(/(?:)/, undef));
+    this.assertEnumEqual([],                   fuse.String('test').split(/(?:)/, null));
+    this.assertEnumEqual([],                   fuse.String('test').split(/(?:)/, NaN));
+    this.assertEnumEqual(['t'],                fuse.String('test').split(/(?:)/, true));
+    this.assertEnumEqual(['t', 'e'],           fuse.String('test').split(/(?:)/, '2'));
+    this.assertEnumEqual([],                   fuse.String('test').split(/(?:)/, 'two'));
+
+    this.assertEnumEqual(['a'],                       fuse.String('a').split(/-/));
+    this.assertEnumEqual(['a'],                       fuse.String('a').split(/-?/));
+    this.assertEnumEqual(['a'],                       fuse.String('a').split(/-??/));
+    this.assertEnumEqual(['', ''],                    fuse.String('a').split(/a/));
+    this.assertEnumEqual(['', ''],                    fuse.String('a').split(/a?/));
+    this.assertEnumEqual(['a'],                       fuse.String('a').split(/a??/));
+    this.assertEnumEqual(['ab'],                      fuse.String('ab').split(/-/));
+    this.assertEnumEqual(['a', 'b'],                  fuse.String('ab').split(/-?/));
+    this.assertEnumEqual(['a', 'b'],                  fuse.String('ab').split(/-??/));
+    this.assertEnumEqual(['a', 'b'],                  fuse.String('a-b').split(/-/));
+    this.assertEnumEqual(['a', 'b'],                  fuse.String('a-b').split(/-?/));
+    this.assertEnumEqual(['a', '-', 'b'],             fuse.String('a-b').split(/-??/));
+    this.assertEnumEqual(['a', '', 'b'],              fuse.String('a--b').split(/-/));
+    this.assertEnumEqual(['a', '', 'b'],              fuse.String('a--b').split(/-?/));
+    this.assertEnumEqual(['a', '-', '-', 'b'],        fuse.String('a--b').split(/-??/));
+    this.assertEnumEqual([],                          fuse.String('').split(/()()/));
+    this.assertEnumEqual(['.'],                       fuse.String('.').split(/()()/));
+    this.assertEnumEqual(['', '.', '', ''],           fuse.String('.').split(/(.?)(.?)/));
+    this.assertEnumEqual(['.'],                       fuse.String('.').split(/(.??)(.??)/));
+    this.assertEnumEqual(['', '.', undef, ''],        fuse.String('.').split(/(.)?(.)?/));
+    this.assertEnumEqual(['t', undef, 'e', 's', 't'], fuse.String('tesst').split(/(s)*/));
+    this.assertEnumEqual(['t', '', 'e', 'ss', 't'],   fuse.String('tesst').split(/(s*)/));
+    this.assertEnumEqual(['t', 'e', 't'],             fuse.String('tesst').split(/(?:s)*/));
+    this.assertEnumEqual(['te', 's', 'st'],           fuse.String('tesst').split(/(?=s+)/));
+    this.assertEnumEqual(['', 'es', ''],              fuse.String('test').split('t'));
+    this.assertEnumEqual(['t', 't'],                  fuse.String('test').split('es'));
+    this.assertEnumEqual(['', 'es', ''],              fuse.String('test').split(/t/));
+    this.assertEnumEqual(['t', 't'],                  fuse.String('test').split(/es/));
+    this.assertEnumEqual(['', 't', 'es', 't', ''],    fuse.String('test').split(/(t)/));
+    this.assertEnumEqual(['t', 'es', 't'],            fuse.String('test').split(/(es)/));
+
+    this.assertEnumEqual(['', 't', 'e', 's', 't', ''],
+      fuse.String('test').split(/(t)(e)(s)(t)/));
+
+    this.assertEnumEqual(['', '.', '.', '.', '', '', ''],
+      fuse.String('.').split(/(((.((.??)))))/));
+
+    this.assertEnumEqual(['.'],
+      fuse.String('.').split(/(((((.??)))))/));
+
+    this.assertEnumEqual(['t', undef, 'e', undef, 's', undef, 's', undef, 't'],
+      fuse.String('tesst').split(/(s)*?/));
+
+    this.assertEnumEqual(['t', '', 'e', '', 's', '', 's', '', 't'],
+      fuse.String('tesst').split(/(s*?)/));
+
+    var ecmaSampleRe = /<(\/)?([^<>]+)>/;
+    this.assertEnumEqual(
+      ['A', undef, 'B', 'bold', '/', 'B', 'and', undef, 'CODE', 'coded', '/', 'CODE', ''],
+      fuse.String('A<B>bold</B>and<CODE>coded</CODE>').split(ecmaSampleRe));
+  },
+
+  'testStripTags': function() {
+    this.assertEqual('hello world',
+      fuse.String('hello world').stripTags());
+
+    this.assertEqual('hello world',
+      fuse.String('hello <span>world</span>').stripTags());
+
+    this.assertEqual('hello world',
+      fuse.String('<a href="#" onclick="moo!">hello</a> world').stripTags());
+
+    this.assertEqual('hello world',
+      fuse.String('h<b><em>e</em></b>l<i>l</i>o w<span class="moo" id="x"><b>o</b></span>rld').stripTags());
+
+    this.assertEqual('hello world',
+      fuse.String('hello wor<input type="text" value="foo>bar">ld').stripTags());
+
+    this.assertEqual('1\n2',
+      fuse.String('1\n2').stripTags());
+
+    this.assertEqual('one < two blah baz', fuse.String(
+      'one < two <a href="# "\ntitle="foo > bar" >blah</a > <input disabled>baz').stripTags(),
+      'failed to ignore none tag related `<` or `>` characters');
+
+    this.assertEqual('1<invalid a="b&c"/>2<invalid a="b<c">3<invald a="b"c">4<invalid  a =  "bc">', fuse.String(
+      '<b>1</b><invalid a="b&c"/><img a="b>c" />2<invalid a="b<c"><b a="b&amp;c">3</b>' +
+      '<invald a="b"c"><b a="b&#38;c" >4</b><invalid  a =  "bc">').stripTags(),
+      'failed to ignore invalid tags');
+  },
+
+  'testStripScripts': function() {
+    this.assertEqual('foo bar', fuse.String('foo bar').stripScripts());
+    this.assertEqual('foo bar', fuse.String('foo <script>boo();<\/script>bar').stripScripts());
+    this.assertEqual('foo bar', fuse.String('foo <script type="text/javascript">boo();\nmoo();<\/script>bar').stripScripts());
+  },
+
+
   'testTruncate': function() {
     var undef,
      source = fuse.String('foo boo boz foo boo boz foo boo boz foo boo boz');
@@ -283,41 +441,6 @@ new Test.Unit.Runner({
     this.assertEqual('hello world',        fuse.String('hello world').trimRight());
     this.assertEqual('  hello  \n  world', fuse.String('  hello  \n  world  ').trimRight());
     this.assertEqual('',                   fuse.String(whitespaceChars).trimRight());
-  },
-
-  'testStripTags': function() {
-    this.assertEqual('hello world',
-      fuse.String('hello world').stripTags());
-
-    this.assertEqual('hello world',
-      fuse.String('hello <span>world</span>').stripTags());
-
-    this.assertEqual('hello world',
-      fuse.String('<a href="#" onclick="moo!">hello</a> world').stripTags());
-
-    this.assertEqual('hello world',
-      fuse.String('h<b><em>e</em></b>l<i>l</i>o w<span class="moo" id="x"><b>o</b></span>rld').stripTags());
-
-    this.assertEqual('hello world',
-      fuse.String('hello wor<input type="text" value="foo>bar">ld').stripTags());
-
-    this.assertEqual('1\n2',
-      fuse.String('1\n2').stripTags());
-
-    this.assertEqual('one < two blah baz', fuse.String(
-      'one < two <a href="# "\ntitle="foo > bar" >blah</a > <input disabled>baz').stripTags(),
-      'failed to ignore none tag related `<` or `>` characters');
-
-    this.assertEqual('1<invalid a="b&c"/>2<invalid a="b<c">3<invald a="b"c">4<invalid  a =  "bc">', fuse.String(
-      '<b>1</b><invalid a="b&c"/><img a="b>c" />2<invalid a="b<c"><b a="b&amp;c">3</b>' +
-      '<invald a="b"c"><b a="b&#38;c" >4</b><invalid  a =  "bc">').stripTags(),
-      'failed to ignore invalid tags');
-  },
-
-  'testStripScripts': function() {
-    this.assertEqual('foo bar', fuse.String('foo bar').stripScripts());
-    this.assertEqual('foo bar', fuse.String('foo <script>boo();<\/script>bar').stripScripts());
-    this.assertEqual('foo bar', fuse.String('foo <script type="text/javascript">boo();\nmoo();<\/script>bar').stripScripts());
   },
 
   'testExtractScripts': function() {
@@ -379,7 +502,7 @@ new Test.Unit.Runner({
 
   'testEscapeHTML': function() {
     this.assertEqual('foo bar',    fuse.String('foo bar').escapeHTML());
-    
+
     var expected = 'foo \u00c3\u00178 bar';
     this.assertEqual(expected, fuse.String(expected).escapeHTML());
 

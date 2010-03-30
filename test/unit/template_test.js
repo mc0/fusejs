@@ -321,5 +321,5 @@ new Test.Unit.Runner({
     this.assertEnumEqual([2, 2, 1], results);
     this.assertEqual(source, source.scan(/x/, this.fail));
     this.assert(fuse.Object.isString(str));
-  },
+  }
 });
