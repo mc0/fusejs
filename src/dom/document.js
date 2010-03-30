@@ -47,7 +47,11 @@
     plugin.viewport = { },
 
     define = function() {
-      var doc = this.ownerDocument,
+      var doc = getDocument(this),
+
+      win = getWindow(doc),
+
+      scrollEl = doc[fuse._info.scrollEl.property],
 
       // Safari < 3 -> doc
       // Opera  < 9.5, Quirks mode -> body
@@ -60,11 +64,22 @@
 
       getWidth = function getWidth() {
         return fuse.Number(dimensionNode.clientWidth);
+      },
+
+      getScrollOffsets = function getScrollOffsets() {
+        return returnOffset(win.pageXOffset, win.pageYOffset);
       };
 
+      if (typeof global.pageXOffset !== 'number') {
+        getScrollOffsets = function getScrollOffsets() {
+          return returnOffset(scrollEl.scrollLeft, scrollEl.scrollTop);
+        };
+      }
+
       // lazy define methods
-      this.getHeight = getHeight;
-      this.getWidth  = getWidth;
+      this.getHeight        = getHeight;
+      this.getWidth         = getWidth;
+      this.getScrollOffsets = getScrollOffsets;
 
       return this[arguments[0]]();
     };
@@ -85,19 +100,9 @@
       return define.call(this, 'getWidth');
     };
 
-    viewport.getScrollOffsets = (function() {
-      var getScrollOffsets = function getScrollOffsets() {
-        return returnOffset(global.pageXOffset, global.pageYOffset);
-      };
-
-      if (typeof global.pageXOffset !== 'number') {
-        getScrollOffsets = function getScrollOffsets() {
-          var scrollEl = fuse._scrollEl;
-          return returnOffset(scrollEl.scrollLeft, scrollEl.scrollTop);
-        };
-      }
-      return getScrollOffsets;
-    })();
+    viewport.getScrollOffsets =  function getScrollOffsets() {
+      return define.call(this, 'getScrollOffsets');
+    };
 
     // prevent JScript bug with named function expressions
     var getDimensions = nil,

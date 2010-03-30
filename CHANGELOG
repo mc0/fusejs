@@ -1,3 +1,5 @@
+* Ensure fuse(document).viewport works with documents from iframes. [jddalton]
+
 * Fix cross-browser bugs with fuse.String match(), search(), split() and fuse.RegExp exec(), test(). [jddalton, Steve Levithan]
 
 * Make the fuse.Fusebox'ed Object constructor, when called as a function and passed a native RegExp instance, return a Fuseboxed RegExp instance. [jddalton]
