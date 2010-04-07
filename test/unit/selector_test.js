@@ -282,12 +282,6 @@ new Test.Unit.Runner({
   // AND NOW COME THOSE NEW TESTS AFTER ANDREW'S REWRITE!
 
   'testSelectorWithNamespacedAttributes': function() {
-    if (fuse.env.test('XPATH')) {
-      this.assertUndefined(new Selector('html div[xml:lang]').xpath);
-      this.assertUndefined(new Selector('body p[xml:lang]').xpath);
-    }
-    else this.info('Could not test XPath bypass: no XPath to begin with!');
-
     this.assertElementsMatch($$('[xml:lang]'), '#item_3', 'div');
     this.assertElementsMatch($$('*[xml:lang]'), '#item_3', '#namespace_attr');
   },
