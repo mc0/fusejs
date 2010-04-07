@@ -1,29 +1,23 @@
   /*---------------------------- SELECTOR: SLICK -----------------------------*/
 
   (function(object, NodeList) {
-    function match(element, selectors) {
-      element = element.raw || fuse.get(element).raw;
-      var node, i = -1, results = Slick(fuse.getDocument(element),
-        String(selectors || ''));
+    var match = function match(element, selectors) {
+      return !!Slick.find(fuse.getDocument(element.raw || fuse.get(element).raw),
+        String(selectors || ''))
+    },
 
-      while (node = results[++i]) {
-        if (node === element) return true;
-      }
-      return false;
-    }
-
-    function query(selectors, context, callback, List) {
-      var node, i = -1, results = Slick(context && fuse.get(context).raw || fuse._doc,
+    query = function(selectors, context, callback, List) {
+      var node, i = -1, results = Slick.search(context && fuse.get(context).raw || fuse._doc,
         String(selectors || ''), List);
       if (callback) {
         while (node = results[++i]) callback(node);
       }
       return results;
-    }
+    },
 
-    function select(selectors, context, callback) {
+    select = function select(selectors, context, callback) {
       return query(selectors, context, callback, NodeList());
-    }
+    };
 
     object.match = match;
     object.select = select;

@@ -1,7 +1,7 @@
   /*--------------------------- SELECTOR: DOMQUERY ---------------------------*/
 
   (function(object, NodeList) {
-    function match(element, selectors) {
+    var match = function match(element, selectors) {
       element = element.raw || fuse.get(element).raw;
       var node, i = -1, results = Ext.DomQuery.select(String(selectors || ''),
         fuse.getDocument(element));
@@ -10,20 +10,20 @@
         if (node === element) return true;
       }
       return false;
-    }
+    },
 
-    function query(selectors, context, callback, toList) {
+    query = function(selectors, context, callback, toList) {
       var node, i = -1, results = toList(Ext.DomQuery.select(String(selectors || ''),
         context && fuse.get(context).raw || fuse._doc));
       if (callback) {
         while (node = results[++i]) callback(node);
       }
       return results;
-    }
+    },
 
-    function select(selectors, context, callback) {
+    select = function select(selectors, context, callback) {
       return query(selectors, context, callback, NodeList.fromNodeList);
-    }
+    };
 
     object.match = match;
     object.select = select;

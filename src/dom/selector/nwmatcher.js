@@ -1,7 +1,9 @@
   /*--------------------------- SELECTOR: NWMATCHER --------------------------*/
 
   (function(object, NodeList) {
-    function match(element, selectors, context) {
+    var __match, __select,
+
+    match = function match(element, selectors, context) {
       function match(element, selectors, context) {
         return __match(
           element.raw || fuse.get(element).raw,
@@ -11,9 +13,9 @@
 
       __match = NW.Dom.match;
       return (object.match = match)(element, selectors, context);
-    }
+    },
 
-    function select(selectors, context, callback) {
+    select = function select(selectors, context, callback) {
       function select(selectors, context, callback) {
         var i = -1, results = NodeList();
         __select(
@@ -29,9 +31,8 @@
 
       __select = NW.Dom.select;
       return (object.select = select)(selectors, context, callback);
-    }
+    };
 
-    var __match, __select;
     object.match = match;
     object.select = select;
 
