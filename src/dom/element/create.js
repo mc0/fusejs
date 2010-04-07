@@ -72,13 +72,18 @@
 
     dom = fuse.dom,
 
+    Element = dom.Element,
+
     getFuseId = Node.getFuseId,
 
-    reComplexTag = /^<([A-Za-z]+)>$/,
+    reComplexTag = /^<([A-Za-z0-9]+)>$/,
+
+    reExtractTagName = /^<([^> ]+)/,
+
+    reTagName = /^[A-Z0-9]+$/,
 
     reStartsWithTableRow = /^<tr/i,
 
-    reTagName= /^<([^> ]+)/,
 
     Decorator = function(element) {
       this.raw = element;
@@ -218,7 +223,7 @@
        var times, wrapping,
         node = cache.node,
         nodeName = context.nodeType === DOCUMENT_NODE
-          ? FROM_STRING_CHILDREN_PARENTS[html.match(reTagName)[1].toUpperCase()]
+          ? FROM_STRING_CHILDREN_PARENTS[html.match(reExtractTagName)[1].toUpperCase()]
           : getNodeName(context);
 
       if (wrapping = FROM_STRING_PARENT_WRAPPERS[nodeName]) {
@@ -249,25 +254,38 @@
       return fragment;
     },
 
+    getFragmentCache = function(ownerDoc) {
+      var id = ownerDoc === doc ? '2' : getFuseId(ownerDoc), data = domData[id];
+      return data.fragmentCache || (data.fragmentCache = {
+        'node':     ownerDoc.createElement('div'),
+        'fragment': ownerDoc.createDocumentFragment()
+      });
+    };
+
+    // shared by primary closure
     getOrCreateTagClass = function(tagName) {
-      var upperCased, tagClass, tagClassName = TAG_NAME_CLASSES[tagName];
+      var upperCased, TagClass, tagClassName = TAG_NAME_CLASSES[tagName];
       if (!tagClassName) {
         upperCased = tagName.toUpperCase();
         tagClassName = TAG_NAME_CLASSES[upperCased];
 
         if (!tagClassName) {
-          // camel-cased name
-          tagClassName =
-          TAG_NAME_CLASSES[upperCased] =
-            tagName.charAt(0).toUpperCase() +
-            tagName.slice(1).toLowerCase()  +
-            'Element';
+          if (reTagName.test(upperCased)) {
+            // camel-cased name
+            tagClassName =
+            TAG_NAME_CLASSES[upperCased] =
+              tagName.charAt(0).toUpperCase() +
+              tagName.slice(1).toLowerCase()  +
+              'Element';
+          } else {
+            tagClassName = 'UnknownElement';
+          }
         }
         TAG_NAME_CLASSES[tagName] = tagClassName;
       }
 
-      if (!(tagClass = dom[tagClassName])) {
-        (tagClass =
+      if (!(TagClass = dom[tagClassName])) {
+        TagClass =
         dom[tagClassName] = Class(Element, function() {
           return {
             'constructor': Function('fn',
@@ -275,17 +293,13 @@
               'return element&&(element.raw?element:fn(element))' +
               '}return ' + tagClassName)(fromElement)
           };
-        })).updateGenerics = Node.updateGenerics;
-      }
-      return tagClass;
-    },
+        });
 
-    getFragmentCache = function(ownerDoc) {
-      var id = ownerDoc === doc ? '2' : getFuseId(ownerDoc), data = domData[id];
-      return data.fragmentCache || (data.fragmentCache = {
-        'node':     ownerDoc.createElement('div'),
-        'fragment': ownerDoc.createDocumentFragment()
-      });
+        TagClass.addMixins = Element.addMixins;
+        TagClass.addPlugins = Element.addPlugins;
+        TagClass.updateGenerics = Element.updateGenerics;
+      }
+      return TagClass;
     };
 
     if (envTest('CREATE_ELEMENT_WITH_HTML')) {

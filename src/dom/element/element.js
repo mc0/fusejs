@@ -1,17 +1,57 @@
   /*-------------------------------- ELEMENT ---------------------------------*/
 
-  Element =
-  fuse.dom.Element = Class(Node, function() {
-    var Element = function Element(tagName, attributes, context) {
-      return isString(tagName)
-        ? Element.create(tagName, attributes, context)
-        : fromElement(tagName);
+  Element = 
+  fuse.dom.Element = function Element(tagName, attributes, context) {
+    return isString(tagName)
+      ? Element.create(tagName, attributes, context)
+      : fromElement(tagName);
+  };
+
+  Class(Node, { 'constructor': Element });
+
+  // add/pave statics
+  (function() {
+    var isMixin = false,
+
+    addToNodeList = function() {
+      var arg, j, jmax,
+       args = arguments, i = -1, imax = args.length,
+       Klass = this, prototype = Klass.prototype;
+
+      while (++i < imax) {
+        arg = args[i];
+        if (typeof arg === 'function') arg = arg();
+        if (!isArray(arg)) arg = [arg];
+
+        j = -1; jmax = arg.length;
+        while (++j < jmax) {
+          eachKey(arg[j], function(method, key) {
+            if (!isMixin || isMixin && !method.$super) {
+              addNodeListMethod(method, key, prototype);
+            }
+          });
+        }
+      }
+      return Klass;
+    },
+
+    addMixins = function addMixins() {
+      Class.statics.addMixins.apply(this, arguments);
+      isMixin = true;
+      addToNodeList.apply(this, arguments);
+      isMixin = false;
+      return this;
+    },
+
+    addPlugins = function addPlugins() {
+      Class.statics.addPlugins.apply(this, arguments);
+      return addToNodeList.apply(this, arguments);
     };
 
-    return { 'constructor': Element };
-  });
-
-  Element.updateGenerics = Node.updateGenerics;
+    Element.addMixins = addMixins;
+    Element.addPlugins = addPlugins;
+    Element.updateGenerics = Node.updateGenerics;
+  })();
 
   /*--------------------------------------------------------------------------*/
 

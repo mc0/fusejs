@@ -1,3 +1,5 @@
+* Make fuse.dom.Element statics extendByTag(), addPlugins(), and addMixins() automatically add methods to fuse.dom.NodeList's prototype. [jddalton]
+
 * Ensure fuse(document).viewport works with documents from iframes. [jddalton]
 
 * Fix cross-browser bugs with fuse.String match(), search(), split() and fuse.RegExp exec(), test(). [jddalton, Steve Levithan]

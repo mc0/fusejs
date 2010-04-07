@@ -96,19 +96,19 @@
   Class.statics = (function() {
     var addMixins = function addMixins() {
       var arg, j, jmax,
-       args = arguments, i = 0, imax = args.length,
+       args = arguments, i = -1, imax = args.length,
        Klass = this, prototype = Klass.prototype;
 
-      while (i < imax) {
-        arg = args[i++];
+      while (++i < imax) {
+        arg = args[i];
         // auto execute arg if it's a closures
         if (typeof arg === 'function') arg = arg();
         // force to array, if not one, to support passing arrays
         if (!isArray(arg)) arg = [arg];
 
-        j = 0; jmax = arg.length;
-        while (j < jmax) {
-          eachKey(arg[j++], function(method, key) {
+        j = -1; jmax = arg.length;
+        while (++j < jmax) {
+          eachKey(arg[j], function(method, key) {
             // flag as mixin if not used as a $super
             if (isFunction(method) && !method.$super)
               (prototype[key] = method)._isMixin = true;
@@ -120,21 +120,21 @@
 
     addPlugins = function addPlugins() {
       var arg, j, jmax, k, plugins, otherMethod,
-       args = arguments, i = 0, imax = args.length,
+       args = arguments, i = -1, imax = args.length,
        Klass      = this,
        prototype  = Klass.prototype,
        superProto = Klass.superclass && Klass.superclass.prototype,
        subclasses = Klass.subclasses,
        subLength  = subclasses.length;
 
-      while (i < imax) {
-        arg = args[i++];
+      while (++i < imax) {
+        arg = args[i];
         if (typeof arg === 'function') arg = arg();
         if (!isArray(arg)) arg = [arg];
 
-        j = 0; jmax = arg.length;
-        while (j < jmax) {
-          eachKey(arg[j++], function(method, key) {
+        j = -1; jmax = arg.length;
+        while (++j < jmax) {
+          eachKey(arg[j], function(method, key) {
             var protoMethod = prototype[key],
              superMethod = superProto && superProto[key];
 
@@ -163,16 +163,16 @@
 
     addStatics = function addStatics() {
       var arg, j, jmax, args = arguments,
-       i = 0, imax = args.length, Klass = this;
+       i = -1, imax = args.length, Klass = this;
 
-      while (i < imax) {
-        arg = args[i++];
+      while (++i < imax) {
+        arg = args[i];
         if (typeof arg === 'function') arg = arg();
         if (!isArray(arg)) arg = [arg];
 
-        j = 0; jmax = arg.length;
-        while (j < jmax) {
-          eachKey(arg[j++], function(method, key) {
+        j = -1; jmax = arg.length;
+        while (++j < jmax) {
+          eachKey(arg[j], function(method, key) {
             if (isFunction(method)) Klass[key] = method;
           });
         }

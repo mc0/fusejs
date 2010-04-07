@@ -6,6 +6,8 @@
   (function(plugin) {
     var SKIPPED_KEYS = { 'callSuper': 1, 'constructor': 1, 'match': 1, 'select': 1 },
 
+    domClassCache = { },
+
     reBool = /^(?:(?:is|has)[A-Z]|contains)/,
 
     reGetter = /^(?:get[A-Z]|down|first|identify|inspect|last|next|previous|read|scroll)/,
@@ -14,8 +16,8 @@
 
     arrEvery = arrProto.every ||
       function(callback) {
-        var i = 0, array = this, l = array.length;
-        for ( ; i < length; i++) {
+        var i = -1, array = this, l = array.length;
+        while (++i < length) {
           if (i in array && !callback(array[i]))
             return false;
         }
@@ -24,53 +26,62 @@
 
     arrEach = arrProto.forEach ||
       function(callback) {
-        var i = 0, array = this, l = array.length;
-        for ( ; i < length; i++) {
+        var i = -1, array = this, l = array.length;
+        while (++i < length) {
           if (i in array) callback(array[i]);
         }
       },
 
     arrSome = arrProto.some ||
       function(callback) {
-        var i = 0, array = this, l = array.length;
-        for ( ; i < length; i++) {
+        var i = -1, array = this, l = array.length;
+        while (++i < length) {
           if (i in array && callback(array[i]))
             return true;
         }
         return false;
-      },
+      };
 
-    addMethod = function(value, key, object) {
+    // shared by primary closure
+    addNodeListMethod = function(value, key, object) {
       if (!SKIPPED_KEYS[key] && isFunction(value) && hasKey(object, key)) {
         if (reGetter.test(key)) {
           // getters return the value of the first element
-          plugin[key] = Function('o',
+          plugin[key] = Function('c,gc',
             'function ' + key + '(){' +
-            'var a=arguments,m=o.' + key + ',e=this[0];' +
-            'if(e)return a.length?m.apply(e,a):m.call(e)' +
-            '}return ' + key)(object);
+            'var m,n,e=this[0];' +
+            'if(e){' +
+            'm=(c[n=e.nodeName]||(c[n]=gc(n))).plugin.' + key + ';' +
+            'return m&&(arguments.length?m.apply(e,arguments):m.call(e))' +
+            '}}return ' + key)(domClassCache, getOrCreateTagClass);
         }
         else {
           // return true for methods prefixed with `is` when all return true OR
           // return true for methods prefixed with `has`/`contains` when some return true OR
           // return the array after executing a method for all elements
           var isBool = reBool.test(key);
-          plugin[key] = Function('o,am',
+          plugin[key] = Function('c,gc,am',
             'function ' + key + '(){' +
-            'var a=arguments,m=o.' + key + ',es=this;' +
+            'var a,es=this;' +
             (isBool ? 'return ' : '') +
-            'am.call(es,a.length' +
-            '?function(e){return m.apply(e,a)}' +
-            ':function(e){return m.call(e)})' +
+            'am.call(es,arguments.length&&(a=arguments)' +
+            '?function(e,m,n){return (m=(c[n=e.nodeName]||(c[n]=gc(n))).plugin.' + key + ')&&m.apply(e,a)}' +
+            ':function(e,m,n){return (m=(c[n=e.nodeName]||(c[n]=gc(n))).plugin.' + key + ')&&m.call(e)})' +
             (isBool ? '' : ';return es') +
-            '}return ' + key)(object,
+            '}return ' + key)(domClassCache, getOrCreateTagClass,
              isBool ? (key.indexOf('is') ? arrSome : arrEvery) : arrEach);
         }
       }
     };
 
-    // Add fuse.dom.Element methods to fuse.dom.NodeList
-    eachKey(Element.plugin, addMethod);
+    // Add Element methods to fuse.dom.NodeList
+    if (fuse.dom.FormElement) {
+      eachKey(fuse.dom.FormElement, addNodeListMethod);
+    }
+    if (fuse.dom.InputElement) {
+      eachKey(fuse.dom.InputElement.plugin, addNodeListMethod);
+    }
+    eachKey(Element.plugin, addNodeListMethod);
 
     // Pave any fuse.dom.NodeList methods that fuse.Array shares.
     // You may call element first(), last(), and contains() by using invoke()

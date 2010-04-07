@@ -119,7 +119,7 @@
     return global;
   };
 
-  // HTML document coerce nodeName to uppercase
+  // HTML documents coerce nodeName to uppercase
   getNodeName = fuse._div.nodeName === 'DIV'
     ? function(element) { return element.nodeName; }
     : function(element) { return element.nodeName.toUpperCase(); };
