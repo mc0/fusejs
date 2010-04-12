@@ -751,7 +751,7 @@
       };
 
       strPlugin.search = function search(pattern) {
-        return instance.Number(__search.call(pattern));
+        return instance.Number(__search.call(this, pattern));
       };
 
       strPlugin.slice = function slice(start, end) {
