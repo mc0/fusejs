@@ -1,4 +1,4 @@
-var documentLoaded = $(document).loaded;
+var documentIsLoaded = $(document).isLoaded();
 
 // eventResults defined in fuse.erb
 

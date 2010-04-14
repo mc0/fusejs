@@ -29,11 +29,11 @@
     fireDomLoadedEvent = function() {
       readyStatePoller.clear();
       cssPoller && cssPoller.clear();
-      return !decoratedDoc.loaded && !!decoratedDoc.fire('dom:loaded');
+      return !decoratedDoc.isLoaded() && !!decoratedDoc.fire('dom:loaded');
     },
 
     checkCssAndFire = function() {
-      return decoratedDoc.loaded
+      return decoratedDoc.isLoaded()
         ? fireDomLoadedEvent()
         : !!(isCssLoaded() && fireDomLoadedEvent());
     },
@@ -62,9 +62,9 @@
     },
 
     checkDomLoadedState = function(event) {
-      if (decoratedDoc.loaded)
+      if (decoratedDoc.isLoaded()) {
         return readyStatePoller.clear();
-
+      }
       // Not sure if readyState is ever `loaded` in Safari 2.x but
       // we check to be on the safe side
       if (FINAL_DOCUMENT_READY_STATES[doc.readyState] ||
@@ -232,11 +232,12 @@
       // http://javascript.nwbox.com/IEContentLoaded/
       if (!isFramed) {
         checkDomLoadedState = function() {
-          if (decoratedDoc.loaded)
+          if (decoratedDoc.isLoaded()) {
             return readyStatePoller.clear();
-          if (doc.readyState === 'complete')
+          }
+          if (doc.readyState === 'complete') {
             fireDomLoadedEvent();
-          else {
+          } else {
             try { fuse._div.doScroll(); } catch(e) { return; }
             fireDomLoadedEvent();
           }

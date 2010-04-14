@@ -217,6 +217,11 @@
       };
     },
 
+    setLoaded = function() {
+      var isLoaded =
+      this.isLoaded = function isLoaded() { return true; };
+    },
+
     // Ensure that the dom:loaded event has finished
     // executing its observers before allowing the
     // window onload event to proceed.
@@ -224,7 +229,7 @@
       var doc = fuse._doc, docEl = fuse._docEl,
        decoratedDoc = fuse.get(doc);
 
-      if (!decoratedDoc.loaded) {
+      if (!decoratedDoc.isLoaded()) {
         event = Event(event || global.event, doc);
         event.type = 'dom:loaded';
 
@@ -242,7 +247,7 @@
           fuse._info.scrollEl = fuse._info.docEl;
         }
 
-        decoratedDoc.loaded = true;
+        setLoaded.call(decoratedDoc);
         domLoadDispatcher(event);
         decoratedDoc.stopObserving('dom:loaded');
       }
@@ -250,7 +255,7 @@
 
     winLoadWrapper = function(event) {
       event || (event = global.event);
-      if (!fuse.get(fuse._doc).loaded) {
+      if (!fuse.get(fuse._doc).isLoaded()) {
         domLoadWrapper(event);
       }
       else if (domData[2] && domData[2].events['dom:loaded']) {
@@ -316,9 +321,14 @@
 
     /*------------------------------------------------------------------------*/
 
-    plugin.preventDefault = function preventDefault() {
-      var preventDefault = function preventDefault() {
-        this.isDefaultPrevented = true;
+    plugin.cancel = function cancel() {
+      var setCancelled = function() {
+        var isCancelled =
+        this.isCancelled = function isCancelled() { return true; };
+      },
+
+      cancel = function cancel() {
+        setCancelled.call(this);
         this.raw && this.raw.preventDefault();
       };
 
@@ -326,20 +336,25 @@
       if (this.raw) {
         // for IE
         if (typeof this.raw.preventDefault === 'undefined') {
-          preventDefault = function preventDefault() {
-            this.isDefaultPrevented = true;
+          cancel = function cancel() {
+            setCancelled.call(this);
             if (this.raw) this.raw.returnValue = false;
           };
         }
-        plugin.preventDefault = preventDefault;
-        this.preventDefault();
+        plugin.cancel = cancel;
+        this.cancel();
       }
-      this.isDefaultPrevented = true;
+      setCancelled.call(this);
     };
 
-    plugin.stopPropagation = function stopPropagation() {
-      var stopPropagation = function stopPropagation() {
-        this.isPropagationStopped = true;
+    plugin.stopBubbling = function stopBubbling() {
+      var setBubbling = function() {
+        var isBubbling =
+        this.isBubbling = function isBubbling() { return false; };
+      },
+
+      stopBubbling = function stopBubbling() {
+        setBubbling.call(this);
         this.raw && this.raw.stopPropagation();
       };
 
@@ -347,26 +362,28 @@
       if (this.raw) {
         // for IE
         if (typeof this.raw.stopPropagation === 'undefined') {
-          stopPropagation = function stopPropagation() {
-            this.isPropagationStopped = true;
+          stopBubbling = function stopBubbling() {
+            setBubbling.call(this);
             if (this.raw) this.raw.cancelBubble = true;
           };
         }
-        plugin.stopPropagation = stopPropagation;
-        this.stopPropagation();
+        plugin.stopBubbling = stopBubbling;
+        this.stopBubbling();
       }
-      this.isPropagationStopped = true;
+      setBubbling.call(this);
     };
 
     plugin.getTarget = function getTarget() {
-      // fired events have no raw
-      if (!this.raw) return this.getCurrentTarget();
+      var setTarget = function(node) {
+        var getTarget =
+        this.getTarget = function getTarget() { return node; };
+        return node;
+      },
 
-      var getTarget = function getTarget() {
+      getTarget = function getTarget() {
         var type, event = this.raw,
          currentTarget = this.getCurrentTarget(),
-         node = currentTarget,
-         getTarget = function getTarget() { return node; };
+         node = currentTarget;
 
         // fired events have no raw
         if (event) {
@@ -394,22 +411,23 @@
           }
         }
 
-        this.getTarget = getTarget;
-        return node;
+        return setTarget.call(this, node);
       };
 
+      // fired events have no raw
+      if (!this.raw) {
+        return setTarget.call(this, this.getCurrentTarget());
+      }
       if (typeof this.raw.target === 'undefined') {
         getTarget = function getTarget() {
           var event = this.raw,
            currentTarget = this.getCurrentTarget(),
-           node = currentTarget,
-           getTarget = function getTarget() { return node; };
+           node = currentTarget;
 
           if (event && typeof currentTarget.nodeType === 'number') {
             node = fromElement(event.srcElement || currentTarget);
           }
-          this.getTarget = getTarget;
-          return node;
+          return setTarget.call(this, node);
         };
       };
 
@@ -418,31 +436,31 @@
     };
 
     plugin.getRelatedTarget = function getRelatedTarget() {
-      // fired events have no raw
-      if (!this.raw) return null;
-
-      var getRelatedTarget = function getRelatedTarget() {
-        var node = this.raw && this.raw.relatedTarget,
-         getRelatedTarget = function getRelatedTarget() { return node; };
-
-        if (node) node = fromElement(node);
-        this.getRelatedTarget = getRelatedTarget;
+      var setRelatedTarget = function(node) {
+        var getRelatedTarget =
+        this.getRelatedTarget = function getRelatedTarget() { return node; };
         return node;
+      },
+
+      getRelatedTarget = function getRelatedTarget() {
+        var node = this.raw && this.raw.relatedTarget;
+        if (node) node = fromElement(node);
+        return setRelatedTarget.call(this, node);
       };
 
+       // fired events have no raw
+      if (!this.raw) {
+        return setRelatedTarget.call(this, null);
+      }
       // for IE
       if (typeof this.raw.relatedTarget === 'undefined') {
         getRelatedTarget = function getRelatedTarget() {
-          var node, event = this.raw,
-           getRelatedTarget = function getRelatedTarget() { return node; };
-
+          var node = null, event = this.raw;
           switch (event && event.type) {
             case 'mouseover': node = fromElement(event.fromElement);
             case 'mouseout':  node = fromElement(event.toElement);
-            default:          node = null;
           }
-          this.getRelatedTarget = getRelatedTarget;
-          return node;
+          return setRelatedTarget.call(this, node);
         };
       }
 
@@ -476,6 +494,18 @@
       return element;
     };
 
+    plugin.isBubbling = function isBubbling() {
+      return true;
+    };
+
+    plugin.isCancelled = function isCancelled() {
+      return false;
+    };
+
+    plugin.isStopped = function isStopped() {
+      return false;
+    };
+
     plugin.isLeftClick = function isLeftClick() {
       return !!this.raw && isButton(this.raw, 'left');
     };
@@ -489,19 +519,20 @@
     };
 
     plugin.stop = function stop() {
-      // Set a "stopped" property so that a custom event can be inspected
+      // Set so that a custom event can be inspected
       // after the fact to determine whether or not it was stopped.
-      this.isStopped =
-      this.isDefaultPrevented =
-      this.isPropagationStopped = true;
+      var isStopped =
+      this.isStopped = function isStopped() { return true; };
 
-      this.preventDefault();
-      this.stopPropagation();
+      this.cancel();
+      this.stopBubbling();
     };
 
     /*------------------------------------------------------------------------*/
 
-    Document.plugin.loaded = false;
+    Document.plugin.isLoaded = function isLoaded() {
+      return false;
+    };
 
     Document.plugin.fire =
     Element.plugin.fire  =
@@ -533,12 +564,11 @@
         if (typeof element[attrName] === 'function' &&
             !element[attrName].isDispatcher) {
           if (element[attrName](event) === false) {
-            event.isDefaultPrevented =
-            event.isPropagationStopped = true;
+            event.stop();
           }
         }
         // fire DOM Level 2
-        if (!event.isPropagationStopped &&
+        if (event.isBubbling() &&
            (dispatcher = ec && ec.dispatcher)) {
           dispatcher(event);
         }
@@ -546,7 +576,7 @@
         if (first) {
           first = false;
 
-          if (event.isDefaultPrevented) {
+          if (event.isCancelled()) {
             // restore previous checked value
             if (checked != null) {
               element.checked = checked;
@@ -572,7 +602,7 @@
           }
         }
         // stop propagating
-        if (event.isPropagationStopped) {
+        if (!event.isBubbling()) {
           break;
         }
       } while (element = element.parentNode);
@@ -638,7 +668,8 @@
     };
 
     // prevent JScript bug with named function expressions
-    var element =       nil,
+    var cancel =        nil,
+     element =          nil,
      fire =             nil,
      findElement =      nil,
      getPointer  =      nil,
@@ -646,12 +677,16 @@
      getPointerY =      nil,
      getRelatedTarget = nil,
      getTarget =        nil,
+     isBubbling =       nil,
+     isCancelled =      nil,
      isLeftClick =      nil,
+     isLoaded =         nil,
      isMiddleClick =    nil,
      isRightClick =     nil,
+     isStopped =        nil,
      observe =          nil,
      preventDefault =   nil,
      stop =             nil,
      stopObserving =    nil,
-     stopPropagation =  nil;
+     stopBubbling =     nil;
   })(Event.plugin);

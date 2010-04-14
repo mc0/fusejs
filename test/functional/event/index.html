@@ -110,7 +110,7 @@
     $('hijack').observe('click', function(e) {
       var el = this.up();
       log(e); // this makes it fail?!?
-      e.preventDefault();
+      e.cancel();
 
       setTimeout(function() {
         if (window.location.hash == '#wrong') el.failed('Hijack failed (<a href="' +
@@ -121,7 +121,6 @@
   </script>
 
   <hr>
-
 
   <p>Mouse click:
   <span class="button" id="left">left</span> <span class="button" id="middle">middle</span> <span class="button" id="right">right</span></p>

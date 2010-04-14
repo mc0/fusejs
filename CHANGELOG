@@ -1,3 +1,6 @@
+* Add fuse.dom.Event methods isStopped(), isCancelled(), isBubbling(), cancel(), stopBubbling(), and fuse.dom.Document method isLoaded(). [jddalton]
+  Note: Backwards compatibility warning.
+
 * Fix fuse.Fusebox'ed Array#map when the SKIP_METHODS_RETURNING_ARRAYS true. [jddalton]
 
 * Add fuse.dom.Event decorator and new Event API. [Brandon Aaron, jddalton]

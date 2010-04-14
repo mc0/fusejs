@@ -266,9 +266,9 @@ new Test.Unit.Runner({
     this.assert(!fired, 'observer should have been stopped');
   },
 
-  'testDocumentLoaded': function() {
-    this.assert(!documentLoaded);
-    this.assert($(document).loaded);
+  'testDocumentIsLoaded': function() {
+    this.assert(!documentIsLoaded);
+    this.assert($(document).isLoaded());
   },
 
   'testCssLoadedBeforeDocumentContentLoadedFires': function() {
@@ -290,21 +290,21 @@ new Test.Unit.Runner({
       '!contentLoaded.windowLoad');
   },
 
-  'testEventStopped': function() {
+  'testEventIsStopped': function() {
     var span = $('span'), event;
 
     span.observe('test:somethingHappened', function() { });
     event = span.fire('test:somethingHappened');
 
-    this.assert(!event.stopped,
-      'event.stopped should be false with an empty observer');
+    this.assert(!event.isStopped(),
+      'event.isStopped() should return false with an empty observer');
 
     span.stopObserving('test:somethingHappened');
     span.observe('test:somethingHappened', function(e) { e.stop() });
     event = span.fire('test:somethingHappened');
 
-    this.assert(event.isStopped,
-      'event.stopped should be true for an observer that calls stop');
+    this.assert(event.isStopped(),
+      'event.isStopped() should return true for an observer that calls stop');
 
     span.stopObserving('test:somethingHappened');
   },
