@@ -7,7 +7,7 @@
 
     elemPlugin  = fuse.dom && fuse.dom.Element.plugin,
 
-    eventProto  = global.Event && global.Event.prototype,
+    eventPlugin = fuse.dom && fuse.dom.Event.plugin,
 
     hashPlugin  = fuse.Hash && fuse.Hash.plugin,
 
@@ -141,20 +141,12 @@
     }
 
     // Event#inspect
-    if (eventProto) {
-      Event.Methods.inspect = function inspect(event) {
-        // called methodized Obj.inspect(Event.prototype) or
-        // called normally Event.inspect(event)
-        if (event) {
-          return event === eventProto
-            ? inspectPlugin(eventProto)
-            : '[object Event]';
-        }
-        // called Obj.inspect(Element.Methods)
-        var methods = Event.Methods;
-        if (this === methods) {
-          return inspectPlugin(methods);
-        }
+    if (eventPlugin) {
+      eventPlugin.inspect = function inspect() {
+        // called Obj.inspect(Event.plugin) or called normally event.inspect()
+        return this === eventPlugin
+          ? inspectPlugin(eventPlugin)
+          : '[object Event]';
       };
     }
 

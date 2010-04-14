@@ -1,5 +1,7 @@
   /*------------------------------- DOM: NODE --------------------------------*/
 
+  DATA_ID_NAME = envTest('ELEMENT_UNIQUE_NUMBER') ? 'uniqueNumber' : '_fuseId';
+
   Node =
   fuse.dom.Node = (function() {
 
@@ -7,13 +9,11 @@
 
     retWinId = true,
 
-    uid = envTest('ELEMENT_UNIQUE_NUMBER') ? 'uniqueNumber' : '_fuseId',
-
     Decorator = function() { },
 
     Node = function Node(node) {
       // quick return if falsy or decorated
-      var data, decorated, id, ownerDoc;
+      var data, decorated, id;
       if (!node || node.raw) {
         return node;
       }
@@ -51,7 +51,7 @@
     },
 
     getFuseId = function getFuseId() {
-      var win, node = this.raw || this, id = node[uid];
+      var win, node = this.raw || this, id = node[DATA_ID_NAME];
 
       // quick return for nodes with ids
       // IE can avoid adding an expando on each node and use the `uniqueNumber` property instead.

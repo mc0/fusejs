@@ -1,29 +1,138 @@
   /*---------------------------------- EVENT ---------------------------------*/
 
-  if (!global.Event) global.Event = { };
+  Event =
+  fuse.dom.Event = (function() {
+    var Decorator = function(event, target) {
+      var getCurrentTarget = 
+      this.getCurrentTarget = function getCurrentTarget() {
+        var getCurrentTarget = function getCurrentTarget() { return target; };
+        if (target) target = fromElement(target);
+        this.getCurrentTarget = getCurrentTarget;
+        return target;
+      };
+    },
 
-  Event.CUSTOM_EVENT_NAME =
-    envTest('ELEMENT_ADD_EVENT_LISTENER') ? 'dataavailable' :
-    envTest('ELEMENT_ATTACH_EVENT') ? 'beforeupdate' : 'keyup';
+    Event = function Event(event, target) {
+      var decorated;
+      if (event) {
+        if (typeof event.raw !== 'undefined') {
+          return event;
+        }
+        decorated = new Decorator(event, target);
+        decorated.raw  = event;
+        decorated.type = event.type;
+      }
+      else {
+        // fired events have no raw
+        decorated = new Decorator(event, target);
+        decorated.raw = null;
+      }
+      return decorated;
+    };
 
-  Event.Methods = { };
+    Class({ 'constructor': Event });
+    Decorator.prototype = Event.plugin;
+    return Event;
+  })();
+
+  _extend(fuse.dom.Event, {
+    'KEY_BACKSPACE': 8,
+    'KEY_DELETE':    46,
+    'KEY_DOWN':      40,
+    'KEY_END':       35,
+    'KEY_ESC':       27,
+    'KEY_HOME':      36,
+    'KEY_INSERT':    45,
+    'KEY_LEFT':      37,
+    'KEY_PAGEDOWN':  34,
+    'KEY_PAGEUP':    33,
+    'KEY_RETURN':    13,
+    'KEY_RIGHT':     39,
+    'KEY_TAB':       9,
+    'KEY_UP':        38
+  });
 
   /*--------------------------------------------------------------------------*/
 
-  (function(methods) {
-
+  (function(plugin) {
     var BUGGY_EVENT_TYPES = { 'error': 1, 'load': 1 },
 
-    BUTTON_MAP = { 'left': 1, 'middle': 2, 'right': 3 },
+    CHECKED_INPUT_TYPES = { 'checkbox': 1, 'radio': 1 },
+
+    arrayIndexOf = Array.prototype.indexOf || fuse.Array.plugin.indexOf,
+
+    definePointerXY = function() {
+      // fired events have no raw
+      if (!this.raw) return 0;
+
+      // defacto standard
+      var getPointerX, getPointerY;
+      if (typeof this.raw.pageX === 'number') {
+        getPointerX = function getPointerX() {
+          return this.raw && this.raw.pageX || 0;
+        };
+
+        getPointerY = function getPointerY() {
+          return this.raw && this.raw.pageY || 0;
+        };
+      }
+      // IE and other
+      else {
+        var info = fuse._info,
+         doc  = getDocument(this.getTarget() || global),
+         root = doc[info.root.property],
+         scrollEl = doc[info.scrollEl.property];
+
+        if (!root || !scrollEl) return 0;
+        doc = root = scrollEl = nil;
+
+        getPointerX = function getPointerX() {
+          // fired events have no raw
+          if (!this.raw) return 0;
+
+          var doc = getDocument(this.getTarget() || global),
+           root = doc[info.root.property],
+           scrollEl = doc[info.scrollEl.property],
+           getPointerX = function getPointerX() { return x; },
+           x = this.raw.clientX + scrollEl.scrollLeft - root.clientLeft;
+
+          if (x < 0) x = 0;
+          this.getPointerX = getPointerX;
+          return x;
+        };
+
+        getPointerY = function getPointerY() {
+          // fired events have no raw
+          if (!this.raw) return 0;
+
+          var doc = getDocument(this.getTarget() || global),
+           root = doc[info.root.property],
+           scrollEl = doc[info.scrollEl.property],
+           getPointerY = function getPointerY() { return y; },
+           y = this.raw.clientY + scrollEl.scrollTop - root.clientTop;
+
+          if (y < 0) y = 0;
+          this.getPointerY = getPointerY;
+          return y;
+        };
+      }
+
+      plugin.getPointerX = getPointerX;
+      plugin.getPointerY = getPointerY;
+      return this[arguments[0]]();
+    },
 
     // lazy define on first call
     // compatibility charts found at http://unixpapa.com/js/mouse.html
     isButton = function(event, mouseButton) {
+      var property = 'which',
+       BUTTON_MAP = { 'left': 1, 'middle': 2, 'right': 3 };
+
       isButton = function(event, mouseButton) {
         return event[property] === BUTTON_MAP[mouseButton];
       };
 
-      var property = 'which';
+      // for non IE
       if (typeof event.which === 'number') {
         // simulate a middle click by pressing the Apple key in Safari 2.x
         if (typeof event.metaKey === 'boolean') {
@@ -35,222 +144,88 @@
           };
         }
       }
+      // for IE
+      // check for `button` second for browsers that have `which` and `button`
       else if (typeof event.button === 'number') {
-        // for IE
         property = 'button';
         BUTTON_MAP = { 'left': 1, 'middle': 4, 'right': 2 };
       }
+      // fallback
       else {
         isButton = function() { return false; };
       }
 
       return isButton(event, mouseButton);
-    };
+    },
 
-    methods.element = function element(event) {
-      event = Event.extend(event);
-      var node = event.target, type = event.type,
-       currentTarget = event.currentTarget;
-
-      // Firefox screws up the "click" event when moving between radio buttons
-      // via arrow keys. It also screws up the "load" and "error" events on images,
-      // reporting the document as the target instead of the original image.
-
-      // Note: Fired events don't have a currentTarget
-      if (currentTarget && (BUGGY_EVENT_TYPES[type] ||
-          getNodeName(currentTarget) === 'INPUT' &&
-          currentTarget.type === 'radio' && type === 'click'))
-        node = currentTarget;
-
-      // Fix a Safari bug where a text node gets passed as the target of an
-      // anchor click rather than the anchor itself.
-      return fuse.get(node && node.nodeType === TEXT_NODE
-        ? node.parentNode
-        : node);
-    };
-
-    methods.findElement = function findElement(event, selectors) {
-      var element = Event.element(event);
-      if (!selectors || selectors == null) return element;
-      return element.match(selectors)
-        ? element
-        : element.up(selectors);
-    };
-
-    methods.isLeftClick = function isLeftClick(event) {
-      return isButton(event, 'left');
-    };
-
-    methods.isMiddleClick = function isMiddleClick(event) {
-      return isButton(event, 'middle');
-    };
-
-    methods.isRightClick = function isRightClick(event) {
-      return isButton(event, 'right');
-    };
-
-    methods.pointer = function pointer(event) {
-      return { 'x': Event.pointerX(event), 'y': Event.pointerY(event) };
-    };
-
-    methods.stop = function stop(event) {
-      // Set a "stopped" property so that a custom event can be inspected
-      // after the fact to determine whether or not it was stopped.
-      event = Event.extend(event);
-      event.stopped = true;
-      event.preventDefault();
-      event.stopPropagation();
-    };
-
-    // prevent JScript bug with named function expressions
-    var element =    nil,
-     findElement =   nil,
-     isLeftClick =   nil,
-     isMiddleClick = nil,
-     isRightClick =  nil,
-     pointer =       nil,
-     stop =          nil;
-  })(Event.Methods);
-
-  // lazy define Event.pointerX() and Event.pointerY()
-  (function(methods) {
-    function define(methodName, event) {
-      if (!fuse._body) return 0;
-      if (typeof event.pageX === 'number') {
-        Event.pointerX =
-        methods.pointerX = function(event) { return event.pageX; };
-
-        Event.pointerY =
-        methods.pointerY = function(event) { return event.pageY; };
-      }
-      else {
-        Event.pointerX =
-        methods.pointerX = function(event) {
-          var info = fuse._info,
-           doc = getDocument(event.srcElement || global),
-           result = event.clientX + doc[info.scrollEl.property].scrollLeft -
-             doc[info.root.property].clientLeft;
-
-          return result > -1 ? result : 0;
-        };
-
-        Event.pointerY =
-        methods.pointerY = function(event) {
-          var info = fuse._info,
-           doc = getDocument(event.srcElement || global),
-           result = event.clientY + doc[info.scrollEl.property].scrollTop -
-             doc[info.root.property].clientTop;
-
-           return result > -1 ? result : 0;
-        };
-      }
-      return methods[methodName](event);
-    }
-
-    methods.pointerX = Func.curry(define, 'pointerX');
-    methods.pointerY = Func.curry(define, 'pointerY');
-  })(Event.Methods);
-
-  /*--------------------------------------------------------------------------*/
-
-  (function(proto) {
-
-    function addLevel2Methods(event) {
-      event.preventDefault  = preventDefault;
-      event.stopPropagation = stopPropagation;
-
-      // avoid memory leak
-      event.pointer  = createPointerMethod();
-      event.pointerX = createPointerMethod('x');
-      event.pointerY = createPointerMethod('y');
-
-      var length = Methods.length;
-      while (length--) {
-        pair = Methods[length];
-        if (!(pair[0] in event))
-          event[pair[0]] = pair[1];
-      }
-      return event;
-    }
-
-    function addLevel2Properties(event, element) {
-      event.pageX = Event.pointerX(event);
-      event.pageY = Event.pointerY(event);
-
-      event._extendedByFuse = emptyFunction;
-      event.currentTarget   = element;
-      event.target          = event.srcElement || element;
-      event.relatedTarget   = relatedTarget(event);
-      return event;
-    }
-
-    function createPointerMethod(xOrY) {
-      switch (xOrY) {
-        case 'x': return function() { return this.pageX; };
-        case 'y': return function() { return this.pageY; };
-        default : return function() { return { 'x': this.pageX, 'y': this.pageY }; };
-      }
-    }
-
-    function relatedTarget(event) {
-      switch (event.type) {
-        case 'mouseover': return fromElement(event.fromElement);
-        case 'mouseout':  return fromElement(event.toElement);
-        default:          return null;
-      }
-    }
-
-    function preventDefault() {
-      this.returnValue = false;
-    }
-
-    function stopPropagation() {
-      this.cancelBubble = true;
-    }
-
-    function addCache(id, eventName, handler) {
+    addCache = function(id, type, handler) {
       // bail if handler is already exists
-      var ec = getOrCreateCache(id, eventName);
-      if (arrayIndexOf.call(ec.handlers, handler) != -1)
+      var ec = getOrCreateCache(id, type);
+      if (arrayIndexOf.call(ec.handlers, handler) != -1) {
         return false;
-
+      }
       ec.handlers.unshift(handler);
-      if (ec.dispatcher) return false;
-      return (ec.dispatcher = createDispatcher(id, eventName));
-    }
+      return ec.dispatcher
+        ? false
+        : (ec.dispatcher = createDispatcher(id, type));
+    },
 
-    function getEventName(eventName) {
-      if (eventName && eventName.indexOf(':') > -1)
-        return Event.CUSTOM_EVENT_NAME;
-      return eventName;
-    }
-
-    function getOrCreateCache(id, eventName) {
+    getOrCreateCache = function(id, type) {
       var data = domData[id], events = data.events || (data.events = { });
-      return (events[eventName] = events[eventName] ||
-        { 'handlers': [], 'dispatcher': false });
-    }
+      return events[type] ||
+        (events[type] = { 'handlers': [], 'dispatcher': false });
+    },
 
-    function removeCacheAtIndex(id, eventName, index) {
+    removeCacheAtIndex = function(id, type, index) {
       // remove responders and handlers at the given index
-      var events = domData[id].events, ec = events[eventName];
+      var events = domData[id].events, ec = events[type];
       ec.handlers.splice(index, 1);
 
       // if no more handlers/responders then
-      // remove the eventName cache
-      if (!ec.handlers.length) delete events[eventName];
-    }
+      // remove the event type cache
+      if (!ec.handlers.length) delete events[type];
+    },
+
+    addObserver = function(element, type, handler) {
+      element.addEventListener(type, handler, false);
+    },
+
+    removeObserver = function(element, type, handler) {
+      element.removeEventListener(type, handler, false);
+    },
+
+    // Event dispatchers manage several handlers and ensure
+    // FIFO execution order. They are attached as the event
+    // listener and execute all the handlers they manage.
+    createDispatcher = function(id, type) {
+      return function(event) {
+        // shallow copy handlers to avoid issues with nested observe/stopObserving
+        var data   = domData[id],
+         decorator = data.decorator,
+         node      = decorator.raw,
+         handlers  = slice.call(data.events[type].handlers, 0),
+         length    = handlers.length;
+
+        event = Event(event || getWindow(node).event, node);
+        while (length--) {
+          // stop event if handler result is false
+          if (handlers[length].call(decorator, event) === false) {
+            event.stop();
+          }
+        }
+      };
+    },
 
     // Ensure that the dom:loaded event has finished
     // executing its observers before allowing the
     // window onload event to proceed.
-    function domLoadWrapper(event) {
+    domLoadWrapper = function(event) {
       var doc = fuse._doc, docEl = fuse._docEl,
        decoratedDoc = fuse.get(doc);
 
       if (!decoratedDoc.loaded) {
-        event = event || global.event;
-        event.eventName = 'dom:loaded';
+        event = Event(event || global.event, doc);
+        event.type = 'dom:loaded';
 
         // define pseudo private body and root properties
         fuse._body     =
@@ -270,222 +245,60 @@
         domLoadDispatcher(event);
         decoratedDoc.stopObserving('dom:loaded');
       }
-    }
+    },
 
-    function winLoadWrapper(event) {
-      event = event || global.event;
+    winLoadWrapper = function(event) {
+      event || (event = global.event);
       if (!fuse.get(fuse._doc).loaded) {
         domLoadWrapper(event);
       }
-      else if (domData['2'] && domData['2'].events['dom:loaded']) {
-        return setTimeout(function() { winLoadWrapper(event); }, 10);
+      else if (domData[2] && domData[2].events['dom:loaded']) {
+        return global.setTimeout(function() { winLoadWrapper(event); }, 10);
       }
-
-      event.eventName = nil;
+      event = Event(event, global);
+      event.type = 'load';
       winLoadDispatcher(event);
-      Event.stopObserving(global, 'load');
-    }
+      fuse.get(global).stopObserving('load');
+    };
 
     /*------------------------------------------------------------------------*/
 
-    var Methods, domLoadDispatcher, winLoadDispatcher,
-
-    arrayIndexOf = Array.prototype.indexOf || fuse.Array.plugin.indexOf,
-
-    setTimeout = global.setTimeout,
-
-    addMethods = function addMethods(methods) {
-      var name; Methods = [];
-      methods && Obj.extend(Event.Methods, methods);
-
-      eachKey(Event.Methods, function(value, key, object) {
-        if (key.lastIndexOf('pointer', 0))
-          Methods.push([key, Func.methodize([key, object])]);
-      });
-    },
-
-    // DOM Level 0
-    addObserver = function(element, eventName, handler) {
-      var attrName = 'on' + getEventName(eventName),
-       id = Node.getFuseId(element),
-       oldHandler = element[attrName];
-
-      if (oldHandler) {
-        if (oldHandler.isDispatcher) return false;
-        addCache(id, eventName, element[attrName]);
-      }
-
-      element[attrName] = domData[id].events[eventName].dispatcher;
-    },
-
-    // DOM Level 0
-    removeObserver = function(element, eventName, handler) {
-      var attrName = 'on' + getEventName(eventName);
-      if (!eventName.indexOf(':') > -1 && element[attrName] === handler)
-        element[attrName] = null;
-    },
-
-    // DOM Level 0
-    createDispatcher = function(id, eventName) {
-      var dispatcher = function(event) {
-        if (!Event || !Event.extend) return false;
-        event = Event.extend(event || getWindow(this).event, this);
-
-        var handlers, length,
-         data    = domData[id],
-         context = data.decorator.raw,
-         events  = data.events,
-         ec = events && events[event.eventName || eventName];
-
-        if (!ec) return false;
-
-        handlers = slice.call(ec.handlers, 0);
-        length = handlers.length;
-        while (length--) handlers[length].call(context, event);
-      };
-
-      dispatcher.isDispatcher = true;
-      return dispatcher;
-    },
-
-    extend = function extend(event, element) {
-      return event && !event._extendedByFuse
-        ? addLevel2Properties(addLevel2Methods(event), element)
-        : event;
-    },
-
-    createEvent = function() { return false; },
-
-    fireEvent   = createEvent;
-
-    /*------------------------------------------------------------------------*/
-
-    if (envTest('ELEMENT_ADD_EVENT_LISTENER') || envTest('ELEMENT_ATTACH_EVENT')) {
-      // Event dispatchers manage several handlers and ensure
-      // FIFO execution order. They are attached as the event
-      // listener and execute all the handlers they manage.
-      createDispatcher = function(id, eventName) {
-        return function(event) {
-          // Prevent a Firefox bug from throwing errors on page
-          // load/unload (#5393, #9421). When firing a custom event all the
-          // CUSTOM_EVENT_NAME observers for that element will fire. Before
-          // executing, make sure the event.eventName matches the eventName.
-          if (!Event || !Event.extend || (event.eventName &&
-              event.eventName !== eventName)) return false;
-
-          // shallow copy handlers to avoid issues with nested
-          // observe/stopObserving
-          var data  = domData[id],
-           ec       = data.events[eventName],
-           node     = data.decorator.raw,
-           context  = data.decorator,
-           handlers = slice.call(ec.handlers, 0),
-           length   = handlers.length;
-
-          event = Event.extend(event || getWindow(node).event, node);
-          while (length--) handlers[length].call(context, event);
-        };
-      };
-
-      // DOM Level 2
-      if (envTest('ELEMENT_ADD_EVENT_LISTENER')) {
-        addObserver = function(element, eventName, handler) {
-          element.addEventListener(getEventName(eventName), handler, false);
-        };
-
-        removeObserver = function(element, eventName, handler) {
-          element.removeEventListener(getEventName(eventName), handler, false);
-        };
-      }
+    if (!envTest('ELEMENT_ADD_EVENT_LISTENER')) {
       // JScript
-      else if (envTest('ELEMENT_ATTACH_EVENT')) {
-        addObserver = function(element, eventName, handler) {
-          element.attachEvent('on' + getEventName(eventName), handler);
+      if (envTest('ELEMENT_ATTACH_EVENT')) {
+        addObserver = function(element, type, handler) {
+          element.attachEvent('on' + type, handler);
         };
 
-        removeObserver =  function(element, eventName, handler) {
-          element.detachEvent('on' + getEventName(eventName), handler);
+        removeObserver =  function(element, type, handler) {
+          element.detachEvent('on' + type, handler);
         };
       }
-    }
-
-    // DOM Level 2
-    if (envTest('DOCUMENT_CREATE_EVENT') && envTest('ELEMENT_DISPATCH_EVENT')) {
-      createEvent = function(context, eventType) {
-        var event = getDocument(context).createEvent('HTMLEvents');
-        eventType && event.initEvent(eventType, true, true);
-        return event;
-      };
-
-      fireEvent = function(element, event) {
-        // In the W3C system, all calls to document.fire should treat
-        // document.documentElement as the target
-        if (element.nodeType === DOCUMENT_NODE)
-          element = element.documentElement;
-        element.dispatchEvent(event);
-      };
-    }
-    // JScript
-    else if(envTest('DOCUMENT_CREATE_EVENT_OBJECT') && envTest('ELEMENT_FIRE_EVENT')) {
-      createEvent = function(context, eventType) {
-        var event = getDocument(context).createEventObject();
-        eventType && (event.eventType = 'on' + eventType);
-        return event;
-      };
-
-      fireEvent = function(element, event) {
-        element.fireEvent(event.eventType, event);
-      };
-    }
-
-
-    // extend Event.prototype
-    if (proto || envTest('OBJECT__PROTO__')) {
-
-      // redefine addMethods to support Event.prototype
-      addMethods = function addMethods(methods) {
-        var name; Methods = [];
-        methods && Obj.extend(Event.Methods, methods);
-
-        eachKey(Event.Methods, function(value, key, object) {
-          proto[key] = Func.methodize([key, object]);
-        });
-      };
-
-      // Safari 2 support
-      if (!proto)
-        proto = Event.prototype = createEvent(fuse._doc)['__proto__'];
-
-      // IE8 supports Event.prototype but still needs
-      // DOM Level 2 event methods and properties.
-      if (hasKey(proto, 'cancelBubble') &&
-          hasKey(proto, 'returnValue') &&
-         !hasKey(proto, 'stopPropagation') &&
-         !hasKey(proto, 'preventDefault') &&
-         !hasKey(proto, 'target') &&
-         !hasKey(proto, 'currentTarget')) {
-
-        extend = (function(__extend) {
-          function extend(event, element) {
-            if (!event.findElement) {
-              return __extend(event, element);
-            }
-            return event && !event._extendedByFuse
-              ? addLevel2Properties(event, element)
-              : event;
-          }
-          return extend;
-        })(extend);
-
-        // initially add methods
-        addMethods();
-        addLevel2Methods(proto);
-      }
+      // DOM Level 0
       else {
-        extend = function extend(event, element) {
-          return !event.findElement
-            ? addLevel2Methods(event)
-            : event;
+        addObserver = function(element, type, handler) {
+          var attrName = 'on' + type,
+           id = Node.getFuseId(element), oldHandler = element[attrName];
+
+          if (oldHandler) {
+            if (oldHandler.isDispatcher) return false;
+            addCache(id, type, element[attrName]);
+          }
+          element[attrName] = domData[id].events[type].dispatcher;
+        };
+
+        removeObserver = function(element, type, handler) {
+          var attrName = 'on' + type;
+          if (element[attrName] === handler) {
+            element[attrName] = null;
+          }
+        };
+
+        var __createDispatcher = createDispatcher;
+        createDispatcher = function(id, type) {
+          var dispatcher = __createDispatcher(id, type);
+          dispatcher.isDispatcher = true;
+          return dispatcher;
         };
       }
     }
@@ -502,116 +315,342 @@
 
     /*------------------------------------------------------------------------*/
 
-    Event.addMethods = addMethods;
+    plugin.preventDefault = function preventDefault() {
+      var preventDefault = function preventDefault() {
+        this.isDefaultPrevented = true;
+        this.raw && this.raw.preventDefault();
+      };
 
-    Event.extend = extend;
+      // fired events have no raw
+      if (this.raw) {
+        // for IE
+        if (typeof this.raw.preventDefault === 'undefined') {
+          preventDefault = function preventDefault() {
+            this.isDefaultPrevented = true;
+            if (this.raw) this.raw.returnValue = false;
+          };
+        }
+        plugin.preventDefault = preventDefault;
+        this.preventDefault();
+      }
+      this.isDefaultPrevented = true;
+    };
 
-    Event.fire = function fire(element, eventName, memo) {
-      var event, decorator = fuse.get(element);
-      element = decorator.raw || decorator;
-      event = createEvent(element, Event.CUSTOM_EVENT_NAME);
+    plugin.stopPropagation = function stopPropagation() {
+      var stopPropagation = function stopPropagation() {
+        this.isPropagationStopped = true;
+        this.raw && this.raw.stopPropagation();
+      };
 
-      if (!event) return false;
-      event.eventName = eventName;
+      // fired events have no raw
+      if (this.raw) {
+        // for IE
+        if (typeof this.raw.stopPropagation === 'undefined') {
+          stopPropagation = function stopPropagation() {
+            this.isPropagationStopped = true;
+            if (this.raw) this.raw.cancelBubble = true;
+          };
+        }
+        plugin.stopPropagation = stopPropagation;
+        this.stopPropagation();
+      }
+      this.isPropagationStopped = true;
+    };
+
+    plugin.getTarget = function getTarget() {
+      // fired events have no raw
+      if (!this.raw) return this.getCurrentTarget();
+
+      var getTarget = function getTarget() {
+        var type, event = this.raw,
+         currentTarget = this.getCurrentTarget(),
+         node = currentTarget,
+         getTarget = function getTarget() { return node; };
+
+        // fired events have no raw
+        if (event) {
+          node = event.target;
+          type = event.type;
+
+          // Firefox screws up the "click" event when moving between radio buttons
+          // via arrow keys. It also screws up the "load" and "error" events on images,
+          // reporting the document as the target instead of the original image.
+          if (BUGGY_EVENT_TYPES[type] ||
+              getNodeName(currentTarget) === 'INPUT' &&
+              currentTarget.type === 'radio' && type === 'click') {
+            node = currentTarget;
+          }
+          if (typeof currentTarget.nodeType === 'number') {
+            // Fix a Safari bug where a text node gets passed as the target of an
+            // anchor click rather than the anchor itself.
+            node = fuse.get(node && node.nodeType === TEXT_NODE
+              ? node.parentNode
+              : node);
+          }
+          else {
+            // force window to return window
+            node = currentTarget;
+          }
+        }
+
+        this.getTarget = getTarget;
+        return node;
+      };
+
+      if (typeof this.raw.target === 'undefined') {
+        getTarget = function getTarget() {
+          var event = this.raw,
+           currentTarget = this.getCurrentTarget(),
+           node = currentTarget,
+           getTarget = function getTarget() { return node; };
+
+          if (event && typeof currentTarget.nodeType === 'number') {
+            node = fromElement(event.srcElement || currentTarget);
+          }
+          this.getTarget = getTarget;
+          return node;
+        };
+      };
+
+      plugin.getTarget = getTarget;
+      return this.getTarget();
+    };
+
+    plugin.getRelatedTarget = function getRelatedTarget() {
+      // fired events have no raw
+      if (!this.raw) return null;
+
+      var getRelatedTarget = function getRelatedTarget() {
+        var node = this.raw && this.raw.relatedTarget,
+         getRelatedTarget = function getRelatedTarget() { return node; };
+
+        if (node) node = fromElement(node);
+        this.getRelatedTarget = getRelatedTarget;
+        return node;
+      };
+
+      // for IE
+      if (typeof this.raw.relatedTarget === 'undefined') {
+        getRelatedTarget = function getRelatedTarget() {
+          var node, event = this.raw,
+           getRelatedTarget = function getRelatedTarget() { return node; };
+
+          switch (event && event.type) {
+            case 'mouseover': node = fromElement(event.fromElement);
+            case 'mouseout':  node = fromElement(event.toElement);
+            default:          node = null;
+          }
+          this.getRelatedTarget = getRelatedTarget;
+          return node;
+        };
+      }
+
+      plugin.getRelatedTarget = getRelatedTarget;
+      return this.getRelatedTarget();
+    };
+
+    plugin.getPointerX = function getPointerX() {
+      return definePointerXY.call(this, 'getPointerX');
+    };
+
+    plugin.getPointerY = function getPointerY() {
+      return definePointerXY.call(this, 'getPointerY');
+    };
+
+    plugin.getPointer = function getPointer() {
+      return { 'x': this.getPointerX(), 'y': this.getPageY() };
+    };
+
+    plugin.findElement = function findElement(selectors) {
+      var match = fuse.dom.selector.match, element = this.getTarget();
+      if (!selectors || selectors == null || !element || match(element, selectors)) {
+        return element;
+      }
+      if (element = (element.raw || element).parentNode) {
+        do {
+          if (element.nodeType === ELEMENT_NODE && match(element, selectors))
+            return fromElement(element);
+        } while (element = element.parentNode);
+      }
+      return element;
+    };
+
+    plugin.isLeftClick = function isLeftClick() {
+      return !!this.raw && isButton(this.raw, 'left');
+    };
+
+    plugin.isMiddleClick = function isMiddleClick() {
+      return !!this.raw && isButton(this.raw, 'middle');
+    };
+
+    plugin.isRightClick = function isRightClick() {
+      return !!this.raw && isButton(this.raw, 'right');
+    };
+
+    plugin.stop = function stop() {
+      // Set a "stopped" property so that a custom event can be inspected
+      // after the fact to determine whether or not it was stopped.
+      this.isStopped =
+      this.isDefaultPrevented =
+      this.isPropagationStopped = true;
+
+      this.preventDefault();
+      this.stopPropagation();
+    };
+
+    /*------------------------------------------------------------------------*/
+
+    Document.plugin.loaded = false;
+
+    Document.plugin.fire =
+    Element.plugin.fire  =
+    Window.plugin.fire   = function fire(type, memo) {
+      var backup, checked, ec, data, id, first = true,
+       element = this.raw || this,
+       attrName = 'on' + type,
+       event = Event(null, element);
+
+      event.type = type;
       event.memo = memo || { };
 
-      fireEvent(element, event);
-      return Event.extend(event);
+      // change checked state before calling handlers
+      if (type === 'click' && getNodeName(element) === 'INPUT' &&
+          CHECKED_INPUT_TYPES[element.type]) {
+        checked = element.checked;
+        element.checked = !checked;
+      }
+
+      do {
+        id = element.nodeType === ELEMENT_NODE
+          ? element[DATA_ID_NAME]
+          : Node.getFuseId(element);
+
+        data = id && domData[id];
+        ec   = data && data.events && data.events[type];
+
+        // fire DOM Level 0
+        if (typeof element[attrName] === 'function' &&
+            !element[attrName].isDispatcher) {
+          if (element[attrName](event) === false) {
+            event.isDefaultPrevented =
+            event.isPropagationStopped = true;
+          }
+        }
+        // fire DOM Level 2
+        if (!event.isPropagationStopped &&
+           (dispatcher = ec && ec.dispatcher)) {
+          dispatcher(event);
+        }
+        // default action
+        if (first) {
+          first = false;
+
+          if (event.isDefaultPrevented) {
+            // restore previous checked value
+            if (checked != null) {
+              element.checked = checked;
+            }
+          }
+          else if (isHostObject(element, type)) {
+            // temporarily remove handler so its not triggered
+            if (typeof element[attrName] === 'function') {
+              backup = element[attrName];
+              element[attrName] = null;
+            }
+            // trigger default action
+            element[type]();
+
+            // ensure checked didn't change
+            if (checked != null) {
+              element.checked = !checked;
+            }
+            // restore backup
+            if (backup) {
+              element[attrName] = backup;
+            }
+          }
+        }
+        // stop propagating
+        if (event.isPropagationStopped) {
+          break;
+        }
+      } while (element = element.parentNode);
+
+      return event;
     };
 
-    Event.observe = function observe(element, eventName, handler) {
-      var dispatcher, decorator = fuse.get(element);
-      element = decorator.raw || decorator;
+    Document.plugin.observe =
+    Element.plugin.observe  =
+    Window.plugin.observe   = function observe(type, handler) {
+      var element = this.raw || this,
+       dispatcher = addCache(Node.getFuseId(element), type, handler);
+      if (!dispatcher) return this;
 
-      dispatcher = addCache(Node.getFuseId(element), eventName, handler);
-      if (!dispatcher) return decorator;
-
-      addObserver(element, eventName, dispatcher);
-      return decorator;
+      addObserver(element, type, dispatcher);
+      return this;
     };
 
-    Event.stopObserving = function stopObserving(element, eventName, handler) {
+    Document.plugin.stopObserving =
+    Element.plugin.stopObserving  =
+    Window.plugin.stopObserving   = function stopObserving(type, handler) {
       var dispatcher, ec, events, foundAt, id, length,
-       decorator = fuse.get(element);
+       callee = Element.plugin.stopObserving,
+       element = this.raw || this;
 
-      element = decorator.raw || decorator;
-      eventName = isString(eventName) ? eventName : null;
-
+      type = isString(type) ? type : null;
       id = Node.getFuseId(element);
       events = domData[id].events;
 
-      if (!events) return decorator;
-      ec = events[eventName];
+      if (!events) return this;
+      ec = events[type];
 
       if (ec && handler == null) {
         // If an event name is passed without a handler,
         // we stop observing all handlers of that type.
         length = ec.handlers.length;
-        if (!length) Event.stopObserving(element, eventName, 0);
-        else while (length--) Event.stopObserving(element, eventName, length);
-        return decorator;
+        if (!length) {
+          callee.call(element, type, 0);
+        } else {
+          while (length--) callee.call(element, type, length);
+        }
+        return this;
       }
-      else if (!eventName || eventName == '') {
+      else if (!type || type == '') {
         // If both the event name and the handler are omitted,
         // we stop observing _all_ handlers on the element.
-        for (eventName in events)
-          Event.stopObserving(element, eventName);
-        return decorator;
+        for (type in events) {
+          callee.call(element, type);
+        }
+        return this;
       }
 
       dispatcher = ec.dispatcher;
       foundAt = isNumber(handler) ? handler : arrayIndexOf.call(ec.handlers, handler);
 
-      if (foundAt < 0) return decorator;
-      removeCacheAtIndex(id, eventName, foundAt);
+      if (foundAt < 0) return this;
+      removeCacheAtIndex(id, type, foundAt);
 
-      if (!events[eventName])
-        removeObserver(element, eventName, dispatcher);
-
-      return decorator;
+      if (!events[type]) {
+        removeObserver(element, type, dispatcher);
+      }
+      return this;
     };
 
-    // add methods if haven't yet
-    if (!Methods) addMethods();
-
-  })(Event.prototype);
-
-  /*--------------------------------------------------------------------------*/
-
-  Obj.extend(Event, Event.Methods);
-
-  _extend(Event, {
-    'KEY_BACKSPACE': 8,
-    'KEY_DELETE':    46,
-    'KEY_DOWN':      40,
-    'KEY_END':       35,
-    'KEY_ESC':       27,
-    'KEY_HOME':      36,
-    'KEY_INSERT':    45,
-    'KEY_LEFT':      37,
-    'KEY_PAGEDOWN':  34,
-    'KEY_PAGEUP':    33,
-    'KEY_RETURN':    13,
-    'KEY_RIGHT':     39,
-    'KEY_TAB':       9,
-    'KEY_UP':        38
-  });
-
-  _extend(Element.plugin, {
-    'fire':          Func.methodize(['fire', Event]),
-    'observe':       Func.methodize(['observe', Event]),
-    'stopObserving': Func.methodize(['stopObserving', Event])
-  });
-
-  _extend(Document.plugin, {
-    'loaded':        false,
-    'fire':          Func.methodize(['fire', Event]),
-    'observe':       Func.methodize(['observe', Event]),
-    'stopObserving': Func.methodize(['stopObserving', Event])
-  });
-
-  _extend(Window.plugin, {
-    'fire':          Func.methodize(['fire', Event]),
-    'observe':       Func.methodize(['observe', Event]),
-    'stopObserving': Func.methodize(['stopObserving', Event])
-  });
+    // prevent JScript bug with named function expressions
+    var element =       nil,
+     fire =             nil,
+     findElement =      nil,
+     getPointer  =      nil,
+     getPointerX =      nil,
+     getPointerY =      nil,
+     getCurrentBlarg = nil,
+     getRelatedTarget = nil,
+     isLeftClick =      nil,
+     isMiddleClick =    nil,
+     isRightClick =     nil,
+     observe =          nil,
+     preventDefault =   nil,
+     stop =             nil,
+     stopObserving =    nil,
+     stopPropagation =  nil;
+  })(Event.plugin);

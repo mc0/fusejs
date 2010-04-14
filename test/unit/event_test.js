@@ -5,7 +5,7 @@ new Test.Unit.Runner({
     var span = $('span'), fired = false;
 
     var observer = fuse.Function.bind(function(event) {
-      this.assertEqual(span, event.element());
+      this.assertEqual(span, event.getTarget());
       this.assertEqual(1, event.memo.index);
       fired = true;
     }, this);
@@ -27,7 +27,7 @@ new Test.Unit.Runner({
   'testCustomEventBubbling': function() {
     var span = $('span'), outer = $('outer'), fired = false;
     var observer = fuse.Function.bind(function(event) {
-      this.assertEqual(span, event.element());
+      this.assertEqual(span, event.getTarget());
       fired = true;
     }, this);
 
@@ -46,7 +46,7 @@ new Test.Unit.Runner({
 
   'testCustomEventCanceling': function() {
     function outerObserver(event) {
-      fired = span == event.element();
+      fired = span == event.getTarget();
     }
 
     function innerObserver(event) {
@@ -75,25 +75,23 @@ new Test.Unit.Runner({
   },
 
   'testEventAddMethods': function() {
-    Event.addMethods({ 'hashBrowns': function() { return 'hash browns' } });
+    fuse.dom.Event.addPlugins({
+      'hashBrowns': function() {
+        return 'hash browns';
+      },
+      'toString': function() {
+        return '[Fuse Event]';
+      }
+    });
+
     var event = $('span').fire('test:somethingHappened');
     this.assertRespondsTo('hashBrowns', event);
 
-    // only test `toString` addition if events don't have it
-    if (!Event.prototype || !fuse.Object.hasKey(Event.prototype, 'toString')) {
+    event = $('span').fire('test:somethingHappened');
+    this.assertEqual('[Fuse Event]', event.toString(),
+      'Failed to extend element with a toString method.');
 
-      Event.addMethods({ 'toString': function() { return '[Fuse Event]' } });
-      event = $('span').fire('test:somethingHappened');
-
-      this.assertEqual('[Fuse Event]', event.toString(),
-        'Failed to extend element with a toString method.');
-
-      // remove toString addition
-      if (fuse.env.test('ELEMENT_SPECIFIC_EXTENSIONS'))
-        delete Event.prototype.toString;
-      delete Event.Methods.toString;
-      Event.addMethods();
-    }
+    delete fuse.dom.Event.plugin.toString;
   },
 
   'testEventObjectIsExtended': function() {
@@ -158,16 +156,14 @@ new Test.Unit.Runner({
     span.fire('test:somethingElseHappened');
     this.assertEqual(0, count);
 
-    this.assertEqual($(window), Event.stopObserving(window));
+    this.assertEqual($(window), $(window).stopObserving());
 
     // test element with no observers
     this.assertNothingRaised(function() { $(document.body).stopObserving() });
   },
 
   'testStopObservingWithNoneStringEventName': function() {
-    this.assertNothingRaised(function() {
-      fuse.Array($('span'), $('outer')).each(Event.stopObserving);
-    });
+    this.assertNothingRaised(function() { $('outer').stopObserving(1); });
   },
 
   'testStopObservingWithoutHandlerArgument': function() {
@@ -214,10 +210,7 @@ new Test.Unit.Runner({
   'testObserveAndStopObservingAreChainable': function() {
     var span = $('span'), observer = function() { };
 
-    try {
     this.assertEqual(span, span.observe('test:somethingHappened', observer));
-    }
-    catch (e) { console.log(e) }
     this.assertEqual(span, span.stopObserving('test:somethingHappened', observer));
 
     span.observe('test:somethingHappened', observer);
@@ -310,63 +303,36 @@ new Test.Unit.Runner({
     span.observe('test:somethingHappened', function(e) { e.stop() });
     event = span.fire('test:somethingHappened');
 
-    this.assert(event.stopped,
+    this.assert(event.isStopped,
       'event.stopped should be true for an observer that calls stop');
 
     span.stopObserving('test:somethingHappened');
   },
 
-  'testEventElement': function() {
-    this.assert(eventResults.windowLoad.eventElement,
-      'window `onload` event.element() should not be null. (some WebKit versions may return null)');
+  'testEventGetTarget': function() {
+    this.assertIdentical($(window), eventResults.windowLoad.target,
+      'window `onload` event.getTarget() should be window.');
 
-    this.assert(eventResults.contentLoaded.eventElement,
-      'document `dom:loaded` event.element() should not be null. (some WebKit versions may return null)');
-
-    //this.assertIdentical(window, eventResults.windowLoad.eventElement,
-      //'window `onload` event.element() should be `window`');
-
-    // This bug would occur in IE on any windows event because it
-    // doesn't have a event.srcElement.
-    this.assertEqual(false, eventResults.eventElement.windowOnLoadBug,
-      'Event.element() window onload bug.');
-
-    // This bug would occur in Firefox on window an document events because the
-    // event.currentTarget does not have a tagName.
-    this.assertEqual(false, eventResults.eventElement.contentLoadedBug,
-      'Event.element() contentLoaded bug.');
+    this.assertIdentical($(document), eventResults.contentLoaded.target,
+      'document `dom:loaded` event.getTarget() should be document.');
 
     // This bug would occur in Firefox on image onload/onerror event
     // because the event.target is wrong and should use event.currentTarget.
-    this.assertEqual(false, eventResults.eventElement.imageOnErrorBug,
-      'Event.element() image onerror bug.');
+    this.assertEqual(false, !!eventResults.currentTarget.imageOnErrorBug,
+      'fuse.dom.Event#getTarget() image onerror bug.');
 
     this.wait(1000, function() {
-      this.assertEqual(false, eventResults.eventElement.imageOnLoadBug,
-        'Event.element() image onload bug.');
+      this.assertEqual(false, !!eventResults.currentTarget.imageOnLoadBug,
+        'fuse.dom.Event#getTarget() image onload bug.');
     });
   },
 
   'testEventCurrentTarget': function() {
-    this.assert(eventResults.windowLoad.eventCurrentTarget,
-      'window `onload` event.currentTarget should not be null. (some WebKit versions may return null)');
+    this.assertIdentical($(window), eventResults.windowLoad.currentTarget,
+      'window `onload` event.getCurrentTarget() should be window.');
 
-    this.assert(eventResults.contentLoaded.eventCurrentTarget,
-      'document `dom:loaded` event.currentTarget should not be null. (some WebKit versions may return null)');
-
-    //this.assertIdentical(window, eventResults.windowLoad.eventCurrentTarget,
-      //'window `onload` event.currentTarget should be `window`');
-  },
-
-  'testEventTarget': function() {
-    this.assert(eventResults.windowLoad.eventTarget,
-      'window `onload` event.target should not be null. (some WebKit versions may return null)');
-
-    this.assert(eventResults.contentLoaded.eventTarget,
-      'document `dom:loaded` event.target should not be null. (some WebKit versions may return null)');
-
-    //this.assertIdentical(window, eventResults.windowLoad.eventTarget,
-      //'window `onload` event.target should be `window`');
+    this.assertIdentical($(document), eventResults.contentLoaded.currentTarget,
+      'document `dom:loaded` event.getCurrentTarget() should be document.');
   },
 
   'testEventFindElement': function() {

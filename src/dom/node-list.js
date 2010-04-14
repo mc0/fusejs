@@ -16,7 +16,7 @@
 
     arrEvery = arrProto.every ||
       function(callback) {
-        var i = -1, array = this, l = array.length;
+        var i = -1, array = this, length = array.length;
         while (++i < length) {
           if (i in array && !callback(array[i]))
             return false;
@@ -26,7 +26,7 @@
 
     arrEach = arrProto.forEach ||
       function(callback) {
-        var i = -1, array = this, l = array.length;
+        var i = -1, array = this, length = array.length;
         while (++i < length) {
           if (i in array) callback(array[i]);
         }
@@ -34,7 +34,7 @@
 
     arrSome = arrProto.some ||
       function(callback) {
-        var i = -1, array = this, l = array.length;
+        var i = -1, array = this, length = array.length;
         while (++i < length) {
           if (i in array && callback(array[i]))
             return true;

@@ -1,3 +1,6 @@
+* Add fuse.dom.Event decorator and new Event API. [Brandon Aaron, jddalton]
+  Note: Backwards compatibility warning.
+
 * Ensure Fuse.Fusebox'ed String#search passes the correct arguments to its internal method. [jddalton]
 
 * Make fuse.dom.Element statics extendByTag(), addPlugins(), and addMixins() automatically add methods to fuse.dom.NodeList's prototype. [jddalton]

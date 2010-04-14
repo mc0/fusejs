@@ -6,7 +6,7 @@
 
     Window = function Window(object) {
       // quick return if empty, decorated, or not a window object
-      if (!object || object.raw || !('frameElement' in object)) {
+      if (!object || object.raw || typeof object.frameElement === 'undefined') {
         return object;
       }
 

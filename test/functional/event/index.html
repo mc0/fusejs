@@ -45,7 +45,7 @@
     (function() {
       var pointer = $('pointer');
       $(document.documentElement).observe('mousemove', function(e) {
-        pointer.update('x:' + e.pageX + ', y:' + e.pointerY());
+        pointer.update('x:' + e.getPointerX() + ', y:' + e.getPointerY());
       });
     })();
   </script>
@@ -55,13 +55,16 @@
   <p id="basic">A basic event test - <strong>click here</strong></p>
   <p id="basic_remove" class="subtest"><strong>click</strong> to stop observing the first test</p>
 
-  <p id="inline_test" onclick="Event.stop(event); $(this).passed();"><strong>click</strong> to ensure generic Event methods work on inline handlers</p>
+  <p id="inline_test" onclick="fuse.dom.Event(event).stop(); $(this).passed();"><strong>click</strong> to ensure generic Event methods work on inline handlers</p>
 
   <script type="text/javascript">
     var basic_callback = function(e) {
       $('basic').passed();
-      if ($('basic_remove')) $('basic_remove').show();
-      else $('basic').failed();
+      if ($('basic_remove')) {
+        $('basic_remove').show();
+      } else {
+        $('basic').failed();
+      }
       log(e);
     }
     $('basic').observe('click', basic_callback)
@@ -78,8 +81,11 @@
 
   <script type="text/javascript">
     $('basic2').observe('click', function(e) {
-      if (this === window) $('basic2').failed('Window scope! (needs scope correction)');
-      else this.passed();
+      if (this === window) {
+        $('basic2').failed('Window scope! (needs scope correction)');
+      } else {
+        this.passed();
+      }
       log(e);
     });
   </script>
@@ -89,8 +95,11 @@
   <script type="text/javascript">
     $('basic3').observe('click', function(evt) {
       var el = $('basic3');
-      if (typeof evt != 'object') this.failed('Expected event object for first argument');
-      else this.passed('Good first argument');
+      if (typeof evt != 'object') {
+        this.failed('Expected event object for first argument');
+      } else {
+        this.passed('Good first argument');
+      }
       log(evt);
     });
   </script>
@@ -120,9 +129,11 @@
   <script type="text/javascript">
     fuse.util.$w('left middle right').each(function(button) {
       $(button).observe('mousedown', function(e) {
-        if (Event['is' + fuse.String(this.raw.id).capitalize() + 'Click'](e))
+        if (e['is' + fuse.String(this.raw.id).capitalize() + 'Click']()) {
           this.passed('Squeak!');
-        else this.failed('OH NO!');
+        } else {
+          this.failed('OH NO!');
+        }
         log(e);
       });
     });
@@ -138,18 +149,21 @@
     })
   </script>
 
-  <p id="target">Event.element() and event.target test</p>
+  <p id="target">Event#getTarget() and event.target test</p>
 
   <script type="text/javascript">
     $('target').observe('click', function(e) {
-      if (e.element() == this && e.target == this.raw) this.passed();
-      else this.failed();
+      if (e.getTarget() == this) {
+        this.passed();
+      } else {
+        this.failed();
+      }
       log(e);
     });
   </script>
 
   <p id="eventElementRadioButton">
-    Test Event.element() on radio buttons (Firefox bug). Focus the first radio button then use the arrow keys to move between the others.
+    Test Event#getTarget() on radio buttons (Firefox bug). Focus the first radio button then use the arrow keys to move between the others.
     <br>
     <input type="radio" id="radio1" name="group" value="A">
     <input type="radio" id="radio2" name="group" value="B">
@@ -161,34 +175,42 @@
       var count = 0, prevID = '';
       $('eventElementRadioButton').getChildren().invoke('observe', 'click', function(e) {
         count++;
-        if (e.element().raw.id === prevID) {
+        if (e.getTarget().raw.id === prevID) {
           $('eventElementRadioButton').failed();
         } else if (count === 3) {
           $('eventElementRadioButton').passed();
         }
-        prevID = e.currentTarget && e.currentTarget.id;
+        e.getCurrentTarget();
+        prevID = e.getCurrentTarget();
+        prevID = prevID && prevID.raw.id;
         log(e);
       });
     })();
   </script>
 
-  <p id="currentTarget"><span>Event.currentTarget test</span></p>
+  <p id="currentTarget"><span>Event#getCurrentTarget() test</span></p>
 
   <script type="text/javascript">
     $('currentTarget').observe('click', function(e) {
-      if (e.currentTarget !== this.raw) this.failed();
-      else this.passed();
+      if (e.getCurrentTarget() !== this) {
+        this.failed();
+      } else {
+        this.passed();
+      }
       log(e);
     })
   </script>
 
-  <p id="findElement"><span>Event.findElement() test</span></p>
+  <p id="findElement"><span>Event#findElement() test</span></p>
 
   <script type="text/javascript">
     $('findElement').observe('click', function(e) {
       if (e.findElement('p') == this && e.findElement('body').raw == document.body &&
-         e.findElement('foo') == null) this.passed();
-      else this.failed();
+          e.findElement('foo') == null) {
+        this.passed();
+      } else {
+        this.failed();
+      }
       log(e);
     })
   </script>
@@ -331,13 +353,13 @@
 
       // test pointer methods
       $(frame.document.documentElement).observe('mousemove', function(e) {
-        pointer.innerHTML = 'x:' +e.pageX +', y:'+ e.pointerY();
+        pointer.innerHTML = 'x:' +e.getPointerX() +', y:'+ e.getPointerY();
       });
 
       // test firing methods
       elFire.observe('click', function() {
         var counter = 0;
-        elFire.observe('something:happened', function() { counter++ });
+        elFire.observe('something:happened', function() { counter++; });
         elFire.fire('something:happened');
         this[ counter ? 'passed' : 'failed']();
       });

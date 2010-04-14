@@ -1923,14 +1923,6 @@ new Test.Unit.Runner({
     this.assertEqual('MY_INPUT_FIELD', input.name,
       'Attribute did not respect case.');
 
-    /*
-    // No longer needed as FuseJS wraps elements
-    if (originalElement && fuse.env.test('ELEMENT_EXTENSIONS')) {
-      Element.prototype.fooBar = fuse.emptyFunction;
-      this.assertRespondsTo('fooBar', fuse('<div>'));
-    }
-    */
-
     // test IE setting "type" property of newly created button/input elements
     var form = $('write_attribute_form');
     input = $('write_attribute_input');

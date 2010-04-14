@@ -230,7 +230,7 @@
 
       // Derived with permission from Diego Perini's IEContentLoaded
       // http://javascript.nwbox.com/IEContentLoaded/
-      if (!isFramed)
+      if (!isFramed) {
         checkDomLoadedState = function() {
           if (decoratedDoc.loaded)
             return readyStatePoller.clear();
@@ -241,9 +241,11 @@
             fireDomLoadedEvent();
           }
         };
+      }
     }
-    else if (envTest('ELEMENT_ADD_EVENT_LISTENER'))
+    else if (envTest('ELEMENT_ADD_EVENT_LISTENER')) {
       decoratedDoc.observe('DOMContentLoaded', checkDomLoadedState);
+    }
 
     // readystate and poller are used (first one to complete wins)
     decoratedDoc.observe('readystatechange', checkDomLoadedState);

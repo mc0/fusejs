@@ -2,9 +2,9 @@
 (function(global) {
 
   // private vars
-  var DOCUMENT_FRAGMENT_NODE, DOCUMENT_NODE, ELEMENT_NODE, TEXT_NODE, Class,
-   Document, Element, Enumerable, Form, Func, Obj, Node, NodeList, Window,
-   $break, _extend, fuse, addArrayMethods, addNodeListMethod, bind, clone,
+  var DATA_ID_NAME, DOCUMENT_FRAGMENT_NODE, DOCUMENT_NODE, ELEMENT_NODE, TEXT_NODE,
+   Class, Document, Element, Enumerable, Event, Form, Func, Obj, Node, NodeList,
+   Window, $break, _extend, fuse, addArrayMethods, addNodeListMethod, bind, clone,
    concatList, defer, domData, eachKey, emptyFunction, envAddTest, envTest,
    escapeRegExpChars, expando, fromElement, getDocument, getNodeName, getWindow,
    getOrCreateTagClass, hasKey, inspect, isArray, isElement, isEmpty, isHash,
@@ -232,8 +232,4 @@
 
   // update native generics and element methods
   fuse.updateGenerics(true);
-
-  if (global.Event && global.Event.Methods) {
-    Event.addMethods();
-  }
 })(this);
