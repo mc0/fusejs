@@ -3,7 +3,7 @@
   (function(object, NodeList) {
     var match = function match(element, selectors) {
       return !!Slick.find(fuse.getDocument(element.raw || fuse.get(element).raw),
-        String(selectors || ''))
+        String(selectors || ''));
     },
 
     query = function(selectors, context, callback, List) {

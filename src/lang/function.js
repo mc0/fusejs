@@ -174,48 +174,48 @@
 
     /*------------------------------------------------------------------------*/
 
-     if (!plugin.bind) {
-       plugin.bind = (function() {
-         var bind = function bind(thisArg) {
-           return arguments.length > 1
-             ? Func.bind.apply(Func, prependList(arguments, this))
-             : Func.bind(this, thisArg);
-         };
-         return bind;
-       })();
-     }
+    if (!plugin.bind) {
+      plugin.bind = (function() {
+        var bind = function bind(thisArg) {
+          return arguments.length > 1
+            ? Func.bind.apply(Func, prependList(arguments, this))
+            : Func.bind(this, thisArg);
+        };
+        return bind;
+      })();
+    }
 
-     plugin.bindAsEventListener = function bindAdEventListener(thisArg) {
-       return arguments.length > 1
-         ? Func.bindAdEventListener.apply(Func, prependList(arguments, this))
-         : Func.bindAdEventListener(this, thisArg);
-     };
+    plugin.bindAsEventListener = function bindAdEventListener(thisArg) {
+      return arguments.length > 1
+        ? Func.bindAdEventListener.apply(Func, prependList(arguments, this))
+        : Func.bindAdEventListener(this, thisArg);
+    };
 
-     plugin.curry = function curry() {
-       return arguments.length
-         ? Func.curry.apply(Func, prependList(arguments, this))
-         : this;
-     };
+    plugin.curry = function curry() {
+      return arguments.length
+        ? Func.curry.apply(Func, prependList(arguments, this))
+        : this;
+    };
 
-     plugin.delay = function delay(timeout) {
-       return arguments.length > 1
-         ? Func.delay.apply(Func, prependList(arguments, this))
-         : Func.delay(this, timeout);
-     };
+    plugin.delay = function delay(timeout) {
+      return arguments.length > 1
+        ? Func.delay.apply(Func, prependList(arguments, this))
+        : Func.delay(this, timeout);
+    };
 
-     plugin.defer = function defer() {
-       return arguments.length
-         ? Func.defer.apply(Func, prependList(arguments, this))
-         : Func.defer(this);
-     };
+    plugin.defer = function defer() {
+      return arguments.length
+        ? Func.defer.apply(Func, prependList(arguments, this))
+        : Func.defer(this);
+    };
 
-     plugin.methodize = function methodize() {
-       return Func.methodize(this);
-     };
+    plugin.methodize = function methodize() {
+      return Func.methodize(this);
+    };
 
-     plugin.wrap = function wrap(wrapper) {
-       return Func.wrap(this, wrapper);
-     };
+    plugin.wrap = function wrap(wrapper) {
+      return Func.wrap(this, wrapper);
+    };
 
     // prevent JScript bug with named function expressions
     var bindAsEventListener = nil, curry = nil, methodize = nil, wrap = nil;
