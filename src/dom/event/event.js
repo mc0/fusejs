@@ -55,6 +55,7 @@
   /*--------------------------------------------------------------------------*/
 
   (function(plugin) {
+
     var BUGGY_EVENT_TYPES = { 'error': 1, 'load': 1 },
 
     CHECKED_INPUT_TYPES = { 'checkbox': 1, 'radio': 1 },
@@ -643,8 +644,8 @@
      getPointer  =      nil,
      getPointerX =      nil,
      getPointerY =      nil,
-     getCurrentBlarg = nil,
      getRelatedTarget = nil,
+     getTarget =        nil,
      isLeftClick =      nil,
      isMiddleClick =    nil,
      isRightClick =     nil,
