@@ -526,13 +526,19 @@
             fromIndex == null ? this.length : fromIndex));
         };
       }
-      if (arrPlugin.map && !SKIP_METHODS_RETURNING_ARRAYS) {
-        arrPlugin.map = function map(callback, thisArg) {
-          var result = __map.call(this, callback || K, thisArg);
-          return result.length
-            ? Array.fromArray(result)
-            : Array();
-        };
+      if (arrPlugin.map) {
+        if (SKIP_METHODS_RETURNING_ARRAYS) {
+          arrPlugin.map = function map(callback, thisArg) {
+            return __map.call(this, callback || K, thisArg);
+          };
+        } else {
+          arrPlugin.map = function map(callback, thisArg) {
+            var result = __map.call(this, callback || K, thisArg);
+            return result.length
+              ? Array.fromArray(result)
+              : Array();
+          };
+        }
       }
       if (!SKIP_METHODS_RETURNING_ARRAYS) {
         arrPlugin.reverse = function reverse() {
