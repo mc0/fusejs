@@ -1,3 +1,5 @@
+* Add native JSON support to the JSON methods and make them comply with ECMA specs. [FuseJS LH #22] [jddalton, kitsg, Tobie Langel]
+
 * Optimize fuse.dom.Element modification methods and add append(), prepend(), insertBefore(), and insertAfter() methods. [FuseJS LH #53] [jddalton, kangax, kitsg]
 
 * Add `defaults` object to constructors to store default properties / options. [jddalton, Thomas Aylott]
@@ -7,7 +9,7 @@
 
 * Fix fuse.Fusebox'ed Array#map when the SKIP_METHODS_RETURNING_ARRAYS true. [jddalton]
 
-* Add fuse.dom.Event decorator and new Event API. [Brandon Aaron, jddalton]
+* Add fuse.dom.Event decorator and new Event API. [FuseJS LH#29] [Brandon Aaron, jddalton]
   Note: Backwards compatibility warning.
 
 * Ensure Fuse.Fusebox'ed String#search passes the correct arguments to its internal method. [jddalton]

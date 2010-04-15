@@ -42,6 +42,15 @@
       return isHostObject(global, 'ActiveXObject');
     },
 
+    'JSON': function() {
+      // true for IE8 and newer browsers
+      return typeof global.JSON === 'object' &&
+        typeof JSON.parse === 'function' &&
+        typeof JSON.stringify === 'function' &&
+        typeof JSON.stringify(K) === 'undefined' &&
+        JSON.stringify(0) === '0' && JSON.parse('{ "x": true }').x;
+    },
+
     'OBJECT__PROTO__': function() {
       // true for Gecko and Webkit
       if ([ ]['__proto__'] === Array.prototype  &&

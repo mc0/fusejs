@@ -1,20 +1,20 @@
 new Test.Unit.Runner({
 
-  'testArrayToJSON': function() {
-    this.assertEqual('[]', fuse.Array().toJSON());
-    this.assertEqual('[\"a\"]', fuse.Array('a').toJSON());
-    this.assertEqual('[\"a\", 1]', fuse.Array('a', 1).toJSON());
-    this.assertEqual('[\"a\", {\"b\": null}]', fuse.Array('a', {'b': null}).toJSON());
-  },
-
   'testDateToJSON': function() {
-    this.assertEqual('\"1970-01-01T00:00:00Z\"',
+    this.assertMatch(
+      /^1970-01-01T00:00:00(\.000)?Z$/,
       new fuse.Date(fuse.Date.UTC(1970, 0, 1)).toJSON());
   },
 
+  'testDateToISOString': function() {
+    this.assertMatch(
+      /^1970-01-01T00:00:00(\.000)?Z$/,
+      new fuse.Date(fuse.Date.UTC(1970, 0, 1)).toISOString());
+  },
+
   'testHashToJSON': function() {
-    this.assertEqual('{\"b\": [false, true], \"c\": {\"a\": \"hello!\"}}',
-      $H({ 'b': [undef, false, true, undef], c: {a: 'hello!'} }).toJSON());
+    this.assertEqual('{"b":[null,false,true,null],"c":{"a":"hello!"}}',
+      fuse.Object.toJSON($H({ b: [undefined, false, true, undefined], c: {a: 'hello!'} })));
   },
 
   'testObjectToJSON': function() {
@@ -22,55 +22,69 @@ new Test.Unit.Runner({
     this.assertUndefined(fuse.Object.toJSON(fuse.K));
 
     this.assertEqual('""',       fuse.Object.toJSON(''));
+    this.assertEqual('\"test\"', fuse.Object.toJSON('test'));
+    this.assertEqual('null',     fuse.Object.toJSON(Number.NaN));
+    this.assertEqual('0',        fuse.Object.toJSON(0));
+    this.assertEqual('-293',     fuse.Object.toJSON(-293));
+
     this.assertEqual('[]',       fuse.Object.toJSON([]));
     this.assertEqual('["a"]',    fuse.Object.toJSON(['a']));
-    this.assertEqual('["a", 1]', fuse.Object.toJSON(['a', 1]));
+    this.assertEqual('["a",1]', fuse.Object.toJSON(['a', 1]));
 
-    this.assertEqual('["a", {"b": null}]',
+    this.assertEqual('["a",{"b":null}]',
       fuse.Object.toJSON(['a', { 'b': null }]));
 
-    this.assertEqual('{"a": "hello!"}',
+    this.assertEqual('{"a":"hello!"}',
       fuse.Object.toJSON({ 'a': 'hello!'}));
 
     this.assertEqual('{}', fuse.Object.toJSON({ }));
     this.assertEqual('{}', fuse.Object.toJSON({ 'a': undef, 'b': undef, 'c': fuse.K }));
 
-    this.assertEqual('{"b": [false, true], "c": {"a": "hello!"}}',
+    this.assertEqual('{"b":[null,false,true,null],"c":{"a":"hello!"}}',
       fuse.Object.toJSON({ 'b': [undef, false, true, undef], 'c': {'a':'hello!' } }));
 
-    this.assertEqual('{"b": [false, true], "c": {"a": "hello!"}}',
+    this.assertEqual('{"b":[null,false,true,null],"c":{"a":"hello!"}}',
       fuse.Object.toJSON($H({ 'b': [undef, false, true, undef], 'c': { 'a': 'hello!' } })));
 
     this.assertEqual('true',  fuse.Object.toJSON(true));
     this.assertEqual('false', fuse.Object.toJSON(false));
     this.assertEqual('null',  fuse.Object.toJSON(null));
 
-    var Person = fuse.Class({ 'constructor': function(name) { this.name = name } });
-    Person.prototype.toJSON = function() { return '-' + this.name };
+    var Person = fuse.Class({ 'constructor': function(name) { this.name = name; } });
+    Person.prototype.getName = function() { return this.name; }
+    Person.prototype.toJSON  = function() { return '-' + this.name; };
+
     var sam = new Person('sam');
+    this.assertEqual('"-sam"', fuse.Object.toJSON(sam));
 
-    this.assertEqual('-sam', fuse.Object.toJSON(sam));
-    this.assertEqual('-sam', sam.toJSON());
+    var element = $('test').raw;
+    element.toJSON = function() { return 'I\'m a div with id test'; };
+    this.assertEqual('"I\'m a div with id test"', fuse.Object.toJSON(element));
 
-    var element = $('test');
-    this.assertUndefined(fuse.Object.toJSON(element));
-
-    element.toJSON = function() { return 'I\'m a div with id test' };
-    this.assertEqual('I\'m a div with id test', fuse.Object.toJSON(element));
-
-    this.assertEqual('{"a": "A", "b": "B", "toString": "bar", "valueOf": ""}',
+    this.assertEqual('{"a":"A","b":"B","toString":"bar","valueOf":""}',
       fuse.Object.toJSON(Fixtures.mixed_dont_enum));
+
+    // test own properties
+    delete Person.prototype.toJSON;
+    this.assertEqual('{"name":"sam"}', fuse.Object.toJSON(sam));
   },
 
-  'testNumberToJSON': function() {
-    this.assertEqual('null', fuse.Number(fuse.Number.NaN).toJSON());
-    this.assertEqual('0',    fuse.Number(0).toJSON());
-    this.assertEqual('-293', fuse.Number(-293).toJSON());
+  'testToJSONWithArrays': function() {
+    this.assertEqual('{"n":[]}',               fuse.Object.toJSON({ "n": fuse.Array() }));
+    this.assertEqual('{"n":["a"]}',            fuse.Object.toJSON({ "n": fuse.Array('a') }));
+    this.assertEqual('{"n":["a",1]}',          fuse.Object.toJSON({ "n": fuse.Array('a', 1) }));
+    this.assertEqual('{"n":["a",{"b":null}]}', fuse.Object.toJSON({ "n": fuse.Array('a', {'b': null}) }));
   },
 
-  'testStringToJSON': function() {
-    this.assertEqual('\"\"',     fuse.String('').toJSON());
-    this.assertEqual('\"test\"', fuse.String('test').toJSON());
+  'testToJSONWithNumbers': function() {
+    this.assertEqual('{"n":null}', fuse.Object.toJSON({ "n": fuse.Number.NaN }));
+    this.assertEqual('{"n":0}',    fuse.Object.toJSON({ "n": 0 }));
+    this.assertEqual('{"n":-293}', fuse.Object.toJSON({ "n": -293 }));
+  },
+
+  'testToJSONWithStrings': function() {
+    this.assertEqual('{"n":""}',     fuse.Object.toJSON({ "n": "" }));
+    this.assertEqual('{"N":"test"}', fuse.Object.toJSON({ "N": "test" }));
   },
 
   'testStringIsJSON': function() {
