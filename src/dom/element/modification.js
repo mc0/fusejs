@@ -2,9 +2,16 @@
 
   (function(plugin) {
 
-    var INSERT_POSITIONS_USING_PARENT_NODE = { 'before': 1, 'after': 1 },
+    var TREAT_AS_STRING = { '[object Number]': 1, '[object String]': 1 },
 
     INSERTABLE_NODE_TYPES = { '1': 1, '3': 1, '8': 1, '10': 1, '11': 1 },
+
+    INSERT_POSITIONS_TO_METHODS = {
+      'before': 'insertBefore',
+      'top':    'prepend',
+      'bottom': 'append',
+      'after':  'insertAfter'
+    },
 
     ELEMENT_INNERHTML_BUGGY = (function() {
       var T = false, o = { };
@@ -24,9 +31,8 @@
     })(),
 
     ELEMENT_INSERT_METHODS = {
-      'before': function(element, node) {
-        element.parentNode &&
-          element.parentNode.insertBefore(node, element);
+      'before': function(element, node, parentNode) {
+        parentNode.insertBefore(node, element);
       },
 
       'top': function(element, node) {
@@ -37,15 +43,79 @@
         element.appendChild(node);
       },
 
-      'after': function(element, node) {
-        element.parentNode &&
-          element.parentNode.insertBefore(node, element.nextSibling);
+      'after': function(element, node, parentNode) {
+         parentNode.insertBefore(node, element.nextSibling);
       }
     },
 
     dom = fuse.dom,
 
-    setTimeout = global.setTimeout,
+    stripScripts   = fuse.String.plugin.stripScripts,
+
+    evalScripts    = fuse.String.plugin.evalScripts,
+
+    isScriptable   = stripScripts && evalScripts,
+
+    reOpenScriptTag = /<script/i,
+
+    rePositions = /^(?:(?:before|top|bottom|after)(?:,|$))+$/i,
+
+
+    getByTagName = function(node, tagName) {
+      var results = [], child = node.firstChild;
+      while (child) {
+        if (getNodeName(child) === tagName) {
+          results.push(child);
+        }
+        else if (child.getElementsByTagName) {
+          // concatList implementation for nodeLists
+          var i = 0, pad = results.length, nodes = child.getElementsByTagName(tagName);
+          while (results[pad + i] = nodes[i++]) { }
+          results.length--;
+        }
+        child = child.nextSibling;
+      }
+      return results;
+    },
+
+    insertContent = function(element, parentNode, content, position) {
+      var stripped, insertElement = ELEMENT_INSERT_METHODS[position];
+      if (content && content != '') {
+        // process string / number
+        if (TREAT_AS_STRING[toString.call(content)]) {
+          stripped = isScriptable && reOpenScriptTag.test(content) ?
+            stripScripts.call(content) : content;
+          if (stripped != '') {
+            insertElement(element,
+              dom.getFragmentFromString(stripped, parentNode || element),
+              parentNode);
+          }
+          // only evalScripts if there are scripts
+          if (content != stripped) {
+            setTimeout(function() { evalScripts.call(content); }, 10);
+          }
+        }
+        // process object
+        else {
+          // process toHTML
+          if (typeof content.toHTML === 'function') {
+            return insertContent(element, parentNode, Obj.toHTML(content), position);
+          }
+          // process toElement
+          if (typeof content.toElement === 'function') {
+            content = content.toElement();
+          }
+          // process element
+          if (INSERTABLE_NODE_TYPES[content.nodeType]) {
+            insertElement(element, content.raw || content, parentNode);
+          }
+        }
+      }
+    },
+
+    replaceElement = function(element, node) {
+      element.parentNode.replaceChild(node, element);
+    },
 
     setScriptText = (function() {
       if (envTest('ELEMENT_SCRIPT_HAS_TEXT_PROPERTY')) {
@@ -53,159 +123,34 @@
           element.text = text || '';
         };
       }
-
-      var textNode = fuse._doc.createTextNode(''),
-      setScriptText = function(element, text) {
-        (element.firstChild || element.appendChild(textNode.cloneNode(false)))
-          .data = text || '';
+      return function(element, text) {
+        var textNode = element.firstChild ||
+          element.appendChild(element.ownerDocument.createTextNode(''));
+        textNode.data = text || '';
       };
-
-      if (envTest('ELEMENT_SCRIPT_FAILS_TO_EVAL_TEXT')) {
-        return function(element, text) {
-          set(element, text);
-          global.eval(element.firstChild.data);
-        };
-      }
-
-      return setScriptText;
     })(),
 
-    replaceElement = (function() {
-      var replaceElement = function(element, node) {
-        element.parentNode.replaceChild(node, element);
-      },
+    wrapper = function(method, element, node) {
+      method(element, node);
 
-      getByTagName = function(node, tagName) {
-        var results = [], child = node.firstChild;
-        while (child) {
-          if (getNodeName(child) === tagName) {
-            results.push(child);
-          }
-          else if (child.getElementsByTagName) {
-            // concatList implementation for nodeLists
-            var i = 0, pad = results.length, nodes = child.getElementsByTagName(tagName);
-            while (results[pad + i] = nodes[i++]) { }
-            results.length--;
-          }
-          child = child.nextSibling;
+      var textNode, i = -1, scripts = [];
+      if (INSERTABLE_NODE_TYPES[node.nodeType]) {
+        if (getNodeName(node) === 'SCRIPT') {
+          scripts = [node];
         }
-        return results;
-      },
-
-      wrapper = function(method, element, node) {
-        var textNode, i = -1, scripts = [];
-
-        method(element, node);
-
-        if (INSERTABLE_NODE_TYPES[node.nodeType]) {
-          if (getNodeName(node) === 'SCRIPT') {
-            scripts = [node];
-          }
-          else if (node.getElementsByTagName) {
-            scripts = node.getElementsByTagName('SCRIPT');
-          }
-          else {
-            // document fragments don't have GEBTN
-            scripts = getByTagName(node, 'SCRIPT');
-          }
-        }
-
-        while (script = scripts[++i]) {
-          setScriptText(script, (textNode = script.firstChild) && textNode.data);
-        }
-      };
-
-      // fix inserting script elements in Safari <= 2.0.2 and Firefox 2.0.0.2
-      if (envTest('ELEMENT_SCRIPT_FAILS_TO_EVAL_TEXT')) {
-        var T = ELEMENT_INSERT_METHODS, before = T.before, top = T.top,
-         bottom = T.bottom, after = T.after;
-
-        T.before = function(element, node) { wrapper(before, element, node); };
-        T.top    = function(element, node) { wrapper(top,    element, node); };
-        T.bottom = function(element, node) { wrapper(bottom, element, node); };
-        T.after  = function(element, node) { wrapper(after,  element, node); };
-
-        return function(element, node) {
-          wrapper(replaceElement, element, node);
-        };
-      }
-      return replaceElement;
-    })(),
-
-    update = function update(content) {
-      var stripped, element = this.raw || this;
-      if (getNodeName(element) === 'SCRIPT') {
-        setScriptText(element, content);
-      }
-      else if (content && content != '') {
-        if (content.toElement) {
-          content = content.toElement();
-        }
-        if (INSERTABLE_NODE_TYPES[content.nodeType]) {
-          element.innerHTML = '';
-          element.appendChild(content.raw || content);
+        else if (node.getElementsByTagName) {
+          scripts = node.getElementsByTagName('SCRIPT');
         }
         else {
-          content = Obj.toHTML(content);
-          element.innerHTML =
-          stripped = content.stripScripts();
-
-          if (content != stripped) {
-            setTimeout(function() { content.evalScripts(); }, 10);
-          }
+          // document fragments don't have GEBTN
+          scripts = getByTagName(node, 'SCRIPT');
         }
-      } else {
-        element.innerHTML = '';
       }
-      return this;
+      while (script = scripts[++i]) {
+        setScriptText(script, (textNode = script.firstChild) && textNode.data);
+      }
     };
 
-    // Fix browsers with buggy innerHTML implementations
-    if (ELEMENT_INNERHTML_BUGGY) {
-      update = function update(content) {
-        var isBuggy, stripped, element = this.raw || this,
-         nodeName = getNodeName(element);
-
-        // update script elements
-        if (nodeName === 'SCRIPT') {
-          setScriptText(element, content);
-          return this;
-        }
-        // remove children manually when innerHTML can't be used
-        if (isBuggy = ELEMENT_INNERHTML_BUGGY[nodeName]) {
-          while (element.lastChild) {
-            element.removeChild(element.lastChild);
-          }
-        }
-        // set content
-        if (content && content != '') {
-          if (content.toElement) {
-            content = content.toElement();
-          }
-          if (INSERTABLE_NODE_TYPES[content.nodeType]) {
-            if (!isBuggy) element.innerHTML = '';
-            element.appendChild(content.raw || content);
-          } else {
-            content = Obj.toHTML(content);
-            stripped = content.stripScripts();
-
-            if (stripped != '') {
-              if (isBuggy) {
-                element.appendChild(dom.getFragmentFromString(stripped, element));
-              } else {
-                element.innerHTML = stripped;
-              }
-            }
-            if (content != stripped) {
-              setTimeout(function() { content.evalScripts(); }, 10);
-            }
-          }
-        } else if (!isBuggy) {
-          element.innerHTML = '';
-        }
-        return this;
-      };
-    }
 
     plugin.cleanWhitespace = function cleanWhitespace() {
       // removes whitespace-only text node children
@@ -222,46 +167,52 @@
       return this;
     };
 
-    plugin.insert = function insert(insertions) {
-      var content, insertContent, nodeName, position, stripped,
-       element = this.raw || this;
+    plugin.insertBefore = function insertBefore(content) {
+      var element = this.raw || this, parentNode = element.parentNode;
+      parentNode && insertContent(element, parentNode, content, 'before');
+      return this;
+    };
 
+    plugin.insertAfter = function insertAfter(content) {
+      var element = this.raw || this, parentNode = element.parentNode;
+      parentNode && insertContent(element, parentNode, content, 'after');
+      return this;
+    };
+
+    plugin.prepend = function prepend(content) {
+      var element = this.raw || this;
+      insertContent(element, null, content, 'top');
+      return this;
+    };
+
+    plugin.append = function append(content) {
+      var element = this.raw || this;
+      insertContent(element, null, content, 'bottom');
+      return this;
+    };
+
+    plugin.insert = function insert(insertions) {
+      var content, defaultPosition, nodeType, position;
       if (insertions) {
         if (isHash(insertions)) {
           insertions = insertions._object;
         }
-
         content = insertions.raw || insertions;
-        if (isString(content) || isNumber(content) ||
-            INSERTABLE_NODE_TYPES[content.nodeType] ||
-            content.toElement || content.toHTML) {
-          insertions = { 'bottom': content };
+        defaultPosition = { 'bottom': content };
+        if (nodeType = content.nodeType) {
+          if (INSERTABLE_NODE_TYPES[nodeType]) {
+            insertions = defaultPosition;
+          }
+        } else if (typeof content !== 'object') {
+          insertions = defaultPosition;
+        } else if (!rePositions.test(Obj.keys(content))) {
+          insertions = defaultPosition;
         }
       }
 
       for (position in insertions) {
-        content  = insertions[position];
-        position = position.toLowerCase();
-        insertContent = ELEMENT_INSERT_METHODS[position];
-
-        if (content && content != '') {
-          if (content.toElement) {
-            content = content.toElement();
-          }
-          if (INSERTABLE_NODE_TYPES[content.nodeType]) {
-            insertContent(element, content.raw || content);
-          }
-          else if ((content = Obj.toHTML(content)) != '') {
-            if ((stripped = content.stripScripts()) != '') {
-              insertContent(element, dom.getFragmentFromString(stripped,
-                INSERT_POSITIONS_USING_PARENT_NODE[position] ? element.parentNode : element));
-            }
-            // only evalScripts if there are scripts
-            if (content != stripped) {
-              setTimeout(function() { content.evalScripts(); }, 10);
-            }
-          }
-        }
+        plugin[INSERT_POSITIONS_TO_METHODS[position.toLowerCase()]]
+          .call(this, insertions[position]);
       }
       return this;
     };
@@ -275,35 +226,81 @@
 
     plugin.replace = function replace(content) {
       var html, stripped, element = this.raw || this;
-
       if (content && content != '') {
-        if (content.toElement) {
-          content = content.toElement();
-        } else if (INSERTABLE_NODE_TYPES[content.nodeType]) {
-          content = content.raw || content;
-        } else {
-          html = Obj.toHTML(content);
-          stripped = html.stripScripts();
+        // process string / number
+        if (TREAT_AS_STRING[toString.call(content)]) {
+          html = content;
+          stripped = isScriptable && reOpenScriptTag.test(content) ?
+            stripScripts.call(content) : content;
           content = stripped == '' ? '' :
             dom.getFragmentFromString(stripped, element.parentNode);
-
-          if (content != stripped) {
-            setTimeout(function() { html.evalScripts(); }, 10);
+          if (html != stripped) {
+            setTimeout(function() { evalScripts.call(html); }, 10);
+          }
+        }
+        // process object
+        else {
+          // process toHTML
+          if (typeof content.toHTML === 'function') {
+            return plugin.replace.call(this, Obj.toHTML(content));
+          }
+          // process toElement
+          if (typeof content.toElement === 'function') {
+            content = content.toElement();
           }
         }
       }
-
+      // replace with content
       if (!content || content == '') {
-        element.parentNode.removeChild(element);
+        plugin.remove.call(element);
       } else if (INSERTABLE_NODE_TYPES[content.nodeType]) {
-        replaceElement(element, content);
+        replaceElement(element, content.raw || content);
+      }
+      return this;
+    };
+
+    plugin.update = function update(content) {
+      var stripped, element = this.raw || this;
+      if (getNodeName(element) === 'SCRIPT') {
+        setScriptText(element, content);
+      }
+      else if (content && content != '') {
+        // process string / number
+        if (TREAT_AS_STRING[toString.call(content)]) {
+          if (isScriptable && reOpenScriptTag.test(content)) {
+            element.innerHTML =
+            stripped = stripScripts.call(content);
+            if (content != stripped) {
+              setTimeout(function() { evalScripts.call(content); }, 10);
+            }
+          } else {
+            element.innerHTML = content;
+          }
+        }
+        // process object
+        else {
+          // process toHTML
+          if (typeof content.toHTML === 'function') {
+            return plugin.update.call(this, Obj.toHTML(content));
+          }
+          // process toElement
+          if (typeof content.toElement === 'function') {
+            content = content.toElement();
+          }
+          // process element
+          if (INSERTABLE_NODE_TYPES[content.nodeType]) {
+            element.innerHTML = '';
+            element.appendChild(content.raw || content);
+          }
+        }
+      } else {
+        element.innerHTML = '';
       }
       return this;
     };
 
     plugin.wrap = function wrap(wrapper, attributes) {
       var rawWrapper, element = this.raw || this;
-
       if (isString(wrapper)) {
         wrapper = Element.create(wrapper, attributes);
       }
@@ -313,18 +310,110 @@
       else {
         wrapper = Element.create('div', wrapper);
       }
-
       rawWrapper = wrapper.raw || wrapper;
       if (element.parentNode) {
         element.parentNode.replaceChild(rawWrapper, element);
       }
-
       rawWrapper.appendChild(element);
       return wrapper;
     };
 
-    plugin.update = update;
+
+    // fix inserting script elements in Safari <= 2.0.2 and Firefox 2.0.0.2
+    if (envTest('ELEMENT_SCRIPT_FAILS_TO_EVAL_TEXT')) {
+      var __replaceElement = replaceElement;
+      replaceElement = function(element, node) {
+        wrapper(__replaceElement, element, node);
+      };
+
+      var __setScriptText = setScriptText;
+      setScriptText = function(element, text) {
+        __setScriptText(element, text);
+        global.eval(element.firstChild.data);
+      };
+
+      (function(T) {
+        var before = T.before, top = T.top, bottom = T.bottom, after = T.after;
+        T.before = function(element, node) { wrapper(before, element, node); };
+        T.top    = function(element, node) { wrapper(top,    element, node); };
+        T.bottom = function(element, node) { wrapper(bottom, element, node); };
+        T.after  = function(element, node) { wrapper(after,  element, node); };
+      })(ELEMENT_INSERT_METHODS);
+    }
+
+    // optimized for IE and Opera
+    if (envTest('ELEMENT_REMOVE_NODE')) {
+      plugin.remove = function remove() {
+        (this.raw || this).removeNode(true);
+        return this;
+      };
+    }
+
+    // fix browsers with buggy innerHTML implementations
+    if (ELEMENT_INNERHTML_BUGGY) {
+      plugin.update = function update(content) {
+        var isBuggy, stripped, element = this.raw || this,
+         nodeName = getNodeName(element);
+
+        // update script elements
+        if (nodeName === 'SCRIPT') {
+          setScriptText(element, content);
+          return this;
+        }
+        // remove children manually when innerHTML can't be used
+        if (isBuggy = ELEMENT_INNERHTML_BUGGY[nodeName]) {
+          while (element.lastChild) {
+            element.removeChild(element.lastChild);
+          }
+        }
+        // set content
+        if (content && content != '') {
+          // process string / number
+          if (TREAT_AS_STRING[toString.call(content)]) {
+            stripped = isScriptable && reOpenScriptTag.test(content) ?
+              stripScripts.call(content) : content;
+            if (stripped != '') {
+              if (isBuggy) {
+                element.appendChild(dom.getFragmentFromString(stripped, element));
+              } else {
+                element.innerHTML = stripped;
+              }
+            }
+            if (content != stripped) {
+              setTimeout(function() { evalScripts.call(content); }, 10);
+            }
+          }
+          // process object
+          else {
+            // process toHTML
+            if (typeof content.toHTML === 'function') {
+              return plugin.update.call(this, Obj.toHTML(content));
+            }
+            // process toElement
+            if (typeof content.toElement === 'function') {
+              content = content.toElement();
+            }
+            // process element
+            if (INSERTABLE_NODE_TYPES[content.nodeType]) {
+              if (!isBuggy) element.innerHTML = '';
+              element.appendChild(content.raw || content);
+            }
+          }
+        } else if (!isBuggy) {
+          element.innerHTML = '';
+        }
+        return this;
+      };
+    }
 
     // prevent JScript bug with named function expressions
-    var cleanWhitespace = nil, insert = nil, remove = nil, replace = nil, wrap = nil;
+    var append =       nil,
+     cleanWhitespace = nil,
+     insert =          nil,
+     insertAfter =     nil,
+     insertBefore =    nil,
+     prepend =         nil,
+     remove =          nil,
+     replace =         nil,
+     wrap =            nil;
   })(Element.plugin);

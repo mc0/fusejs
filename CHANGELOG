@@ -1,3 +1,5 @@
+* Optimize fuse.dom.Element modification methods and add append(), prepend(), insertBefore(), and insertAfter() methods. [FuseJS LH #53] [jddalton, kangax, kitsg]
+
 * Add `defaults` object to constructors to store default properties / options. [jddalton, Thomas Aylott]
 
 * Add fuse.dom.Event methods isStopped(), isCancelled(), isBubbling(), cancel(), stopBubbling(), and fuse.dom.Document method isLoaded(). [jddalton]
@@ -14,7 +16,7 @@
 
 * Ensure fuse(document).viewport works with documents from iframes. [jddalton]
 
-* Fix cross-browser bugs with fuse.String match(), search(), split() and fuse.RegExp exec(), test(). [jddalton, Steve Levithan]
+* Fix cross-browser bugs with fuse.String match(), search(), split() and fuse.RegExp exec(), test(). [FuseJS LH #42] [jddalton, kitsg, Steve Levithan]
 
 * Make the fuse.Fusebox'ed Object constructor, when called as a function and passed a native RegExp instance, return a Fuseboxed RegExp instance. [jddalton]
 
