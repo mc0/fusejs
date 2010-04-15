@@ -9,8 +9,8 @@
    escapeRegExpChars, expando, fromElement, getDocument, getNodeName, getWindow,
    getOrCreateTagClass, hasKey, inspect, isArray, isElement, isEmpty, isHash,
    isHostObject, isFunction, isNumber, isPrimitive, isRegExp, isSameOrigin,
-   isString, isUndefined, K, nil, prependList, returnOffset, slice, toInteger,
-   toString, undef, userAgent;
+   isString, isUndefined, K, nil, prependList, returnOffset, setTimeout, slice,
+   toInteger, toString, undef, userAgent;
 
   fuse =
   global.fuse = function fuse() { };
@@ -105,6 +105,9 @@
 
   // a quick way to copy an array slice.call(array, 0)
   slice = [].slice;
+
+  // shortcut
+  setTimeout = global.setTimeout;
 
   // used to access the an object's internal [[Class]] property
   toString = {}.toString;

@@ -68,7 +68,7 @@
         this.lastText = responseText;
       }
 
-      this.timer = global.setTimeout(this.onTimerEvent,
+      this.timer = setTimeout(this.onTimerEvent,
         this.decay * this.frequency * this.timerMultiplier);
     };
 

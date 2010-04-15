@@ -61,7 +61,7 @@
     };
 
     plugin.start = function start() {
-      this.timerID = global.setTimeout(this.onTimerEvent,
+      this.timerID = setTimeout(this.onTimerEvent,
         this.interval * this.options.multiplier);
       return this;
     };

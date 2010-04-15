@@ -259,7 +259,7 @@
         domLoadWrapper(event);
       }
       else if (domData[2] && domData[2].events['dom:loaded']) {
-        return global.setTimeout(function() { winLoadWrapper(event); }, 10);
+        return setTimeout(function() { winLoadWrapper(event); }, 10);
       }
       event = Event(event, global);
       event.type = 'load';

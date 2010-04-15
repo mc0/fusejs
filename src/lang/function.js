@@ -132,7 +132,7 @@
         f = fn;
       }
 
-      return global.setTimeout(function() {
+      return setTimeout(function() {
         var fn = f || context[name];
         return fn.apply(fn, args);
       }, timeout * 1000);

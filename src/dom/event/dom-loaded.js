@@ -13,7 +13,6 @@
 
     Poller = function(method) {
       var poller = this,
-      setTimeout = global.setTimeout,
       callback   = function() {
         if (!method() && poller.id != null)
           poller.id = setTimeout(callback, 10);
