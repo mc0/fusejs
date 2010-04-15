@@ -80,35 +80,34 @@
 
     insertContent = function(element, parentNode, content, position) {
       var stripped, insertElement = ELEMENT_INSERT_METHODS[position];
-      if (content && content != '') {
-        // process string / number
-        if (TREAT_AS_STRING[toString.call(content)]) {
-          stripped = isScriptable && reOpenScriptTag.test(content) ?
-            stripScripts.call(content) : content;
-          if (stripped != '') {
-            insertElement(element,
-              dom.getFragmentFromString(stripped, parentNode || element),
-              parentNode);
-          }
-          // only evalScripts if there are scripts
-          if (content != stripped) {
-            setTimeout(function() { evalScripts.call(content); }, 10);
-          }
+
+      // process string / number
+      if (TREAT_AS_STRING[toString.call(content)]) {
+        stripped = isScriptable && reOpenScriptTag.test(content) ?
+          stripScripts.call(content) : content;
+        if (stripped != '') {
+          insertElement(element,
+            dom.getFragmentFromString(stripped, parentNode || element),
+            parentNode);
         }
-        // process object
-        else {
-          // process toHTML
-          if (typeof content.toHTML === 'function') {
-            return insertContent(element, parentNode, Obj.toHTML(content), position);
-          }
-          // process toElement
-          if (typeof content.toElement === 'function') {
-            content = content.toElement();
-          }
-          // process element
-          if (INSERTABLE_NODE_TYPES[content.nodeType]) {
-            insertElement(element, content.raw || content, parentNode);
-          }
+        // only evalScripts if there are scripts
+        if (content != stripped) {
+          setTimeout(function() { evalScripts.call(content); }, 10);
+        }
+      }
+      // process object
+      else if (content) {
+        // process toHTML
+        if (typeof content.toHTML === 'function') {
+          return insertContent(element, parentNode, Obj.toHTML(content), position);
+        }
+        // process toElement
+        if (typeof content.toElement === 'function') {
+          content = content.toElement();
+        }
+        // process element
+        if (INSERTABLE_NODE_TYPES[content.nodeType]) {
+          insertElement(element, content.raw || content, parentNode);
         }
       }
     },
@@ -226,72 +225,70 @@
 
     plugin.replace = function replace(content) {
       var html, stripped, element = this.raw || this;
-      if (content && content != '') {
-        // process string / number
-        if (TREAT_AS_STRING[toString.call(content)]) {
-          html = content;
-          stripped = isScriptable && reOpenScriptTag.test(content) ?
-            stripScripts.call(content) : content;
-          content = stripped == '' ? '' :
-            dom.getFragmentFromString(stripped, element.parentNode);
-          if (html != stripped) {
-            setTimeout(function() { evalScripts.call(html); }, 10);
-          }
+
+      // process string / number
+      if (TREAT_AS_STRING[toString.call(content)]) {
+        html = content;
+        stripped = isScriptable && reOpenScriptTag.test(content) ?
+          stripScripts.call(content) : content;
+        content = stripped == '' ? '' :
+          dom.getFragmentFromString(stripped, element.parentNode);
+        if (html != stripped) {
+          setTimeout(function() { evalScripts.call(html); }, 10);
         }
-        // process object
-        else {
-          // process toHTML
-          if (typeof content.toHTML === 'function') {
-            return plugin.replace.call(this, Obj.toHTML(content));
-          }
-          // process toElement
-          if (typeof content.toElement === 'function') {
-            content = content.toElement();
-          }
+      }
+      // process object
+      else if (content) {
+        // process toHTML
+        if (typeof content.toHTML === 'function') {
+          return plugin.replace.call(this, Obj.toHTML(content));
+        }
+        // process toElement
+        if (typeof content.toElement === 'function') {
+          content = content.toElement();
         }
       }
       // replace with content
-      if (!content || content == '') {
-        plugin.remove.call(element);
-      } else if (INSERTABLE_NODE_TYPES[content.nodeType]) {
+      if (INSERTABLE_NODE_TYPES[content && content.nodeType]) {
         replaceElement(element, content.raw || content);
+      } else {
+        plugin.remove.call(element);
       }
       return this;
     };
 
     plugin.update = function update(content) {
       var stripped, element = this.raw || this;
+
       if (getNodeName(element) === 'SCRIPT') {
         setScriptText(element, content);
       }
-      else if (content && content != '') {
-        // process string / number
-        if (TREAT_AS_STRING[toString.call(content)]) {
-          if (isScriptable && reOpenScriptTag.test(content)) {
-            element.innerHTML =
-            stripped = stripScripts.call(content);
-            if (content != stripped) {
-              setTimeout(function() { evalScripts.call(content); }, 10);
-            }
-          } else {
-            element.innerHTML = content;
+      // process string / number
+      else if (TREAT_AS_STRING[toString.call(content)]) {
+        if (isScriptable && reOpenScriptTag.test(content)) {
+          element.innerHTML =
+          stripped = stripScripts.call(content);
+          if (content != stripped) {
+            setTimeout(function() { evalScripts.call(content); }, 10);
           }
+        } else {
+          element.innerHTML = content;
         }
-        // process object
-        else {
-          // process toHTML
-          if (typeof content.toHTML === 'function') {
-            return plugin.update.call(this, Obj.toHTML(content));
-          }
-          // process toElement
-          if (typeof content.toElement === 'function') {
-            content = content.toElement();
-          }
-          // process element
-          if (INSERTABLE_NODE_TYPES[content.nodeType]) {
-            element.innerHTML = '';
-            element.appendChild(content.raw || content);
-          }
+      }
+      // process object
+      else if (content) {
+        // process toHTML
+        if (typeof content.toHTML === 'function') {
+          return plugin.update.call(this, Obj.toHTML(content));
+        }
+        // process toElement
+        if (typeof content.toElement === 'function') {
+          content = content.toElement();
+        }
+        // process element
+        if (INSERTABLE_NODE_TYPES[content.nodeType]) {
+          element.innerHTML = '';
+          element.appendChild(content.raw || content);
         }
       } else {
         element.innerHTML = '';
@@ -366,38 +363,35 @@
             element.removeChild(element.lastChild);
           }
         }
-        // set content
-        if (content && content != '') {
-          // process string / number
-          if (TREAT_AS_STRING[toString.call(content)]) {
-            stripped = isScriptable && reOpenScriptTag.test(content) ?
-              stripScripts.call(content) : content;
-            if (stripped != '') {
-              if (isBuggy) {
-                element.appendChild(dom.getFragmentFromString(stripped, element));
-              } else {
-                element.innerHTML = stripped;
-              }
-            }
-            if (content != stripped) {
-              setTimeout(function() { evalScripts.call(content); }, 10);
+        // process string / number
+        if (TREAT_AS_STRING[toString.call(content)]) {
+          stripped = isScriptable && reOpenScriptTag.test(content) ?
+            stripScripts.call(content) : content;
+          if (stripped != '') {
+            if (isBuggy) {
+              element.appendChild(dom.getFragmentFromString(stripped, element));
+            } else {
+              element.innerHTML = stripped;
             }
           }
-          // process object
-          else {
-            // process toHTML
-            if (typeof content.toHTML === 'function') {
-              return plugin.update.call(this, Obj.toHTML(content));
-            }
-            // process toElement
-            if (typeof content.toElement === 'function') {
-              content = content.toElement();
-            }
-            // process element
-            if (INSERTABLE_NODE_TYPES[content.nodeType]) {
-              if (!isBuggy) element.innerHTML = '';
-              element.appendChild(content.raw || content);
-            }
+          if (content != stripped) {
+            setTimeout(function() { evalScripts.call(content); }, 10);
+          }
+        }
+        // process object
+        else if (content) {
+          // process toHTML
+          if (typeof content.toHTML === 'function') {
+            return plugin.update.call(this, Obj.toHTML(content));
+          }
+          // process toElement
+          if (typeof content.toElement === 'function') {
+            content = content.toElement();
+          }
+          // process element
+          if (INSERTABLE_NODE_TYPES[content.nodeType]) {
+            if (!isBuggy) element.innerHTML = '';
+            element.appendChild(content.raw || content);
           }
         } else if (!isBuggy) {
           element.innerHTML = '';

@@ -1,6 +1,6 @@
   /*------------------------------- DOM: NODE --------------------------------*/
 
-  DATA_ID_NAME = envTest('ELEMENT_UNIQUE_NUMBER') ? 'uniqueNumber' : '_fuseId';
+  DATA_ID_PROP = envTest('ELEMENT_UNIQUE_NUMBER') ? 'uniqueNumber' : '_fuseId';
 
   Node =
   fuse.dom.Node = (function() {
@@ -51,7 +51,7 @@
     },
 
     getFuseId = function getFuseId() {
-      var win, node = this.raw || this, id = node[DATA_ID_NAME];
+      var win, node = this.raw || this, id = node[DATA_ID_PROP];
 
       // quick return for nodes with ids
       // IE can avoid adding an expando on each node and use the `uniqueNumber` property instead.

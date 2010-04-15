@@ -2,7 +2,7 @@
 (function(global) {
 
   // private vars
-  var DATA_ID_NAME, DOCUMENT_FRAGMENT_NODE, DOCUMENT_NODE, ELEMENT_NODE, TEXT_NODE,
+  var DATA_ID_PROP, DOCUMENT_FRAGMENT_NODE, DOCUMENT_NODE, ELEMENT_NODE, TEXT_NODE,
    Class, Document, Element, Enumerable, Event, Form, Func, Obj, Node, NodeList,
    Window, $break, _extend, fuse, addArrayMethods, addNodeListMethod, bind, clone,
    concatList, defer, domData, eachKey, emptyFunction, envAddTest, envTest,

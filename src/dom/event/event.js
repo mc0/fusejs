@@ -554,7 +554,7 @@
 
       do {
         id = element.nodeType === ELEMENT_NODE
-          ? element[DATA_ID_NAME]
+          ? element[DATA_ID_PROP]
           : Node.getFuseId(element);
 
         data = id && domData[id];
