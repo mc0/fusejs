@@ -30,12 +30,12 @@ new Test.Unit.Runner({
       'element with no className or id');
 
     this.assertNothingRaised(
-      function() { fuse.Object.inspect(Element) },
-      'Failed to inspect Element');
+      function() { fuse.Object.inspect(fuse.dom.Element) },
+      'Failed to inspect fuse.dom.Element');
 
     this.assertNothingRaised(
-      function() { fuse.Object.inspect(Element.Methods) },
-      'Failed to inspect Element.Methods');
+      function() { fuse.Object.inspect(fuse.dom.Element.plugin) },
+      'Failed to inspect fuse.dom.Element.plugin');
   },
 
   'testEnumerableInspect': function() {
@@ -63,8 +63,8 @@ new Test.Unit.Runner({
   },
 
   'testEventInspect': function() {
-    this.assert('[object Event]' != fuse.Object.inspect(Event.Methods),
-      'Failed to inspect Event.Methods');
+    this.assert('[object Event]' != fuse.Object.inspect(fuse.dom.Event.plugin),
+      'Failed to inspect fuse.dom.Event.plugin');
   },
 
   'testHashInspect': function() {

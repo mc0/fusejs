@@ -42,13 +42,12 @@
       return result;
     };
 
-    // populate specialChars
-    (function(i, key, character) {
+    // populate specialChars with control characters
+    (function(i, key) {
       while (--i) {
         key = String.fromCharCode(i);
         if (!specialChars[key]) {
-          character = i.toString(16);
-          specialChars[key] = '\\u00' + (character.length === 1 ? '0' : '') + character;
+          specialChars[key] = '\\u' + ('0000' + i.toString(16)).slice(-4);
         }
       }
     })(32);
@@ -57,12 +56,8 @@
 
     // fuse.Array#inspect
     arrPlugin.inspect = function inspect() {
-      // following ECMA spec precedent
-      if (this == null) {
-        throw new TypeError;
-      }
-      // called Obj.inspect(fuse.Array.plugin)
-      if (this === arrPlugin) {
+      // called Obj.inspect(fuse.Array.plugin) or Obj.inspect(fuse.Array)
+      if (this === arrPlugin || this == global || this == null) {
         return inspectPlugin(arrPlugin);
       }
       // called normally fuse.Array(...).inspect()
@@ -76,12 +71,8 @@
     // fuse.String#inspect
     strInspect =
     strPlugin.inspect = function inspect(useDoubleQuotes) {
-      // following ECMA spec precedent
-      if (this == null) {
-        throw new TypeError;
-      }
-      // called Obj.inspect(fuse.String.plugin)
-      if (this === strPlugin) {
+      // called Obj.inspect(fuse.String.plugin) or Obj.inspect(fuse.Array)
+      if (this === strPlugin || this == global || this == null) {
         return inspectPlugin(strPlugin);
       }
       // called normally fuse.String(...).inspect()
@@ -104,8 +95,8 @@
     // fuse.Hash#inspect
     if (hashPlugin) {
       hashPlugin.inspect = function inspect() {
-        // called Obj.inspect(fuse.Hash.plugin)
-        if (this === hashPlugin) {
+        // called Obj.inspect(fuse.Hash.plugin) or generic if added later
+        if (this === hashPlugin || this == global || this == null) {
           return inspectPlugin(hashPlugin);
         }
         // called normally fuse.Hash(...).inspect()
@@ -121,7 +112,7 @@
     if (elemPlugin) {
       elemPlugin.inspect = function inspect() {
         // called Obj.inspect(Element.plugin) or Obj.inspect(Element)
-        if (this === elemPlugin || this === Element) {
+        if (this === elemPlugin || this == global || this == null) {
           return inspectPlugin(this);
         }
         // called normally Element.inspect(element)
@@ -158,21 +149,25 @@
 
     // fuse.Object.inspect
     Obj.inspect = function inspect(value) {
-      var constructor, object, results, string;
+      var classType, object, results;
       if (value != null) {
         object = fuse.Object(value);
-        if (isFunction(object.inspect)) {
+
+        // this is not duplicating checks, one is a type check the other
+        // is an internal [[Class]] check because Safari 3.1 mistakes
+        // regexp instances as typeof `function`
+        if (typeof object.inspect === 'function' &&
+            isFunction(object.inspect)) {
           return object.inspect();
         }
 
-        // Attempt to avoid inspecting DOM nodes.
+        // attempt to avoid inspecting DOM nodes.
         // IE treats nodes like objects:
         // IE7 and below are missing the node's constructor property
         // IE8 node constructors are typeof "object"
         try {
-          string = toString.call(object);
-          constructor = object.constructor;
-          if (string === '[object Object]' && constructor && typeof constructor !== 'object') {
+          classType = toString.call(object);
+          if (classType === '[object Object]' && typeof object.constructor === 'function') {
             results = [];
             eachKey(object, function(value, key) {
               hasKey(object, key) &&

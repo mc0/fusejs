@@ -1,3 +1,5 @@
+* Make inspect() methods support iterating over objects that have their own generic inspect() method. [jddalton]
+
 * Add native JSON support to the JSON methods and make them comply with ECMA specs. [FuseJS LH #22] [jddalton, kitsg, Tobie Langel]
 
 * Optimize fuse.dom.Element modification methods and add append(), prepend(), insertBefore(), and insertAfter() methods. [FuseJS LH #53] [jddalton, kangax, kitsg]
