@@ -293,7 +293,14 @@
   /*--------------------------------------------------------------------------*/
 
   (function(plugin) {
-    var getFuseId = Node.getFuseId;
+    var getFuseId = Node.getFuseId,
+
+    OPACITY_PROP = (function(s) {
+      return typeof s.opactiy  !== 'undefined' ? 'opacity'       :
+        typeof s.MozOpacity    !== 'undefined' ? 'MozOpacity'    :
+        typeof s.WebkitOpacity !== 'undefined' ? 'WebKitOpacity' :
+        typeof s.KhtmlOpacity  !== 'undefined' ? 'KhtmlOpacity'  : false;
+    })(fuse._div.style);
 
     plugin.getDimensions = function getDimensions(options) {
       return {
@@ -333,20 +340,24 @@
     };
 
     plugin.getOpacity = (function() {
-      var getOpacity,
-       reOpacity = /alpha\(opacity=(.*)\)/;
+      var reOpacity = /alpha\(opacity=(.*)\)/,
 
       getOpacity = function getOpacity() {
-        return fuse.Number(parseFloat(this.style.opacity));
+        return fuse.Number(parseFloat(this.style[OPACITY_PROP]));
       };
 
+      if (!OPACITY_PROP) {
+        getOpacity = function getOpacity() {
+          return fuse.Number(1);
+        };
+      }
       if (envTest('ELEMENT_COMPUTED_STYLE')) {
         getOpacity = function getOpacity() {
           var element = this.raw || this,
            style = element.ownerDocument.defaultView.getComputedStyle(element, null);
           return fuse.Number(parseFloat(style
             ? style.opacity
-            : element.style.opacity));
+            : element.style[OPACITY_PROP]));
         };
       }
       else if (envTest('ELEMENT_MS_CSS_FILTERS')) {
@@ -360,10 +371,9 @@
     })();
 
     plugin.setOpacity = (function() {
-      var __setOpacity, setOpacity,
-       nearOne  = 0.99999,
-       nearZero = 0.00001,
-       reAlpha  = /alpha\([^)]*\)/i;
+      var nearOne = 0.99999,
+       nearZero   = 0.00001,
+       reAlpha    = /alpha\([^)]*\)/i,
 
       setOpacity = function setOpacity(value) {
         if (value > nearOne) {
@@ -371,35 +381,16 @@
         } if (value < nearZero && !isString(value)) {
           value = 0;
         }
-        this.style.opacity = value;
+        this.style[OPACITY_PROP] = value;
         return this;
       };
 
-      // Sniff for Safari 2.x
-      if (fuse.env.agent.WebKit && (userAgent.match(/AppleWebKit\/(\d+)/) || [])[1] < 500) {
-        __setOpacity = setOpacity;
-
+      if (!OPACITY_PROP) {
         setOpacity = function setOpacity(value) {
-          if (value > nearOne) {
-            var element = this.raw || this;
-            element.style.opacity = 1;
-
-            // TODO: Is this really needed or the best approach ?
-            if (getNodeName(element) === 'IMG' && element.width) {
-              element.width++; element.width--;
-            } else {
-              try {
-                element.removeChild(element.appendChild(element
-                  .ownerDocument.createTextNode(' ')));
-              } catch (e) { }
-            }
-          } else {
-            __setOpacity.call(this, value);
-          }
-          return this;
+          // do nothing
         };
       }
-      else if (envTest('ELEMENT_MS_CSS_FILTERS')) {
+      if (envTest('ELEMENT_MS_CSS_FILTERS')) {
         setOpacity = function setOpacity(value) {
           // strip alpha from filter style
           var element = this.raw || this,
