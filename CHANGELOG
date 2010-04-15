@@ -1,3 +1,5 @@
+* Add `defaults` object to constructors to store default properties / options. [jddalton, Thomas Aylott]
+
 * Add fuse.dom.Event methods isStopped(), isCancelled(), isBubbling(), cancel(), stopBubbling(), and fuse.dom.Document method isLoaded(). [jddalton]
   Note: Backwards compatibility warning.
 

@@ -2,11 +2,10 @@
 
   fuse.ajax.Base = Class(function() {
     var Base = function Base(url, options) {
-      var customHeaders, queryString,
-       body = null,
-       defaultOptions = fuse.ajax.Base.options,
-       defaultHeaders = defaultOptions.headers,
-       location = global.location;
+      var customHeaders, queryString, body = null,
+       location = global.location,
+       defaults = Base.defaults,
+       defaultHeaders = defaults.headers;
 
       // remove headers from user options to be added in further down
       if (options && options.headers) {
@@ -15,12 +14,12 @@
       }
 
       // clone default options/headers and overwrite with user options
-      delete defaultOptions.headers;
-      defaultOptions = clone(defaultOptions);
-      fuse.ajax.Base.options.headers = defaultHeaders;
+      delete defaults.headers;
+      defaults = clone(defaults);
+      Base.defaults.headers = defaultHeaders;
 
-      defaultOptions.headers = clone(defaultHeaders);
-      options = this.options = _extend(defaultOptions, options);
+      defaults.headers = clone(defaultHeaders);
+      options = this.options = _extend(defaults, options);
 
       var encoding = options.encoding,
        headers = options.headers,
@@ -75,7 +74,7 @@
 
       // set default timeout multiplier
       this.timerMultiplier = options.timerMultiplier ||
-        fuse.Timer && fuse.Timer.options.multiplier || 1;
+        fuse.Timer && fuse.Timer.defaults.multiplier || 1;
 
       // Playing it safe here, even though we could not reproduce this bug,
       // jQuery tickets #2570, #2865 report versions of Opera will display a
@@ -99,7 +98,7 @@
     return { 'constructor': Base };
   });
 
-  fuse.ajax.Base.options = {
+  fuse.ajax.Base.defaults = {
     'asynchronous': true,
     'contentType':  'application/x-www-form-urlencoded',
     'encoding':     'UTF-8',

@@ -14,19 +14,19 @@ new Test.Unit.Runner({
   },
 
   'testBaseDefaultOptions': function() {
-    var backup = fuse.Object.clone(fuse.ajax.Base.options);
-    fuse.Object.extend(fuse.ajax.Base.options,  {
+    var backup = fuse.Object.clone(fuse.ajax.Base.defaults);
+    fuse.Object.extend(fuse.ajax.Base.defaults,  {
       'method': 'get',
       'evalJS': 'force',
       'asynchronous': false
     });
 
     fuse.ajax.Request('../fixtures/hello.js');
-    var h2 = $('content').firstChild;
+    var h2 = $('content').raw.firstChild;
     this.assertEqual('hello world!', getInnerHTML(h2));
 
     // restore
-    fuse.ajax.Base.options = backup;
+    fuse.ajax.Base.defaults = backup;
   },
 
   'testSynchronousRequest': function() {
@@ -38,7 +38,7 @@ new Test.Unit.Runner({
 
     this.assertEqual(0, fuse.ajax.activeRequestCount);
 
-    var h2 = $('content').firstChild;
+    var h2 = $('content').raw.firstChild;
     this.assertEqual('hello world!', getInnerHTML(h2));
   },
 
@@ -50,7 +50,7 @@ new Test.Unit.Runner({
     });
 
     this.wait(1000, function() {
-      var h2 = $('content').firstChild;
+      var h2 = $('content').raw.firstChild;
       this.assertEqual('hello world!', getInnerHTML(h2));
     });
   },
@@ -258,7 +258,7 @@ new Test.Unit.Runner({
 
     // ensure responders are called
     var responderCounter = 0,
-     increaseCounter = function() { responderCounter++ };
+     increaseCounter = function() { responderCounter++; };
 
     fuse.ajax.Responders.register({
       'onCreate':  increaseCounter,
@@ -316,7 +316,7 @@ new Test.Unit.Runner({
 
       this.assertEqual(0, fuse.ajax.activeRequestCount);
 
-      var h2 = $('content').firstChild;
+      var h2 = $('content').raw.firstChild;
       this.assertEqual('hello world!', getInnerHTML(h2));
     }
     else this.info(message);
@@ -332,7 +332,9 @@ new Test.Unit.Runner({
         }, this)
       }));
     }
-    else this.info(message);
+    else {
+      this.info(message);
+    }
   },
 
   'testOnCreateCallback': function() {
@@ -353,7 +355,7 @@ new Test.Unit.Runner({
         extendDefault({
           'parameters': Fixtures.js,
           'onDone': fuse.Function.bind(function() {
-            var h2 = $('content').firstChild;
+            var h2 = $('content').raw.firstChild;
             this.assertEqual('hello world!', getInnerHTML(h2));
           }, this)
       }));
@@ -377,7 +379,7 @@ new Test.Unit.Runner({
       extendDefault({
         'evalJS':     'force',
         'onDone': fuse.Function.bind(function() {
-          var h2 = $('content').firstChild;
+          var h2 = $('content').raw.firstChild;
           this.assertEqual('hello world!', getInnerHTML(h2));
         }, this)
     }));
@@ -463,8 +465,8 @@ new Test.Unit.Runner({
           'sanitizeJSON': true,
           'parameters':   Fixtures.invalidJson,
           'onException':  fuse.Function.bind(function(request, error) {
-            this.assert(fuse.String.contains(error.message, 'Badly formed JSON string'));
             this.assertInstanceOf(fuse.ajax.Request, request);
+            this.assertEqual('SyntaxError', error.name);
           }, this)
       }));
     }
@@ -494,7 +496,7 @@ new Test.Unit.Runner({
             // $value = utf8_decode($_GET['X-JSON']);
             // or for none superglobals values
             // $value = utf8_decode(urldecode($encoded));
-            var expected = 'hello #\u00E9\u00E0 '; // hello #éà
+            var expected = 'hello #\u00E9\u00E0 ';
             this.assertEqual(expected, decode(request.headerJSON.test));
             this.assertEqual(expected, decode(json.test));
           }, this)
@@ -508,7 +510,9 @@ new Test.Unit.Runner({
           }, this)
       }));
     }
-    else this.info(message);
+    else {
+      this.info(message);
+    }
   },
 
   'testGetHeader': function() {
@@ -522,7 +526,9 @@ new Test.Unit.Runner({
           }, this)
       }));
     }
-    else this.info(message);
+    else {
+      this.info(message);
+    }
   },
 
   'testParametersCanBeHash': function() {
@@ -537,7 +543,9 @@ new Test.Unit.Runner({
           }, this)
       }));
     }
-    else this.info(message);
+    else {
+      this.info(message);
+    }
   },
 
   'testRequestHeaders': function() {
@@ -563,7 +571,9 @@ new Test.Unit.Runner({
         }));
       }, 'requestHeaders as hash object');
     }
-    else this.info(message);
+    else {
+      this.info(message);
+    }
   },
 
   'testIsSameOrigin': function() {
@@ -586,7 +596,7 @@ new Test.Unit.Runner({
         extendDefault({
           'parameters':  Fixtures.invalidJson,
           'onException': fuse.Function.bind(function(request, error) {
-            this.assert(fuse.String.contains(error.message, 'Badly formed JSON string'));
+            this.assertEqual('SyntaxError', error.name);
           }, this)
       }));
 
@@ -594,11 +604,13 @@ new Test.Unit.Runner({
         extendDefault({
           'parameters':  { 'X-JSON': '{});window.attacked = true;({}' },
           'onException': fuse.Function.bind(function(request, error) {
-            this.assert(fuse.String.contains(error.message, 'Badly formed JSON string'));
+            this.assertEqual('SyntaxError', error.name);
           }, this)
       }));
     }
-    else this.info(message);
+    else {
+      this.info(message);
+    }
   },
 
   'testTimedUpdater': function() {
@@ -665,8 +677,8 @@ new Test.Unit.Runner({
   },
 
   'testTimedUpdaterDefaultOptions': function() {
-    var backup = fuse.Object.clone(fuse.ajax.TimedUpdater.options);
-    fuse.Object.extend(fuse.ajax.TimedUpdater.options,  {
+    var backup = fuse.Object.clone(fuse.ajax.TimedUpdater.defaults);
+    fuse.Object.extend(fuse.ajax.TimedUpdater.defaults,  {
       'asynchronous': false,
       'method': 'get',
       'frequency': 3
@@ -687,6 +699,6 @@ new Test.Unit.Runner({
     });
 
     // restore
-    fuse.ajax.TimedUpdater.options = backup;
+    fuse.ajax.TimedUpdater.defaults = backup;
   }
 });

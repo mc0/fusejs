@@ -12,7 +12,7 @@
       instance.executing = false;
 
       instance.onTimerEvent = function() { onTimerEvent.call(instance); };
-      instance.options = _extend(clone(Timer.options), options);
+      instance.options = _extend(clone(Timer.defaults), options);
       return instance;
     },
 
@@ -78,6 +78,6 @@
     var execute = nil, start = nil, stop = nil;
   })(fuse.Timer.plugin);
 
-  fuse.Timer.options = {
+  fuse.Timer.defaults = {
     'multiplier': 1
   };

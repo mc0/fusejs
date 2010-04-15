@@ -40,9 +40,9 @@ new Test.Unit.Runner({
     }
 
     var timerEventCount = 0,
-     backup = fuse.Object.clone(fuse.Timer.options);
+     backup = fuse.Object.clone(fuse.Timer.defaults);
 
-    fuse.Object.extend(fuse.Timer.options,  { 'multiplier': 1000 });
+    fuse.Object.extend(fuse.Timer.defaults,  { 'multiplier': 1000 });
 
     var timer = fuse.Timer(timerEventFired, 2).start();
 
@@ -55,6 +55,6 @@ new Test.Unit.Runner({
     });
 
     // restore
-    fuse.Timer.options = backup;
+    fuse.Timer.defaults = backup;
   }
 });

@@ -4,7 +4,7 @@
     var Klass = function() { },
 
     Template = function Template(template, pattern) {
-      pattern || (pattern = fuse.Template.defaultPattern);
+      pattern || (pattern = Template.defaults.pattern);
       if (!isRegExp(pattern)) {
         pattern = fuse.RegExp(escapeRegExpChars(pattern));
       }
@@ -43,7 +43,9 @@
     return Template;
   })();
 
-  fuse.Template.defaultPattern = /(\\)?(#\{([^}]*)\})/g;
+  fuse.Template.defaults = {
+    'pattern': /(\\)?(#\{([^}]*)\})/g
+  };
 
   /*--------------------------------------------------------------------------*/
 

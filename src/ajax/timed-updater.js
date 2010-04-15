@@ -9,7 +9,7 @@
       var onDone,
        callbackName = 'on' + Request.Events[4],
        instance     = __instance || new Klass,
-       options      = _extend(clone(TimedUpdater.options), options);
+       options      = _extend(clone(TimedUpdater.defaults), options);
 
       __instance = null;
 
@@ -87,7 +87,7 @@
     var updateDone = nil, start = nil, stop = nil;
   })(fuse.ajax.TimedUpdater.plugin);
 
-  fuse.ajax.TimedUpdater.options = {
+  fuse.ajax.TimedUpdater.defaults = {
     'decay':     1,
     'frequency': 2,
     'maxDecay':  Infinity
