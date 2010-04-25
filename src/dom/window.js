@@ -2,11 +2,15 @@
 
   Window =
   fuse.dom.Window = (function() {
-    var Decorator = function() { },
+    var isWindow = function(object) {
+      return toString.call(object) === '[object Window]';
+    },
+
+    Decorator = function() { },
 
     Window = function Window(object) {
       // quick return if empty, decorated, or not a window object
-      if (!object || object.raw || typeof object.frameElement === 'undefined') {
+      if (!object || object.raw || !isWindow(object)) {
         return object;
       }
 
@@ -21,6 +25,13 @@
       decorated.raw = object;
       return decorated;
     };
+
+    if (!isWindow(global)) {
+      // weak fallback
+      isWindow = function(object) {
+        return typeof object.frameElement !== 'undefined';
+      };
+    }
 
     Class({ 'constructor': Window });
     Decorator.prototype = Window.plugin;

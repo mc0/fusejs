@@ -1,3 +1,5 @@
+* Fix window object detection for Safari 2.0 in fuse.dom.Window. [jddalton]
+
 * Add a `raw` property to all wrapped sandboxed native methods to reference their original methods. [jddalton]
 
 * Add support for proprietary opacity styles to setOpacity() and getOpacity(). [David Mark, jddalton]
