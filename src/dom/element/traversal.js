@@ -105,16 +105,6 @@
         : plugin.getNextSiblings.call(element, selectors);
     };
 
-    plugin.match = function match(selectors) {
-      return isString(selectors)
-        ? fuse.dom.selector.match(this, selectors)
-        : selectors.match(this);
-    };
-
-    plugin.query = function query(selectors, callback) {
-      return fuse.dom.selector.select(selectors, this, callback);
-    };
-
     plugin.getSiblings = function getSiblings(selectors) {
       var match, element = this.raw || this, i = 0,
        original = element, results = NodeList();
@@ -248,10 +238,8 @@
      getPreviousSiblings = nil,
      getSiblings =         nil,
      last =                nil,
-     match =               nil,
      next =                nil,
      previous =            nil,
-     query =               nil,
      up =                  nil;
   })(Element.plugin);
 

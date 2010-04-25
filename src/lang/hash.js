@@ -83,6 +83,8 @@
     return Hash;
   })();
 
+  fuse.Hash.from = fuse.Hash;
+
   /*--------------------------------------------------------------------------*/
 
   (function(plugin) {
@@ -293,9 +295,3 @@
      values =        nil,
      zip =           nil;
   })(fuse.Hash.plugin, fuse.Hash);
-
-  /*--------------------------------------------------------------------------*/
-
-  fuse.addNS('util');
-
-  fuse.util.$H = fuse.Hash.from = fuse.Hash;

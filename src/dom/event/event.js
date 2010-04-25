@@ -60,7 +60,7 @@
 
     CHECKED_INPUT_TYPES = { 'checkbox': 1, 'radio': 1 },
 
-    arrayIndexOf = Array.prototype.indexOf || fuse.Array.plugin.indexOf,
+    arrIndexOf = fuse.Array.plugin.indexOf.raw,
 
     definePointerXY = function() {
       // fired events have no raw
@@ -162,7 +162,7 @@
     addCache = function(id, type, handler) {
       // bail if handler is already exists
       var ec = getOrCreateCache(id, type);
-      if (arrayIndexOf.call(ec.handlers, handler) != -1) {
+      if (arrIndexOf.call(ec.handlers, handler) != -1) {
         return false;
       }
       ec.handlers.unshift(handler);
@@ -656,7 +656,7 @@
       }
 
       dispatcher = ec.dispatcher;
-      foundAt = isNumber(handler) ? handler : arrayIndexOf.call(ec.handlers, handler);
+      foundAt = isNumber(handler) ? handler : arrIndexOf.call(ec.handlers, handler);
 
       if (foundAt < 0) return this;
       removeCacheAtIndex(id, type, foundAt);

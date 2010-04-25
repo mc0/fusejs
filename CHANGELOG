@@ -1,3 +1,10 @@
+* Separate the fuse.util methods into their own /lang/util.js file. [jddalton]
+
+* Separate the ECMA specification bug fixes into their own /lang/ecma.js file. [jddalton]
+
+* Remove fuse.String.interpret. [jddalton]
+  Note: Backwards compatibility warning.
+
 * Fix window object detection for Safari 2.0 in fuse.dom.Window. [jddalton]
 
 * Add a `raw` property to all wrapped sandboxed native methods to reference their original methods. [jddalton]

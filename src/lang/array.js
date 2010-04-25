@@ -1,6 +1,6 @@
   /*------------------------------ LANG: ARRAY -------------------------------*/
 
-  addArrayMethods = function(List) {
+  addArrayMethods.callbacks.push(function(List) {
 
     var plugin = List.plugin,
 
@@ -441,35 +441,8 @@
 
     /* Use native browser JS 1.6 implementations if available */
 
-    // Opera's implementation of Array.prototype.concat treats a functions arguments
-    // object as an array so we overwrite concat to fix it.
-    // ECMA-5 15.4.4.4
-    if (!plugin.concat || envTest('ARRAY_CONCAT_ARGUMENTS_BUGGY'))
-      plugin.concat = function concat() {
-        if (this == null) throw new TypeError;
-
-        var item, j, i = -1,
-         length  = arguments.length,
-         object  = Object(this),
-         results = isArray(object) ? List.fromArray(object) : List(object),
-         n       = results.length;
-
-        while (++i < length) {
-          item = arguments[i];
-          if (isArray(item)) {
-            j = 0; itemLen = item.length;
-            for ( ; j < itemLen; j++, n++) {
-              if (j in item) results[n] = item[j];
-            }
-          } else {
-            results[n++] = item;
-          }
-        }
-        return results;
-      };
-
     // ECMA-5 15.4.4.16
-    if (!plugin.every)
+    if (!plugin.every) {
       plugin.every = function every(callback, thisArg) {
         callback = callback || K;
         if (this == null || !isFunction(callback)) throw new TypeError;
@@ -481,9 +454,10 @@
         }
         return true;
       };
+    }
 
     // ECMA-5 15.4.4.20
-    if (!plugin.filter)
+    if (!plugin.filter) {
       plugin.filter = function filter(callback, thisArg) {
         callback = callback || function(value) { return value != null; };
         if (this == null || !isFunction(callback)) throw new TypeError;
@@ -499,8 +473,11 @@
         return results;
       };
 
+      plugin.filter.raw = plugin.filter;
+    }
+
     // ECMA-5 15.4.4.18
-    if (!plugin.forEach)
+    if (!plugin.forEach) {
       plugin.forEach = function forEach(callback, thisArg) {
         if (this == null || !isFunction(callback)) throw new TypeError;
         var i = -1, object = Object(this), length = object.length >>> 0;
@@ -516,8 +493,11 @@
         }
       };
 
+      plugin.forEach.raw = plugin.forEach;
+    }
+
     // ECMA-5 15.4.4.14
-    if (!plugin.indexOf)
+    if (!plugin.indexOf) {
       plugin.indexOf = function indexOf(item, fromIndex) {
         if (this == null) throw new TypeError;
 
@@ -534,8 +514,11 @@
         return fuse.Number(-1);
       };
 
+      plugin.indexOf.raw = plugin.indexOf;
+    }
+
     // ECMA-5 15.4.4.15
-    if (!plugin.lastIndexOf)
+    if (!plugin.lastIndexOf) {
       plugin.lastIndexOf = function lastIndexOf(item, fromIndex) {
         if (this == null) throw new TypeError;
         var object = Object(this), length = object.length >>> 0;
@@ -553,8 +536,11 @@
         return fuse.Number(fromIndex);
       };
 
+      plugin.lastIndexOf.raw = plugin.lastIndexOf;
+    }
+
     // ECMA-5 15.4.4.19
-    if (!plugin.map)
+    if (!plugin.map) {
       plugin.map = function map(callback, thisArg) {
         if (!callback) return plugin.clone.call(this);
         if (this == null || !isFunction(callback)) throw new TypeError;
@@ -574,33 +560,11 @@
         return results;
       };
 
-    // ECMA-5 15.4.4.10
-    if (envTest('ARRAY_SLICE_EXLUDES_TRAILING_UNDEFINED_INDEXES'))
-      plugin.slice = (function(__slice) {
-        function slice(start, end) {
-          if (this == null) throw new TypeError;
-
-          var endIndex, result, object = Object(this),
-           length = object.length >>> 0;
-
-          end = typeof end === 'undefined' ? length : toInteger(end);
-          endIndex = end - 1;
-
-          if (end > length || endIndex in object) {
-            return __slice.call(object, start, end);
-          }
-
-          object[endIndex] = undef;
-          result = __slice.call(object, start, end);
-          delete object[endIndex];
-          return result;
-        }
-
-        return slice;
-      })(plugin.slice);
+      plugin.map.raw = plugin.map;
+    }
 
     // ECMA-5 15.4.4.17
-    if (!plugin.some)
+    if (!plugin.some) {
       plugin.some = function some(callback, thisArg) {
         callback = callback || K;
         if (this == null || !isFunction(callback)) throw new TypeError;
@@ -612,6 +576,9 @@
         }
         return false;
       };
+
+      plugin.some.raw = plugin.some;
+    }
 
     // assign any missing Enumerable methods
     if (Enumerable) {
@@ -629,7 +596,6 @@
     var _each =     nil,
      clear =        nil,
      compact =      nil,
-     concat =       nil,
      each =         nil,
      every =        nil,
      filter =       nil,
@@ -654,12 +620,6 @@
      unique =       nil,
      without =      nil,
      zip =          nil;
-  };
-
-  /*--------------------------------------------------------------------------*/
+  });
 
   addArrayMethods(fuse.Array);
-
-  fuse.addNS('util');
-
-  fuse.util.$A = fuse.Array.from;

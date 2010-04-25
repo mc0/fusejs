@@ -58,21 +58,21 @@
 
     reSplitByDot = /\b(?!\\)\./g,
 
+    strReplace = envTest('STRING_REPLACE_COERCE_FUNCTION_TO_STRING') ?
+      fuse.String.plugin.replace : fuse.String.plugin.replace.raw,
+
+    strSplit = envTest('STRING_SPLIT_BUGGY_WITH_REGEXP') ?
+      fuse.String.plugin.split : fuse.String.plugin.split.raw,
+
     escapeDots = function(match, path) {
       return '.' + path.replace(reDots, '\\.');
-    },
-
-    replace = envTest('STRING_REPLACE_COERCE_FUNCTION_TO_STRING') ?
-      fuse.String.plugin.replace : ''.replace,
-
-    split = envTest('STRING_SPLIT_BUGGY_WITH_REGEXP') ?
-      fuse.String.plugin.split : ''.split;
+    };
 
 
     plugin.preparse = function preparse() {
       var backslash, chain, escaped, prop, temp, token, tokens, j, i = 1,
        template = String(this.template),
-       parts    = split.call(template, this.pattern),
+       parts    = strSplit.call(template, this.pattern),
        length   = parts.length;
 
       escaped = this._escaped = { };
@@ -89,13 +89,13 @@
           // avoid parsing duplicates
           if (tokens[token]) continue;
 
-          j = -1; temp = split.call(chain, reSplitByDot); chain = [];
+          j = -1; temp = strSplit.call(chain, reSplitByDot); chain = [];
           while (prop = temp[++j]) {
             // convert bracket notation to dot notation then split and add
             if (prop.indexOf('[') > -1) {
-              prop = replace.call(prop, reBrackets, escapeDots);
+              prop = strReplace.call(prop, reBrackets, escapeDots);
               if (prop.charAt(0) === '.') prop = prop.slice(1);
-              chain.push.apply(chain, split.call(prop, reSplitByDot));
+              chain.push.apply(chain, strSplit.call(prop, reSplitByDot));
             }
             // simply add
             else {
@@ -193,7 +193,7 @@
   /*--------------------------------------------------------------------------*/
 
   (function(plugin) {
-    var replace = plugin.replace,
+    var strReplace = plugin.replace,
 
     prepareReplacement = function(replacement) {
       if (typeof replacement === 'function') {
@@ -212,7 +212,7 @@
       if (!pattern.global) {
         pattern = fuse.RegExp.clone(pattern, { 'global': true });
       }
-      return replace.call(this, pattern, prepareReplacement(replacement));
+      return strReplace.call(this, pattern, prepareReplacement(replacement));
     };
 
     plugin.interpolate = function interpolate(object, pattern) {
@@ -237,7 +237,7 @@
         if (pattern.global) {
           pattern = fuse.RegExp.clone(pattern, { 'global': false });
         }
-        return replace.call(this, pattern, prepareReplacement(replacement));
+        return strReplace.call(this, pattern, prepareReplacement(replacement));
       }
 
       if (typeof replacement !== 'function') {

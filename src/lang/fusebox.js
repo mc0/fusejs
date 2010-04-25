@@ -119,12 +119,12 @@
        glFunction     = global.Function,
        reStrict       = /^\s*(['"])use strict\1/,
        sbSlice        = __Array.prototype.slice,
-       toString       = {}.toString;
+       sbToString     = __Object.prototype.toString;
 
       instance || (instance = new Klass);
 
       from = function(value) {
-        switch (toString.call(value)) {
+        switch (sbToString.call(value)) {
           case '[object Array]':
             if (value.constructor !== instance.Array) {
               return instance.Array.fromArray(value);
@@ -205,7 +205,7 @@
 
         RegExp = function RegExp(pattern, flags) {
           var result = new __RegExp(pattern, flags);
-          result['__proto__'] = rePlugin;
+          result['__proto__'] = regPlugin;
           return result;
         };
 
@@ -311,7 +311,7 @@
        funcPlugin           = Function.plugin = Function.prototype,
        objPlugin            = Object.plugin   = Object.prototype,
        numPlugin            = Number.plugin   = Number.prototype,
-       rePlugin             = RegExp.plugin   = RegExp.prototype,
+       regPlugin            = RegExp.plugin   = RegExp.prototype,
        strPlugin            = String.plugin   = String.prototype,
        __concat             = arrPlugin.concat,
        __every              = arrPlugin.every,
@@ -351,7 +351,7 @@
        __toExponential      = numPlugin.toExponential,
        __toFixed            = numPlugin.toFixed,
        __toPrecision        = numPlugin.toPrecision,
-       __exec               = rePlugin.exec,
+       __exec               = regPlugin.exec,
        __charAt             = strPlugin.charAt,
        __charCodeAt         = strPlugin.charCodeAt,
        __strConcat          = strPlugin.concat,
@@ -427,7 +427,7 @@
       // ECMA-5 15.4.3.2
       if (!(Array.isArray = __Array.isArray))
         Array.isArray = function isArray(value) {
-          return toString.call(value) === '[object Array]';
+          return sbToString.call(value) === '[object Array]';
         };
 
       // ECMA-5 15.9.4.4
@@ -477,14 +477,14 @@
 
           // redefine RegExp to auto-fix \s issues
           RegExp = function RegExp(pattern, flags) {
-            return new RE((toString.call(pattern) === '[object RegExp]' ?
+            return new RE((sbToString.call(pattern) === '[object RegExp]' ?
               pattern.source : String(pattern))
                 .replace(reCharClass, newCharClass), flags);
           };
 
           // associate properties of old RegExp to the redefined one
           RegExp.SPECIAL_CHARS = RE.SPECIAL_CHARS;
-          rePlugin = RegExp.plugin = RegExp.prototype = RE.prototype;
+          regPlugin = RegExp.plugin = RegExp.prototype = RE.prototype;
         }
 
         return RegExp;
@@ -492,14 +492,6 @@
 
       /*----------------------------------------------------------------------*/
 
-      if (!SKIP_METHODS_RETURNING_ARRAYS) {
-        (arrPlugin.concat = function concat() {
-          var args = arguments;
-          return Array.fromArray(args.length
-            ? __concat.apply(this, args)
-            : __concat.call(this));
-        }).raw = __concat;
-      }
       if (arrPlugin.every) {
         (arrPlugin.every = function every(callback, thisArg) {
           return __every.call(this, callback || K, thisArg);
@@ -540,41 +532,52 @@
         }
         arrPlugin.map.raw = __map;
       }
-      if (!SKIP_METHODS_RETURNING_ARRAYS) {
-        (arrPlugin.reverse = function reverse() {
-          return this.length > 0
-            ? Array.fromArray(__reverse.call(this))
-            : Array();
-        }).raw = __reverse;
-      }
-      if (!SKIP_METHODS_RETURNING_ARRAYS) {
-        (arrPlugin.slice = function slice(start, end) {
-          var result = __slice.call(this, start, end == null ? this.length : end);
-          return result.length
-            ? Array.fromArray(result)
-            : Array();
-        }).raw = __slice;
-      }
       if (arrPlugin.some) {
         (arrPlugin.some = function some(callback, thisArg) {
           return __some.call(this, callback || K, thisArg);
         }).raw = __some;
       }
+
       if (!SKIP_METHODS_RETURNING_ARRAYS) {
-        (arrPlugin.sort = function sort(compareFn) {
+        arrPlugin.concat = function concat() {
+          var args = arguments;
+          return Array.fromArray(args.length
+            ? __concat.apply(this, args)
+            : __concat.call(this));
+        };
+
+        arrPlugin.reverse = function reverse() {
+          return this.length > 0
+            ? Array.fromArray(__reverse.call(this))
+            : Array();
+        };
+
+        arrPlugin.slice = function slice(start, end) {
+          var result = __slice.call(this, start, end == null ? this.length : end);
+          return result.length
+            ? Array.fromArray(result)
+            : Array();
+        };
+
+        arrPlugin.sort = function sort(compareFn) {
           return this.length > 0
             ? Array.fromArray(compareFn ? __sort.call(this, compareFn) : __sort.call(this))
             : Array();
-        }).raw = __sort;
-      }
-      if (!SKIP_METHODS_RETURNING_ARRAYS) {
-        (arrPlugin.splice = function splice(start, deleteCount) {
+        };
+
+        arrPlugin.splice = function splice(start, deleteCount) {
           var result = __splice.apply(this, arguments);
           return result.length
             ? Array.fromArray(result)
             : Array();
-        }).raw = __splice;
+        };
       }
+
+      arrPlugin.concat.raw  = __concat;
+      arrPlugin.reverse.raw = __reverse;
+      arrPlugin.slice.raw   = __slice;
+      arrPlugin.sort.raw    = __sort;
+      arrPlugin.splice.raw  = __splice;
 
       (arrPlugin.join = function join(separator) {
         return String(__join.call(this, separator));
@@ -693,7 +696,7 @@
         return instance.String(__toPrecision.call(this, precision));
       }).raw = __toPrecision;
 
-      (rePlugin.exec = function exec(string) {
+      (regPlugin.exec = function exec(string) {
         var output = __exec.call(this, string);
         if (output) {
           var item, i = -1, length = output.length, results = instance.Array();
@@ -816,7 +819,7 @@
       funcPlugin.constructor = Function;
       objPlugin.constructor  = Object;
       numPlugin.constructor  = Number;
-      rePlugin.constructor   = RegExp;
+      regPlugin.constructor  = RegExp;
       strPlugin.constructor  = String;
 
       /*----------------------------------------------------------------------*/
@@ -988,3 +991,7 @@
 
     return Fusebox;
   })();
+
+  // redefine private helpers using sandboxed methods
+  slice = fuse.Array.plugin.slice.raw;
+  toString = fuse.Object.plugin.toString;

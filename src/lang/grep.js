@@ -1,10 +1,10 @@
   /*------------------------------- LANG: GREP -------------------------------*/
 
-  (function() {
-    var arrPlugin = fuse.Array.plugin,
-     toArray = arrPlugin.clone || arrPlugin.slice;
+  addArrayMethods.callbacks.push(function(List) {
+    var plugin = List.plugin,
+     toArray = plugin.clone || plugin.slice;
 
-    arrPlugin.grep = function grep(pattern, callback, thisArg) {
+    plugin.grep = function grep(pattern, callback, thisArg) {
       if (this == null) {
         throw new TypeError;
       }
@@ -13,7 +13,7 @@
         return toArray.call(this, 0);
       }
 
-      var item, i = -1, results = fuse.Array(), object = Object(this),
+      var item, i = -1, results = List(), object = Object(this),
        length = object.length >>> 0;
       if (isString(pattern)) {
         pattern = new RegExp(escapeRegExpChars(pattern));
@@ -27,6 +27,11 @@
       return results;
     };
 
+    // prevent JScript bug with named function expressions
+    var grep = nil;
+  });
+
+  (function() {
     if (Enumerable) {
       Enumerable.grep = function grep(pattern, callback, thisArg) {
         if (!pattern || pattern == '' ||

@@ -32,10 +32,6 @@
     return Range;
   })();
 
-  fuse.addNS('util');
-
-  fuse.util.$R = fuse.Range;
-
   /*--------------------------------------------------------------------------*/
 
   (function(plugin) {

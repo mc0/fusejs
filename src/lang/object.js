@@ -287,7 +287,7 @@
     Obj.toHTML = function toHTML(object) {
       return object && typeof object.toHTML === 'function'
         ? fuse.String(object.toHTML())
-        : fuse.String.interpret(object);
+        : fuse.String(object == null ? '' : object);
     };
 
     Obj.toQueryString = function toQueryString(object) {

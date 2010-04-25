@@ -34,7 +34,7 @@
     env.removeTest = removeTest;
   })(fuse.env);
 
-  /*----------------------------- LANG FEATURES ------------------------------*/
+  /*-------------------------- LANG FEATURES / BUGS --------------------------*/
 
   envAddTest({
     'ACTIVE_X_OBJECT': function() {
@@ -48,7 +48,7 @@
         typeof JSON.parse === 'function' &&
         typeof JSON.stringify === 'function' &&
         typeof JSON.stringify(K) === 'undefined' &&
-        JSON.stringify(0) === '0' && JSON.parse('{ "x": true }').x;
+        JSON.stringify(0) === '0' && !!JSON.parse('{ "x": true }').x;
     },
 
     'OBJECT__PROTO__': function() {
@@ -62,56 +62,6 @@
         list['__proto__'] = backup;
         return result && typeof list.push === 'function';
       }
-    }
-  });
-
-  /*-------------------------------- LANG BUGS -------------------------------*/
-
-  envAddTest({
-    'ARRAY_CONCAT_ARGUMENTS_BUGGY': function() {
-      // true for Opera
-      var array = [];
-      return (function() { return array.concat &&
-        array.concat(arguments).length === 2; })(1, 2);
-    },
-
-    'ARRAY_SLICE_EXLUDES_TRAILING_UNDEFINED_INDEXES': function() {
-      // true for Opera 9.25
-      var array = [1]; array[2] = 1;
-      return array.slice && array.slice(0, 2).length === 1;
-    },
-
-    'REGEXP_EXEC_RETURNS_UNDEFINED_VALUES_AS_STRINGS': function() {
-      // true for IE; String#match is affected too
-      return typeof /x(y)?/.exec('x')[1] === 'string'; 
-    },
-
-    'REGEXP_INCREMENTS_LAST_INDEX_AFTER_ZERO_LENGTH_MATCHES': function() {
-      // true for IE
-      var pattern = /^/g, data = [];
-      data[0] = !!pattern.test('').lastIndex;
-      ''.match(pattern);
-      data[1] = !!pattern.lastIndex;
-      return data[0] || data[1];
-    },
-
-    'STRING_LAST_INDEX_OF_BUGGY_WITH_NEGATIVE_OR_NAN_POSITION': function() {
-       // true for Chrome 1-2 and Opera 9.25
-       var string = 'xox';
-       return string.lastIndexOf('x', -1) !== 0 ||
-         string.lastIndexOf('x', +'x') !== 2
-    },
-
-    'STRING_METHODS_WRONGLY_SET_REGEXP_LAST_INDEX': function() {
-      // true for IE
-      var string = 'oxo', data = [], pattern = /x/;
-      string.replace(pattern, '');
-      data[0] = !!pattern.lastIndex;
-      string.match(pattern);
-      data[1] = !!pattern.lastIndex;
-      string.search(pattern);
-      data[2] = !!pattern.lastIndex;
-      return data[0] || data[1] || data[2];
     },
 
     'STRING_REPLACE_COERCE_FUNCTION_TO_STRING': function() {
@@ -120,40 +70,8 @@
       return 'x'.replace(/x/, func) === String(func);
     },
 
-    'STRING_REPLACE_BUGGY_WITH_GLOBAL_FLAG_AND_EMPTY_PATTERN': function() {
-      // true for Chrome 1
-      var string = 'xy', replacement = function() { return 'o'; };
-      return !(string.replace(/()/g, 'o') === 'oxoyo' &&
-        string.replace(new RegExp('', 'g'), replacement) === 'oxoyo' &&
-        string.replace(/(y|)/g, replacement) === 'oxoo');
-    },
-
-    'STRING_REPLACE_PASSES_UNDEFINED_VALUES_AS_STRINGS': function() {
-      // true for Firefox
-      var result;
-      'x'.replace(/x(y)?/, function(x, y) { result = typeof y === 'string'; });
-      return result; 
-    },
-
     'STRING_SPLIT_BUGGY_WITH_REGEXP': function() {
       // true for IE
       return 'x'.split(/x/).length !== 2 || 'oxo'.split(/x(y)?/).length !== 3;
-    },
-
-    'STRING_SPLIT_RETURNS_UNDEFINED_VALUES_AS_STRINGS': function() {
-      // true for Firefox
-      var result = 'oxo'.split(/x(y)?/);
-      return result.length === 3 && typeof result[1] === 'string'; 
-    },
-
-    'STRING_SPLIT_ZERO_LENGTH_MATCH_RETURNS_NON_EMPTY_ARRAY': function() {
-      return !!''.split(/^/).length;
-    },
-
-    'STRING_TRIM_INCOMPLETE': function() {
-      // true for Firefox
-      var key, sMap = fuse.RegExp.SPECIAL_CHARS.s, whitespace = '';
-      for (key in sMap) whitespace += key;
-      return typeof whitespace.trim !== 'function' || !!whitespace.trim();
     }
   });

@@ -56,21 +56,6 @@
   (function() {
     var doc = fuse._doc,
 
-    $ = function $(object) {
-      var objects, args = arguments, length = args.length;
-      if (length > 1) {
-        objects = NodeList();
-        while (length--) objects[length] = $(args[length]);
-        return objects;
-      }
-      if (isString(object)) {
-        object = doc.getElementById(object || expando);
-        return object && fromElement(object);
-      }
-      // attempt window decorator first, and then node decorator
-      return Node(Window(object));
-    },
-
     get = function get(object, attributes, context) {
       if (isString(object)) {
         if (attributes && typeof attributes.nodeType !== 'string') {
@@ -94,9 +79,6 @@
 
     fuse.get = get;
     fuse.getById = getById;
-
-    fuse.addNS('util');
-    fuse.util.$ = $;
   })();
 
   /*--------------------------------------------------------------------------*/

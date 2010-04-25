@@ -3,8 +3,6 @@
   (function() {
     var objInspect, strInspect,
 
-    arrPlugin   = fuse.Array.plugin,
-
     elemPlugin  = fuse.dom && fuse.dom.Element.plugin,
 
     eventPlugin = fuse.dom && fuse.dom.Event.plugin,
@@ -54,21 +52,25 @@
 
     /*------------------------------------------------------------------------*/
 
-    // fuse.Array#inspect
-    arrPlugin.inspect = function inspect() {
-      // called Obj.inspect(fuse.Array.plugin) or Obj.inspect(fuse.Array)
-      if (this === arrPlugin || this == global || this == null) {
-        return inspectPlugin(arrPlugin);
-      }
-      // called normally fuse.Array(...).inspect()
-      var results = [], object = Object(this), length = object.length >>> 0;
-      while (length--) {
-        results[length] = objInspect(object[length]);
-      }
-      return fuse.String('[' + results.join(', ') + ']');
-    };
+    addArrayMethods.callbacks.push(function(List) {
+      var plugin = List.plugin;
+      plugin.inspect = function inspect() {
+        // called Obj.inspect(fuse.Array.plugin) or Obj.inspect(fuse.Array)
+        if (this === plugin || this == global || this == null) {
+          return inspectPlugin(plugin);
+        }
+        // called normally fuse.Array(...).inspect()
+        var results = [], object = Object(this), length = object.length >>> 0;
+        while (length--) {
+          results[length] = objInspect(object[length]);
+        }
+        return fuse.String('[' + results.join(', ') + ']');
+      };
 
-    // fuse.String#inspect
+      // prevent JScript bug with named function expressions
+      var inspect = nil;
+    });
+
     strInspect =
     strPlugin.inspect = function inspect(useDoubleQuotes) {
       // called Obj.inspect(fuse.String.plugin) or Obj.inspect(fuse.Array)
@@ -82,7 +84,6 @@
         : "'" + string.replace(reWithSingleQuotes, escapeSpecialChars) + "'");
     };
 
-    // fuse.Enumerable#inspect
     if (Enumerable) {
       Enumerable.inspect = function inspect() {
         // called normally or called Obj.inspect(fuse.Enumerable)
@@ -92,7 +93,6 @@
       };
     }
 
-    // fuse.Hash#inspect
     if (hashPlugin) {
       hashPlugin.inspect = function inspect() {
         // called Obj.inspect(fuse.Hash.plugin) or generic if added later
@@ -108,7 +108,6 @@
       };
     }
 
-    // fuse.dom.Element#inspect
     if (elemPlugin) {
       elemPlugin.inspect = function inspect() {
         // called Obj.inspect(Element.plugin) or Obj.inspect(Element)
@@ -131,7 +130,6 @@
       };
     }
 
-    // Event#inspect
     if (eventPlugin) {
       eventPlugin.inspect = function inspect() {
         // called Obj.inspect(Event.plugin) or called normally event.inspect()
@@ -147,7 +145,6 @@
     // used by this closure only
     objInspect =
 
-    // fuse.Object.inspect
     Obj.inspect = function inspect(value) {
       var classType, object, results;
       if (value != null) {

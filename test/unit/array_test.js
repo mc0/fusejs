@@ -108,42 +108,6 @@ new Test.Unit.Runner({
       'called with an object as the `this` value and the `falsy` argument');
   },
 
-  'testConcat': function() {
-    // test passing an arguments object to concat
-    var self = this;
-    (function() {
-      self.assertEqual(1,
-        fuse.Array().concat(arguments).length,
-        'treats arguments as an array');
-    })(1, 2);
-
-    var array = fuse.Array('a', 'b', 'c');
-    this.assertEnumEqual($w('a b c d e f g h i'),
-      array.concat(['d', 'e'], 'f', ['g', 'h'], ['i']),
-      'failed basic concat test');
-
-    // test falsy values
-    var expected = [8, 9, 0, 'a', null, undef, false, 'd'];
-    this.assertEnumEqual(expected,
-      fuse.Array.create(8).concat([9, 0], 'a', [null], undef, false, 'd'),
-      'failed to concat falsy values');
-
-    // test undefined indexs
-    array = fuse.Array(3);
-    array = array.concat(array);
-    this.assert(!(4 in array), 'Undefined indexs should be left unset.');
-
-    // test setting a different `this`
-    array = [3]; array[2] = 4;
-    this.assertEnumEqual([Fixtures.Object, 3, undef, 4, 5],
-      fuse.Array.plugin.concat.call(Fixtures.Object, array, 5),
-      'Should work when called with an object as the `this` value');
-
-    this.assertEnumEqual(['a', 'b'],
-      fuse.Array.plugin.concat.call('a', 'b'),
-      'Should work when called with a string as the `this` value');
-  },
-
   'testContains': function() {
     var basic = fuse.Array(1, 2, 3),
      names = fuse.Array('joe', 'john', 'kit');

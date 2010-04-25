@@ -4,20 +4,6 @@
 
   Form = fuse.dom.FormElement;
 
-  fuse.addNS('util');
-
-  fuse.util.$F = (function() {
-    function $F(element) {
-      element = fuse.get(element);
-      return element && element.getValue
-        ? element.getValue()
-        : null;
-    }
-    return $F;
-  })();
-
-  /*--------------------------------------------------------------------------*/
-
   (function(plugin, dom) {
 
     var buttonPlugin = dom.ButtonElement.plugin,

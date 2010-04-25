@@ -42,10 +42,16 @@
     };
   })();
 
+  addArrayMethods = function(List) {
+    var callbacks = addArrayMethods.callbacks, i = -1;
+    while (callbacks[++i]) callbacks[i](List);
+  };
+
+  addArrayMethods.callbacks = [];
+
   $break =
   fuse.$break = function $break() { };
 
-  addArrayMethods =
   addNodeListMethod =
   emptyFunction =
   fuse.emptyFunction = function emptyFunction() { };
@@ -118,7 +124,6 @@
   /*--------------------------------------------------------------------------*/
 
   (function() {
-
     var getNS = function getNS(path) {
       var key, i = -1, keys = path.split('.'), object = this;
       while (key = keys[++i])
@@ -189,6 +194,7 @@
    'lang/number.js',
    'lang/regexp.js',
    'lang/string.js',
+   'lang/ecma.js',
 
    'lang/hash.js',
    'lang/range.js',
@@ -207,31 +213,40 @@
    'dom/element/attribute.js',
    'dom/element/style.js',
    'dom/element/position.js',
+   'dom/element/traversal.js',
 
    'dom/form/field.js',
    'dom/form/form.js',
    'dom/form/event-observer.js',
    'dom/form/timed-observer.js',
 
-   'dom/event/event.js',
-   'dom/event/dom-loaded.js',
-
-   'lang/grep.js',
-   'lang/inspect.js',
-   'lang/json.js',
-
-   'dom/element/traversal.js',
    'dom/node-list.js',
    'dom/selector/selector.js',
    'dom/selector/nwmatcher.js',
+
+   'dom/event/event.js',
+   'dom/event/dom-loaded.js',
 
    'ajax/ajax.js',
    'ajax/responders.js',
    'ajax/base.js',
    'ajax/request.js',
    'ajax/updater.js',
-   'ajax/timed-updater.js') %>
-  /*--------------------------------------------------------------------------*/
+   'ajax/timed-updater.js',
+
+   'lang/grep.js',
+   'lang/inspect.js',
+   'lang/json.js',
+   'lang/util.js') %>
+
+  addArrayMethods(fuse.Array);
+
+  // pave any fuse.dom.NodeList methods that fuse.Array shares
+  // you may call element first(), last(), and contains() by using invoke()
+  // ex: elements.invoke('first');
+  if (fuse.dom && fuse.dom.NodeList) {
+    addArrayMethods(fuse.dom.NodeList);
+  }
 
   // update native generics and element methods
   fuse.updateGenerics(true);

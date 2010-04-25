@@ -679,7 +679,7 @@ new Test.Unit.Runner({
     this.assert($$('#item_1', clone)[0] == fuse.dom.Element.down(clone));
   },
 
-  'testSelectorSpit': function() {
+  'testSelectorSplit': function() {
     this.assertEnumEqual(['.group', 'div[class~="expand"]', 'a'],
       Selector.split('.group, div[class~="expand"], a'));
 

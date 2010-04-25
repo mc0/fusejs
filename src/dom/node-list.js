@@ -74,20 +74,15 @@
       }
     };
 
-    // Add Element methods to fuse.dom.NodeList
+    // add Element methods to fuse.dom.NodeList
+    eachKey(Element.plugin, addNodeListMethod);
+
     if (fuse.dom.FormElement) {
       eachKey(fuse.dom.FormElement, addNodeListMethod);
     }
     if (fuse.dom.InputElement) {
       eachKey(fuse.dom.InputElement.plugin, addNodeListMethod);
     }
-    eachKey(Element.plugin, addNodeListMethod);
-
-    // Pave any fuse.dom.NodeList methods that fuse.Array shares.
-    // You may call element first(), last(), and contains() by using invoke()
-    // Ex: elements.invoke('first');
-    addArrayMethods(NodeList);
-
   })(NodeList.plugin);
 
   /*--------------------------------------------------------------------------*/

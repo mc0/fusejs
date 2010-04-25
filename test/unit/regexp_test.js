@@ -112,22 +112,5 @@ new Test.Unit.Runner({
       '\\/\\(\\[\\.\\*\\+\\?\\^\\=\\!\\:\\$\\{\\}\\(\\)\\|\\[\\\\\\]\\\\\\\/\\\\\\\\\\]\\)\\/g',
       fuse.RegExp.escape('/([.*+?^=!:${}()|[\\]\\/\\\\])/g')
     );
-  },
-
-  'testRegExpExec': function() {
-    var results = fuse.RegExp('x(y)?').exec('x');
-    this.assertEqual(true, '1' in results,
-      'Should not return a sparse array.');
-
-    this.assertEnumEqual(['x', undef], results,
-      'Should contain an undefined value.');
-  },
-  
-  'testRegExpTest': function() {
-    var pattern = fuse.RegExp('^', 'g');
-    pattern.test('');
-
-    this.assertEqual(0, pattern.lastIndex,
-      'Should not set lastIndex for zero length matches.');
   }
 });
