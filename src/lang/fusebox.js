@@ -15,7 +15,7 @@
     mode = (function()  {
       // true for IE >= 5.5 (ActiveX object by itself is supported by IE4)
       // note: use iframes when served from the file protocol to avoid an ActiveX warning.
-
+      //
       // The htmlfile ActiveX object avoids https mixed content warnings and is a
       // workaround for access denied errors thrown when using iframes to create
       // sandboxes after the document.domain is set. Access will be denied until
@@ -29,17 +29,16 @@
           return result;
         } catch (e) { }
       }
-
       // true for Carakan, JaegerMonkey, JavaScriptCore, KJS, Nitro, Rhino,
       // SpiderMonkey, SquirrelFish (Extreme), Tamarin, TraceMonkey, V8
-
+      //
       // Check "OBJECT__PROTO__" first because Firefox will permanently screw up
       // other iframes on the page if an iframe is inserted and removed before the
       // dom has loaded.
       if (envTest('OBJECT__PROTO__')) {
         return OBJECT__PROTO__;
       }
-
+      // last but not least try the iframe
       var doc = global.document;
       if (isHostObject(global, 'frames') && doc &&
           isHostObject(doc, 'createElement')) {
@@ -48,9 +47,9 @@
     })(),
 
     createSandbox = (function() {
-      if (mode === OBJECT__PROTO__)
+      if (mode === OBJECT__PROTO__) {
         return function() { return global; };
-
+      }
       // IE requires the iframe/htmlfile remain in the cache or it will be
       // marked for garbage collection
       var counter = 0, doc = global.document;
@@ -107,19 +106,20 @@
       // Most methods try to follow ECMA spec but may differ from
       // the documented method.length value or allow null callbacks.
       var Array, Boolean, Date, Function, Number, Object, RegExp, String, from,
-       glSlice     = global.Array.prototype.slice,
-       glFunction  = global.Function,
-       reStrict    = /^\s*(['"])use strict\1/,
-       sandbox     = createSandbox(),
-       toString    = global.Object.prototype.toString,
-       __Array     = sandbox.Array,
-       __Boolean   = sandbox.Boolean,
-       __Date      = sandbox.Date,
-       __Function  = sandbox.Function,
-       __Number    = sandbox.Number,
-       __Object    = sandbox.Object,
-       __RegExp    = sandbox.RegExp,
-       __String    = sandbox.String;
+       sandbox        = createSandbox(),
+       __Array        = sandbox.Array,
+       __Boolean      = sandbox.Boolean,
+       __Date         = sandbox.Date,
+       __Function     = sandbox.Function,
+       __Number       = sandbox.Number,
+       __Object       = sandbox.Object,
+       __RegExp       = sandbox.RegExp,
+       __String       = sandbox.String,
+       filterCallback = function(value) { return value != null; },
+       glFunction     = global.Function,
+       reStrict       = /^\s*(['"])use strict\1/,
+       sbSlice        = __Array.prototype.slice,
+       toString       = {}.toString;
 
       instance || (instance = new Klass);
 
@@ -169,20 +169,21 @@
         Date = function Date(year, month, date, hours, minutes, seconds, ms) {
           var result;
           if (this.constructor === Date) {
-           result = arguments.length === 1
-             ? new __Date(year)
-             : new __Date(year, month, date || 1, hours || 0, minutes || 0, seconds || 0, ms || 0);
-           result['__proto__'] = datePlugin;
+            result = arguments.length === 1
+              ? new __Date(year)
+              : new __Date(year, month, date || 1, hours || 0, minutes || 0, seconds || 0, ms || 0);
+            result['__proto__'] = datePlugin;
+          } else {
+            result = instance.String(new __Date);
           }
-          else result = instance.String(new __Date);
           return result;
         };
 
         Function = function Function(argN, body) {
           var args = arguments,
           result = args.length < 3
-           ? __Function(argN, body)
-           : __Function.apply(__Function, args);
+            ? __Function(argN, body)
+            : __Function.apply(__Function, args);
           result['__proto__'] = funcPlugin;
           return result;
         };
@@ -215,7 +216,7 @@
         };
 
         // make prototype values conform to ECMA spec and inherit from regular natives
-        Object.prototype['__proto__']   = __Object.prototype;
+        Object.prototype['__proto__']                      = __Object.prototype;
         (Array.prototype    = [ ])['__proto__']            = __Array.prototype;
         (Boolean.prototype  = new __Boolean)['__proto__']  = __Boolean.prototype;
         (Date.prototype     = new __Date)['__proto__']     = __Date.prototype;
@@ -229,8 +230,8 @@
           var args = arguments, argLen = args.length;
           if (argLen) {
             return argLen === 1 && length > -1
-             ? new __Array(length)
-             : Array.fromArray(args);
+              ? new __Array(length)
+              : Array.fromArray(args);
           }
           return new __Array();
         };
@@ -249,13 +250,16 @@
         };
 
         Function = function Function(argN, body) {
-          var fn, result, args = glSlice.call(arguments, 0),
-          originalBody = body = args.pop();
+          var fn, result, args = sbSlice.call(arguments, 0),
+           toString = function toString() { return originalBody; },
+           originalBody = body = args.pop();
+
           argN = args.join(',');
 
           // ensure we aren't in strict mode and map arguments.callee to the wrapper
-          if (body && body.search(reStrict) < 0)
+          if (body && body.search(reStrict) < 0) {
             body = 'arguments.callee = arguments.callee.' + expando + '; ' + body;
+          }
 
           // create function using global.Function constructor
           fn = new glFunction(argN, body);
@@ -265,7 +269,6 @@
             'var sandbox = this; return function() { return fn.apply(this == sandbox ? global : this, arguments) }')(global, fn);
 
           // make toString() return the unmodified function body
-          function toString() { return originalBody; }
           result.toString = toString;
 
           return result;
@@ -366,7 +369,9 @@
        __toLocaleLowerCase  = strPlugin.toLocaleLowerCase,
        __toLocaleUpperCase  = strPlugin.toLocaleUpperCase,
        __toUpperCase        = strPlugin.toUpperCase,
-       __trim               = strPlugin.trim;
+       __trim               = strPlugin.trim,
+       __trimLeft           = strPlugin.trimLeft,
+       __trimRight          = strPlugin.trimRight;
 
       Number.MAX_VALUE         = 1.7976931348623157e+308;
 
@@ -396,32 +401,28 @@
         }
       };
 
-      Array.fromArray = (function() {
-        var fromArray = function fromArray(array) {
-          var result = new __Array;
-          result.push.apply(result, array);
-          return result;
-        };
-
-        if (mode === OBJECT__PROTO__) {
-          fromArray = function fromArray(array) {
-            var result = glSlice.call(array, 0);
-            result['__proto__'] = arrPlugin;
-            return result;
-          };
-        }
-        else if (SKIP_METHODS_RETURNING_ARRAYS) {
-          var sbSlice = __Array.prototype.slice;
-          fromArray = function fromArray(array) {
-            return sbSlice.call(array, 0);
-          };
-        }
-        return fromArray;
-      })();
-
       Array.create = function create() {
         return Array.fromArray(arguments);
       };
+
+      Array.fromArray = function fromArray(array) {
+        var result = new __Array;
+        result.push.apply(result, array);
+        return result;
+      };
+
+      if (mode === OBJECT__PROTO__) {
+        Array.fromArray = function fromArray(array) {
+          var result = sbSlice.call(array, 0);
+          result['__proto__'] = arrPlugin;
+          return result;
+        };
+      }
+      else if (SKIP_METHODS_RETURNING_ARRAYS) {
+        Array.fromArray = function fromArray(array) {
+          return sbSlice.call(array, 0);
+        };
+      }
 
       // ECMA-5 15.4.3.2
       if (!(Array.isArray = __Array.isArray))
@@ -449,8 +450,7 @@
 
       // ECMA-5 15.5.3.2
       String.fromCharCode = function fromCharCode(charCode) {
-        var args = arguments;
-        return String(args.length > 1
+        return String(arguments.length > 1
           ? __String.fromCharCode.apply(__String, arguments)
           : __String.fromCharCode(charCode));
       };
@@ -493,38 +493,37 @@
       /*----------------------------------------------------------------------*/
 
       if (!SKIP_METHODS_RETURNING_ARRAYS) {
-        arrPlugin.concat = function concat() {
+        (arrPlugin.concat = function concat() {
           var args = arguments;
           return Array.fromArray(args.length
             ? __concat.apply(this, args)
             : __concat.call(this));
-        };
+        }).raw = __concat;
       }
       if (arrPlugin.every) {
-        arrPlugin.every = function every(callback, thisArg) {
+        (arrPlugin.every = function every(callback, thisArg) {
           return __every.call(this, callback || K, thisArg);
-        };
+        }).raw = __every;
       }
       if (arrPlugin.filter) {
-        arrPlugin.filter = function filter(callback, thisArg) {
-          var result = __filter.call(this, callback ||
-            function(value) { return value != null; }, thisArg);
+        (arrPlugin.filter = function filter(callback, thisArg) {
+          var result = __filter.call(this, callback || filterCallback, thisArg);
           return result.length
             ? Array.fromArray(result)
             : Array();
-        };
+        }).raw = __filter;
       }
       if (arrPlugin.indexOf) {
-        arrPlugin.indexOf = function indexOf(item, fromIndex) {
+        (arrPlugin.indexOf = function indexOf(item, fromIndex) {
           return instance.Number(__indexOf.call(this, item,
             fromIndex == null ? 0 : fromIndex));
-        };
+        }).raw = __indexOf;
       }
       if (arrPlugin.lastIndexOf) {
-        arrPlugin.lastIndexOf = function lastIndexOf(item, fromIndex) {
+        (arrPlugin.lastIndexOf = function lastIndexOf(item, fromIndex) {
           return instance.Number(__lastIndexOf.call(this, item,
             fromIndex == null ? this.length : fromIndex));
-        };
+        }).raw = __lastIndexOf;
       }
       if (arrPlugin.map) {
         if (SKIP_METHODS_RETURNING_ARRAYS) {
@@ -539,161 +538,162 @@
               : Array();
           };
         }
+        arrPlugin.map.raw = __map;
       }
       if (!SKIP_METHODS_RETURNING_ARRAYS) {
-        arrPlugin.reverse = function reverse() {
+        (arrPlugin.reverse = function reverse() {
           return this.length > 0
             ? Array.fromArray(__reverse.call(this))
             : Array();
-        };
+        }).raw = __reverse;
       }
       if (!SKIP_METHODS_RETURNING_ARRAYS) {
-        arrPlugin.slice = function slice(start, end) {
+        (arrPlugin.slice = function slice(start, end) {
           var result = __slice.call(this, start, end == null ? this.length : end);
           return result.length
             ? Array.fromArray(result)
             : Array();
-        };
+        }).raw = __slice;
       }
       if (arrPlugin.some) {
-        arrPlugin.some = function some(callback, thisArg) {
+        (arrPlugin.some = function some(callback, thisArg) {
           return __some.call(this, callback || K, thisArg);
-        };
+        }).raw = __some;
       }
       if (!SKIP_METHODS_RETURNING_ARRAYS) {
-        arrPlugin.sort = function sort(compareFn) {
+        (arrPlugin.sort = function sort(compareFn) {
           return this.length > 0
             ? Array.fromArray(compareFn ? __sort.call(this, compareFn) : __sort.call(this))
             : Array();
-        };
+        }).raw = __sort;
       }
       if (!SKIP_METHODS_RETURNING_ARRAYS) {
-        arrPlugin.splice = function splice(start, deleteCount) {
+        (arrPlugin.splice = function splice(start, deleteCount) {
           var result = __splice.apply(this, arguments);
           return result.length
             ? Array.fromArray(result)
             : Array();
-        };
+        }).raw = __splice;
       }
 
-      arrPlugin.join = function join(separator) {
+      (arrPlugin.join = function join(separator) {
         return String(__join.call(this, separator));
-      };
+      }).raw = __join;
 
-      arrPlugin.push = function push(item) {
+      (arrPlugin.push = function push(item) {
         var args = arguments;
         return instance.Number(args.length > 1
           ? __push.apply(this, args)
           : __push.call(this, item));
-      };
+      }).raw = __push;
 
-      arrPlugin.unshift = function unshift(item) {
+      (arrPlugin.unshift = function unshift(item) {
         var args = arguments;
         return instance.Number(args.length > 1
           ? __unshift.apply(this, args)
           : __unshift.call(this, item));
-      };
+      }).raw = __unshift;
 
       if (datePlugin.toISOString) {
-        datePlugin.toISOString = function toISOString() {
+        (datePlugin.toISOString = function toISOString() {
           return instance.String(__toISOString.call(this));
-        };
+        }).raw = __toISOString;
       }
       if (datePlugin.toJSON) {
-        datePlugin.toJSON= function toJSON() {
+        (datePlugin.toJSON = function toJSON() {
           return instance.String(__toJSON.call(this));
-        };
+        }).raw = __toJSON;
       }
 
-      datePlugin.getDate = function getDate() {
+      (datePlugin.getDate = function getDate() {
         return instance.Number(__getDate.call(this));
-      };
+      }).raw = __getDate;
 
-      datePlugin.getDay = function getDay() {
+      (datePlugin.getDay = function getDay() {
         return instance.Number(__getDay.call(this));
-      };
+      }).raw = __getDay;
 
-      datePlugin.getFullYear = function getFullYear() {
+      (datePlugin.getFullYear = function getFullYear() {
         return instance.Number(__getFullYear.call(this));
-      };
+      }).raw = __getFullYear;
 
-      datePlugin.getHours = function getHours() {
+      (datePlugin.getHours = function getHours() {
         return instance.Number(__getHours.call(this));
-      };
+      }).raw = __getHours;
 
-      datePlugin.getMilliseconds = function getMilliseconds() {
+      (datePlugin.getMilliseconds = function getMilliseconds() {
         return instance.Number(__getMilliseconds.call(this));
-      };
+      }).raw = __getMilliseconds;
 
-      datePlugin.getMinutes = function getMinutes() {
+      (datePlugin.getMinutes = function getMinutes() {
         return instance.Number(__getMinutes.call(this));
-      };
+      }).raw = __getMinutes;
 
-      datePlugin.getMonth = function getMonth () {
+      (datePlugin.getMonth = function getMonth () {
         return instance.Number(__getMonth.call(this));
-      };
+      }).raw = __getMonth;
 
-      datePlugin.getSeconds = function getSeconds() {
+      (datePlugin.getSeconds = function getSeconds() {
         return instance.Number(__getSeconds.call(this));
-      };
+      }).raw = __getSeconds;
 
-      datePlugin.getTime = function getTime() {
+      (datePlugin.getTime = function getTime() {
         return instance.Number(__getTime.call(this));
-      };
+      }).raw = __getTime;
 
-      datePlugin.getTimezoneOffset = function getTimezoneOffset() {
+      (datePlugin.getTimezoneOffset = function getTimezoneOffset() {
         return instance.Number(__getTimezoneOffset.call(this));
-      };
+      }).raw = __getTimezoneOffset;
 
-      datePlugin.getUTCDate = function getUTCDate() {
+      (datePlugin.getUTCDate = function getUTCDate() {
         return instance.Number(__getUTCDate.call(this));
-      };
+      }).raw = __getUTCDate;
 
-      datePlugin.getUTCDay = function getUTCDay() {
+      (datePlugin.getUTCDay = function getUTCDay() {
         return instance.Number(__getUTCDay.call(this));
-      };
+      }).raw = __getUTCDay;
 
-      datePlugin.getUTCFullYear = function getUTCFullYear() {
+      (datePlugin.getUTCFullYear = function getUTCFullYear() {
         return instance.Number(__getUTCFullYear.call(this));
-      };
+      }).raw = __getUTCFullYear;
 
-      datePlugin.getUTCHours = function getUTCHours() {
+      (datePlugin.getUTCHours = function getUTCHours() {
         return instance.Number(__getUTCHours.call(this));
-      };
+      }).raw = __getUTCHours;
 
-      datePlugin.getUTCMilliseconds = function getUTCMilliseconds() {
+      (datePlugin.getUTCMilliseconds = function getUTCMilliseconds() {
         return instance.Number(__getUTCMilliseconds.call(this));
-      };
+      }).raw = __getUTCMilliseconds;
 
-      datePlugin.getUTCMinutes = function getUTCMinutes() {
+      (datePlugin.getUTCMinutes = function getUTCMinutes() {
         return instance.Number(__getUTCMinutes.call(this));
-      };
+      }).raw = __getUTCMinutes;
 
-      datePlugin.getUTCMonth = function getUTCMonth() {
+      (datePlugin.getUTCMonth = function getUTCMonth() {
         return instance.Number(__getUTCMonth.call(this));
-      };
+      }).raw = __getUTCMonth;
 
-      datePlugin.getUTCSeconds = function getUTCSeconds() {
+      (datePlugin.getUTCSeconds = function getUTCSeconds() {
         return instance.Number(__getUTCSeconds.call(this));
-      };
+      }).raw = __getUTCSeconds;
 
-      datePlugin.getYear = function getYear() {
+      (datePlugin.getYear = function getYear() {
         return instance.Number(__getYear.call(this));
-      };
+      }).raw = __getYear;
 
-      numPlugin.toExponential = function toExponential(fractionDigits) {
+      (numPlugin.toExponential = function toExponential(fractionDigits) {
         return instance.String(__toExponential.call(this, fractionDigits));
-      };
+      }).raw = __toExponential;
 
-      numPlugin.toFixed = function toFixed(fractionDigits) {
+      (numPlugin.toFixed = function toFixed(fractionDigits) {
         return instance.String(__toFixed.call(this, fractionDigits));
-      };
+      }).raw = __toFixed;
 
-      numPlugin.toPrecision = function toPrecision(precision) {
+      (numPlugin.toPrecision = function toPrecision(precision) {
         return instance.String(__toPrecision.call(this, precision));
-      };
+      }).raw = __toPrecision;
 
-      rePlugin.exec = function exec(string) {
+      (rePlugin.exec = function exec(string) {
         var output = __exec.call(this, string);
         if (output) {
           var item, i = -1, length = output.length, results = instance.Array();
@@ -704,44 +704,54 @@
           results.input = output.input;
         }
         return output && results;
-      };
+      }).raw = __exec;
 
       if (strPlugin.trim) {
-        strPlugin.trim = function trim() {
+        (strPlugin.trim = function trim() {
           return String(__trim.call(this));
-        };
+        }).raw = __trim;
+      }
+      if (strPlugin.trimLeft) {
+        (strPlugin.trimLeft = function trimLeft() {
+          return String(__trimLeft.call(this));
+        }).raw = __trimLeft;
+      }
+      if (strPlugin.trimRight) {
+        (strPlugin.trimRight = function trimRight() {
+          return String(__trimRight.call(this));
+        }).raw = __trimRight;
       }
 
-      strPlugin.charAt = function charAt(pos) {
+      (strPlugin.charAt = function charAt(pos) {
         return String(__charAt.call(this, pos));
-      };
+      }).raw = __charAt;
 
-      strPlugin.charCodeAt = function charCodeAt(pos) {
+      (strPlugin.charCodeAt = function charCodeAt(pos) {
         return instance.Number(__charCodeAt.call(this, pos));
-      };
+      }).raw = __charCodeAt;
 
-      strPlugin.concat = function concat(item) {
+      (strPlugin.concat = function concat(item) {
         var args = arguments;
         return String(args.length > 1
           ? __strConcat.apply(this, args)
           : __strConcat.call(this, item));
-      };
+      }).raw = __strConcat;
 
-      strPlugin.indexOf = function indexOf(item, fromIndex) {
+      (strPlugin.indexOf = function indexOf(item, fromIndex) {
         return instance.Number(__strIndexOf.call(this, item,
           fromIndex == null ? 0 : fromIndex));
-      };
+      }).raw = __strIndexOf;
 
-      strPlugin.lastIndexOf = function lastIndexOf(item, fromIndex) {
+      (strPlugin.lastIndexOf = function lastIndexOf(item, fromIndex) {
         return instance.Number(__strLastIndexOf.call(this, item,
           fromIndex == null ? this.length : fromIndex));
-      };
+      }).raw = __strLastIndexOf;
 
-      strPlugin.localeCompare = function localeCompare(that) {
-        return instance.Number(__localeCompate.call(this, that));
-      };
+      (strPlugin.localeCompare = function localeCompare(that) {
+        return instance.Number(__localeCompare.call(this, that));
+      }).raw = __localeCompare;
 
-      strPlugin.match = function match(pattern) {
+      (strPlugin.match = function match(pattern) {
         var output = __match.call(this, pattern);
         if (output) {
           var item, i = -1, length = output.length, results = instance.Array();
@@ -750,54 +760,54 @@
           }
         }
         return output && results;
-      };
+      }).raw = __match;
 
-      strPlugin.replace = function replace(pattern, replacement) {
+      (strPlugin.replace = function replace(pattern, replacement) {
         return String(__replace.call(this, pattern, replacement));
-      };
+      }).raw = __replace;
 
-      strPlugin.search = function search(pattern) {
+      (strPlugin.search = function search(pattern) {
         return instance.Number(__search.call(this, pattern));
-      };
+      }).raw = __search;
 
-      strPlugin.slice = function slice(start, end) {
+      (strPlugin.slice = function slice(start, end) {
         return String(__strSlice.call(this, start,
           end == null ? this.length : end));
-      };
+      }).raw = __strSlice;
 
-      strPlugin.split = function split(separator, limit) {
+      (strPlugin.split = function split(separator, limit) {
         var item, i = -1, output = __split.call(this, separator, limit),
          length = output.length, results = instance.Array();
         while (++i < length) {
           results[i] = (item = output[i]) == null ? item : String(item);
         }
         return results;
-      };
+      }).raw = __split;
 
-      strPlugin.substr = function substr(start, length) {
+      (strPlugin.substr = function substr(start, length) {
         return String(__substr.call(start, length == null ? this.length : length));
-      };
+      }).raw = __substr;
 
-      strPlugin.substring = function substring(start, end) {
+      (strPlugin.substring = function substring(start, end) {
         return String(__substring.call(this, start,
           end == null ? this.length : end));
-      };
+      }).raw = __substring;
 
-      strPlugin.toLowerCase = function toLowerCase() {
+      (strPlugin.toLowerCase = function toLowerCase() {
         return String(__toLowerCase.call(this));
-      };
+      }).raw = __toLowerCase;
 
-      strPlugin.toLocaleLowerCase = function toLocaleLowerCase() {
+      (strPlugin.toLocaleLowerCase = function toLocaleLowerCase() {
         return String(__toLocaleLowerCase.call(this));
-      };
+      }).raw = __toLocaleLowerCase;
 
-      strPlugin.toLocaleUpperCase = function toLocaleUpperCase() {
+      (strPlugin.toLocaleUpperCase = function toLocaleUpperCase() {
         return String(__toLocaleUpperCase.call(this));
-      };
+      }).raw = __toLocaleUpperCase;
 
-      strPlugin.toUpperCase = function toUpperCase() {
+      (strPlugin.toUpperCase = function toUpperCase() {
         return String(__toUpperCase.call(this));
-      };
+      }).raw = __toUpperCase;
 
       // point constructor properties to the native wrappers
       arrPlugin.constructor  = Array;
@@ -813,8 +823,8 @@
 
       // prevent JScript bug with named function expressions
       var charAt = nil, charCodeAt = nil, create = nil, concat = nil,
-       every = nil, exec = nil, filter = nil, getDate = nil, getDay = nil,
-       getFullYear = nil, getHours = nil, getMilliseconds = nil,
+       every = nil, exec = nil, filter = nil, fromArray = nil, getDate = nil,
+       getDay = nil, getFullYear = nil, getHours = nil, getMilliseconds = nil,
        getMinutes = nil, getMonth = nil, getSeconds = nil, getTime = nil,
        getTimezoneOffset = nil, getUTCDate = nil, getUTCDay = nil,
        getUTCFullYear = nil, getUTCHours = nil, getUTCMilliseconds = nil,
@@ -825,7 +835,8 @@
        split = nil, splice = nil, substr = nil, substring = nil,
        toExponential = nil, toFixed = nil, toISOString = nil, toJSON = nil,
        toLowerCase = nil, toLocaleLowerCase = nil, toLocaleUpperCase = nil,
-       toPrecision = nil, toUpperCase = nil, trim = nil, unshift = nil;
+       toPrecision = nil, toUpperCase = nil, trim = nil, trimLeft = nil,
+       trimRight = nil, unshift = nil;
 
       // assign native wrappers to Fusebox instance and return
       instance.Array    = Array;

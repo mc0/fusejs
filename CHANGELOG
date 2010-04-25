@@ -1,3 +1,5 @@
+* Add a `raw` property to all wrapped sandboxed native methods to reference their original methods. [jddalton]
+
 * Add support for proprietary opacity styles to setOpacity() and getOpacity(). [David Mark, jddalton]
 
 * Make inspect() methods support iterating over objects that have their own generic inspect() method. [jddalton]
