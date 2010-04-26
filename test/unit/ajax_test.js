@@ -223,18 +223,18 @@ new Test.Unit.Runner({
     var options = {
       'method':       'get',
       'asynchronous': false,
-      'onDone':       fuse.emptyFunction
+      'onDone':       fuse.Function.NOP
     };
 
     var request = fuse.ajax.Updater('content', '../fixtures/content.html', options);
     request.options.onDone = function() { };
-    this.assertIdentical(fuse.emptyFunction, options.onDone,
+    this.assertIdentical(fuse.Function.NOP, options.onDone,
       'failed to clone options object');
   },
 
   'testResponders': function(){
     var i, count = 0,
-     dummyResponder = { 'onDone': fuse.emptyFunction };
+     dummyResponder = { 'onDone': fuse.Function.NOP };
 
     // check for internal responder
     for (i in fuse.ajax.Responders.responders) count++;
@@ -296,7 +296,7 @@ new Test.Unit.Runner({
   },
 
   'testRespondersCanBeHash': function(){
-    var hashResponder = $H({ 'onDone': fuse.emptyFunction });
+    var hashResponder = $H({ 'onDone': fuse.Function.NOP });
 
     fuse.ajax.Responders.register(hashResponder);
     this.assertEqual(2, fuse.ajax.Responders.responders['onDone'].length);

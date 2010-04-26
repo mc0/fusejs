@@ -36,56 +36,48 @@
 
 
     plugin.blank = function blank() {
-      if (this == null) throw new TypeError;
       return reBlank.test(this);
     };
 
     plugin.camelize = function camelize() {
-      if (this == null) throw new TypeError;
       return fuse.String(replace.call(this, reHyphenated, toUpperCase));
     };
 
     plugin.capitalize = function capitalize() {
-      if (this == null) throw new TypeError;
       var string = String(this);
       return fuse.String(string.charAt(0).toUpperCase() +
         string.slice(1).toLowerCase());
     };
 
     plugin.contains = function contains(pattern) {
-      if (this == null) throw new TypeError;
       return String(this).indexOf(pattern) > -1;
     };
 
     plugin.isEmpty = function isEmpty() {
-      if (this == null) throw new TypeError;
       return !String(this).length;
     };
 
     plugin.endsWith = function endsWith(pattern) {
       // when searching for a pattern at the end of a long string
       // indexOf(pattern, fromIndex) is faster than lastIndexOf(pattern)
-      if (this == null) throw new TypeError;
       var string = String(this), d = string.length - pattern.length;
       return d >= 0 && string.indexOf(pattern, d) === d;
     };
 
     plugin.evalScripts = function evalScripts() {
-      if (this == null) throw new TypeError;
-      results = fuse.Array();
+      result = fuse.Array();
       fuse.String(this).extractScripts(function(script) {
-        results.push(global.eval(String(script)));
+        result.push(global.eval(String(script)));
       });
 
-      return results;
+      return result;
     };
 
     plugin.extractScripts = function extractScripts(callback) {
-      if (this == null) throw new TypeError;
       var match, script, striptTags,
-       string = String(this), results = fuse.Array();
+       string = String(this), result = fuse.Array();
 
-      if (!reOpenScriptTag.test(string)) return results;
+      if (!reOpenScriptTag.test(string)) return result;
 
       scriptTags = string.replace(reHTMLComments, '');
       // clear lastIndex because exec() uses it as a starting point
@@ -95,47 +87,41 @@
         while (match = reScripts.exec(scriptTags)) {
           if (script = match[1]) {
             callback(script);
-            results.push(script);
+            result.push(script);
           }
         }
       } else {
         while (match = reScripts.exec(scriptTags)) {
-          if (script = match[1]) results.push(script);
+          if (script = match[1]) result.push(script);
         }
       }
-      return results;
+      return result;
     };
 
     plugin.hyphenate = function hyphenate() {
-      if (this == null) throw new TypeError;
       return fuse.String(String(this).replace(reUnderscores, '-'));
     };
 
     plugin.startsWith = function startsWith(pattern) {
       // when searching for a pattern at the start of a long string
       // lastIndexOf(pattern, fromIndex) is faster than indexOf(pattern)
-      if (this == null) throw new TypeError;
       return !String(this).lastIndexOf(pattern, 0);
     };
 
     plugin.stripScripts = function stripScripts() {
-      if (this == null) throw new TypeError;
       return fuse.String(String(this).replace(reScripts, ''));
     };
 
     plugin.times = function times(count) {
-      if (this == null) throw new TypeError;
       return fuse.String(repeat(String(this), toInteger(count)));
     };
 
     plugin.toArray = function toArray() {
-      if (this == null) throw new TypeError;
       return fuse.String(this).split('');
     };
 
     plugin.toQueryParams = function toQueryParams(separator) {
-      if (this == null) throw new TypeError;
-      var match = String(this).split('?'), object = fuse.Object();
+      var match = String(this).split('?'), object = Obj();
 
       // if ? (question mark) is present and there is no query after it
       if (match.length > 1 && !match[1]) return object;
@@ -176,12 +162,10 @@
     };
 
     plugin.truncate = function truncate(length, truncation) {
-      if (this == null) throw new TypeError;
       var endIndex, string = String(this);
-
       length = +length;
-      if (isNaN(length)) length = 30;
 
+      if (isNaN(length)) length = 30;
       if (length < string.length) {
         truncation = truncation == null ? '...' : String(truncation);
         endIndex = length - truncation.length;
@@ -191,7 +175,6 @@
     };
 
     plugin.underscore = function underscore() {
-      if (this == null) throw new TypeError;
       return fuse.String(String(this)
         .replace(reDoubleColons, '/')
         .replace(reCapped,       '$1_$2')
@@ -199,10 +182,9 @@
         .replace(reHyphens,      '_').toLowerCase());
     };
 
-    // ECMA-5 15.5.4.8
-    if (!plugin.lastIndexOf) {
+    // ES5 15.5.4.8
+    if (!isFunction(plugin.lastIndexOf)) {
       plugin.lastIndexOf = function lastIndexOf(searchString, position) {
-        if (this == null) throw new TypeError;
         searchString = String(searchString);
 
         var string = String(this), len = string.length,
@@ -234,28 +216,25 @@
 
       plugin.lastIndexOf.raw = plugin.lastIndexOf;
     }
-    // ECMA-5 15.5.4.20
-    if (!plugin.trim) {
+    // ES5 15.5.4.20
+    if (!isFunction(plugin.trim)) {
       plugin.trim = function trim() {
-        if (this == null) throw new TypeError;
         return String(this).replace(reTrimLeft, '').replace(reTrimRight, '');
       };
 
       plugin.trim.raw = plugin.trim;
     }
     // non-standard
-    if (!plugin.trimLeft) {
+    if (!isFunction(plugin.trimLeft)) {
       plugin.trimLeft = function trimLeft() {
-        if (this == null) throw new TypeError;
         return String(this).replace(reTrimLeft, '');
       };
 
       plugin.trimLeft.raw = plugin.trimLeft;
     }
     // non-standard
-    if (!plugin.trimRight) {
+    if (!isFunction(plugin.trimRight)) {
       plugin.trimRight = function trimRight() {
-        if (this == null) throw new TypeError;
         return String(this).replace(reTrimRight, '');
       };
 
@@ -317,7 +296,6 @@
        reTokens  = /@fusetoken/g,
 
        escapeHTML = function escapeHTML() {
-         if (this == null) throw new TypeError;
          textNode.data = String(this);
          return fuse.String(container.innerHTML);
        },
@@ -336,7 +314,6 @@
        },
 
        unescapeHTML = function unescapeHTML() {
-         if (this == null) throw new TypeError;
          var result, tokenized, string = String(this);
 
          // tokenize tags before setting innerHTML then swap them after
@@ -365,7 +342,6 @@
       textNode.data = '>';
       if (container.innerHTML !== '&gt;') {
         escapeHTML = function escapeHTML() {
-          if (this == null) throw new TypeError;
           textNode.data = String(this);
           return fuse.String(container.innerHTML.replace(reTagEnds, '&gt;'));
         };
@@ -404,7 +380,6 @@
     };
 
     plugin.stripTags = function stripTags() {
-      if (this == null) throw new TypeError;
       return fuse.String(String(this).replace(reTags, ''));
     };
 

@@ -4,7 +4,13 @@
 
     var plugin = List.plugin,
 
-    funcProto = Function.prototype,
+    funcApply  = Func.plugin.apply,
+
+    funcCall   = Func.plugin.call,
+
+    filterCallback = function(value) {
+      return value != null;
+    },
 
     sorter = function(left, right) {
       var a = left.criteria, b = right.criteria;
@@ -17,21 +23,21 @@
       // Safari 2.x will crash when accessing a non-existent property of a
       // node list, not in the document, that contains a text node unless we
       // use the `in` operator
-      var object = fuse.Object(iterable);
+      var object = Obj(iterable);
       if ('toArray' in object) return object.toArray();
       if ('item' in iterable)  return List.fromNodeList(iterable);
 
-      var length = iterable.length >>> 0, results = List(length);
+      var length = iterable.length >>> 0, result = List(length);
       while (length--) {
-        if (length in object) results[length] = iterable[length];
+        if (length in object) result[length] = iterable[length];
       }
-      return results;
+      return result;
     };
 
     List.fromNodeList = function fromNodeList(nodeList) {
-      var i = -1, results = List();
-      while (results[++i] = nodeList[i]) { }
-      return results.length-- && results;
+      var i = -1, result = List();
+      while (result[++i] = nodeList[i]) { }
+      return result.length-- && result;
     };
 
     /*------------------------------------------------------------------------*/
@@ -42,7 +48,6 @@
     };
 
     plugin.clear = function clear() {
-      if (this == null) throw new TypeError;
       var object = Object(this);
 
       if (!isArray(object)) {
@@ -55,56 +60,48 @@
       return object;
     };
 
-    plugin.clone = (function() {
-      function clone() {
-        var object = Object(this);
-        if (this == null) throw new TypeError;
-
-        if (isArray(object)) {
-          return object.constructor !== List
-            ? List.fromArray(object)
-            : object.slice(0);
-        }
-        return List.from(object);
+    plugin.clone = function clone() {
+      var object = Object(this);
+      if (isArray(object)) {
+        return object.constructor !== List
+          ? List.fromArray(object)
+          : object.slice(0);
       }
-      return clone;
-    })();
+      return List.from(object);
+    };
 
     plugin.compact = function compact(falsy) {
-      if (this == null) throw new TypeError;
-      var i = -1, j = i, results = List(),
+      var i = -1, j = i, result = List(),
        object = Object(this),
        length = object.length >>> 0;
 
       if (falsy) {
         while (++i < length) {
-          if (object[i] && object[i] != '') results[++j] = object[i];
+          if (object[i] && object[i] != '') result[++j] = object[i];
         }
       } else {
         while (++i < length) {
-          if (object[i] != null) results[++j] = object[i];
+          if (object[i] != null) result[++j] = object[i];
         }
       }
-      return results;
+      return result;
     };
 
     plugin.flatten = function flatten() {
-      if (this == null) throw new TypeError;
-      var item, i = -1, j = i, results = List(),
+      var item, i = -1, j = i, result = List(),
        object = Object(this), length = object.length >>> 0;
 
       while (++i < length) {
         if (isArray(item = object[i])) {
-          j = concatList(results, plugin.flatten.call(item)).length - 1;
+          j = concatList(result, plugin.flatten.call(item)).length - 1;
         } else {
-          results[++j] = item;
+          result[++j] = item;
         }
       }
-      return results;
+      return result;
     };
 
     plugin.insert = function insert(index, value) {
-      if (this == null) throw new TypeError;
       var object = Object(this),
        length = object.length >>> 0;
 
@@ -119,39 +116,38 @@
     };
 
     plugin.unique = function unique() {
-      var item, i = -1, j = i, results = List(),
+      var item, i = -1, j = i, result = List(),
        object = Object(this),
        length = object.length >>> 0;
 
       while (++i < length) {
-        if (i in object && !results.contains(item = object[i]))
-          results[++j] = item;
+        if (i in object && !result.contains(item = object[i]))
+          result[++j] = item;
       }
-      return results;
+      return result;
     };
 
     plugin.without = function without() {
-      if (this == null) throw new TypeError;
       var args, i = -1, j = i, indexOf = plugin.indexOf,
-       results = List(), object = Object(this),
+       result = List(), object = Object(this),
        length = object.length >>> 0;
 
       if (length) {
         args = slice.call(arguments, 0);
         while (++i < length) {
           if (i in object && indexOf.call(args, object[i]) == -1)
-            results[++j] = object[i];
+            result[++j] = object[i];
         }
       }
-      return results;
+      return result;
     };
 
     /* Create optimized Enumerable equivalents */
 
     plugin.contains = (function() {
       var contains = function contains(value) {
-        if (this == null) throw new TypeError;
-        var item, object = Object(this), length = object.length >>> 0;
+        var item, object = Object(this),
+         length = object.length >>> 0;
 
         while (length--) {
           if (length in object) {
@@ -168,7 +164,6 @@
         var __contains = contains;
         contains = function contains(value) {
           // attempt a fast strict search first
-          if (this == null) throw new TypeError;
           var object = Object(this);
           return plugin.indexOf.call(object, value) > -1
             ? true
@@ -188,7 +183,6 @@
     };
 
     plugin.first = function first(callback, thisArg) {
-      if (this == null) throw new TypeError;
       var i = -1, object = Object(this),
        length = object.length >>> 0;
 
@@ -213,8 +207,8 @@
 
     plugin.inject = (function() {
       var inject = function inject(accumulator, callback, thisArg) {
-        if (this == null) throw new TypeError;
-        var i = -1, object = Object(this), length = object.length >>> 0;
+        var i = -1, object = Object(this),
+         length = object.length >>> 0;
 
         if (thisArg) {
           while (++i < length) {
@@ -233,7 +227,6 @@
       // use Array#reduce if available
       if (typeof plugin.reduce === 'function') {
         var __inject = inject;
-
         inject = function inject(accumulator, callback, thisArg) {
           return thisArg
             ? __inject.call(this, accumulator, callback, thisArg)
@@ -245,16 +238,17 @@
 
     plugin.intersect = (function() {
       function intersect(array) {
-        if (this == null) throw new TypeError;
-        var item, i = -1, j = i, results = List(),
+        var item, i = -1, j = i, result = List(),
          object = Object(this), length = object.length >>> 0;
 
         while (++i < length) {
           if (i in object &&
-              contains.call(array, item = object[i]) && !results.contains(item))
-            results[++j] = item;
+              contains.call(array, item = object[i]) &&
+              !result.contains(item)) {
+            result[++j] = item;
+          }
         }
-        return results;
+        return result;
       }
 
       var contains = plugin.contains;
@@ -262,29 +256,26 @@
     })();
 
     plugin.invoke = function invoke(method) {
-      if (this == null) throw new TypeError;
-      var args, results = fuse.Array(), object = Object(this),
+      var args, result = fuse.Array(), object = Object(this),
        length = object.length >>> 0;
 
       if (arguments.length < 2) {
         while (length--) {
           if (length in object)
-            results[length] = funcProto.call.call(object[length][method], object[length]);
+            result[length] = funcCall.call(object[length][method], object[length]);
         }
       } else {
         args = slice.call(arguments, 1);
         while (length--) {
           if (length in object)
-            results[length] = funcProto.apply.call(object[length][method], object[length], args);
+            result[length] = funcApply.call(object[length][method], object[length], args);
         }
       }
-      return results;
+      return result;
     };
 
     plugin.last = function last(callback, thisArg) {
-      if (this == null) throw new TypeError;
       var object = Object(this), length = object.length >>> 0;
-
       if (callback == null) {
         return object[length && length - 1];
       }
@@ -295,17 +286,15 @@
         }
       }
       else {
-        var results = List(), count = +callback;
-        if (isNaN(count)) return results;
+        var result = List(), count = +callback;
+        if (isNaN(count)) return result;
         count = count < 1 ? 1 : count > length ? length : count;
         return plugin.slice.call(object, length - count);
       }
     };
 
     plugin.max = function max(callback, thisArg) {
-      if (this == null) throw new TypeError;
       var result;
-
       if (!callback && (callback = K) && isArray(this)) {
         // John Resig's fast Array max|min:
         // http://ejohn.org/blog/fast-javascript-maxmin
@@ -329,9 +318,7 @@
     };
 
     plugin.min = function min(callback, thisArg) {
-      if (this == null) throw new TypeError;
       var result;
-
       if (!callback && (callback = K) && isArray(this)) {
         result = Math.min.apply(Math, this);
         if (!isNaN(result)) return result;
@@ -353,13 +340,11 @@
     };
 
     plugin.partition = function partition(callback, thisArg) {
-      if (this == null) throw new TypeError;
-
-      callback = callback || K;
       var item, i = -1, j = i, k = i,
        trues = List(), falses = List(),
        object = Object(this), length = object.length >>> 0;
 
+      callback || (callback = K);
       while (++i < length) {
         if (i in object) {
           if (callback.call(thisArg, item = object[i], i, object)) {
@@ -373,29 +358,25 @@
     };
 
     plugin.pluck = function pluck(property) {
-      if (this == null) throw new TypeError;
-      var i = -1, results = fuse.Array(), object = Object(this),
+      var i = -1, result = fuse.Array(), object = Object(this),
        length = object.length >>> 0;
 
       while (++i < length) {
-        if (i in object) results[i] = object[i][property];
+        if (i in object) result[i] = object[i][property];
       }
-      return results;
+      return result;
     };
 
     plugin.size = function size() {
-      if (this == null) throw new TypeError;
       return fuse.Number(Object(this).length >>> 0);
     };
 
     plugin.sortBy = function sortBy(callback, thisArg) {
-      if (this == null) throw new TypeError;
-
-      callback = callback || K;
-      var value, i = -1, results = List(), array = [],
+      var value, i = -1, result = List(), array = [],
        object = Object(this),
        length = object.length >>> 0;
 
+      callback || (callback = K);
       while (length--) {
         value = object[length];
         array[length] = { 'value': value, 'criteria': callback.call(thisArg, value, length, object) };
@@ -405,17 +386,16 @@
       length = array.length;
 
       while (++i < length) {
-        if (i in array) results[i] = array[i].value;
+        if (i in array) result[i] = array[i].value;
       }
-      return results;
+      return result;
     };
 
     plugin.zip = function zip() {
-      if (this == null) throw new TypeError;
       var lists, plucked, j, k, i = -1,
        args     = slice.call(arguments, 0),
        callback = K,
-       results  = fuse.Array(),
+       result   = fuse.Array(),
        object   = Object(this),
        length   = object.length >>> 0;
 
@@ -432,20 +412,20 @@
         while (++j < k) {
           if (j in lists) plucked[j] = lists[j][i];
         }
-        results[i] = callback(plucked, i, object);
+        result[i] = callback(plucked, i, object);
       }
-      return results;
+      return result;
     };
 
     /*------------------------------------------------------------------------*/
 
     /* Use native browser JS 1.6 implementations if available */
 
-    // ECMA-5 15.4.4.16
-    if (!plugin.every) {
+    // ES5 15.4.4.16
+    if (!isFunction(plugin.every)) {
       plugin.every = function every(callback, thisArg) {
-        callback = callback || K;
-        if (this == null || !isFunction(callback)) throw new TypeError;
+        callback || (callback = K);
+        if (typeof callback !== 'function') throw new TypeError;
 
         var i = -1, object = Object(this), length = object.length >>> 0;
         while (++i < length) {
@@ -456,31 +436,31 @@
       };
     }
 
-    // ECMA-5 15.4.4.20
-    if (!plugin.filter) {
+    // ES5 15.4.4.20
+    if (!isFunction(plugin.filter)) {
       plugin.filter = function filter(callback, thisArg) {
-        callback = callback || function(value) { return value != null; };
-        if (this == null || !isFunction(callback)) throw new TypeError;
+        callback || (callback = filterCallback);
+        if (typeof callback !== 'function') throw new TypeError;
 
-        var i = -1, j = i, results = List(),
+        var i = -1, j = i, result = List(),
          object = Object(this),
          length = object.length >>> 0;
 
         while (++i < length) {
           if (i in object && callback.call(thisArg, object[i], i, object))
-            results[++j] = object[i];
+            result[++j] = object[i];
         }
-        return results;
+        return result;
       };
 
       plugin.filter.raw = plugin.filter;
     }
 
-    // ECMA-5 15.4.4.18
-    if (!plugin.forEach) {
+    // ES5 15.4.4.18
+    if (!isFunction(plugin.forEach)) {
       plugin.forEach = function forEach(callback, thisArg) {
-        if (this == null || !isFunction(callback)) throw new TypeError;
-        var i = -1, object = Object(this), length = object.length >>> 0;
+        var i = -1, object = Object(this),
+         length = object.length >>> 0;
 
         if (thisArg) {
           while (++i < length) {
@@ -496,16 +476,14 @@
       plugin.forEach.raw = plugin.forEach;
     }
 
-    // ECMA-5 15.4.4.14
-    if (!plugin.indexOf) {
+    // ES5 15.4.4.14
+    if (!isFunction(plugin.indexOf)) {
       plugin.indexOf = function indexOf(item, fromIndex) {
-        if (this == null) throw new TypeError;
-
         fromIndex = toInteger(fromIndex);
         var object = Object(this), length = object.length >>> 0;
         if (fromIndex < 0) fromIndex = length + fromIndex;
 
-        // ECMA-5 draft oversight, should use [[HasProperty]] instead of [[Get]]
+        // ES5 draft oversight, should use [[HasProperty]] instead of [[Get]]
         fromIndex--;
         while (++fromIndex < length) {
           if (fromIndex in object && object[fromIndex] === item)
@@ -517,10 +495,9 @@
       plugin.indexOf.raw = plugin.indexOf;
     }
 
-    // ECMA-5 15.4.4.15
-    if (!plugin.lastIndexOf) {
+    // ES5 15.4.4.15
+    if (!isFunction(plugin.lastIndexOf)) {
       plugin.lastIndexOf = function lastIndexOf(item, fromIndex) {
-        if (this == null) throw new TypeError;
         var object = Object(this), length = object.length >>> 0;
         fromIndex = fromIndex == null ? length : toInteger(fromIndex);
 
@@ -528,7 +505,7 @@
         if (fromIndex > length) fromIndex = length - 1;
         if (fromIndex < 0) fromIndex = length + fromIndex;
 
-        // ECMA-5 draft oversight, should use [[HasProperty]] instead of [[Get]]
+        // ES5 draft oversight, should use [[HasProperty]] instead of [[Get]]
         fromIndex++;
         while (--fromIndex > -1) {
           if (fromIndex in object && object[fromIndex] === item) break;
@@ -539,35 +516,35 @@
       plugin.lastIndexOf.raw = plugin.lastIndexOf;
     }
 
-    // ECMA-5 15.4.4.19
-    if (!plugin.map) {
+    // ES5 15.4.4.19
+    if (!isFunction(plugin.map)) {
       plugin.map = function map(callback, thisArg) {
         if (!callback) return plugin.clone.call(this);
-        if (this == null || !isFunction(callback)) throw new TypeError;
+        if (typeof callback !== 'function') throw new TypeError;
 
-        var i = -1, results = List(), object = Object(this),
+        var i = -1, result = List(), object = Object(this),
          length = object.length >>> 0;
 
         if (thisArg) {
           while (++i < length) {
-            if (i in object) results[i] = callback.call(thisArg, object[i], i, object);
+            if (i in object) result[i] = callback.call(thisArg, object[i], i, object);
           }
         } else {
           while (++i < length) {
-            if (i in object) results[i] = callback(object[i], i, object);
+            if (i in object) result[i] = callback(object[i], i, object);
           }
         }
-        return results;
+        return result;
       };
 
       plugin.map.raw = plugin.map;
     }
 
-    // ECMA-5 15.4.4.17
-    if (!plugin.some) {
+    // ES5 15.4.4.17
+    if (!isFunction(plugin.some)) {
       plugin.some = function some(callback, thisArg) {
-        callback = callback || K;
-        if (this == null || !isFunction(callback)) throw new TypeError;
+        callback || (callback = K);
+        if (typeof callback !== 'function') throw new TypeError;
 
         var i = -1, object = Object(this), length = object.length >>> 0;
         while (++i < length) {
@@ -595,6 +572,7 @@
     // prevent JScript bug with named function expressions
     var _each =     nil,
      clear =        nil,
+     clone =        nil,
      compact =      nil,
      each =         nil,
      every =        nil,

@@ -35,7 +35,7 @@
     return Event;
   })();
 
-  _extend(fuse.dom.Event, {
+  Obj._extend(fuse.dom.Event, {
     'KEY_BACKSPACE': 8,
     'KEY_DELETE':    46,
     'KEY_DOWN':      40,

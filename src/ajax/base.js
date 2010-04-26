@@ -15,11 +15,11 @@
 
       // clone default options/headers and overwrite with user options
       delete defaults.headers;
-      defaults = clone(defaults);
+      defaults = Obj.clone(defaults);
       Base.defaults.headers = defaultHeaders;
 
-      defaults.headers = clone(defaultHeaders);
-      options = this.options = _extend(defaults, options);
+      defaults.headers = Obj.clone(defaultHeaders);
+      options = this.options = Obj._extend(defaults, options);
 
       var encoding = options.encoding,
        headers = options.headers,
@@ -40,7 +40,7 @@
       } else if (isHash(params)) {
         params = params.toObject();
       } else {
-        params = clone(params);
+        params = Obj.clone(params);
       }
 
       // simulate other verbs over post

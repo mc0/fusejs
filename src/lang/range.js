@@ -41,9 +41,9 @@
 
     buildCache = function(thisArg, callback) {
       var c = thisArg._cache = fuse.Array(), i = 0,
-       value = c.start = thisArg.start = fuse.Object(thisArg.start);
+       value = c.start = thisArg.start = Obj(thisArg.start);
 
-      c.end = thisArg.end = fuse.Object(thisArg.end);
+      c.end = thisArg.end = Obj(thisArg.end);
       c.exclusive = thisArg.exclusive;
 
       if (callback) {
@@ -149,7 +149,6 @@
     };
 
     fuse.String.plugin.succ = function succ() {
-      if (this == null) throw new TypeError;
       var index = this.length - 1;
       return fuse.String(this.slice(0, index) +
         String.fromCharCode(this.charCodeAt(index) + 1));

@@ -1,22 +1,57 @@
-  /*---------------------------- LANG: ECMA BUGS -----------------------------*/
+  /*----------------------------- LANG: ES5 BUGS -----------------------------*/
 
   (function(regPlugin, strPlugin) {
-    var reOptCapture = /\)[*?]/,
+    var __apply   = Func.plugin.apply,
+    __call        = Func.plugin.call,
+    __exec        = regPlugin.exec,
+    __lastIndexOf = strPlugin.lastIndexOf,
+    __match       = strPlugin.match,
+    __replace     = strPlugin.replace,
+    __search      = strPlugin.search,
+    __split       = strPlugin.split,
+    __test        = regPlugin.test,
+    __trim        = strPlugin.trim,
+    __trimLeft    = strPlugin.trimLeft,
+    __trimRight   = strPlugin.trimRight,
 
-    regExec = regPlugin.exec.raw,
+    reOptCapture = /\)[*?]/,
+
+    regExec = __exec.raw,
 
     rawExec = regExec,
 
     sMap = fuse.RegExp.SPECIAL_CHARS.s,
 
-    strReplace = strPlugin.replace.raw,
+    strReplace = __replace.raw,
+
+    apply = function apply(thisArg) {
+      if (thisArg == null) throw new TypeError;
+      return __apply.apply(this, arguments);
+    },
+
+    call = function call(thisArg) {
+      if (thisArg == null) throw new TypeError;
+      return arguments.length > 1
+        ? __call.apply(this, arguments)
+        : __call.call(this, thisArg);
+    },
+
+    // enforce ES5 rules for Array and String methods
+    // where `this` cannot be undefined or null
+    wrapApplyAndCall = function(object) {
+      eachKey(object, function(value, key) {
+        if (hasKey(object, key)) {
+          object[key].call = call;
+          object[key].apply = apply;
+        }
+      });
+    },
 
     ARRAY_CONCAT_ARGUMENTS_BUGGY = (function() {
       // true for Opera
       var array = [];
-      return (function() { return array.concat &&
-        array.concat(arguments).length === 2; })(1, 2);
-    })(),
+      return array.concat && array.concat(arguments).length === 2; 
+    })(1, 2),
 
     ARRAY_SLICE_EXLUDES_TRAILING_UNDEFINED_INDEXES = (function() {
       // true for Opera 9.25
@@ -87,43 +122,39 @@
     /*------------------------------------------------------------------------*/
 
     addArrayMethods.callbacks.push(function(List) {
-      var plugin = List.plugin;
+      var plugin = List.plugin,
+       __concat  = plugin.concat,
+       __slice   = plugin.slice;
 
       // Opera's implementation of Array.prototype.concat treats a functions arguments
       // object as an array so we overwrite concat to fix it.
-      // ECMA-5 15.4.4.4
+      // ES5 15.4.4.4
       if (ARRAY_CONCAT_ARGUMENTS_BUGGY) {
-        var __concat = plugin.concat;
-        (plugin.concat = function concat() {
-          if (this == null) throw new TypeError;
-
+        plugin.concat = function concat() {
           var item, j, i = -1,
-           length  = arguments.length,
-           object  = Object(this),
-           results = isArray(object) ? List.fromArray(object) : List(object),
-           n       = results.length;
+           length = arguments.length,
+           object = Object(this),
+           result = isArray(object) ? List.fromArray(object) : List(object),
+           n      = result.length;
 
           while (++i < length) {
             item = arguments[i];
             if (isArray(item)) {
               j = 0; itemLen = item.length;
               for ( ; j < itemLen; j++, n++) {
-                if (j in item) results[n] = item[j];
+                if (j in item) result[n] = item[j];
               }
             } else {
-              results[n++] = item;
+              result[n++] = item;
             }
           }
-          return results;
-        }).raw = __concat.raw;
+          return result;
+        };
       }
 
-      // ECMA-5 15.4.4.10
+      // ES5 15.4.4.10
       if (ARRAY_SLICE_EXLUDES_TRAILING_UNDEFINED_INDEXES) {
-        var __slice = plugin.slice;
-        (plugin.slice = function slice(start, end) {
-          if (this == null) throw new TypeError;
-
+        plugin.slice = function slice(start, end) {
           var endIndex, result, object = Object(this),
            length = object.length >>> 0;
 
@@ -137,8 +168,14 @@
           result = __slice.call(object, start, end);
           delete object[endIndex];
           return result;
-        }).raw = __slice.raw;
+        };
       }
+
+      plugin.concat.raw = __concat.raw;
+      plugin.slice.raw  = __slice.raw;
+
+      // enforce ES5 rules for `this`
+      wrapApplyAndCall(plugin);
 
       // prevent JScript bug with named function expressions
       var concat = nil, slice = nil;
@@ -150,8 +187,7 @@
     // Based on work by Steve Levithan
     if (REGEXP_EXEC_RETURNS_UNDEFINED_VALUES_AS_STRINGS ||
         REGEXP_INCREMENTS_LAST_INDEX_AFTER_ZERO_LENGTH_MATCHES) {
-      var __exec = regPlugin.exec;
-      regExec =
+      reExec =
       regPlugin.exec = function exec(string) {
         var cache, exec = __exec;
         if (reOptCapture.test(this.source)) {
@@ -191,16 +227,15 @@
         }
 
         // lazy define
+        exec.raw = __exec.raw;
         this.exec = exec;
-        exec.raw || (exec.raw = __exec.raw);
         return this.exec(string);
       };
     }
 
     // For IE
     if (REGEXP_INCREMENTS_LAST_INDEX_AFTER_ZERO_LENGTH_MATCHES) {
-      var __test = regPlugin.test;
-      (regPlugin.test = function test(string) {
+      regPlugin.test = function test(string) {
         var test = __test;
         if (this.global) {
           test = function test(string) {
@@ -210,34 +245,35 @@
             }
             return !!match;
           };
+
+          test.raw = __test;
         }
         // lazy define
         this.test = test;
-        test.raw  = __test.raw;
         return this.test(string);
-      }).raw = __test;
+      };
+
+      regPlugin.test.raw = __test;
     }
 
     /*------------------------------------------------------------------------*/
 
     // For Chrome 1-2 and Opera 9.25
     if (STRING_LAST_INDEX_OF_BUGGY_WITH_NEGATIVE_OR_NAN_POSITION) {
-      var __lastIndexOf = strPlugin.lastIndexOf;
-      (strPlugin.lastIndexOf = function lastIndexOf(searchString, position) {
+      strPlugin.lastIndexOf = function lastIndexOf(searchString, position) {
         return isNaN(position)
           ? __lastIndexOf.call(this, searchString)
           : __lastIndexOf.call(this, searchString, position < 0 ? 0 : position);
-      }).raw = __lastIndexOf.raw;
+      };
     }
 
-    // ECMA-5 15.5.4.10
+    // ES5 15.5.4.10
     // For IE
     if (STRING_METHODS_WRONGLY_SET_REGEXP_LAST_INDEX ||
         REGEXP_EXEC_RETURNS_UNDEFINED_VALUES_AS_STRINGS) {
-      var __match = strPlugin.match;
-      (strPlugin.match = function match(pattern) {
+      strPlugin.match = function match(pattern) {
+        var result = __match.call(this, pattern);
         if (isRegExp(pattern)) {
-          var result = __match.call(this, pattern);
           if (!pattern.global && reOptCapture.test(pattern)) {
             // ensure undefined values are not turned to empty strings
             strReplace.call(this, pattern, function() {
@@ -251,32 +287,32 @@
           pattern.lastIndex = 0;
         }
         return result;
-      }).raw = __match.raw;
+      };
     }
 
-    // ECMA-5 15.5.4.11
+    // ES5 15.5.4.11
     // For Safari 2.0.2- and Chrome 1+
     // Based on work by Dean Edwards:
     // http://code.google.com/p/base2/source/browse/trunk/lib/src/base2-legacy.js?r=239#174
-    var __replace = strPlugin.replace;
     if (envTest('STRING_REPLACE_COERCE_FUNCTION_TO_STRING') ||
         STRING_REPLACE_BUGGY_WITH_GLOBAL_FLAG_AND_EMPTY_PATTERN) {
+      strReplace =
       strPlugin.replace = function replace(pattern, replacement) {
         if (typeof replacement !== 'function') {
           return __replace.call(this, pattern, replacement);
-        }
-        if (this == null) {
-          throw new TypeError;
         }
         if (!isRegExp(pattern)) {
           pattern = new RegExp(escapeRegExpChars(pattern));
         }
 
         // set pattern.lastIndex to 0 before we perform string operations
-        var match, index = 0, nonGlobal = !pattern.global,
-         lastIndex = pattern.lastIndex = 0,
-         result = '', source = String(this),
-         srcLength = source.length;
+        var match, 
+         index     = 0,
+         nonGlobal = !pattern.global,
+         result    = '',
+         source    = String(this),
+         srcLength = source.length,
+         lastIndex = pattern.lastIndex = 0;
 
         while (match = regExec.call(pattern, source)) {
           index = match.index;
@@ -299,15 +335,12 @@
             result += source.charAt(lastIndex);
           }
         }
-
         // append the remaining source to the result
         if (lastIndex < srcLength) {
           result += source.slice(lastIndex, srcLength);
         }
         return fuse.String(result);
       };
-
-      strReplace = strPlugin.replace;
     }
 
     // For Firefox
@@ -347,25 +380,22 @@
         return result;
       };
 
-      // ECMA-5 15.5.4.12
-      var __search = strPlugin.search;
-      (strPlugin.search = function search(pattern) {
-        var backup, result;
+      // ES5 15.5.4.12
+      strPlugin.search = function search(pattern) {
         if (isRegExp(pattern)) {
-          backup = pattern.lastIndex;
-          result = __search.call(this, pattern);
+          var backup = pattern.lastIndex,
+           result = __search.call(this, pattern);
           pattern.lastIndex = backup;
           return result;
         }
         return __search.call(this, pattern);
-      }).raw = __search.raw;
+      };
     }
 
-    // ECMA-5 15.5.4.14
+    // ES5 15.5.4.14
     // For IE and Firefox
     // Based on work by Steve Levithan
     // http://xregexp.com/
-    var __split = strPlugin.split;
     if (envTest('STRING_SPLIT_BUGGY_WITH_REGEXP') ||
         STRING_SPLIT_RETURNS_UNDEFINED_VALUES_AS_STRINGS) {
       strPlugin.split = function split(separator, limit) {
@@ -376,7 +406,7 @@
         }
 
         var backup, index, lastIndex, length, match, string, strLength, j,
-         i = -1, lastLastIndex = 0, results = fuse.Array();
+         i = -1, lastLastIndex = 0, result = fuse.Array();
 
         string = fuse.String(this);
         strLength = string.length;
@@ -402,14 +432,14 @@
           // and if the regexp can match an empty string then don't match the
           // empty substring at the beginning or end of the input string
           if (lastIndex > lastLastIndex && index < strLength) {
-            results[++i] = string.slice(lastLastIndex, index);
-            if (results.length === limit) return results;
+            result[++i] = string.slice(lastLastIndex, index);
+            if (result.length === limit) return result;
 
             // add capture groups
             j = 0;
             while (++j < length) {
-              results[++i] = match[j] == null ? match[j] : fuse.String(match[j]);
-              if (results.length === limit) break;
+              result[++i] = match[j] == null ? match[j] : fuse.String(match[j]);
+              if (result.length === limit) break;
             }
             lastLastIndex = lastIndex;
           }
@@ -422,40 +452,39 @@
         // don't match empty substring at end if the input string is empty
         separator.lastIndex = 0;
         if (!(strLength === 0 && separator.test(''))) {
-          results[++i] = string.slice(lastLastIndex);
+          result[++i] = string.slice(lastLastIndex);
         }
         if (backup != null) {
           separator.lastIndex = backup;
         }
-        return results;
+        return result;
       };
     }
     // For Chrome 1+
     else if (STRING_SPLIT_ZERO_LENGTH_MATCH_RETURNS_NON_EMPTY_ARRAY) {
       strPlugin.split = function split(separator, limit) {
-        var backup, results = __split.call(this, separator, limit);
-        if (results && isRegExp(separator)) {
+        var backup, result = __split.call(this, separator, limit);
+        if (result && isRegExp(separator)) {
           if (separator.global) {
             backup = separator.lastIndex;
             separator.lastIndex = 0;
           }
           if (!String(this).length && separator.test('')) {
-            results.length = 0;
+            result.length = 0;
           }
           if (backup != null) {
             separator.lastIndex = backup;
           }
         }
-        return results;
+        return result;
       };
     }
 
-    // ECMA-5 15.5.4.20
+    // ES5 15.5.4.20
     if (STRING_TRIM_INCOMPLETE) {
-      var __trim = strPlugin.trim;
-      (strPlugin.trim = function trim() {
-        if (this == null) throw new TypeError;
-        var string = String(this), start = -1, end = string.length;
+      strPlugin.trim = function trim() {
+        var string = String(this),
+         start = -1, end = string.length;
 
         if (!end) return fuse.String(string);
         while (sMap[string.charAt(++start)]) { };
@@ -463,33 +492,37 @@
 
         while (sMap[string.charAt(--end)]) { }
         return fuse.String(string.slice(start, end + 1));
-      }).raw = __trim.raw;
+      };
 
       // non-standard
-      var __trimLeft = strPlugin.trimLeft;
-      (strPlugin.trimLeft = function trimLeft() {
-        if (this == null) throw new TypeError;
+      strPlugin.trimLeft = function trimLeft() {
         var string = String(this), start = -1;
-
         if (!string) return fuse.String(string);
         while (sMap[string.charAt(++start)]) { }
         return fuse.String(string.slice(start));
-      }).raw = __trimLeft.raw;
+      };
 
       // non-standard
-      var __trimRight = strPlugin.trimRight;
-      (strPlugin.trimRight = function trimRight() {
-        if (this == null) throw new TypeError;
+      strPlugin.trimRight = function trimRight() {
         var string = String(this), end = string.length;
-
         if (!end) return fuse.String(string);
         while (sMap[string.charAt(--end)]) { }
         return fuse.String(string.slice(0, end + 1));
-      }).raw = __trimRight.raw;
+      };
     }
 
-    strPlugin.replace.raw = __replace.raw;
-    strPlugin.split.raw   = __split.raw;
+    regPlugin.exec.raw        = __exec.raw;
+    strPlugin.lastIndexOf.raw = __lastIndexOf.raw;
+    strPlugin.match.raw       = __match.raw;
+    strPlugin.replace.raw     = __replace.raw;
+    strPlugin.search.raw      = __search.raw;
+    strPlugin.split.raw       = __split.raw;
+    strPlugin.trim.raw        = __trim.raw;
+    strPlugin.trimLeft.raw    = __trimLeft.raw;
+    strPlugin.trimRight.raw   = __trimRight.raw;
+
+    // enforce ES5 rules for `this`
+    wrapApplyAndCall(strPlugin);
 
     // prevent JScript bug with named function expressions
     var exec =     nil,

@@ -3,22 +3,22 @@
   (function(object, NodeList) {
     var match = function match(element, selectors) {
       element = element.raw || fuse.get(element).raw;
-      var node, i = -1, results = Ext.DomQuery.select(String(selectors || ''),
+      var node, i = -1, result = Ext.DomQuery.select(String(selectors || ''),
         fuse.getDocument(element));
 
-      while (node = results[++i]) {
+      while (node = result[++i]) {
         if (node === element) return true;
       }
       return false;
     },
 
     query = function(selectors, context, callback, toList) {
-      var node, i = -1, results = toList(Ext.DomQuery.select(String(selectors || ''),
+      var node, i = -1, result = toList(Ext.DomQuery.select(String(selectors || ''),
         context && fuse.get(context).raw || fuse._doc));
       if (callback) {
-        while (node = results[++i]) callback(node);
+        while (node = result[++i]) callback(node);
       }
-      return results;
+      return result;
     },
 
     select = function select(selectors, context, callback) {

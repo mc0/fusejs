@@ -3,22 +3,22 @@
   (function(object, NodeList) {
     var match = function match(element, selectors) {
       element = element.raw || fuse.get(element).raw;
-      var node, i = -1, results = peppy.query(String(selectors || ''),
+      var node, i = -1, result = peppy.query(String(selectors || ''),
         fuse.getDocument(element));
 
-      while (node = results[++i]) {
+      while (node = result[++i]) {
         if (node === element) return true;
       }
       return false;
     },
 
     query = function(selectors, context, callback, toList) {
-      var node, i = -1, results = toList(peppy.query(String(selectors || ''),
+      var node, i = -1, result = toList(peppy.query(String(selectors || ''),
         context && fuse.get(context).raw || fuse._doc));
       if (callback) {
-        while (node = results[++i]) callback(node);
+        while (node = result[++i]) callback(node);
       }
-      return results;
+      return result;
     },
 
     select = function select(selectors, context, callback) {

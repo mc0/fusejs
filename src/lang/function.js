@@ -3,8 +3,9 @@
   Func =
   fuse.Function;
 
-  // ECMA-5 15.3.4.5
-  bind =
+  Func.NOP = NOP;
+
+  // ES5 15.3.4.5
   Func.bind = (function() {
     var bind = function bind(fn, thisArg) {
       // allows lazy loading the target method
@@ -45,7 +46,6 @@
     // native support
     if (isFunction(Func.plugin.bind)) {
       var __bind = bind, plugin = Func.plugin;
-
       bind = function bind(fn, thisArg) {
         // bind with curry
         var isLazy = isArray(fn);
@@ -64,7 +64,6 @@
     return bind;
   })();
 
-  defer =
   Func.defer = function defer(fn) {
     return Func.delay.apply(global,
       concatList([fn, 0.01], slice.call(arguments, 1)));
@@ -167,22 +166,19 @@
       return function() {
         var fn = f || context[name];
         return arguments.length
-          ? wrapper.apply(this, prependList(arguments, bind(fn, this)))
-          : wrapper.call(this, bind(fn, this));
+          ? wrapper.apply(this, prependList(arguments, Func.bind(fn, this)))
+          : wrapper.call(this, Func.bind(fn, this));
       };
     };
 
     /*------------------------------------------------------------------------*/
 
-    if (!plugin.bind) {
-      plugin.bind = (function() {
-        var bind = function bind(thisArg) {
-          return arguments.length > 1
-            ? Func.bind.apply(Func, prependList(arguments, this))
-            : Func.bind(this, thisArg);
-        };
-        return bind;
-      })();
+    if (!isFunction(plugin.bind)) {
+      plugin.bind = function bind(thisArg) {
+        return arguments.length > 1
+          ? Func.bind.apply(Func, prependList(arguments, this))
+          : Func.bind(this, thisArg);
+      };
     }
 
     plugin.bindAsEventListener = function bindAdEventListener(thisArg) {
@@ -218,5 +214,9 @@
     };
 
     // prevent JScript bug with named function expressions
-    var bindAsEventListener = nil, curry = nil, methodize = nil, wrap = nil;
+    var bind =             nil,
+     bindAsEventListener = nil,
+     curry =               nil,
+     methodize =           nil,
+     wrap =                nil;
   })(Func.plugin);

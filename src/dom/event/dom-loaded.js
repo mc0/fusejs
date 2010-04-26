@@ -39,25 +39,25 @@
 
     getSheetElements = function() {
       var i = 0, link, links = doc.getElementsByTagName('LINK'),
-       results = fuse.Array.fromNodeList(doc.getElementsByTagName('STYLE'));
+       result = fuse.Array.fromNodeList(doc.getElementsByTagName('STYLE'));
       while (link = links[i++])
         if (link.rel.toLowerCase() === 'stylesheet')
-          results.push(link);
-      return results;
+          result.push(link);
+      return result;
     },
 
     getSheetObjects = function(elements) {
-      for (var i = 0, results = [], element, sheet; element = elements[i++]; ) {
+      for (var i = 0, result = [], element, sheet; element = elements[i++]; ) {
         sheet = getSheet(element);
         // bail when sheet is null/undefined on elements
         if (sheet == null) return false;
         if (isSameOrigin(sheet.href)) {
-          results.push(sheet);
-          if (!addImports(results, sheet))
+          result.push(sheet);
+          if (!addImports(result, sheet))
             return false;
         }
       }
-      return results;
+      return result;
     },
 
     checkDomLoadedState = function(event) {

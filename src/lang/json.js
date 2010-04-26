@@ -6,11 +6,11 @@
     var inspect = fuse.String.plugin.inspect,
      STRINGABLE_TYPES = { 'boolean': 1, 'object': 1, 'number': 1, 'string': 1 };
 
-    // ECMA-5 15.12.3
+    // ES5 15.12.3
     Obj.toJSON = function toJSON(value) {
       if (!STRINGABLE_TYPES[typeof value]) return;
 
-      var length, i = -1, results = [],
+      var length, i = -1, result = [],
        object = Object(value),
        classType = toString.call(object);
 
@@ -22,18 +22,18 @@
           length = object.length;
           while (++i < length) {
             value = Obj.toJSON(object[i]);
-            results[i] = typeof value === 'undefined' ? 'null' : value;
+            result[i] = typeof value === 'undefined' ? 'null' : value;
           }
-          return fuse.String('[' + results.join(',') + ']');
+          return fuse.String('[' + result.join(',') + ']');
 
         case '[object Object]' :
           // handle null
           if (value === null) {
             return fuse.String(value);
           }
-          // this is not duplicating checks, one is a type check the other
-          // is an internal [[Class]] check because Safari 3.1 mistakes
-          // regexp instances as typeof `function`
+          // this is not duplicating checks, one is a type check for host objects
+          // and the other is an internal [[Class]] check because Safari 3.1
+          // mistakes regexp instances as typeof `function`
           if (typeof object.toJSON === 'function' &&
               isFunction(object.toJSON)) {
             return Obj.toJSON(object.toJSON());
@@ -43,10 +43,10 @@
             eachKey(object, function(value, key) {
               if (hasKey(object, key) &&
                   typeof (value = Obj.toJSON(value)) !== 'undefined') {
-                results.push(inspect.call(key, true) + ':' + value);
+                result.push(inspect.call(key, true) + ':' + value);
               }
             });
-            return fuse.String('{' + results.join(',') + '}');
+            return fuse.String('{' + result.join(',') + '}');
           }
           break;
 
@@ -59,7 +59,7 @@
       }
     };
 
-    // ECMA-5 15.9.5.43
+    // ES5 15.9.5.43
     if (!fuse.Date.plugin.toISOString) {
       fuse.Date.plugin.toISOString = function toISOString() {
         return fuse.String(this.getUTCFullYear() + '-' +
@@ -71,7 +71,7 @@
       };
     }
 
-    // ECMA-5 15.9.5.44
+    // ES5 15.9.5.44
     if (!fuse.Date.plugin.toJSON) {
       fuse.Date.plugin.toJSON = function toJSON() {
         return this.toISOString();
@@ -145,11 +145,9 @@
     })(1536, 1540,  8204, 8207,  8232, 8239,  8288, 8303,  65520, 65535);
 
     plugin.isJSON = function isJSON() {
-      if (this == null) throw new TypeError;
-      var string = String(this);
-
       // split the second stage into 4 regexp operations in order to work around
       // crippling inefficiencies in IE's and Safari's regexp engines.
+      var string = String(this);
       return !reBlank.test(string) && reSafeString.test(string
         // replace the JSON backslash pairs with '@' (a non-JSON character)
         .replace(reEscapedChars, '@')
@@ -160,7 +158,6 @@
     };
 
     plugin.unfilterJSON = function unfilterJSON(filter) {
-      if (this == null) throw new TypeError;
       return fuse.String(String(this).replace(filter || fuse.jsonFilter, '$1'));
     };
 

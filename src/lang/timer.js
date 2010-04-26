@@ -12,7 +12,7 @@
       instance.executing = false;
 
       instance.onTimerEvent = function() { onTimerEvent.call(instance); };
-      instance.options = _extend(clone(Timer.defaults), options);
+      instance.options = Obj._extend(Obj.clone(Timer.defaults), options);
       return instance;
     },
 

@@ -71,7 +71,7 @@
     };
 
     Responders.unregister = function unregister(responder) {
-      var handler, name, handlers, length, results,
+      var handler, name, handlers, length, result,
        responders = this.responders;
 
       if (isHash(responder)) responder = responder._object;
@@ -80,12 +80,12 @@
         if (handlers = responders[name]) {
           i = 0;
           method = responder[name];
-          results = fuse.Array(); 
+          result = fuse.Array(); 
 
           // rebuild handlers list excluding the handle that is tied to the responder method
           while (handler = handlers[i++])
-            if (handler.__method !== method) results.push(handler);
-          responders[name] = results;
+            if (handler.__method !== method) result.push(handler);
+          responders[name] = result;
         }
       }
     };

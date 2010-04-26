@@ -17,16 +17,16 @@
 
     select = function select(selectors, context, callback) {
       function select(selectors, context, callback) {
-        var i = -1, results = NodeList();
+        var i = -1, result = NodeList();
         __select(
           String(selectors || ''),
           context && fuse.get(context).raw,
           function(node) {
-            results[++i] = node;
+            result[++i] = node;
             callback && callback(node);
           });
 
-        return results;
+        return result;
       }
 
       __select = NW.Dom.select;

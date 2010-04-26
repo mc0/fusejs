@@ -8,11 +8,17 @@
 
     domClassCache = { },
 
-    reBool = /^(?:(?:is|has)[A-Z]|contains)/,
+    arrProto  = Array.prototype,
 
-    reGetter = /^(?:get[A-Z]|down|first|identify|inspect|last|next|previous|read|scroll)/,
+    elemProto = Element.prototype,
 
-    arrProto = Array.prototype,
+    funcApply = Func.plugin.apply,
+
+    funcCall  = Func.plugin.call,
+
+    reBool    = /^(?:(?:is|has)[A-Z]|contains)/,
+
+    reGetter  = /^(?:get[A-Z]|down|first|identify|inspect|last|next|previous|read|scroll)/,
 
     arrEvery = arrProto.every ||
       function(callback) {
@@ -83,19 +89,15 @@
     if (fuse.dom.InputElement) {
       eachKey(fuse.dom.InputElement.plugin, addNodeListMethod);
     }
-  })(NodeList.plugin);
 
-  /*--------------------------------------------------------------------------*/
-
-  (function(plugin, elemProto, funcProto) {
     plugin.get = function get(index) {
-      var results, object = Object(this), length = object.length >>> 0;
+      var result, object = Object(this), length = object.length >>> 0;
       if (index == null) {
-        results = NodeList();
+        result = NodeList();
         for (index = 0; index < length; index++) {
-          if (index in object) results[index] = Node(object[index]);
+          if (index in object) result[index] = Node(object[index]);
         }
-        return results;
+        return result;
       }
 
       if (index < 0) {
@@ -107,14 +109,13 @@
     };
 
     plugin.invoke = function invoke(method) {
-      if (this == null) throw new TypeError;
-      var args, item, i = 0, results = fuse.Array(), object = Object(this),
+      var args, item, i = 0, result = fuse.Array(), object = Object(this),
        length = object.length >>> 0;
 
       if (arguments.length < 2) {
         while (length--) {
           if (length in object) {
-            results[length] = funcProto.call
+            result[length] = funcCall
               .call(elemProto[method] || object[length][method], object[length]);
           }
         }
@@ -122,14 +123,14 @@
         args = slice.call(arguments, 1);
         while (length--) {
           if (length in object) {
-            results[length] = funcProto.apply
+            result[length] = funcApply
               .call(elemProto[method] || object[length][method], object[length], args);
           }
         }
       }
-      return results;
+      return result;
     }
 
     // prevent JScript bug with named function expressions
     var get = nil, invoke = nil;
-  })(NodeList.plugin, Element.prototype, Function.prototype);
+  })(NodeList.plugin);

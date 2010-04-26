@@ -15,8 +15,8 @@
     prevElement   = 'previousElementSibling',
 
     getSome = function(element, property, selectors, count) {
-      var match, results = null, i = 0;
-      if (!element) return results;
+      var match, result = null, i = 0;
+      if (!element) return result;
 
       // handle when a callback and optional thisArg is passed
       // thisArg = count, callback = selectors;
@@ -33,7 +33,7 @@
         }
 
         if (count > 1) {
-          results = NodeList();
+          result = NodeList();
         } else {
           count = 1;
         }
@@ -51,7 +51,7 @@
           else {
             do {
               if (i < count && element.nodeType === ELEMENT_NODE)
-                results[i++] = fromElement(element);
+                result[i++] = fromElement(element);
             } while (element = element[property]);
           }
         }
@@ -71,12 +71,12 @@
             do {
               if (i < count && element.nodeType === ELEMENT_NODE &&
                   match(element, selectors))
-                results[i++] = fromElement(element);
+                result[i++] = fromElement(element);
             } while (element = element[property]);
           }
         }
       }
-      return results;
+      return result;
     };
 
     if (isHostObject(fuse._docEl, nextElement) &&
@@ -107,7 +107,7 @@
 
     plugin.getSiblings = function getSiblings(selectors) {
       var match, element = this.raw || this, i = 0,
-       original = element, results = NodeList();
+       original = element, result = NodeList();
 
       if (element = element.parentNode) {
         element = element[firstNode];
@@ -116,20 +116,20 @@
           do {
             if (element.nodeType === ELEMENT_NODE &&
                 element !== original && match(element, selectors))
-              results[i++] = fromElement(element);
+              result[i++] = fromElement(element);
           } while (element = element[nextNode]);
         } else {
           do {
             if (element.nodeType === ELEMENT_NODE && element !== original)
-              results[i++] = fromElement(element);
+              result[i++] = fromElement(element);
           } while (element = element[nextNode]);
         }
       }
-      return results;
+      return result;
     };
 
     plugin.down = function down(selectors, count) {
-      var match, node, nodes, results = null, i = 0, j = 0,
+      var match, node, nodes, result = null, i = 0, j = 0,
        element = this.raw || this;
 
       // handle when a callback and optional thisArg is passed
@@ -148,7 +148,7 @@
         }
 
         if (count > 1) {
-          results = NodeList();
+          result = NodeList();
         } else {
           count = 1;
         }
@@ -164,7 +164,7 @@
           nodes = element.getElementsByTagName('*');
           while (node = nodes[i++]) {
             if (j < count && node.nodeType === ELEMENT_NODE)
-              results[j++] = fromElement(node);
+              result[j++] = fromElement(node);
           }
         }
         // handle when selectors are passed
@@ -184,12 +184,12 @@
             while (node = nodes[i++]) {
               if (j < count && node.nodeType === ELEMENT_NODE &&
                   match(node, selectors))
-                results[j++] = fromElement(node);
+                result[j++] = fromElement(node);
             }
           }
         }
       }
-      return results;
+      return result;
     };
 
     plugin.next = function next(selectors, count) {

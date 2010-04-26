@@ -3,13 +3,12 @@
 
   // private vars
   var DATA_ID_PROP, DOCUMENT_FRAGMENT_NODE, DOCUMENT_NODE, ELEMENT_NODE, TEXT_NODE,
-   Class, Document, Element, Enumerable, Event, Form, Func, Obj, Node, NodeList,
-   Window, $break, _extend, fuse, addArrayMethods, addNodeListMethod, bind, clone,
-   concatList, defer, domData, eachKey, emptyFunction, envAddTest, envTest,
-   escapeRegExpChars, expando, fromElement, getDocument, getNodeName, getWindow,
-   getOrCreateTagClass, hasKey, inspect, isArray, isElement, isEmpty, isHash,
-   isHostObject, isFunction, isNumber, isPrimitive, isRegExp, isSameOrigin,
-   isString, isUndefined, K, nil, prependList, returnOffset, setTimeout, slice,
+   K, NOP, Class, Document, Element, Enumerable, Event, Form, Func, Obj, Node,
+   NodeList, Window, $break, fuse, addArrayMethods, addNodeListMethod, concatList,
+   domData, eachKey, envAddTest, envTest, escapeRegExpChars, expando, fromElement,
+   getDocument, getNodeName, getWindow, getOrCreateTagClass, hasKey, isArray,
+   isElement, isHash, isHostObject, isFunction, isNumber, isPrimitive, isRegExp,
+   isSameOrigin, isString, nil, prependList, returnOffset, setTimeout, slice,
    toInteger, toString, undef, userAgent;
 
   fuse =
@@ -28,8 +27,51 @@
 
   /*--------------------------------------------------------------------------*/
 
-  // Host objects can return type values that are different from their actual data type.
-  // The objects we are concerned with are usally of types object, function, or unknown.
+  $break =
+  fuse.$break = function $break() { };
+
+  NOP =
+  addNodeListMethod = function NOP() { };
+
+  K =
+  fuse.K = function K(x) { return x; };
+
+  addArrayMethods = function(List) {
+    var callbacks = addArrayMethods.callbacks, i = -1;
+    while (callbacks[++i]) callbacks[i](List);
+  };
+
+  addArrayMethods.callbacks = [];
+
+  concatList = function(list, otherList) {
+    var pad = list.length, length = otherList.length;
+    while (length--) list[pad + length] = otherList[length];
+    return list;
+  };
+
+  escapeRegExpChars = (function() {
+    var reSpecialChars = /([.*+?^=!:${}()|[\]\/\\])/g;
+    return function(string) {
+      return String(string).replace(reSpecialChars, '\\$1');
+    };
+  })();
+
+  // Allow a pre-sugared array to be passed
+  prependList = function(list, value, result) {
+    (result || (result = []))[0] = value;
+    var length = list.length;
+    while (length--) result[1 + length] = list[length];
+    return result;
+  };
+
+  isFunction = function isFunction(value) {
+    return toString.call(value) === '[object Function]';
+  };
+
+  // Host objects can return type values that are different from their actual
+  // data type. The objects we are concerned with usually return non-primitive
+  // types of object, function, or unknown.
+  //
   // For example:
   // typeof document.createElement('div').offsetParent -> unknown
   // typeof document.createElement -> object
@@ -42,45 +84,7 @@
     };
   })();
 
-  addArrayMethods = function(List) {
-    var callbacks = addArrayMethods.callbacks, i = -1;
-    while (callbacks[++i]) callbacks[i](List);
-  };
-
-  addArrayMethods.callbacks = [];
-
-  $break =
-  fuse.$break = function $break() { };
-
-  addNodeListMethod =
-  emptyFunction =
-  fuse.emptyFunction = function emptyFunction() { };
-
-  K =
-  fuse.K = function K(x) { return x };
-
-  concatList = function(list, otherList) {
-    var pad = list.length, length = otherList.length;
-    while (length--) list[pad + length] = otherList[length];
-    return list;
-  };
-
-  // Allow a pre-sugared array to be passed
-  prependList = function(list, value, results) {
-    (results || (results = []))[0] = value;
-    var length = list.length;
-    while (length--) results[1 + length] = list[length];
-    return results;
-  };
-
-  escapeRegExpChars = (function() {
-    var reSpecialChars = /([.*+?^=!:${}()|[\]\/\\])/g;
-    return function(string) {
-      return String(string).replace(reSpecialChars, '\\$1');
-    };
-  })();
-
-  // ECMA-5 9.4 ToInteger implementation
+  // ES5 9.4 ToInteger implementation
   toInteger = function(object) {
     // fast coerce to number
     var number = +object;
@@ -194,12 +198,6 @@
    'lang/number.js',
    'lang/regexp.js',
    'lang/string.js',
-   'lang/ecma.js',
-
-   'lang/hash.js',
-   'lang/range.js',
-   'lang/template.js',
-   'lang/timer.js',
 
    'dom/dom.js',
    'dom/features.js',
@@ -237,6 +235,12 @@
    'lang/grep.js',
    'lang/inspect.js',
    'lang/json.js',
+   'lang/ecma.js',
+   
+   'lang/hash.js',
+   'lang/range.js',
+   'lang/template.js',
+   'lang/timer.js',
    'lang/util.js') %>
 
   addArrayMethods(fuse.Array);

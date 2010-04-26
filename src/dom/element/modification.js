@@ -62,20 +62,20 @@
 
 
     getByTagName = function(node, tagName) {
-      var results = [], child = node.firstChild;
+      var result = [], child = node.firstChild;
       while (child) {
         if (getNodeName(child) === tagName) {
-          results.push(child);
+          result.push(child);
         }
         else if (child.getElementsByTagName) {
           // concatList implementation for nodeLists
-          var i = 0, pad = results.length, nodes = child.getElementsByTagName(tagName);
-          while (results[pad + i] = nodes[i++]) { }
-          results.length--;
+          var i = 0, pad = result.length, nodes = child.getElementsByTagName(tagName);
+          while (result[pad + i] = nodes[i++]) { }
+          result.length--;
         }
         child = child.nextSibling;
       }
-      return results;
+      return result;
     },
 
     insertContent = function(element, parentNode, content, position) {

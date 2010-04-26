@@ -1,7 +1,7 @@
   /*------------------------------- LANG: HASH -------------------------------*/
 
   fuse.Hash = (function() {
-    var Klass = function () { },
+    var Klass = function() { },
 
     Hash = function Hash(object) {
       return setWithObject((new Klass).clear(), object);
@@ -108,11 +108,11 @@
         }
       }
       else {
-        var count = +callback, results = fuse.Array();
-        if (isNaN(count)) return results;
+        var count = +callback, result = fuse.Array();
+        if (isNaN(count)) return result;
         count = count < 1 ? 1 : count;
-        while (++i < count && (pair = pairs[i])) results[i] = _returnPair(pair);
-        return results;
+        while (++i < count && (pair = pairs[i])) result[i] = _returnPair(pair);
+        return result;
       }
     };
 
@@ -129,13 +129,13 @@
         }
       }
       else {
-        var count = +callback, results = fuse.Array();
-        if (isNaN(count)) return results;
+        var count = +callback, result = fuse.Array();
+        if (isNaN(count)) return result;
         count = count < 1 ? 1 : count > length ? length : count;
         var  pad = length - count;
         while (++i < count)
-          results[i] = _returnPair(pairs[pad + i]);
-        return results;
+          result[i] = _returnPair(pairs[pad + i]);
+        return result;
       }
     };
 
@@ -155,10 +155,9 @@
       return this;
     };
 
-    plugin.clone = (function() {
-      function clone() { return new $H(this); };
-      return clone;
-    })();
+    plugin.clone = function clone() {
+      return new $H(this);
+    };
 
     plugin.contains = function contains(value) {
       var item, pair, i = -1, pairs = this._pairs;
@@ -239,7 +238,7 @@
     };
 
     plugin.toObject = function toObject() {
-      var pair, i = -1, pairs = this._pairs, result = fuse.Object();
+      var pair, i = -1, pairs = this._pairs, result = Obj();
       while (pair = pairs[++i]) result[pair[0]] = pair[1];
       return result;
     };
@@ -281,6 +280,7 @@
 
     // prevent JScript bug with named function expressions
     var clear =      nil,
+     clone =         nil,
      contains =      nil,
      filter =        nil,
      get =           nil,

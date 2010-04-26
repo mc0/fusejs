@@ -102,16 +102,16 @@
     };
 
     plugin.getControls = function getControls() {
-      var node, results = NodeList(), i = 0, j = -1,
+      var node, result = NodeList(), i = 0, j = -1,
        nodes = (this.raw || this).getElementsByTagName('*');
 
       if (node = nodes[0]) {
         do {
           if (CONTROL_NODE_NAMES[node.nodeName.toUpperCase()])
-            results[++j] = fromElement(node);
+            result[++j] = fromElement(node);
         } while (node = nodes[++i]);
       }
-      return results;
+      return result;
     };
 
     plugin.getInputs = function getInputs(typeName, name) {
@@ -119,30 +119,30 @@
       name = String(typeName || '');
 
       var input, inputs = (this.raw || this).getElementsByTagName('input'),
-       results = NodeList(), i = -1, j = i;
+       result = NodeList(), i = -1, j = i;
 
       if (!typeName && !name) {
         while (input = inputs[++i]) {
-          results[i] = fromElement(input);
+          result[i] = fromElement(input);
         }
       }
       else if (typeName && !name) {
         while (input = inputs[++i]) {
           if (typeName === input.type)
-            results[++j] = fromElement(input);
+            result[++j] = fromElement(input);
         }
       }
       else {
         while (input = inputs[++i]) {
           if ((!typeName || typeName === input.type) && (!name || name === input.name))
-            results[++j] = fromElement(input);
+            result[++j] = fromElement(input);
         }
       }
-      return results;
+      return result;
     };
 
     plugin.request = function request(options) {
-      options = clone(options);
+      options = Obj.clone(options);
 
       var params = options.parameters,
        submit = options.submit,
@@ -153,7 +153,7 @@
 
       if (params) {
         if (isString(params)) params = fuse.String.toQueryParams(params);
-        _extend(options.parameters, params);
+        Obj._extend(options.parameters, params);
       }
       if (plugin.hasAttribute.call(this, 'method') && !options.method) {
         options.method = plugin.getAttribute.call(this, 'method');
@@ -182,7 +182,7 @@
        element     = this.raw || this,
        checkString = !!elements,
        doc         = fuse._doc,
-       result      = fuse.Object(),
+       result      = Obj(),
        submit      = options.submit;
 
       if (submit && submit.raw) {

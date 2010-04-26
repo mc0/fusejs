@@ -103,7 +103,7 @@
     })(),
 
     createFusebox = function(instance) {
-      // Most methods try to follow ECMA spec but may differ from
+      // Most methods try to follow ES5 spec but may differ from
       // the documented method.length value or allow null callbacks.
       var Array, Boolean, Date, Function, Number, Object, RegExp, String, from,
        sandbox        = createSandbox(),
@@ -215,7 +215,7 @@
           return result;
         };
 
-        // make prototype values conform to ECMA spec and inherit from regular natives
+        // make prototype values conform to ES5 spec and inherit from regular natives
         Object.prototype['__proto__']                      = __Object.prototype;
         (Array.prototype    = [ ])['__proto__']            = __Array.prototype;
         (Boolean.prototype  = new __Boolean)['__proto__']  = __Boolean.prototype;
@@ -424,13 +424,13 @@
         };
       }
 
-      // ECMA-5 15.4.3.2
-      if (!(Array.isArray = __Array.isArray))
+      // ES5 15.4.3.2
+      if (!isFunction(Array.isArray = __Array.isArray))
         Array.isArray = function isArray(value) {
           return sbToString.call(value) === '[object Array]';
         };
 
-      // ECMA-5 15.9.4.4
+      // ES5 15.9.4.4
       Date.now = (function() {
         var now = function now() { return instance.Number(+new Date()); };
         if (__Date.now)
@@ -438,17 +438,17 @@
         return now;
       })();
 
-      // ECMA-5 15.9.4.2
+      // ES5 15.9.4.2
       Date.parse = function parse(dateString) {
         return instance.Number(__Date.parse(dateString));
       };
 
-      // ECMA-5 15.9.4.3
+      // ES5 15.9.4.3
       Date.UTC = function UTC(year, month, date, hours, minutes, seconds, ms) {
         return instance.Number(__Date.UTC(year, month, date || 1, hours || 0, minutes || 0, seconds || 0, ms || 0));
       };
 
-      // ECMA-5 15.5.3.2
+      // ES5 15.5.3.2
       String.fromCharCode = function fromCharCode(charCode) {
         return String(arguments.length > 1
           ? __String.fromCharCode.apply(__String, arguments)
@@ -456,7 +456,7 @@
       };
 
       // versions of WebKit and IE have non-spec-conforming /\s/
-      // so we standardize it (see: ECMA-5 15.10.2.12)
+      // so we standardize it (see: ES5 15.10.2.12)
       // http://www.unicode.org/Public/UNIDATA/PropList.txt
       RegExp = (function(RE) {
         var character,
@@ -492,12 +492,12 @@
 
       /*----------------------------------------------------------------------*/
 
-      if (arrPlugin.every) {
+      if (isFunction(arrPlugin.every)) {
         (arrPlugin.every = function every(callback, thisArg) {
           return __every.call(this, callback || K, thisArg);
         }).raw = __every;
       }
-      if (arrPlugin.filter) {
+      if (isFunction(arrPlugin.filter)) {
         (arrPlugin.filter = function filter(callback, thisArg) {
           var result = __filter.call(this, callback || filterCallback, thisArg);
           return result.length
@@ -505,19 +505,19 @@
             : Array();
         }).raw = __filter;
       }
-      if (arrPlugin.indexOf) {
+      if (isFunction(arrPlugin.indexOf)) {
         (arrPlugin.indexOf = function indexOf(item, fromIndex) {
           return instance.Number(__indexOf.call(this, item,
             fromIndex == null ? 0 : fromIndex));
         }).raw = __indexOf;
       }
-      if (arrPlugin.lastIndexOf) {
+      if (isFunction(arrPlugin.lastIndexOf)) {
         (arrPlugin.lastIndexOf = function lastIndexOf(item, fromIndex) {
           return instance.Number(__lastIndexOf.call(this, item,
             fromIndex == null ? this.length : fromIndex));
         }).raw = __lastIndexOf;
       }
-      if (arrPlugin.map) {
+      if (isFunction(arrPlugin.map)) {
         if (SKIP_METHODS_RETURNING_ARRAYS) {
           arrPlugin.map = function map(callback, thisArg) {
             return __map.call(this, callback || K, thisArg);
@@ -532,7 +532,7 @@
         }
         arrPlugin.map.raw = __map;
       }
-      if (arrPlugin.some) {
+      if (isFunction(arrPlugin.some)) {
         (arrPlugin.some = function some(callback, thisArg) {
           return __some.call(this, callback || K, thisArg);
         }).raw = __some;
@@ -597,12 +597,12 @@
           : __unshift.call(this, item));
       }).raw = __unshift;
 
-      if (datePlugin.toISOString) {
+      if (isFunction(datePlugin.toISOString)) {
         (datePlugin.toISOString = function toISOString() {
           return instance.String(__toISOString.call(this));
         }).raw = __toISOString;
       }
-      if (datePlugin.toJSON) {
+      if (isFunction(datePlugin.toJSON)) {
         (datePlugin.toJSON = function toJSON() {
           return instance.String(__toJSON.call(this));
         }).raw = __toJSON;
@@ -699,27 +699,27 @@
       (regPlugin.exec = function exec(string) {
         var output = __exec.call(this, string);
         if (output) {
-          var item, i = -1, length = output.length, results = instance.Array();
+          var item, i = -1, length = output.length, result = instance.Array();
           while (++i < length) {
-            results[i] = (item = output[i]) == null ? item : instance.String(item);
+            result[i] = (item = output[i]) == null ? item : instance.String(item);
           }
-          results.index = output.index;
-          results.input = output.input;
+          result.index = output.index;
+          result.input = output.input;
         }
-        return output && results;
+        return output && result;
       }).raw = __exec;
 
-      if (strPlugin.trim) {
+      if (isFunction(strPlugin.trim)) {
         (strPlugin.trim = function trim() {
           return String(__trim.call(this));
         }).raw = __trim;
       }
-      if (strPlugin.trimLeft) {
+      if (isFunction(strPlugin.trimLeft)) {
         (strPlugin.trimLeft = function trimLeft() {
           return String(__trimLeft.call(this));
         }).raw = __trimLeft;
       }
-      if (strPlugin.trimRight) {
+      if (isFunction(strPlugin.trimRight)) {
         (strPlugin.trimRight = function trimRight() {
           return String(__trimRight.call(this));
         }).raw = __trimRight;
@@ -757,12 +757,12 @@
       (strPlugin.match = function match(pattern) {
         var output = __match.call(this, pattern);
         if (output) {
-          var item, i = -1, length = output.length, results = instance.Array();
+          var item, i = -1, length = output.length, result = instance.Array();
           while (++i < length) {
-            results[i] = (item = output[i]) == null ? item : instance.String(item);
+            result[i] = (item = output[i]) == null ? item : instance.String(item);
           }
         }
-        return output && results;
+        return output && result;
       }).raw = __match;
 
       (strPlugin.replace = function replace(pattern, replacement) {
@@ -780,11 +780,11 @@
 
       (strPlugin.split = function split(separator, limit) {
         var item, i = -1, output = __split.call(this, separator, limit),
-         length = output.length, results = instance.Array();
+         length = output.length, result = instance.Array();
         while (++i < length) {
-          results[i] = (item = output[i]) == null ? item : String(item);
+          result[i] = (item = output[i]) == null ? item : String(item);
         }
-        return results;
+        return result;
       }).raw = __split;
 
       (strPlugin.substr = function substr(start, length) {
@@ -854,7 +854,7 @@
       return instance;
     },
 
-    postProcess = emptyFunction,
+    postProcess = NOP,
 
     Klass = function() { },
 

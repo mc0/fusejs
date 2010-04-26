@@ -7,12 +7,12 @@
     },
 
     query = function(selectors, context, callback, List) {
-      var node, i = -1, results = Slick.search(context && fuse.get(context).raw || fuse._doc,
+      var node, i = -1, result = Slick.search(context && fuse.get(context).raw || fuse._doc,
         String(selectors || ''), List);
       if (callback) {
-        while (node = results[++i]) callback(node);
+        while (node = result[++i]) callback(node);
       }
-      return results;
+      return result;
     },
 
     select = function select(selectors, context, callback) {

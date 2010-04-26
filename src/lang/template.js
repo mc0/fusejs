@@ -12,7 +12,7 @@
         pattern = fuse.RegExp.clone(pattern, { 'global': true });
       }
       if (pattern.constructor !== fuse.RegExp) {
-        pattern = fuse.Object(pattern);
+        pattern = Obj(pattern);
       }
 
       var instance = __instance || new Klass;
@@ -204,8 +204,6 @@
     };
 
     plugin.gsub = function gsub(pattern, replacement) {
-      if (this == null) throw new TypeError;
-
       if (!isRegExp(pattern)) {
         pattern = fuse.RegExp(escapeRegExpChars(pattern), 'g');
       }
@@ -216,20 +214,16 @@
     };
 
     plugin.interpolate = function interpolate(object, pattern) {
-      if (this == null) throw new TypeError;
       return fuse.Template(this, pattern).parse(object);
     };
 
     plugin.scan = function scan(pattern, callback) {
-      if (this == null) throw new TypeError;
       var result = fuse.String(this);
       result.gsub(pattern, callback);
       return result;
     };
 
     plugin.sub = function sub(pattern, replacement, count) {
-      if (this == null) throw new TypeError;
-
       if (count == null || count == 1) {
         if (!isRegExp(pattern)) {
           pattern = fuse.RegExp(escapeRegExpChars(pattern));

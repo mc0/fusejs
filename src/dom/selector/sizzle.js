@@ -7,12 +7,12 @@
     },
 
     query = function(selectors, context, callback, List) {
-      var node, i = -1, results = Sizzle(String(selectors || ''),
+      var node, i = -1, result = Sizzle(String(selectors || ''),
         context && fuse.get(context).raw || fuse._doc, List);
       if (callback) {
-        while (node = results[++i]) callback(node);
+        while (node = result[++i]) callback(node);
       }
-      return results;
+      return result;
     },
 
     select = function select(selectors, context, callback) {

@@ -415,18 +415,6 @@ new Test.Unit.Runner({
     this.assert(!fuse.Object.isNumber(undef));
   },
 
-  'testObjectIsUndefined': function() {
-    this.assert(fuse.Object.isUndefined(undef));
-
-    this.assert(!fuse.Object.isUndefined(null));
-    this.assert(!fuse.Object.isUndefined(false));
-    this.assert(!fuse.Object.isUndefined(0));
-    this.assert(!fuse.Object.isUndefined(''));
-    this.assert(!fuse.Object.isUndefined(function() { }));
-    this.assert(!fuse.Object.isUndefined([]));
-    this.assert(!fuse.Object.isUndefined({}));
-  },
-
   'testObjectKeys': function() {
     this.assertEnumEqual([],          fuse.Object.keys({ }));
     this.assertEnumEqual([],          fuse.Object.keys([ ]));

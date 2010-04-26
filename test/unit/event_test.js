@@ -235,7 +235,7 @@ new Test.Unit.Runner({
     });
 
     // if there is a bug then this observer will be skipped
-    $(document).observe('test:somethingHappened', fuse.emptyFunction);
+    $(document).observe('test:somethingHappened', fuse.Function.NOP);
 
     $(document).fire('test:somethingHappened');
     this.assert(!fired, 'observer should NOT have fired');
@@ -356,7 +356,7 @@ new Test.Unit.Runner({
 
   'testFuseIdDuplication': function() {
     var element = $('container').down();
-    element.observe('test:somethingHappened', fuse.emptyFunction);
+    element.observe('test:somethingHappened', fuse.Function.NOP);
 
     var fuseId = element.getFuseId(),
      clone = $(element.raw.cloneNode(true));
@@ -372,7 +372,7 @@ new Test.Unit.Runner({
 
   'testDocumentAndWindowFuseId': function() {
     fuse.Array(document, window).each(function(object) {
-      $(object).observe('test:somethingHappened', fuse.emptyFunction);
+      $(object).observe('test:somethingHappened', fuse.Function.NOP);
       this.assertUndefined(object.getFuseId);
 
       $(object).stopObserving('test:somethingHappened');

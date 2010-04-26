@@ -1,3 +1,10 @@
+* Reduce the number of private variables and standardize repeatedly used variable names for better minification. [jddalton]
+
+* Wrap apply() and call() of Array and String methods to ensure `thisArg` is not null or undefined. [jddalton]
+
+* Move fuse.emptyFunction to fuse.Function.NOP and remove fuse.Object.isUndefined. [jddalton]
+  Note: Backwards compatibility warning.
+
 * Separate the fuse.util methods into their own /lang/util.js file. [jddalton]
 
 * Separate the ECMA specification bug fixes into their own /lang/ecma.js file. [jddalton]

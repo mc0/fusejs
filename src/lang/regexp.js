@@ -6,7 +6,7 @@
     };
 
     plugin.clone = function clone(options) {
-      options = _extend({
+      options = Obj._extend({
         'global':     this.global,
         'ignoreCase': this.ignoreCase,
         'multiline':  this.multiline

@@ -52,13 +52,13 @@
     };
 
     mixin.filter = function filter(callback, thisArg) {
-      var results = fuse.Array();
+      var result = fuse.Array();
       callback = callback || function(value) { return value != null; };
       this._each(function(value, index, iterable) {
         if (callback.call(thisArg, value, index, iterable))
-          results.push(value);
+          result.push(value);
       });
-      return results;
+      return result;
     };
 
     mixin.first = function first(callback, thisArg) {
@@ -98,17 +98,17 @@
 
     mixin.map = function map(callback, thisArg) {
       if (!callback) return this.toArray();
-      var results = fuse.Array();
+      var result = fuse.Array();
       if (thisArg) {
         this._each(function(value, index, iterable) {
-          results.push(callback.call(thisArg, value, index, iterable));
+          result.push(callback.call(thisArg, value, index, iterable));
         });
       } else {
         this._each(function(value, index, iterable) {
-          results.push(callback(value, index, iterable));
+          result.push(callback(value, index, iterable));
         });
       }
-      return results;
+      return result;
     };
 
     mixin.max = function max(callback, thisArg) {
@@ -179,9 +179,9 @@
     };
 
     mixin.toArray = function toArray() {
-      var results = fuse.Array();
-      this._each(function(value, index) { results[index] = value; });
-      return results;
+      var result = fuse.Array();
+      this._each(function(value, index) { result[index] = value; });
+      return result;
     };
 
     mixin.zip = function zip() {

@@ -9,7 +9,7 @@
       var onDone,
        callbackName = 'on' + Request.Events[4],
        instance     = __instance || new Klass,
-       options      = _extend(clone(TimedUpdater.defaults), options);
+       options      = Obj._extend(Obj.clone(TimedUpdater.defaults), options);
 
       __instance = null;
 

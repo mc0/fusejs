@@ -7,12 +7,12 @@
     },
 
     query = function(selectors, context, callback, toList) {
-      var node, i = -1, results = toList(Sly(String(selectors || ''),
+      var node, i = -1, result = toList(Sly(String(selectors || ''),
         context && fuse.get(context).raw || fuse._doc));
       if (callback) {
-        while (node = results[++i]) callback(node);
+        while (node = result[++i]) callback(node);
       }
-      return results;
+      return result;
     },
 
     select = function select(selectors, context, callback) {

@@ -1,7 +1,7 @@
   /*----------------------------- LANG: INSPECT ------------------------------*/
 
   (function() {
-    var objInspect, strInspect,
+    var strInspect,
 
     elemPlugin  = fuse.dom && fuse.dom.Element.plugin,
 
@@ -35,7 +35,7 @@
     inspectPlugin = function(plugin) {
       var result, backup = plugin.inspect;
       plugin.inspect = expando;
-      result = objInspect(plugin).replace(expando, String(backup));
+      result = Obj.inspect(plugin).replace(expando, String(backup));
       plugin.inspect = backup;
       return result;
     };
@@ -60,11 +60,11 @@
           return inspectPlugin(plugin);
         }
         // called normally fuse.Array(...).inspect()
-        var results = [], object = Object(this), length = object.length >>> 0;
+        var result = [], object = Object(this), length = object.length >>> 0;
         while (length--) {
-          results[length] = objInspect(object[length]);
+          result[length] = Obj.inspect(object[length]);
         }
-        return fuse.String('[' + results.join(', ') + ']');
+        return fuse.String('[' + result.join(', ') + ']');
       };
 
       // prevent JScript bug with named function expressions
@@ -102,7 +102,7 @@
         // called normally fuse.Hash(...).inspect()
         var pair, i = -1, pairs = this._pairs, result = [];
         while (pair = pairs[++i]) {
-          result[i] = pair[0].inspect() + ': ' + objInspect(pair[1]);
+          result[i] = pair[0].inspect() + ': ' + Obj.inspect(pair[1]);
         }
         return '#<Hash:{' + result.join(', ') + '}>';
       };
@@ -139,20 +139,14 @@
       };
     }
 
-    // used by the framework closure
-    inspect =
-
-    // used by this closure only
-    objInspect =
-
     Obj.inspect = function inspect(value) {
-      var classType, object, results;
+      var classType, object, result;
       if (value != null) {
-        object = fuse.Object(value);
+        object = Obj(value);
 
-        // this is not duplicating checks, one is a type check the other
-        // is an internal [[Class]] check because Safari 3.1 mistakes
-        // regexp instances as typeof `function`
+        // this is not duplicating checks, one is a type check for host objects
+        // and the other is an internal [[Class]] check because Safari 3.1
+        // mistakes regexp instances as typeof `function`
         if (typeof object.inspect === 'function' &&
             isFunction(object.inspect)) {
           return object.inspect();
@@ -165,12 +159,12 @@
         try {
           classType = toString.call(object);
           if (classType === '[object Object]' && typeof object.constructor === 'function') {
-            results = [];
+            result = [];
             eachKey(object, function(value, key) {
               hasKey(object, key) &&
-                results.push(strInspect.call(key) + ': ' + objInspect(object[key]));
+                result.push(strInspect.call(key) + ': ' + Obj.inspect(object[key]));
             });
-            return fuse.String('{' + results.join(', ') + '}');
+            return fuse.String('{' + result.join(', ') + '}');
           }
         } catch (e) { }
       }

@@ -111,7 +111,7 @@
     }
     else {
       hasKey = function hasKey(object, property) {
-        // ECMA-5 15.2.4.5
+        // ES5 15.2.4.5
         if (object == null) throw new TypeError;
         return hasOwnProperty.call(object, property);
       };
@@ -135,23 +135,6 @@
 
   /*--------------------------------------------------------------------------*/
 
-  _extend =
-  Obj._extend = function _extend(destination, source) {
-    if (source) {
-      for (var key in source) {
-        destination[key] = source[key];
-      }
-    }
-    return destination;
-  };
-
-  clone =
-  Obj.clone = function clone(object) {
-    if (object && typeof object.clone === 'function')
-      return object.clone();
-    return Obj.extend(fuse.Object(), object);
-  };
-
   isArray =
   Obj.isArray = fuse.Array.isArray;
 
@@ -160,20 +143,7 @@
     return !!value && value.nodeType === ELEMENT_NODE;
   };
 
-  isEmpty =
-  Obj.isEmpty = function isEmpty(object) {
-    if (object) {
-      for (var key in object) {
-        if (hasKey(object, key)) return false;
-      }
-    }
-    return true;
-  };
-
-  isFunction =
-  Obj.isFunction = function isFunction(value) {
-    return toString.call(value) === '[object Function]';
-  };
+  Obj.isFunction = isFunction;
 
   isHash =
   Obj.isHash = function isHash(value) {
@@ -186,7 +156,7 @@
     return toString.call(value) === '[object Number]' && isFinite(value);
   };
 
-  // ECMA-5 4.3.2
+  // ES5 4.3.2
   isPrimitive =
   Obj.isPrimitive = function isPrimitive(value) {
     var type = typeof value;
@@ -232,17 +202,27 @@
     return toString.call(value) === '[object String]';
   };
 
-  isUndefined =
-  Obj.isUndefined = function isUndefined(value) {
-    return typeof value === 'undefined';
-  };
-
   /*--------------------------------------------------------------------------*/
 
   (function() {
     var toQueryPair = function(key, value) {
       return fuse.String(typeof value === 'undefined' ? key :
         key + '=' + encodeURIComponent(value == null ? '' : value));
+    };
+
+    Obj._extend = function _extend(destination, source) {
+      if (source) {
+        for (var key in source) {
+          destination[key] = source[key];
+        }
+      }
+      return destination;
+    };
+
+    Obj.clone = function clone(object) {
+      if (object && typeof object.clone === 'function')
+        return object.clone();
+      return Obj.extend(Obj(), object);
     };
 
     Obj.each = function each(object, callback, thisArg) {
@@ -261,27 +241,36 @@
       return destination;
     };
 
-    // ECMA-5 15.2.3.14
+    Obj.isEmpty = function isEmpty(object) {
+      if (object) {
+        for (var key in object) {
+          if (hasKey(object, key)) return false;
+        }
+      }
+      return true;
+    };
+
+    // ES5 15.2.3.14
     if (!Obj.keys) {
       Obj.keys = function keys(object) {
         if (isPrimitive(object)) throw new TypeError;
 
-        var results = fuse.Array(), i = -1;
+        var result = fuse.Array(), i = -1;
         eachKey(object, function(value, key) {
-          if (hasKey(object, key)) results[++i] = key;
+          if (hasKey(object, key)) result[++i] = key;
         });
-        return results;
+        return result;
       };
     }
 
     Obj.values = function values(object) {
       if (isPrimitive(object)) throw new TypeError;
 
-      var results = fuse.Array(), i = -1;
+      var result = fuse.Array(), i = -1;
       eachKey(object, function(value, key) {
-        if (hasKey(object, key)) results[++i] = value;
+        if (hasKey(object, key)) result[++i] = value;
       });
-      return results;
+      return result;
     };
 
     Obj.toHTML = function toHTML(object) {
@@ -291,25 +280,28 @@
     };
 
     Obj.toQueryString = function toQueryString(object) {
-      var results = [];
+      var result = [];
       eachKey(object, function(value, key) {
         if (hasKey(object, key)) {
           key = encodeURIComponent(key);
           if (value && isArray(value)) {
-            var i = results.length, j = 0, length = i + value.length;
-            while (i < length) results[i++] = toQueryPair(key, value[j++]);
+            var i = result.length, j = 0, length = i + value.length;
+            while (i < length) result[i++] = toQueryPair(key, value[j++]);
           }
           else if (!value || toString.call(value) !== '[object Object]') {
-            results.push(toQueryPair(key, value));
+            result.push(toQueryPair(key, value));
           }
         }
       });
-      return fuse.String(results.join('&'));
+      return fuse.String(result.join('&'));
     };
 
     // prevent JScript bug with named function expressions
-    var each =       nil,
+    var _extend =    nil,
+     clone =         nil, 
+     each =          nil,
      extend =        nil,
+     isEmpty =       nil,
      keys =          nil,
      values =        nil,
      toHTML =        nil,
