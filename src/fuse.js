@@ -143,10 +143,12 @@
 
       while (key = keys[++i]) {
         if (!object[key]) {
-          Klass = Class(object, { 'constructor': key });
+          Klass = Class(object.constructor.superclass || object, { 'constructor': key });
           object = object[key] = new Klass;
+          object.plugin = Klass.plugin;
+        } else {
+          object = object[key];
         }
-        else object = object[key];
       }
       return object;
     },
