@@ -181,7 +181,7 @@
        submitSerialized, type, value, i = 0,
        element     = this.raw || this,
        checkString = !!elements,
-       doc         = fuse._doc,
+       doc         = getDocument(element),
        result      = Obj(),
        submit      = options.submit;
 

@@ -1,3 +1,5 @@
+* Remove a reference to the window.document object in fuse.dom.Form#serializeElements. [jddalton]
+
 * Ensure namespaces only inherit from the parent namespaces `plugin` property and not static properties. [jddalton]
 
 * Reduce the number of private variables and standardize repeatedly used variable names for better minification. [jddalton]
