@@ -22,13 +22,13 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 (function(global) {
-  var slice = Array.prototype.slice,
+  var NOP   = function() { },
 
-   emptyFunction = function() { },
+   slice    = [].slice,
 
-   toString = Object.prototype.toString,
+   toString = {}.toString,
 
-   isArray = function(object) {
+   isArray  = function(object) {
      return toString.call(object) === '[object Array]';
    },
 
@@ -504,9 +504,9 @@
   Test.Unit.Testcase = fuse.Class([Test.Unit.Assertions, {
     'initialize': function(name, test, setup, teardown) {
       this.name     = name;
-      this.test     = test     || emptyFunction;
-      this.setup    = setup    || emptyFunction;
-      this.teardown = teardown || emptyFunction;
+      this.test     = test     || NOP;
+      this.setup    = setup    || NOP;
+      this.teardown = teardown || NOP;
       this.messages = [];
       this.actions  = { };
     },
