@@ -35,7 +35,7 @@
     return Event;
   })();
 
-  Obj._extend(fuse.dom.Event, {
+  Event.addStatics({
     'KEY_BACKSPACE': 8,
     'KEY_DELETE':    46,
     'KEY_DOWN':      40,
@@ -49,18 +49,85 @@
     'KEY_RETURN':    13,
     'KEY_RIGHT':     39,
     'KEY_TAB':       9,
-    'KEY_UP':        38
+    'KEY_UP':        38,
+    'updateGenerics': Node.updateGenerics
   });
 
   /*--------------------------------------------------------------------------*/
 
   (function(plugin) {
 
-    var BUGGY_EVENT_TYPES = { 'error': 1, 'load': 1 },
+    var domLoadDispatcher, winLoadDispatcher,
+
+    BUGGY_EVENT_TYPES = { 'error': 1, 'load': 1 },
 
     CHECKED_INPUT_TYPES = { 'checkbox': 1, 'radio': 1 },
 
     arrIndexOf = fuse.Array.plugin.indexOf.raw,
+
+    // lazy define on first call
+    // compatibility charts found at http://unixpapa.com/js/mouse.html
+    defineIsClick = function() {
+      // fired events have no raw
+      if (!this.raw) return false;
+
+      var CLICK_MAP = { 'L': 1, 'M': 2, 'R': 3 },
+
+      property = 'which',
+
+      isLeftClick = function isLeftClick() {
+        var event = this.raw;
+        return (this.isLeftClick = event && event[property] === CLICK_MAP.L
+          ? Func.TRUE
+          : Func.FALSE)();
+      },
+
+      isMiddleClick = function isMiddleClick() {
+        var event = this.raw;
+        return (this.isMiddleClick = event && event[property] === CLICK_MAP.M
+          ? Func.TRUE
+          : Func.FALSE)();
+      },
+
+      isRightClick = function isRightClick() {
+        var event = this.raw;
+        return (this.isRightClick = event && event[property] === CLICK_MAP.R
+          ? Func.TRUE
+          : Func.FALSE)();
+      };
+
+      // for non IE
+      if (typeof this.raw.which === 'number') {
+        // simulate a middle click by pressing the Apple key in Safari 2.x
+        if (typeof this.raw.metaKey === 'boolean') {
+          isMiddleClick = function isMiddleClick() {
+            var result, which, event = this.raw;
+            if (event) {
+              which  = event.which;
+              result = which === CLICK_MAP.L ? event.metaKey : which === CLICK_MAP.M;
+            }
+            return (this.isMiddleClick = result ? Func.TRUE : Func.FALSE)();
+          };
+        }
+      }
+      // for IE
+      // check for `button` second for browsers that have `which` and `button`
+      else if (typeof this.raw.button === 'number') {
+        CLICK_MAP = { 'L': 1, 'M': 4, 'R': 2 };
+        property = 'button';
+      }
+      // fallback
+      else {
+        isLeftClick   =
+        isMiddleClick =
+        isRightClick  = Func.FALSE;
+      }
+
+      plugin.isLeftClick   = isLeftClick;
+      plugin.isMiddleClick = isMiddleClick;
+      plugin.isRightClick  = isRightClick;
+      return this[arguments[0]]();
+    },
 
     definePointerXY = function() {
       // fired events have no raw
@@ -77,7 +144,7 @@
           return this.raw && this.raw.pageY || 0;
         };
       }
-      // IE and other
+      // IE and others
       else {
         var info = fuse._info,
          doc  = getDocument(this.getTarget() || global),
@@ -121,42 +188,6 @@
       plugin.getPointerX = getPointerX;
       plugin.getPointerY = getPointerY;
       return this[arguments[0]]();
-    },
-
-    // lazy define on first call
-    // compatibility charts found at http://unixpapa.com/js/mouse.html
-    isButton = function(event, mouseButton) {
-      var property = 'which',
-       BUTTON_MAP = { 'left': 1, 'middle': 2, 'right': 3 };
-
-      isButton = function(event, mouseButton) {
-        return event[property] === BUTTON_MAP[mouseButton];
-      };
-
-      // for non IE
-      if (typeof event.which === 'number') {
-        // simulate a middle click by pressing the Apple key in Safari 2.x
-        if (typeof event.metaKey === 'boolean') {
-          isButton = function(event, mouseButton) {
-            var value = event.which;
-            return mouseButton === 'middle' && value == 1
-              ? event.metaKey
-              : value === BUTTON_MAP[mouseButton];
-          };
-        }
-      }
-      // for IE
-      // check for `button` second for browsers that have `which` and `button`
-      else if (typeof event.button === 'number') {
-        property = 'button';
-        BUTTON_MAP = { 'left': 1, 'middle': 4, 'right': 2 };
-      }
-      // fallback
-      else {
-        isButton = function() { return false; };
-      }
-
-      return isButton(event, mouseButton);
     },
 
     addCache = function(id, type, handler) {
@@ -216,12 +247,7 @@
         }
       };
     },
-
-    setLoaded = function() {
-      var isLoaded =
-      this.isLoaded = function isLoaded() { return true; };
-    },
-
+ 
     // Ensure that the dom:loaded event has finished
     // executing its observers before allowing the
     // window onload event to proceed.
@@ -247,7 +273,7 @@
           fuse._info.scrollEl = fuse._info.docEl;
         }
 
-        setLoaded.call(decoratedDoc);
+        decoratedDoc.isLoaded = Func.TRUE;
         domLoadDispatcher(event);
         decoratedDoc.stopObserving('dom:loaded');
       }
@@ -324,7 +350,7 @@
     plugin.cancel = function cancel() {
       var setCancelled = function() {
         var isCancelled =
-        this.isCancelled = function isCancelled() { return true; };
+        this.isCancelled = Func.TRUE;
       },
 
       cancel = function cancel() {
@@ -349,8 +375,7 @@
 
     plugin.stopBubbling = function stopBubbling() {
       var setBubbling = function() {
-        var isBubbling =
-        this.isBubbling = function isBubbling() { return false; };
+        this.isBubbling = Func.FALSE;
       },
 
       stopBubbling = function stopBubbling() {
@@ -494,50 +519,38 @@
       return element;
     };
 
-    plugin.isBubbling = function isBubbling() {
-      return true;
-    };
-
-    plugin.isCancelled = function isCancelled() {
-      return false;
-    };
-
-    plugin.isStopped = function isStopped() {
-      return false;
-    };
+    plugin.isCancelled =
+    plugin.isStopped   = Func.FALSE;
+    plugin.isBubbling  = Func.TRUE;
 
     plugin.isLeftClick = function isLeftClick() {
-      return !!this.raw && isButton(this.raw, 'left');
+      return defineIsClick.call(this, 'isLeftClick');
     };
 
     plugin.isMiddleClick = function isMiddleClick() {
-      return !!this.raw && isButton(this.raw, 'middle');
+      return defineIsClick.call(this, 'isMiddleClick');
     };
 
     plugin.isRightClick = function isRightClick() {
-      return !!this.raw && isButton(this.raw, 'right');
+      return defineIsClick.call(this, 'isRightClick');
     };
 
     plugin.stop = function stop() {
-      // Set so that a custom event can be inspected
+      // set so that a custom event can be inspected
       // after the fact to determine whether or not it was stopped.
-      var isStopped =
-      this.isStopped = function isStopped() { return true; };
-
+      this.isStopped = Func.TRUE;
       this.cancel();
       this.stopBubbling();
     };
 
     /*------------------------------------------------------------------------*/
 
-    Document.plugin.isLoaded = function isLoaded() {
-      return false;
-    };
+    Document.plugin.isLoaded = Func.FALSE;
 
     Document.plugin.fire =
     Element.plugin.fire  =
     Window.plugin.fire   = function fire(type, memo) {
-      var backup, checked, ec, data, id, first = true,
+      var backup, checked, dispatcher, ec, data, id, first = true,
        element = this.raw || this,
        attrName = 'on' + type,
        event = Event(null, element);

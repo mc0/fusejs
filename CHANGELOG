@@ -1,3 +1,5 @@
+* Add method generics to fuse.dom.Event and make isLeftClick(), isMiddleClick(), and isRightClick() lazy define themselves. [jddalton]
+
 * Move fuse.K to fuse.Function.IDENTITY and add fuse.Function.TRUE/fuse.Function.FALSE shortcut functions. [jddalton]
   Note: Backwards compatibility warning.
 
