@@ -3,53 +3,45 @@
   NodeList =
   fuse.dom.NodeList = fuse.Fusebox().Array;
 
-  (function(plugin) {
-    var SKIPPED_KEYS = { 'callSuper': 1, 'constructor': 1, 'match': 1, 'select': 1 },
+  addNodeListMethod = (function(plugin) {
 
-    domClassCache = { },
+    var SKIPPED_KEYS = { 'callSuper': 1, 'constructor': 1, 'match': 1, 'query': 1 },
+     domClassCache = { },
+     arrPlugin = fuse.Array.plugin,
+     arrEvery  = arrPlugin.every,
+     arrEach   = arrPlugin.forEach,
+     arrSome   = arrPlugin.some,
+     reBool    = /^(?:(?:is|has)[A-Z]|contains)/,
+     reGetter  = /^(?:get[A-Z]|down|first|identify|inspect|last|next|previous|read|scroll)/;
 
-    arrProto  = Array.prototype,
-
-    elemProto = Element.prototype,
-
-    funcApply = Func.plugin.apply,
-
-    funcCall  = Func.plugin.call,
-
-    reBool    = /^(?:(?:is|has)[A-Z]|contains)/,
-
-    reGetter  = /^(?:get[A-Z]|down|first|identify|inspect|last|next|previous|read|scroll)/,
-
-    arrEvery = arrProto.every ||
-      function(callback) {
+    if (!arrEvery || arrEvery === (arrEvery = arrEvery.raw)) {
+      arrEvery = function(callback) {
         var i = -1, array = this, length = array.length;
         while (++i < length) {
-          if (i in array && !callback(array[i]))
-            return false;
+          if (i in array && !callback(array[i])) return false;
         }
         return true;
-      },
-
-    arrEach = arrProto.forEach ||
-      function(callback) {
+      };
+    }
+    if (!arrEach || arrEach === arrEach.raw) {
+     arrEach = function(callback) {
         var i = -1, array = this, length = array.length;
         while (++i < length) {
           if (i in array) callback(array[i]);
         }
-      },
-
-    arrSome = arrProto.some ||
-      function(callback) {
+      };
+    }
+    if (!arrSome || arrSome === (arrSome = arrSome.raw)) {
+      arrSome = function(callback) {
         var i = -1, array = this, length = array.length;
         while (++i < length) {
-          if (i in array && callback(array[i]))
-            return true;
+          if (i in array && callback(array[i])) return true;
         }
         return false;
       };
+    }
 
-    // shared by primary closure
-    addNodeListMethod = function(value, key, object) {
+    return function(value, key, object) {
       if (!SKIPPED_KEYS[key] && isFunction(value) && hasKey(object, key)) {
         if (reGetter.test(key)) {
           // getters return the value of the first element
@@ -60,8 +52,7 @@
             'm=(c[n=e.nodeName]||(c[n]=gc(n))).plugin.' + key + ';' +
             'return m&&(arguments.length?m.apply(e,arguments):m.call(e))' +
             '}}return ' + key)(domClassCache, getOrCreateTagClass);
-        }
-        else {
+        } else {
           // return true for methods prefixed with `is` when all return true OR
           // return true for methods prefixed with `has`/`contains` when some return true OR
           // return the array after executing a method for all elements
@@ -79,16 +70,14 @@
         }
       }
     };
+  })(NodeList.plugin);
 
-    // add Element methods to fuse.dom.NodeList
-    eachKey(Element.plugin, addNodeListMethod);
+  /*--------------------------------------------------------------------------*/
 
-    if (fuse.dom.FormElement) {
-      eachKey(fuse.dom.FormElement, addNodeListMethod);
-    }
-    if (fuse.dom.InputElement) {
-      eachKey(fuse.dom.InputElement.plugin, addNodeListMethod);
-    }
+  (function(plugin) {
+    var elemPlugin = Element.plugin,
+     funcApply = Func.plugin.apply,
+     funcCall  = Func.plugin.call;
 
     plugin.get = function get(index) {
       var result, object = Object(this), length = object.length >>> 0;
@@ -109,14 +98,14 @@
     };
 
     plugin.invoke = function invoke(method) {
-      var args, item, i = 0, result = fuse.Array(), object = Object(this),
-       length = object.length >>> 0;
+      var args, item, i = 0, result = fuse.Array(),
+       object = Object(this), length = object.length >>> 0;
 
       if (arguments.length < 2) {
         while (length--) {
           if (length in object) {
             result[length] = funcCall
-              .call(elemProto[method] || object[length][method], object[length]);
+              .call(elemPlugin[method] || object[length][method], object[length]);
           }
         }
       } else {
@@ -124,7 +113,7 @@
         while (length--) {
           if (length in object) {
             result[length] = funcApply
-              .call(elemProto[method] || object[length][method], object[length], args);
+              .call(elemPlugin[method] || object[length][method], object[length], args);
           }
         }
       }

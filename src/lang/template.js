@@ -50,7 +50,9 @@
   /*--------------------------------------------------------------------------*/
 
   (function(plugin) {
-    var reBackslashs = /\\/g,
+    var strPlugin = fuse.String.plugin,
+
+    reBackslashs = /\\/g,
 
     reBrackets = /\[((?:(?!\])[^\\]|\\.)*)\]/g,
 
@@ -58,16 +60,19 @@
 
     reSplitByDot = /\b(?!\\)\./g,
 
-    strReplace = envTest('STRING_REPLACE_COERCE_FUNCTION_TO_STRING') ?
-      fuse.String.plugin.replace : fuse.String.plugin.replace.raw,
-
-    strSplit = envTest('STRING_SPLIT_BUGGY_WITH_REGEXP') ?
-      fuse.String.plugin.split : fuse.String.plugin.split.raw,
-
     escapeDots = function(match, path) {
       return '.' + path.replace(reDots, '\\.');
-    };
+    },
 
+    strReplace = function(pattern, replacement) {
+      return (strReplace = envTest('STRING_REPLACE_COERCE_FUNCTION_TO_STRING') ?
+        strPlugin.replace : strPlugin.replace.raw).call(this, pattern, replacement);
+    },
+
+    strSplit = function(separator) {
+      return (strSplit = envTest('STRING_SPLIT_BUGGY_WITH_REGEXP') ?
+        strPlugin.split : strPlugin.split.raw).call(this, separator);
+    };
 
     plugin.preparse = function preparse() {
       var backslash, chain, escaped, prop, temp, token, tokens, j, i = 1,
@@ -193,7 +198,9 @@
   /*--------------------------------------------------------------------------*/
 
   (function(plugin) {
-    var strReplace = plugin.replace,
+    var strReplace = function(pattern, replacement) {
+      return (strReplace = plugin.replace).call(this, pattern, replacement);
+    },
 
     prepareReplacement = function(replacement) {
       if (typeof replacement === 'function') {

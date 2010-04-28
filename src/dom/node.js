@@ -5,11 +5,7 @@
   Node =
   fuse.dom.Node = (function() {
 
-    var fuseId = 3,
-
-    retWinId = true,
-
-    Decorator = function() { },
+    var Decorator = function() { },
 
     Node = function Node(node) {
       // quick return if falsy or decorated
@@ -18,16 +14,8 @@
         return node;
       }
       if (node.nodeType !== TEXT_NODE) {
-        // switch flag to bail early for window objects
-        retWinId = false;
-        id = getFuseId.call(node);
-        retWinId = true;
-
-        // return if window
-        if (!id) {
-          return node;
-        }
         // return cached if available
+        id = getFuseId.call(node);
         if ((data = domData[id]).decorator) {
           return data.decorator;
         }
@@ -37,7 +25,6 @@
           case DOCUMENT_NODE: return Document(node);
         }
       }
-
       // use new Decorator, which has Node.plugin mapped to Decorator.prototype,
       // to avoid `new` operator with fuse.dom.Node
       decorated = new Decorator;
@@ -51,7 +38,46 @@
     },
 
     getFuseId = function getFuseId() {
-      var win, node = this.raw || this, id = node[DATA_ID_PROP];
+      return Node.getFuseId(this);
+    };
+
+    Class({ 'constructor': Node, 'getFuseId': getFuseId });
+    Decorator.prototype = Node.plugin;
+    return Node;
+  })();
+
+  /*--------------------------------------------------------------------------*/
+
+  Node.addStatics(function() {
+    var SKIPPED_KEYS = { 'constructor': 1, 'callSuper': 1, 'getFuseId': 1 },
+
+    fuseId = 3,
+
+    createGeneric = function(proto, methodName) {
+      return Function('o,s',
+        'function ' + methodName + '(node){' +
+        'var a=arguments,n=fuse.get(node),m=o.' + methodName +
+        ';return a.length' +
+        '?m.apply(n,s.call(a,1))' +
+        ':m.call(n)' +
+        '}return ' + methodName)(proto, slice);
+    },
+
+    updateGenerics = function updateGenerics(deep) {
+      var Klass = this;
+      if (deep) {
+        fuse.updateGenerics(Klass, deep);
+      } else {
+        Obj._each(Klass.prototype, function(value, key, proto) {
+          if (!SKIPPED_KEYS[key] && isFunction(proto[key]) && hasKey(proto, key))
+            Klass[key] = createGeneric(proto, key);
+        });
+      }
+    },
+
+    getFuseId = function getFuseId(node) {
+      node = node.raw || node;
+      var win, id = node[DATA_ID_PROP];
 
       // quick return for nodes with ids
       // IE can avoid adding an expando on each node and use the `uniqueNumber` property instead.
@@ -59,7 +85,6 @@
         domData[id] || (domData[id] = { });
         return id;
       }
-
       // In IE window == document is true but not document == window.
       // Use loose comparison because different `window` references for
       // the same window may not strict equal each other.
@@ -67,14 +92,10 @@
       if (node == win) {
         // optimization flag is set in the Node factory to avoid
         // resolving ids for windows when not needed
-        if (retWinId) {
-          id = '1';
-          if (node != global) {
-            id = getFuseId(win.frameElement) + '-1';
-            domData[id] || (domData[id] = { });
-          }
-        } else {
-          id = false;
+        id = '1';
+        if (node != global) {
+          id = getFuseId(node.frameElement) + '-1';
+          domData[id] || (domData[id] = { });
         }
         return id;
       }
@@ -92,61 +113,22 @@
       return id;
     };
 
-    Class({ 'constructor': Node });
-    Decorator.prototype = Node.plugin;
-    Node.plugin.getFuseId = getFuseId;
-    return Node;
-  })();
-
-  /*--------------------------------------------------------------------------*/
-
-  Node.getFuseId = (function(__getFuseId) {
-    function getFuseId(node) {
-      return __getFuseId.call(node);
-    }
-    return getFuseId;
-  })(Node.plugin.getFuseId);
-
-  Node.updateGenerics = (function() {
-    var SKIPPED_KEYS = { 'constructor': 1, 'callSuper': 1, 'getFuseId': 1 };
-
-    function createGeneric(proto, methodName) {
-      return Function('o,s',
-        'function ' + methodName + '(node){' +
-        'var a=arguments,n=fuse.get(node),m=o.' + methodName +
-        ';return a.length' +
-        '?m.apply(n,s.call(a,1))' +
-        ':m.call(n)' +
-        '}return ' + methodName)(proto, slice);
-    }
-
-    function updateGenerics(deep) {
-      var Klass = this;
-      if (deep) {
-        fuse.updateGenerics(Klass, deep);
-      } else {
-        Obj._each(Klass.prototype, function(value, key, proto) {
-          if (!SKIPPED_KEYS[key] && isFunction(proto[key]) && hasKey(proto, key))
-            Klass[key] = createGeneric(proto, key);
-        });
-      }
-    }
-
-    return updateGenerics;
-  })();
-
-  // constants
-  Node.DOCUMENT_FRAGMENT_NODE =      DOCUMENT_FRAGMENT_NODE;
-  Node.DOCUMENT_NODE =               DOCUMENT_NODE;
-  Node.ELEMENT_NODE =                ELEMENT_NODE;
-  Node.TEXT_NODE =                   TEXT_NODE;
-  Node.ATTRIBUTE_NODE =              2;
-  Node.CDATA_SECTION_NODE =          4;
-  Node.ENTITY_REFERENCE_NODE =       5;
-  Node.ENTITY_NODE =                 6;
-  Node.PROCESSING_INSTRUCTION_NODE = 7;
-  Node.COMMENT_NODE =                8;
-  Node.DOCUMENT_TYPE_NODE =          10;
-  Node.NOTATION_NODE =               12;
+    return {
+      'DOCUMENT_FRAGMENT_NODE':      DOCUMENT_FRAGMENT_NODE,
+      'DOCUMENT_NODE':               DOCUMENT_NODE,
+      'ELEMENT_NODE':                ELEMENT_NODE,
+      'TEXT_NODE':                   TEXT_NODE,
+      'ATTRIBUTE_NODE':              2,
+      'CDATA_SECTION_NODE':          4,
+      'ENTITY_REFERENCE_NODE':       5,
+      'ENTITY_NODE':                 6,
+      'PROCESSING_INSTRUCTION_NODE': 7,
+      'COMMENT_NODE':                8,
+      'DOCUMENT_TYPE_NODE':          10,
+      'NOTATION_NODE':               12,
+      'getFuseId':      getFuseId,
+      'updateGenerics': updateGenerics
+    };
+  });
 
   Node.updateGenerics();
