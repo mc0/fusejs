@@ -295,7 +295,7 @@
 
     plugin.max = function max(callback, thisArg) {
       var result;
-      if (!callback && (callback = K) && isArray(this)) {
+      if (!callback && (callback = IDENTITY) && isArray(this)) {
         // John Resig's fast Array max|min:
         // http://ejohn.org/blog/fast-javascript-maxmin
         result = Math.max.apply(Math, this);
@@ -319,7 +319,7 @@
 
     plugin.min = function min(callback, thisArg) {
       var result;
-      if (!callback && (callback = K) && isArray(this)) {
+      if (!callback && (callback = IDENTITY) && isArray(this)) {
         result = Math.min.apply(Math, this);
         if (!isNaN(result)) return result;
         result = undef;
@@ -344,7 +344,7 @@
        trues = List(), falses = List(),
        object = Object(this), length = object.length >>> 0;
 
-      callback || (callback = K);
+      callback || (callback = IDENTITY);
       while (++i < length) {
         if (i in object) {
           if (callback.call(thisArg, item = object[i], i, object)) {
@@ -376,7 +376,7 @@
        object = Object(this),
        length = object.length >>> 0;
 
-      callback || (callback = K);
+      callback || (callback = IDENTITY);
       while (length--) {
         value = object[length];
         array[length] = { 'value': value, 'criteria': callback.call(thisArg, value, length, object) };
@@ -394,7 +394,7 @@
     plugin.zip = function zip() {
       var lists, plucked, j, k, i = -1,
        args     = slice.call(arguments, 0),
-       callback = K,
+       callback = IDENTITY,
        result   = fuse.Array(),
        object   = Object(this),
        length   = object.length >>> 0;
@@ -424,7 +424,7 @@
     // ES5 15.4.4.16
     if (!isFunction(plugin.every)) {
       plugin.every = function every(callback, thisArg) {
-        callback || (callback = K);
+        callback || (callback = IDENTITY);
         if (typeof callback !== 'function') throw new TypeError;
 
         var i = -1, object = Object(this), length = object.length >>> 0;
@@ -434,6 +434,8 @@
         }
         return true;
       };
+
+      plugin.every.raw = plugin.every;
     }
 
     // ES5 15.4.4.20
@@ -543,7 +545,7 @@
     // ES5 15.4.4.17
     if (!isFunction(plugin.some)) {
       plugin.some = function some(callback, thisArg) {
-        callback || (callback = K);
+        callback || (callback = IDENTITY);
         if (typeof callback !== 'function') throw new TypeError;
 
         var i = -1, object = Object(this), length = object.length >>> 0;

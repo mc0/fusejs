@@ -209,7 +209,7 @@ new Test.Unit.Runner({
     // test lazy defined syntax support
     var lazy = { 'test': function() { return 'old' } };
     lazy.methodized = methodize(['test', lazy]);
-    lazy.test = fuse.K;
+    lazy.test = fuse.Function.IDENTITY;
 
     this.assertEqual(lazy, lazy.methodized(), 'lazy defined method');
   }

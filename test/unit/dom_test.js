@@ -118,7 +118,7 @@ new Test.Unit.Runner({
 
   'testFuseGetAfterAddMethods': function() {
     var span = fuse.dom.Element('span');
-    fuse.dom.Element.extend({ 'testMethod': fuse.K });
+    fuse.dom.Element.extend({ 'testMethod': fuse.Function.IDENTITY });
 
     this.assertRespondsTo('testMethod', fuse.get(span));
     delete fuse.dom.Element.plugin.testMethod;

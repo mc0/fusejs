@@ -239,10 +239,10 @@ new Test.Unit.Runner({
     this.assert($('link_1').match('a[rel^="external"]'));
     this.assert($('link_1').match("a[rel^='external']"));
 
-    this.assert( span.match({ 'match': function(element) { return true  } }),
+    this.assert( span.match({ 'match': fuse.Function.TRUE }),
       'custom selector');
 
-    this.assert(!span.match({ 'match': function(element) { return false } }),
+    this.assert(!span.match({ 'match': fuse.Function.FALSE }),
       'custom selector');
 
     this.assert(span.match('div, span'),

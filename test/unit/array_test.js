@@ -562,8 +562,8 @@ new Test.Unit.Runner({
       fuse.Array(3, 1, 2).sortBy(),
       'no callback passed');
 
-    this.assertEnumEqual(fuse.Array(0, undef, 2).sortBy(fuse.K),
-      fuse.Array.plugin.sortBy.call(Fixtures.Object, fuse.K),
+    this.assertEnumEqual(fuse.Array(0, undef, 2).sortBy(fuse.Function.IDENTITY),
+      fuse.Array.plugin.sortBy.call(Fixtures.Object, fuse.Function.IDENTITY),
       'called with an object as the `this` value');
   },
 

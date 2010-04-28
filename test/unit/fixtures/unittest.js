@@ -1,4 +1,4 @@
 var testObj = {
-  'isNice':   function() { return true  },
-  'isBroken': function() { return false }
+  'isNice':   fuse.Function.TRUE,
+  'isBroken': fuse.Function.FALSE }
 };

@@ -47,7 +47,7 @@
       return typeof global.JSON === 'object' &&
         typeof JSON.parse === 'function' &&
         typeof JSON.stringify === 'function' &&
-        typeof JSON.stringify(K) === 'undefined' &&
+        typeof JSON.stringify(NOP) === 'undefined' &&
         JSON.stringify(0) === '0' && !!JSON.parse('{ "x": true }').x;
     },
 

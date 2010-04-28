@@ -2,14 +2,15 @@
 (function(global) {
 
   // private vars
-  var DATA_ID_PROP, DOCUMENT_FRAGMENT_NODE, DOCUMENT_NODE, ELEMENT_NODE, TEXT_NODE,
-   K, NOP, Class, Document, Element, Enumerable, Event, Form, Func, Obj, Node,
-   NodeList, Window, $break, fuse, addArrayMethods, addNodeListMethod, concatList,
-   domData, eachKey, envAddTest, envTest, escapeRegExpChars, expando, fromElement,
-   getDocument, getNodeName, getWindow, getOrCreateTagClass, hasKey, isArray,
-   isElement, isHash, isHostObject, isFunction, isNumber, isPrimitive, isRegExp,
-   isSameOrigin, isString, nil, prependList, returnOffset, setTimeout, slice,
-   toInteger, toString, undef, userAgent;
+  var DATA_ID_PROP, DOCUMENT_FRAGMENT_NODE, DOCUMENT_NODE, ELEMENT_NODE,
+   IDENTITY, NOP, TEXT_NODE, Class, Document, Element, Enumerable, Event, Form,
+   Func, Obj, Node, NodeList, Window, $break, fuse, addArrayMethods,
+   addNodeListMethod, concatList, domData, eachKey, envAddTest, envTest,
+   escapeRegExpChars, expando, fromElement, getDocument, getNodeName, getWindow,
+   getOrCreateTagClass, hasKey, isArray, isElement, isHash, isHostObject,
+   isFunction, isNumber, isPrimitive, isRegExp, isSameOrigin, isString, nil,
+   prependList, returnOffset, setTimeout, slice, toInteger, toString, undef,
+   userAgent;
 
   fuse =
   global.fuse = function fuse() { };
@@ -30,11 +31,10 @@
   $break =
   fuse.$break = function $break() { };
 
+  IDENTITY = function IDENTITY(x) { return x; };
+
   NOP =
   addNodeListMethod = function NOP() { };
-
-  K =
-  fuse.K = function K(x) { return x; };
 
   addArrayMethods = function(List) {
     var callbacks = addArrayMethods.callbacks, i = -1;
@@ -165,7 +165,7 @@
       var paths, object, i = -1;
       if (isString(paths)) paths = [paths];
       if (!isArray(paths)) deep  = path;
-      if (!paths) paths = ['Array', 'Date', 'Number', 'Object', 'RegExp', 'String', 'dom.Node']; 
+      if (!paths) paths = ['Array', 'Date', 'Number', 'Object', 'RegExp', 'String', 'dom.Event', 'dom.Node'];
 
       while (path = paths[++i]) {
         object = isString(path) ? fuse.getNS(path) : path;
@@ -179,7 +179,7 @@
     fuse.getNS =
     fuse.prototype.getNS = getNS;
 
-    fuse.addNS = 
+    fuse.addNS =
     fuse.prototype.addNS = addNS;
 
     fuse.updateGenerics  = updateGenerics;
@@ -192,7 +192,6 @@
 
    'lang/object.js',
    'lang/class.js',
-   'lang/console.js',
 
    'lang/function.js',
    'lang/enumerable.js',
@@ -234,23 +233,32 @@
    'ajax/updater.js',
    'ajax/timed-updater.js',
 
-   'lang/grep.js',
-   'lang/inspect.js',
-   'lang/json.js',
-   'lang/ecma.js',
-   
+   'lang/console.js',
    'lang/hash.js',
    'lang/range.js',
    'lang/template.js',
    'lang/timer.js',
-   'lang/util.js') %>
+   'lang/util.js',
+
+   'lang/grep.js',
+   'lang/inspect.js',
+   'lang/json.js',
+   'lang/ecma.js') %>
 
   addArrayMethods(fuse.Array);
 
-  // pave any fuse.dom.NodeList methods that fuse.Array shares
-  // you may call element first(), last(), and contains() by using invoke()
-  // ex: elements.invoke('first');
-  if (fuse.dom && fuse.dom.NodeList) {
+  if (Element && NodeList) {
+    // add Element methods to fuse.dom.NodeList
+    eachKey(Element.plugin, addNodeListMethod);
+    if (Form) {
+      eachKey(Form, addNodeListMethod);
+    }
+    if (fuse.dom.InputElement) {
+      eachKey(fuse.dom.InputElement.plugin, addNodeListMethod);
+    }
+    // pave any fuse.dom.NodeList methods that fuse.Array shares
+    // you may call element first(), last(), and contains() by using invoke()
+    // ex: elements.invoke('first');
     addArrayMethods(fuse.dom.NodeList);
   }
 

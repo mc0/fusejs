@@ -22,7 +22,7 @@
     },
 
     cssDoneLoading = function() {
-      return (isCssLoaded = function() { return true; })();
+      return (isCssLoaded = Func.TRUE)();
     },
 
     fireDomLoadedEvent = function() {

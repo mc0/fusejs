@@ -1,3 +1,6 @@
+* Move fuse.K to fuse.Function.IDENTITY and add fuse.Function.TRUE/fuse.Function.FALSE shortcut functions. [jddalton]
+  Note: Backwards compatibility warning.
+
 * Remove a reference to the window.document object in fuse.dom.Form#serializeElements. [jddalton]
 
 * Ensure namespaces only inherit from the parent namespaces `plugin` property and not static properties. [jddalton]

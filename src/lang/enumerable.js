@@ -41,7 +41,7 @@
     };
 
     mixin.every = function every(callback, thisArg) {
-      callback = callback || K;
+      callback || (callback = IDENTITY);
       var result = true;
       this.each(function(value, index, iterable) {
         if (!callback.call(thisArg, value, index, iterable)) {
@@ -112,7 +112,7 @@
     };
 
     mixin.max = function max(callback, thisArg) {
-      callback = callback || K;
+      callback || (callback = IDENTITY);
       var comparable, max, result;
       this._each(function(value, index, iterable) {
         comparable = callback.call(thisArg, value, index, iterable);
@@ -124,7 +124,7 @@
     };
 
     mixin.min = function min(callback, thisArg) {
-      callback = callback || K;
+      callback || (callback = IDENTITY);
       var comparable, min, result;
       this._each(function(value, index, iterable) {
         comparable = callback.call(thisArg, value, index, iterable);
@@ -136,7 +136,7 @@
     };
 
     mixin.partition = function partition(callback, thisArg) {
-      callback = callback || K;
+      callback || (callback = IDENTITY);
       var trues = fuse.Array(), falses = fuse.Array();
       this._each(function(value, index, iterable) {
         (callback.call(thisArg, value, index, iterable) ?
@@ -156,7 +156,7 @@
     };
 
     mixin.some = function some(callback, thisArg) {
-      callback = callback || K;
+      callback || (callback = IDENTITY);
       var result = false;
       this.each(function(value, index, iterable) {
         if (callback.call(thisArg, value, index, iterable)) {
@@ -185,7 +185,7 @@
     };
 
     mixin.zip = function zip() {
-      var j, length, lists, plucked, callback = K,
+      var j, length, lists, plucked, callback = IDENTITY,
        args = slice.call(arguments, 0);
 
       // if last argument is a function it is the callback

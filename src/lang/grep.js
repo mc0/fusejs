@@ -16,7 +16,7 @@
         pattern = new RegExp(escapeRegExpChars(pattern));
       }
 
-      callback || (callback = K);
+      callback || (callback = IDENTITY);
       while (++i < length) {
         if (i in object && pattern.test(object[i]))
           result.push(callback.call(thisArg, object[i], i, object));
@@ -41,7 +41,7 @@
           pattern = new RegExp(escapeRegExpChars(pattern));
         }
 
-        callback || (callback = K);
+        callback || (callback = IDENTITY);
         this._each(function(value, index, iterable) {
           if (pattern.test(value))
             result.push(callback.call(thisArg, value, index, iterable));
@@ -62,7 +62,7 @@
           pattern = new RegExp(escapeRegExpChars(pattern));
         }
 
-        callback || (callback = K);
+        callback || (callback = IDENTITY);
         while (pair = pairs[i++]) {
           if (pattern.test(value = pair[1]))
             result.set(key = pair[0], callback.call(thisArg, value, key, this));

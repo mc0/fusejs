@@ -102,7 +102,7 @@ new Test.Unit.Runner({
 
     // test null return value of toTemplateReplacements()
     source  = 'My name is "#{name}", my job is "#{job}"';
-    subject = { 'toTemplateReplacements': fuse.K };
+    subject = { 'toTemplateReplacements': fuse.Function.IDENTITY };
     this.assertEqual('My name is "", my job is ""',
       fuse.Template(source).parse(subject));
 

@@ -218,7 +218,7 @@
     };
 
     plugin.partition = function partition(callback, thisArg) {
-      callback = callback || K;
+      callback || (callback = IDENTITY);
       var key, value, pair, i = -1, pairs = this._pairs,
        trues = new $H, falses = new $H;
 
@@ -254,7 +254,7 @@
     plugin.zip = function zip() {
       var j, key, length, pair, pairs, values, i = -1,
        args     = slice.call(arguments, 0),
-       callback = K,
+       callback = IDENTITY,
        hashes   = [this],
        pairs    = this._pairs,
        result   = new $H;

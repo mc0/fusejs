@@ -494,7 +494,7 @@
 
       if (isFunction(arrPlugin.every)) {
         (arrPlugin.every = function every(callback, thisArg) {
-          return __every.call(this, callback || K, thisArg);
+          return __every.call(this, callback || IDENTITY, thisArg);
         }).raw = __every;
       }
       if (isFunction(arrPlugin.filter)) {
@@ -520,11 +520,11 @@
       if (isFunction(arrPlugin.map)) {
         if (SKIP_METHODS_RETURNING_ARRAYS) {
           arrPlugin.map = function map(callback, thisArg) {
-            return __map.call(this, callback || K, thisArg);
+            return __map.call(this, callback || IDENTITY, thisArg);
           };
         } else {
           arrPlugin.map = function map(callback, thisArg) {
-            var result = __map.call(this, callback || K, thisArg);
+            var result = __map.call(this, callback || IDENTITY, thisArg);
             return result.length
               ? Array.fromArray(result)
               : Array();
@@ -534,7 +534,7 @@
       }
       if (isFunction(arrPlugin.some)) {
         (arrPlugin.some = function some(callback, thisArg) {
-          return __some.call(this, callback || K, thisArg);
+          return __some.call(this, callback || IDENTITY, thisArg);
         }).raw = __some;
       }
 
@@ -901,7 +901,7 @@
             // remove second iframe from document
             postProcess();
             // test to see if Array#map is corrupted
-            try { Array().map(K); }
+            try { Array().map(IDENTITY); }
             catch (e) {
               postProcess = (function(__postProcess) {
                 return function(instance) {

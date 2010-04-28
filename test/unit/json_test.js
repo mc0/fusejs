@@ -19,7 +19,7 @@ new Test.Unit.Runner({
 
   'testObjectToJSON': function() {
     this.assertUndefined(fuse.Object.toJSON(undef));
-    this.assertUndefined(fuse.Object.toJSON(fuse.K));
+    this.assertUndefined(fuse.Object.toJSON(fuse.Function.IDENTITY));
 
     this.assertEqual('""',       fuse.Object.toJSON(''));
     this.assertEqual('\"test\"', fuse.Object.toJSON('test'));
@@ -38,7 +38,7 @@ new Test.Unit.Runner({
       fuse.Object.toJSON({ 'a': 'hello!'}));
 
     this.assertEqual('{}', fuse.Object.toJSON({ }));
-    this.assertEqual('{}', fuse.Object.toJSON({ 'a': undef, 'b': undef, 'c': fuse.K }));
+    this.assertEqual('{}', fuse.Object.toJSON({ 'a': undef, 'b': undef, 'c': fuse.Function.IDENTITY }));
 
     this.assertEqual('{"b":[null,false,true,null],"c":{"a":"hello!"}}',
       fuse.Object.toJSON({ 'b': [undef, false, true, undef], 'c': {'a':'hello!' } }));

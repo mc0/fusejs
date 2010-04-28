@@ -3,11 +3,9 @@
   Func =
   fuse.Function;
 
-  Func.NOP = NOP;
-
-  // ES5 15.3.4.5
-  Func.bind = (function() {
-    var bind = function bind(fn, thisArg) {
+  (function(plugin) {
+    // ES5 15.3.4.5
+    Func.bind = function bind(fn, thisArg) {
       // allows lazy loading the target method
       var f, context, curried, name, reset;
       if (isArray(fn)) {
@@ -15,12 +13,10 @@
       } else {
         f = fn;
       }
-
       // follow spec and throw if fn is not callable
       if (typeof (f || context[name]) !== 'function') {
         throw new TypeError;
       }
-
       // bind with curry
       if (arguments.length > 2) {
         curried = slice.call(arguments, 2);
@@ -33,7 +29,6 @@
             : curried);
         };
       }
-
       // simple bind
       return function() {
         var fn = f || context[name];
@@ -43,36 +38,6 @@
       };
     };
 
-    // native support
-    if (isFunction(Func.plugin.bind)) {
-      var __bind = bind, plugin = Func.plugin;
-      bind = function bind(fn, thisArg) {
-        // bind with curry
-        var isLazy = isArray(fn);
-        if (arguments.length > 2) {
-          return isLazy
-            ? __bind.apply(null, args)
-            : plugin.bind.apply(fn, slice.call(args, 1));
-        }
-        // simple bind
-        return isLazy
-          ? __bind(fn, thisArg)
-          : plugin.bind.call(fn, thisArg);
-      };
-    }
-
-    return bind;
-  })();
-
-  Func.defer = function defer(fn) {
-    return Func.delay.apply(global,
-      concatList([fn, 0.01], slice.call(arguments, 1)));
-  };
-
-  /*--------------------------------------------------------------------------*/
-
-  (function(plugin) {
-
     Func.bindAsEventListener = function bindAsEventListener(fn, thisArg) {
       // allows lazy loading the target method
       var f, context, curried, name;
@@ -81,7 +46,6 @@
       } else {
         f = fn;
       }
-
       // bind with curry
       if (arguments.length > 2) {
         curried = slice.call(arguments, 2);
@@ -90,7 +54,6 @@
             prependList(curried, event || getWindow(this).event));
         };
       }
-
       // simple bind
       return function(event) {
         return (f || context[name]).call(thisArg, event || getWindow(this).event);
@@ -137,6 +100,11 @@
       }, timeout * 1000);
     };
 
+    Func.defer = function defer(fn) {
+      return Func.delay.apply(global,
+        concatList([fn, 0.01], slice.call(arguments, 1)));
+    };
+
     Func.methodize = function methodize(fn) {
       // allows lazy loading the target method
       var f, context, name;
@@ -171,9 +139,30 @@
       };
     };
 
+    Func.FALSE    = function FALSE() { return false; };
+    Func.TRUE     = function TRUE() { return true; };
+    Func.IDENTITY = IDENTITY;
+    Func.NOP      = NOP;
+
     /*------------------------------------------------------------------------*/
 
-    if (!isFunction(plugin.bind)) {
+    // native support
+    if (isFunction(plugin.bind)) {
+      var __bind = Func.bind;
+      Func.bind = function bind(fn, thisArg) {
+        // bind with curry
+        var isLazy = isArray(fn);
+        if (arguments.length > 2) {
+          return isLazy
+            ? __bind.apply(null, args)
+            : plugin.bind.apply(fn, slice.call(args, 1));
+        }
+        // simple bind
+        return isLazy
+          ? __bind(fn, thisArg)
+          : plugin.bind.call(fn, thisArg);
+      };
+    } else {
       plugin.bind = function bind(thisArg) {
         return arguments.length > 1
           ? Func.bind.apply(Func, prependList(arguments, this))
@@ -214,9 +203,13 @@
     };
 
     // prevent JScript bug with named function expressions
-    var bind =             nil,
+    var FALSE =            nil,
+     TRUE =                nil,
+     bind =                nil,
      bindAsEventListener = nil,
      curry =               nil,
+     delay =               nil,
+     defer =               nil,
      methodize =           nil,
      wrap =                nil;
   })(Func.plugin);

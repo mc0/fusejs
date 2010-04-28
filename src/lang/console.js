@@ -6,7 +6,7 @@
 
     var object,
 
-    error = function() { return false; },
+    error = Func.FALSE,
 
     info = error,
 
