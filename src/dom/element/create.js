@@ -95,8 +95,8 @@
     },
 
     create = function create(tagName, attributes, context) {
-      var clone, complexTag, data, decorated, element, fragment, id, isCached,
-       length, result = null;
+      var clone, complexTag, decorated, element, fragment, id, isCached,
+       length, nodes, result = null;
 
       // For speed we don't normalize tagName case.
       // There is the potential for cache.div, cache.DIV, cache['<div name="x">']
@@ -129,7 +129,7 @@
               decorated =
               result[length] = new Decorator(element);
 
-              // cache flag evaluation
+              // cache if allowed
               if (isCached !== false) {
                 domData[getFuseId(element)].decorator = decorated;
               }
@@ -141,7 +141,7 @@
             Decorator.prototype = getOrCreateTagClass(element.nodeName).plugin;
             result = new Decorator(element);
 
-            // cache flag evaluation
+            // cache if allowed
             if (isCached !== false) {
               domData[getFuseId(element)].decorator = result;
             }
@@ -155,17 +155,15 @@
 
       context || (context = doc);
       id = context === doc ? '2' : getFuseId(getDocument(context));
-      data = domData[id].nodes;
-      clone =
-        (data[tagName] ||
-        (data[tagName] = context.createElement(tagName)))
-        .cloneNode(false);
 
-      // avoid adding the new element to the data cache
+      nodes = domData[id].nodes;
+      clone = (nodes[tagName] ||
+        (nodes[tagName] = context.createElement(tagName))).cloneNode(false);
+
       Decorator.prototype = getOrCreateTagClass(clone.nodeName).plugin;
       decorated = new Decorator(clone);
 
-      // cache flag evaluation
+      // cache if allowed
       if ((attributes && attributes.cache) !== false) {
         domData[getFuseId(clone)].decorator = decorated;
       }

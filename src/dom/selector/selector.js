@@ -2,14 +2,16 @@
 
   fuse.addNS('dom.selector');
 
-  (function(plugin) {
-    plugin.match = function match(selectors) {
+  (function(docPlugin, elemPlugin) {
+    docPlugin.match  =
+    elemPlugin.match = function match(selectors) {
       return isString(selectors)
         ? fuse.dom.selector.match(this, selectors)
         : selectors.match(this);
     };
 
-    plugin.query = function query(selectors, callback) {
+    docPlugin.query  =
+    elemPlugin.query = function query(selectors, callback) {
       return fuse.dom.selector.select(selectors, this, callback);
     };
 
@@ -22,4 +24,4 @@
 
     // prevent JScript bug with named function expressions
     var match = nil, query = nil;
-  })(fuse.dom.Element.plugin);
+  })(Document.plugin, Element.plugin);

@@ -28,6 +28,7 @@
       viewport.ownerDocument =
       decorated.raw = node;
       decorated.nodeName = node.nodeName;
+      decorated.nodeType = DOCUMENT_NODE;
  
       eachKey(pluginViewport, function(value, key, object) {
         if (hasKey(object, key)) viewport[key] = value;
