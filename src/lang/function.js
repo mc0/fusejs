@@ -4,6 +4,12 @@
   fuse.Function;
 
   (function(plugin) {
+
+    Func.FALSE    = function FALSE() { return false; };
+    Func.TRUE     = function TRUE() { return true; };
+    Func.IDENTITY = IDENTITY;
+    Func.NOP      = NOP;
+
     // ES5 15.3.4.5
     Func.bind = function bind(fn, thisArg) {
       // allows lazy loading the target method
@@ -138,11 +144,6 @@
           : wrapper.call(this, Func.bind(fn, this));
       };
     };
-
-    Func.FALSE    = function FALSE() { return false; };
-    Func.TRUE     = function TRUE() { return true; };
-    Func.IDENTITY = IDENTITY;
-    Func.NOP      = NOP;
 
     /*------------------------------------------------------------------------*/
 

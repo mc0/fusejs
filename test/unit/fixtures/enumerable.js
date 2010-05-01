@@ -49,8 +49,8 @@ var Fixtures = {
   'Z': []
 };
 
-for (var i = 1; i < 101; i++) {
-  Fixtures.Z.push(i);
-}
+(function(i) {
+  while (++i < 101) Fixtures.Z.push(i);
+})(0);
 
 Fixtures.Z = new EnumObject(Fixtures.Z);
