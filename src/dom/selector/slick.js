@@ -2,7 +2,7 @@
 
   (function(object, NodeList) {
     var match = function match(element, selectors) {
-      return !!Slick.find(fuse.getDocument(element.raw || fuse.get(element).raw),
+      return Slick.match(element.raw || fuse.get(element).raw,
         String(selectors || ''));
     },
 
