@@ -1,3 +1,5 @@
+* Add fuse.dom.Element, Document, and Window methods delegate(type, selector, handler) and stopDelegating([type, selector, handler]). [jddalton]
+
 * Add fuse.dom.Document match()/query() method and nodeType property. [jddalton]
 
 * Add method generics to fuse.dom.Event and make isLeftClick(), isMiddleClick(), and isRightClick() lazy define themselves. [jddalton]

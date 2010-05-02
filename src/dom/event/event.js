@@ -2,13 +2,13 @@
 
   Event =
   fuse.dom.Event = (function() {
-    var Decorator = function(event, target) {
+    var Decorator = function(event, currTarget) {
       var getCurrentTarget = 
       this.getCurrentTarget = function getCurrentTarget() {
-        var getCurrentTarget = function getCurrentTarget() { return target; };
-        if (target) target = fromElement(target);
+        var getCurrentTarget = function getCurrentTarget() { return currTarget; };
+        if (currTarget) currTarget = fromElement(Window(currTarget));
         this.getCurrentTarget = getCurrentTarget;
-        return target;
+        return currTarget;
       };
     },
 
@@ -57,200 +57,211 @@
 
   (function(plugin) {
 
-    var domLoadDispatcher, winLoadDispatcher,
+    var domLoadDispatcher, winLoadDispatcher, stopObserving,
 
     BUGGY_EVENT_TYPES = { 'error': 1, 'load': 1 },
 
     CHECKED_INPUT_TYPES = { 'checkbox': 1, 'radio': 1 },
 
+    CLICK_MAP  = { 'L': 1, 'M': 2, 'R': 3 },
+
+    CLICK_PROP = 'which',
+
+    EVENT_TYPE_ALIAS = { 'blur': 'delegate:blur', 'focus': 'delegate:focus' },
+
     arrIndexOf = fuse.Array.plugin.indexOf.raw,
 
-    // lazy define on first call
-    // compatibility charts found at http://unixpapa.com/js/mouse.html
     defineIsClick = function() {
-      // fired events have no raw
-      if (!this.raw) return false;
-
-      var CLICK_MAP = { 'L': 1, 'M': 2, 'R': 3 },
-
-      property = 'which',
+      var object = this.raw ? plugin : this,
 
       isLeftClick = function isLeftClick() {
         var event = this.raw;
-        return (this.isLeftClick = event && event[property] === CLICK_MAP.L
-          ? Func.TRUE
-          : Func.FALSE)();
+        return (this.isLeftClick = createGetter('isLeftClick',
+          !!event && event[CLICK_PROP] === CLICK_MAP.L))();
       },
 
       isMiddleClick = function isMiddleClick() {
         var event = this.raw;
-        return (this.isMiddleClick = event && event[property] === CLICK_MAP.M
-          ? Func.TRUE
-          : Func.FALSE)();
+        return (this.isMiddleClick = createGetter('isMiddleClick',
+          !!event && event[CLICK_PROP] === CLICK_MAP.M))();
       },
 
       isRightClick = function isRightClick() {
         var event = this.raw;
-        return (this.isRightClick = event && event[property] === CLICK_MAP.R
-          ? Func.TRUE
-          : Func.FALSE)();
+        return (this.isRightClick = createGetter('isRightClick',
+          !!event && event[CLICK_PROP] === CLICK_MAP.R))();
       };
 
-      // for non IE
-      if (typeof this.raw.which === 'number') {
+      if (this.raw && typeof this.raw.which === 'number') {
         // simulate a middle click by pressing the Apple key in Safari 2.x
         if (typeof this.raw.metaKey === 'boolean') {
           isMiddleClick = function isMiddleClick() {
-            var result, which, event = this.raw;
-            if (event) {
-              which  = event.which;
-              result = which === CLICK_MAP.L ? event.metaKey : which === CLICK_MAP.M;
-            }
-            return (this.isMiddleClick = result ? Func.TRUE : Func.FALSE)();
+            var event = this.raw, which = event && event.which;
+            return (this.isMiddleClick = createGetter('isMiddleClick',
+              which === CLICK_MAP.L ? event.metaKey : which === CLICK_MAP.M))();
           };
         }
       }
       // for IE
       // check for `button` second for browsers that have `which` and `button`
-      else if (typeof this.raw.button === 'number') {
-        CLICK_MAP = { 'L': 1, 'M': 4, 'R': 2 };
-        property = 'button';
+      // compatibility charts found at http://unixpapa.com/js/mouse.html
+      else if (this.raw && typeof this.raw.button === 'number') {
+        CLICK_MAP  = { 'L': 1, 'M': 4, 'R': 2 };
+        CLICK_PROP = 'button';
       }
       // fallback
       else {
-        isLeftClick   =
-        isMiddleClick =
-        isRightClick  = Func.FALSE;
+        isLeftClick   = createGetter('isLeftClick',   false);
+        isMiddleClick = createGetter('isMiddleClick', false);
+        isRightClick  = createGetter('isRightClick',  false);
       }
 
-      plugin.isLeftClick   = isLeftClick;
-      plugin.isMiddleClick = isMiddleClick;
-      plugin.isRightClick  = isRightClick;
+      object.isLeftClick   = isLeftClick;
+      object.isMiddleClick = isMiddleClick;
+      object.isRightClick  = isRightClick;
+
+      object = nil;
       return this[arguments[0]]();
     },
 
     definePointerXY = function() {
-      // fired events have no raw
-      if (!this.raw) return 0;
+      var info = fuse._info,
+
+      doc = getDocument(this.getTarget() || global),
+
+      object = this.raw && doc[info.root.property] &&
+        doc[info.scrollEl.property] ? plugin : this,
 
       // defacto standard
-      var getPointerX, getPointerY;
-      if (typeof this.raw.pageX === 'number') {
-        getPointerX = function getPointerX() {
-          return this.raw && this.raw.pageX || 0;
-        };
+      getPointerX = function getPointerX() {
+        return (this.getPointerX = createGetter('getPointerX',
+          this.raw && this.raw.pageX || 0))();
+      },
 
-        getPointerY = function getPointerY() {
-          return this.raw && this.raw.pageY || 0;
-        };
+      getPointerY = function getPointerY() {
+        return (this.getPointerY = createGetter('getPointerY',
+          this.raw && this.raw.pageY || 0))();
+      };
+
+      // fired events have no raw
+      if (!this.raw) {
+        getPointerX = createGetter('getPointerX', 0);
+        getPointerY = createGetter('getPointerY', 0);
       }
       // IE and others
-      else {
-        var info = fuse._info,
-         doc  = getDocument(this.getTarget() || global),
-         root = doc[info.root.property],
-         scrollEl = doc[info.scrollEl.property];
-
-        if (!root || !scrollEl) return 0;
-        doc = root = scrollEl = nil;
-
+      if (typeof this.raw.pageX !== 'number') {
         getPointerX = function getPointerX() {
-          // fired events have no raw
-          if (!this.raw) return 0;
-
-          var doc = getDocument(this.getTarget() || global),
-           root = doc[info.root.property],
-           scrollEl = doc[info.scrollEl.property],
-           getPointerX = function getPointerX() { return x; },
-           x = this.raw.clientX + scrollEl.scrollLeft - root.clientLeft;
-
-          if (x < 0) x = 0;
-          this.getPointerX = getPointerX;
+          var doc, root, scrollEl, x = 0;
+          if (this.raw) {
+            doc = getDocument(this.getTarget() || global);
+            root = doc[info.root.property];
+            scrollEl = doc[info.scrollEl.property];
+            x = this.raw.clientX + scrollEl.scrollLeft - root.clientLeft;
+            if (x < 0) x = 0;
+          }
+          this.getPointerX = createGetter('getPointerX', x);
           return x;
         };
 
         getPointerY = function getPointerY() {
-          // fired events have no raw
-          if (!this.raw) return 0;
-
-          var doc = getDocument(this.getTarget() || global),
-           root = doc[info.root.property],
-           scrollEl = doc[info.scrollEl.property],
-           getPointerY = function getPointerY() { return y; },
-           y = this.raw.clientY + scrollEl.scrollTop - root.clientTop;
-
-          if (y < 0) y = 0;
-          this.getPointerY = getPointerY;
+          var doc, root, scrollEl, y = 0;
+          if (this.raw) {
+            doc = getDocument(this.getTarget() || global);
+            root = doc[info.root.property];
+            scrollEl = doc[info.scrollEl.property];
+            y = this.raw.clientY + scrollEl.scrollTop - root.clientTop;
+            if (y < 0) y = 0;
+          }
+          this.getPointerY = createGetter('getPointerY', y);
           return y;
         };
       }
 
-      plugin.getPointerX = getPointerX;
-      plugin.getPointerY = getPointerY;
+      object.getPointerX = getPointerX;
+      object.getPointerY = getPointerY;
+
+      doc = object = nil;
       return this[arguments[0]]();
     },
 
     addCache = function(id, type, handler) {
       // bail if handler is already exists
       var ec = getOrCreateCache(id, type);
-      if (arrIndexOf.call(ec.handlers, handler) != -1) {
+      if (arrIndexOf.call(ec.handlers, handler) > -1) {
         return false;
       }
       ec.handlers.unshift(handler);
-      return ec.dispatcher
-        ? false
-        : (ec.dispatcher = createDispatcher(id, type));
-    },
-
-    getOrCreateCache = function(id, type) {
-      var data = domData[id], events = data.events || (data.events = { });
-      return events[type] ||
-        (events[type] = { 'handlers': [], 'dispatcher': false });
-    },
-
-    removeCacheAtIndex = function(id, type, index) {
-      // remove responders and handlers at the given index
-      var events = domData[id].events, ec = events[type];
-      ec.handlers.splice(index, 1);
-
-      // if no more handlers/responders then
-      // remove the event type cache
-      if (!ec.handlers.length) delete events[type];
+      return ec.dispatcher ? false : (ec.dispatcher = createDispatcher(id, type));
     },
 
     addObserver = function(element, type, handler) {
       element.addEventListener(type, handler, false);
     },
 
+    createGetter = function(name, value) {
+      return Function('v', 'function ' + name + '(){return v;} return ' + name)(value);
+    },
+
+    // Event dispatchers manage several handlers and ensure
+    // FIFO execution order. They are attached as the primary event
+    // listener and execute all handlers they manage.
+    createDispatcher = function(id, type, bubble) {
+      return function(event) {
+        // shallow copy handlers to avoid issues with nested observe/stopObserving
+        var parentNode,
+         data      = domData[id],
+         decorator = data.decorator,
+         node      = decorator.raw || decorator,
+         ec        = data.events[type],
+         handlers  = slice.call(ec.handlers, 0);
+
+        event = Event(event || getWindow(node).event, decorator);
+        dispatch(handlers.length, handlers, decorator, event);
+
+        // bubble if flagged by delegation
+        if (ec._bubbleForDelegation && event.isBubbling() &&
+            (parentNode = node.parentNode)) {
+          // cancel real bubbling
+          event.stopBubbling();
+          // fake out and set it to bubbling
+          event.isBubbling = createGetter('isBubbling', true);
+          // start manual bubbling
+          decorator.fire.call(parentNode, EVENT_TYPE_ALIAS[type] || type, null, event);
+        }
+      };
+    },
+
+    // This pattern, based on work by Dean Edwards and John Resig and allows a
+    // handler to error out without stopping the other handlers from firing.
+    // http://groups.google.com/group/jquery-dev/browse_thread/thread/2a14c2da6bcbb5f
+    dispatch = function(length, handlers, decorator, event) {
+      var error;
+      try {
+        while (length--) {
+          // stop event if handler result is false
+          if (handlers[length].call(decorator, event, decorator) === false) {
+            event.stop();
+          }
+        }
+      } catch (e) {
+        error = e;
+        dispatch(length, handlers, decorator, event);
+      } finally {
+        if (error) throw error;
+      }
+    },
+
+    getOrCreateCache = function(id, type) {
+      var data = domData[id], events = data.events || (data.events = { });
+      return events[type] || (events[type] = { 'handlers': [], 'dispatcher': false });
+    },
+
     removeObserver = function(element, type, handler) {
       element.removeEventListener(type, handler, false);
     },
 
-    // Event dispatchers manage several handlers and ensure
-    // FIFO execution order. They are attached as the event
-    // listener and execute all the handlers they manage.
-    createDispatcher = function(id, type) {
-      return function(event) {
-        // shallow copy handlers to avoid issues with nested observe/stopObserving
-        var data   = domData[id],
-         decorator = data.decorator,
-         node      = decorator.raw,
-         handlers  = slice.call(data.events[type].handlers, 0),
-         length    = handlers.length;
-
-        event = Event(event || getWindow(node).event, node);
-        while (length--) {
-          // stop event if handler result is false
-          if (handlers[length].call(decorator, event) === false) {
-            event.stop();
-          }
-        }
-      };
-    },
- 
-    // Ensure that the dom:loaded event has finished
-    // executing its observers before allowing the
-    // window onload event to proceed.
+    // ensure that the dom:loaded event has finished executing its observers
+    // before allowing the window onload event to proceed
     domLoadWrapper = function(event) {
       var doc = fuse._doc, docEl = fuse._docEl,
        decoratedDoc = fuse.get(doc);
@@ -273,9 +284,9 @@
           fuse._info.scrollEl = fuse._info.docEl;
         }
 
-        decoratedDoc.isLoaded = Func.TRUE;
+        decoratedDoc.isLoaded = createGetter('isLoaded', true);
         domLoadDispatcher(event);
-        decoratedDoc.stopObserving('dom:loaded');
+        decoratedDoc.stopObserving('DOMContentLoaded').stopObserving('dom:loaded');
       }
     },
 
@@ -313,7 +324,7 @@
            id = Node.getFuseId(element), oldHandler = element[attrName];
 
           if (oldHandler) {
-            if (oldHandler.isDispatcher) return false;
+            if (oldHandler._isDispatcher) return false;
             addCache(id, type, element[attrName]);
           }
           element[attrName] = domData[id].events[type].dispatcher;
@@ -329,7 +340,7 @@
         var __createDispatcher = createDispatcher;
         createDispatcher = function(id, type) {
           var dispatcher = __createDispatcher(id, type);
-          dispatcher.isDispatcher = true;
+          dispatcher._isDispatcher = true;
           return dispatcher;
         };
       }
@@ -348,13 +359,12 @@
     /*------------------------------------------------------------------------*/
 
     plugin.cancel = function cancel() {
-      var setCancelled = function() {
-        var isCancelled =
-        this.isCancelled = Func.TRUE;
+      var setCancelled = function(object) {
+        object.isCancelled = createGetter('isCancelled', true);
       },
 
       cancel = function cancel() {
-        setCancelled.call(this);
+        setCancelled(this);
         this.raw && this.raw.preventDefault();
       };
 
@@ -363,23 +373,23 @@
         // for IE
         if (typeof this.raw.preventDefault === 'undefined') {
           cancel = function cancel() {
-            setCancelled.call(this);
+            setCancelled(this);
             if (this.raw) this.raw.returnValue = false;
           };
         }
         plugin.cancel = cancel;
         this.cancel();
       }
-      setCancelled.call(this);
+      setCancelled(this);
     };
 
     plugin.stopBubbling = function stopBubbling() {
-      var setBubbling = function() {
-        this.isBubbling = Func.FALSE;
+      var setBubbling = function(object) {
+        object.isBubbling = createGetter('isBubbling', false);
       },
 
       stopBubbling = function stopBubbling() {
-        setBubbling.call(this);
+        setBubbling(this);
         this.raw && this.raw.stopPropagation();
       };
 
@@ -388,71 +398,67 @@
         // for IE
         if (typeof this.raw.stopPropagation === 'undefined') {
           stopBubbling = function stopBubbling() {
-            setBubbling.call(this);
+            setBubbling(this);
             if (this.raw) this.raw.cancelBubble = true;
           };
         }
         plugin.stopBubbling = stopBubbling;
         this.stopBubbling();
       }
-      setBubbling.call(this);
+      setBubbling(this);
     };
 
     plugin.getTarget = function getTarget() {
-      var setTarget = function(node) {
-        var getTarget =
-        this.getTarget = function getTarget() { return node; };
-        return node;
+      var setTarget = function(object, value) {
+        object.getTarget = createGetter('getTarget', value);
+        return value;
       },
 
       getTarget = function getTarget() {
-        var type, event = this.raw,
-         currentTarget = this.getCurrentTarget(),
-         node = currentTarget;
+        var currRaw, type,
+         event = this.raw,
+         currTarget = this.getCurrentTarget(),
+         node = currTarget;
 
-        // fired events have no raw
         if (event) {
-          node = event.target;
+          currRaw = currTarget.raw || currTarget;
+          node = event.target || currTarget;
           type = event.type;
 
-          // Firefox screws up the "click" event when moving between radio buttons
-          // via arrow keys. It also screws up the "load" and "error" events on images,
-          // reporting the document as the target instead of the original image.
+          // 1) Firefox screws up the "load" and "error" events on images
+          // 2) Firefox also screws up the "click" event when
+          //    moving between radio buttons via arrow keys.
+          // 3) Force window to return window
           if (BUGGY_EVENT_TYPES[type] ||
-              getNodeName(currentTarget) === 'INPUT' &&
-              currentTarget.type === 'radio' && type === 'click') {
-            node = currentTarget;
+              (getNodeName(currRaw) === 'INPUT' &&
+              currRaw.type === 'radio' && type === 'click') ||
+              currRaw == getWindow(currRaw)) {
+            node = currTarget;
           }
-          if (typeof currentTarget.nodeType === 'number') {
-            // Fix a Safari bug where a text node gets passed as the target of an
-            // anchor click rather than the anchor itself.
-            node = fuse.get(node && node.nodeType === TEXT_NODE
-              ? node.parentNode
-              : node);
+          // Fix a Safari bug where a text node gets passed as the target of an
+          // anchor click rather than the anchor itself.
+          else if (node.nodeType === TEXT_NODE) {
+            node = node.parentNode;
           }
-          else {
-            // force window to return window
-            node = currentTarget;
-          }
+          node = fromElement(node);
         }
-
-        return setTarget.call(this, node);
+        return setTarget(this, node);
       };
 
       // fired events have no raw
       if (!this.raw) {
-        return setTarget.call(this, this.getCurrentTarget());
+        return setTarget(this, this.getCurrentTarget());
       }
       if (typeof this.raw.target === 'undefined') {
         getTarget = function getTarget() {
-          var event = this.raw,
-           currentTarget = this.getCurrentTarget(),
-           node = currentTarget;
-
-          if (event && typeof currentTarget.nodeType === 'number') {
-            node = fromElement(event.srcElement || currentTarget);
+          var node, event = this.raw;
+          if (event && (node = event.srcElement)) {
+            node = fromElement(node);
           }
-          return setTarget.call(this, node);
+          if (!node) {
+            node = this.getCurrentTarget();
+          }
+          return setTarget(this, node);
         };
       };
 
@@ -461,21 +467,19 @@
     };
 
     plugin.getRelatedTarget = function getRelatedTarget() {
-      var setRelatedTarget = function(node) {
-        var getRelatedTarget =
-        this.getRelatedTarget = function getRelatedTarget() { return node; };
-        return node;
+      var setRelatedTarget = function(object, value) {
+        object.getRelatedTarget = createGetter('getRelatedTarget', value);
+        return value;
       },
 
       getRelatedTarget = function getRelatedTarget() {
         var node = this.raw && this.raw.relatedTarget;
-        if (node) node = fromElement(node);
-        return setRelatedTarget.call(this, node);
+        return setRelatedTarget(this, node && fromElement(node));
       };
 
-       // fired events have no raw
+      // fired events have no raw
       if (!this.raw) {
-        return setRelatedTarget.call(this, null);
+        return setRelatedTarget(this, null);
       }
       // for IE
       if (typeof this.raw.relatedTarget === 'undefined') {
@@ -485,7 +489,7 @@
             case 'mouseover': node = fromElement(event.fromElement);
             case 'mouseout':  node = fromElement(event.toElement);
           }
-          return setRelatedTarget.call(this, node);
+          return setRelatedTarget(this, node);
         };
       }
 
@@ -505,23 +509,21 @@
       return { 'x': this.getPointerX(), 'y': this.getPageY() };
     };
 
-    plugin.findElement = function findElement(selectors) {
+    plugin.findElement = function findElement(selectors, untilElement) {
       var match = fuse.dom.selector.match, element = this.getTarget();
-      if (!selectors || selectors == null || !element || match(element, selectors)) {
+      if (selectors == null || selectors == '' || !element || match(element, selectors)) {
         return element;
       }
       if (element = (element.raw || element).parentNode) {
         do {
+          if (element === untilElement)
+            break;
           if (element.nodeType === ELEMENT_NODE && match(element, selectors))
             return fromElement(element);
         } while (element = element.parentNode);
       }
-      return element;
+      return null;
     };
-
-    plugin.isCancelled =
-    plugin.isStopped   = Func.FALSE;
-    plugin.isBubbling  = Func.TRUE;
 
     plugin.isLeftClick = function isLeftClick() {
       return defineIsClick.call(this, 'isLeftClick');
@@ -538,25 +540,30 @@
     plugin.stop = function stop() {
       // set so that a custom event can be inspected
       // after the fact to determine whether or not it was stopped.
-      this.isStopped = Func.TRUE;
+      this.isStopped = createGetter('isStopped', true);
       this.cancel();
       this.stopBubbling();
     };
 
+    plugin.isCancelled = createGetter('isCancelled', false);
+    plugin.isStopped   = createGetter('isStopped',   false);
+    plugin.isBubbling  = createGetter('isBubbling',  true);
+
     /*------------------------------------------------------------------------*/
 
-    Document.plugin.isLoaded = Func.FALSE;
+    Document.plugin.isLoaded = createGetter('isLoaded', false);
 
     Document.plugin.fire =
     Element.plugin.fire  =
-    Window.plugin.fire   = function fire(type, memo) {
-      var backup, checked, dispatcher, ec, data, id, first = true,
-       element = this.raw || this,
-       attrName = 'on' + type,
-       event = Event(null, element);
+    Window.plugin.fire   = function fire(type, memo, event) {
+      var backup, checked, dispatcher, ec, data, id,
+       first    = true,
+       element  = this.raw || this,
+       attrName = 'on' + type;
 
-      event.type = type;
-      event.memo = memo || { };
+      event = Event(event || null, element);
+      event.type = type && String(type);
+      event.memo || (event.memo = memo || { });
 
       // change checked state before calling handlers
       if (type === 'click' && getNodeName(element) === 'INPUT' &&
@@ -566,16 +573,14 @@
       }
 
       do {
-        id = element.nodeType === ELEMENT_NODE
-          ? element[DATA_ID_PROP]
-          : Node.getFuseId(element);
-
+        id   = element.nodeType === ELEMENT_NODE ? element[DATA_ID_PROP] : Node.getFuseId(element);
         data = id && domData[id];
         ec   = data && data.events && data.events[type];
 
         // fire DOM Level 0
         if (typeof element[attrName] === 'function' &&
-            !element[attrName].isDispatcher) {
+            !element[attrName]._isDispatcher) {
+          // stop event if handler result is false
           if (element[attrName](event) === false) {
             event.stop();
           }
@@ -628,61 +633,70 @@
     Window.plugin.observe   = function observe(type, handler) {
       var element = this.raw || this,
        dispatcher = addCache(Node.getFuseId(element), type, handler);
-      if (!dispatcher) return this;
 
+      if (!dispatcher) return this;
       addObserver(element, type, dispatcher);
       return this;
     };
 
+    stopObserving =
     Document.plugin.stopObserving =
     Element.plugin.stopObserving  =
     Window.plugin.stopObserving   = function stopObserving(type, handler) {
-      var dispatcher, ec, events, foundAt, id, length,
-       callee = Element.plugin.stopObserving,
-       element = this.raw || this;
+      var ec, foundAt, length,
+       element = this.raw || this,
+       id      = Node.getFuseId(this),
+       events  = domData[id].events;
 
-      type = isString(type) ? type : null;
-      id = Node.getFuseId(element);
-      events = domData[id].events;
+      if (!events)return this;
+      type = isString(type) ? type && String(type) : null;
 
-      if (!events) return this;
-      ec = events[type];
-
-      if (ec && handler == null) {
-        // If an event name is passed without a handler,
-        // we stop observing all handlers of that type.
-        length = ec.handlers.length;
-        if (!length) {
-          callee.call(element, type, 0);
-        } else {
-          while (length--) callee.call(element, type, length);
-        }
+      // if the event type is omitted we stop
+      // observing all handlers on the element
+      if (!type) {
+        eachKey(events, function(handlers, type) {
+          stopObserving.call(element, type);
+        });
         return this;
       }
-      else if (!type || type == '') {
-        // If both the event name and the handler are omitted,
-        // we stop observing _all_ handlers on the element.
-        for (type in events) {
-          callee.call(element, type);
+      if (ec = events[type]) {
+        // if the handler is omitted we stop
+        // observing all handlers of that type
+        if (handler == null) {
+          length = ec.handlers.length;
+          while (length--) stopObserving.call(element, type, length);
+          return this;
         }
+      } else {
         return this;
       }
 
-      dispatcher = ec.dispatcher;
-      foundAt = isNumber(handler) ? handler : arrIndexOf.call(ec.handlers, handler);
+      if (isNumber(handler)) {
+        // bail if handler is a delegator
+        foundAt = handler;
+        if (ec.handlers[foundAt]._delegatee) {
+          foundAt = -1;
+        }
+      } else {
+        foundAt = arrIndexOf.call(ec.handlers, handler);
+      }
 
       if (foundAt < 0) return this;
-      removeCacheAtIndex(id, type, foundAt);
 
-      if (!events[type]) {
-        removeObserver(element, type, dispatcher);
+      // remove handler
+      ec.handlers.splice(foundAt, 1);
+
+      // if no more handlers and not bubbling for
+      // delegation then remove the event type data and dispatcher
+      if (!ec.handlers.length && !ec._bubbleForDelegation) {
+        removeObserver(element, type, ec.dispatcher);
+        delete events[type];
       }
       return this;
     };
 
     // prevent JScript bug with named function expressions
     var cancel =        nil,
-     element =          nil,
      fire =             nil,
      findElement =      nil,
      getPointer  =      nil,
@@ -700,6 +714,5 @@
      observe =          nil,
      preventDefault =   nil,
      stop =             nil,
-     stopObserving =    nil,
      stopBubbling =     nil;
   })(Event.plugin);

@@ -40,7 +40,7 @@
 <body>
   <h1>FuseJS functional tests for the Event module</h1>
 
-  <div id="pointer"></div>
+  <div id="pointer">x: 0, y:0</div>
   <script type="text/javascript">
     (function() {
       var pointer = $('pointer');
@@ -50,11 +50,13 @@
     })();
   </script>
 
-  <div id="log">log empty</div>
+  <fieldset>
+    <legend>Log</legend>
+    <div id="log"></div>
+  </fieldset>
 
   <p id="basic">A basic event test - <strong>click here</strong></p>
   <p id="basic_remove" class="subtest"><strong>click</strong> to stop observing the first test</p>
-
   <p id="inline_test" onclick="fuse.dom.Event(event).stop(); $(this).passed();"><strong>click</strong> to ensure generic Event methods work on inline handlers</p>
 
   <script type="text/javascript">
@@ -65,7 +67,7 @@
       } else {
         $('basic').failed();
       }
-      log(e);
+      log(e.raw);
     }
     $('basic').observe('click', basic_callback)
     $('basic_remove').observe('click', function(e) {
@@ -73,7 +75,7 @@
       el.passed('This test should now be inactive (try clicking)');
       el.stopObserving('click');
       $('basic_remove').remove();
-      log(e);
+      log(e.raw);
     }).hide()
   </script>
 
@@ -86,21 +88,21 @@
       } else {
         this.passed();
       }
-      log(e);
+      log(e.raw);
     });
   </script>
 
   <p id="basic3"><strong>Event object</strong> test - should be present as a first argument</p>
 
   <script type="text/javascript">
-    $('basic3').observe('click', function(evt) {
+    $('basic3').observe('click', function(e) {
       var el = $('basic3');
       if (typeof evt != 'object') {
         this.failed('Expected event object for first argument');
       } else {
         this.passed('Good first argument');
       }
-      log(evt);
+      log(e.raw);
     });
   </script>
 
@@ -109,7 +111,7 @@
   <script type="text/javascript">
     $('hijack').observe('click', function(e) {
       var el = this.up();
-      log(e); // this makes it fail?!?
+      log(e.raw); // this makes it fail?!?
       e.cancel();
 
       setTimeout(function() {
@@ -133,7 +135,7 @@
         } else {
           this.failed('OH NO!');
         }
-        log(e);
+        log(e.raw);
       });
     });
   </script>
@@ -144,7 +146,7 @@
     $('context').observe('contextmenu', function(e) {
       this.passed();
       e.stop();
-      log(e);
+      log(e.raw);
     })
   </script>
 
@@ -157,7 +159,7 @@
       } else {
         this.failed();
       }
-      log(e);
+      log(e.raw);
     });
   </script>
 
@@ -182,7 +184,7 @@
         e.getCurrentTarget();
         prevID = e.getCurrentTarget();
         prevID = prevID && prevID.raw.id;
-        log(e);
+        log(e.raw);
       });
     })();
   </script>
@@ -196,7 +198,7 @@
       } else {
         this.passed();
       }
-      log(e);
+      log(e.raw);
     })
   </script>
 
@@ -210,7 +212,7 @@
       } else {
         this.failed();
       }
-      log(e);
+      log(e.raw);
     })
   </script>
 
@@ -220,11 +222,11 @@
     $('stop').observe('click', function(e) {
       e.stop();
       this.passed();
-      log(e);
+      log(e.raw);
     })
     $('container').observe('click', function(e) {
       $('stop').failed();
-      log(e);
+      log(e.raw);
     })
   </script>
 
@@ -237,7 +239,7 @@
     $('keyup').observe('keyup', function(e) {
       var el = $('keyup_log');
       el.passed('Key captured: the length is ' + $('keyup').getValue().length);
-      log(e);
+      log(e.raw);
     })
   </script>
 
@@ -254,7 +256,7 @@
           el.passed();
         }
         catch (err) { el.failed(err.toString()) }
-        log(e);
+        log(e.raw);
       }, document.body, 'foo', [1,2,3]));
   </script>
 
@@ -265,7 +267,7 @@
       var el = $('obj_inspect')
       try { el.passed(fuse.Object.inspect(e)) }
       catch (err) { el.failed('Failed! Error thrown') }
-      log(e);
+      log(e.raw);
     })
   </script>
 
@@ -280,7 +282,7 @@
 
       this.update('Registered two unload events, one inline ("onunload") and one regular - try to refresh, both should fire')
       this._done = true;
-      log(e);
+      log(e.raw);
     })
   </script>
 
@@ -290,11 +292,16 @@
     (function() {
       var el = $('observer_order'), count = 0;
       fuse.Number(2).times(function(n) {
-        el.observe('click', function(evt) { count = n; log(evt); })
+        el.observe('click', function(e) {
+          count = n;
+          log(e.raw);
+        })
       });
 
       el.observe('click', function() {
-        fuse.Function.defer(function() { (count == 1) ? el.passed() : el.failed() });
+        fuse.Function.defer(function() {
+          (count == 1) ? el.passed() : el.failed();
+        });
       });
     })();
   </script>
@@ -340,6 +347,96 @@
         el[count ? 'passed' : 'failed']();
       });
     })();
+  </script>
+
+  <div id="delegation_container">
+    Event delegation
+    <ul>
+      <li>
+        <span class="delegation-child-1">Child 1 (click)</span>
+      </li>
+      <li>
+        <span class="delegation-child-2">Child 2 (mouseover)</span>
+      </li>
+      <li class="delegation-child-3">
+        <span>Child 3 (mouseup)</span>
+      </li>
+      <li>
+        <select class="delegation-child-4">
+          <option value="1">Child 4</option>
+          <option value="2">Changed</option>
+        </select>
+        <span>(change)</span>
+      </li>
+      <li>
+         <span>Child 5</span>
+        <input type="radio" name="delegation-child-5" value="1">
+        <input type="radio" name="delegation-child-5" value="2">
+        <span>(focus)</span>
+      </li>
+    </ul>
+
+    Results: 
+
+    <ul id="delegation_results">
+      <li id="delegation_result_1">Test 1</li>
+      <li id="delegation_result_2">Test 2</li>
+      <li id="delegation_result_3">Test 3</li>
+      <li id="delegation_result_4">Test 4</li>
+      <li id="delegation_result_5">Test 5</li>
+    </ul>
+  </div>
+
+  <script type="text/javascript">
+    var msg = "Passed. Click to unregister.",
+     clickMsg = "Now try original event again to ensure observation was stopped.";
+
+    $('delegation_container').delegate('click', '.delegation-child-1', function() {
+      var result = $('delegation_results').down('li', 1)[0];
+      result.passed(msg + " (" + (+new Date) + ")");
+      result.observe('click', function() {
+        this.update(clickMsg);
+        $('delegation_container').stopDelegating('click');
+      });
+    });
+
+    $(document).delegate('mouseover', '.delegation-child-2', function() {
+      var result = $('delegation_results').down('li', 2)[1];
+      result.passed(msg + " (" + (+new Date) + ")");
+      result.observe('click', function() {
+        this.update(clickMsg);
+        $(document).stopDelegating();
+      });
+    })
+
+    $('delegation_container').delegate('mouseup', '.delegation-child-3', function() {
+      var result = $('delegation_results').down('li', 3)[2];
+      result.passed(msg + " (" + (+new Date) + ")");
+      result.observe('click', function() {
+        this.update(clickMsg);
+        $('delegation_container').stopDelegating('mouseup', '.delegation-child-3');
+      });
+    });
+
+    $('delegation_container').delegate('change', '.delegation-child-4', function() {
+      var result = $('delegation_results').down('li', 4)[3];
+      result.passed(msg + " (" + (+new Date) + ")");
+      result.observe('click', function() {
+        this.update(clickMsg);
+        $('delegation_container').stopDelegating('change');
+      });
+    });
+
+    var observer = function() {
+      var result = $('delegation_results').down('li', 5)[4];
+      result.passed(msg + " (" + (+new Date) + ")");
+      result.observe('click', function() {
+        this.update(clickMsg);
+        $('delegation_container').stopDelegating('focus', '[type=radio]', observer);
+      });
+    };
+
+    $('delegation_container').delegate('focus', '[type=radio]', observer);
   </script>
 
   <iframe id="iframe" src="iframe.html" height="200" width="500"></iframe>

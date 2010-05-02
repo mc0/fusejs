@@ -11,6 +11,8 @@
 
     decoratedDoc = fuse.get(doc),
 
+    isFramed = true,
+
     Poller = function(method) {
       var poller = this,
       callback   = function() {
@@ -64,8 +66,8 @@
       if (decoratedDoc.isLoaded()) {
         return readyStatePoller.clear();
       }
-      // Not sure if readyState is ever `loaded` in Safari 2.x but
-      // we check to be on the safe side
+      // Not sure if readyState is ever `loaded` in
+      // Safari 2.x but we check to be on the safe side
       if (FINAL_DOCUMENT_READY_STATES[doc.readyState] ||
           event && event.type === 'DOMContentLoaded') {
         readyStatePoller.clear();
@@ -223,8 +225,8 @@
     if (!envTest('ELEMENT_ADD_EVENT_LISTENER') && envTest('ELEMENT_DO_SCROLL')) {
 
       // Avoid a potential browser hang when checking global.top (thanks Rich Dougherty)
+      // The value of frameElement can be null or an object.
       // Checking global.frameElement could throw if not accessible.
-      var isFramed = true;
       try { isFramed = global.frameElement != null; } catch(e) { }
 
       // Derived with permission from Diego Perini's IEContentLoaded
@@ -242,8 +244,7 @@
           }
         };
       }
-    }
-    else if (envTest('ELEMENT_ADD_EVENT_LISTENER')) {
+    } else if (envTest('ELEMENT_ADD_EVENT_LISTENER')) {
       decoratedDoc.observe('DOMContentLoaded', checkDomLoadedState);
     }
 
