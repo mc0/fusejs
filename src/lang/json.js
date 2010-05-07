@@ -7,7 +7,7 @@
      STRINGABLE_TYPES = { 'boolean': 1, 'object': 1, 'number': 1, 'string': 1 };
 
     // ES5 15.12.3
-    Obj.toJSON = function toJSON(value) {
+    fuse.Object.toJSON = function toJSON(value) {
       if (!STRINGABLE_TYPES[typeof value]) return;
 
       var length, i = -1, result = [],
@@ -60,7 +60,7 @@
     };
 
     // ES5 15.9.5.43
-    if (!fuse.Date.plugin.toISOString) {
+    if (!isFunction(fuse.Date.plugin.toISOString)) {
       fuse.Date.plugin.toISOString = function toISOString() {
         return fuse.String(this.getUTCFullYear() + '-' +
           fuse.Number(this.getUTCMonth() + 1).toPaddedString(2) + '-' +
@@ -72,7 +72,7 @@
     }
 
     // ES5 15.9.5.44
-    if (!fuse.Date.plugin.toJSON) {
+    if (!isFunction(fuse.Date.plugin.toJSON)) {
       fuse.Date.plugin.toJSON = function toJSON() {
         return this.toISOString();
       };
@@ -85,7 +85,7 @@
     }
 
     if (envTest('JSON')) {
-      Obj.toJSON = function toJSON(object) {
+      fuse.Object.toJSON = function toJSON(object) {
         if (object && typeof object.toJSON === 'function') {
           object = object.toJSON();
         }

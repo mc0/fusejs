@@ -9,5 +9,5 @@
     }
   };
 
-  fuse.env.agent.IE = !fuse.env.agent.Opera && userAgent.indexOf('MSIE') > -1 &&
-    isHostObject(global, 'attachEvent');
+  fuse.env.agent.IE = !fuse.env.agent.Opera &&
+    userAgent.indexOf('MSIE') > -1 && isHostType(global, 'attachEvent');

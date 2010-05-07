@@ -29,8 +29,8 @@
   });
 
   (function() {
-    if (Enumerable) {
-      Enumerable.grep = function grep(pattern, callback, thisArg) {
+    if (fuse.Enumerable) {
+      fuse.Enumerable.grep = function grep(pattern, callback, thisArg) {
         if (!pattern || pattern == '' ||
             isRegExp(pattern) &&!pattern.source) {
           return this.toArray();

@@ -78,7 +78,7 @@
       hash._values.splice(index, 1);
     };
 
-    Class({ 'constructor': Hash, 'merge': merge, 'set': set, 'unset': unset });
+    fuse.Class({ 'constructor': Hash, 'merge': merge, 'set': set, 'unset': unset });
     Klass.prototype = Hash.plugin;
     return Hash;
   })();
@@ -238,13 +238,13 @@
     };
 
     plugin.toObject = function toObject() {
-      var pair, i = -1, pairs = this._pairs, result = Obj();
+      var pair, i = -1, pairs = this._pairs, result = fuse.Object();
       while (pair = pairs[++i]) result[pair[0]] = pair[1];
       return result;
     };
 
     plugin.toQueryString = function toQueryString() {
-      return Obj.toQueryString(this._object);
+      return fuse.Object.toQueryString(this._object);
     };
 
     plugin.values = function values() {

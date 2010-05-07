@@ -41,7 +41,7 @@
       return Node.getFuseId(this);
     };
 
-    Class({ 'constructor': Node, 'getFuseId': getFuseId });
+    fuse.Class({ 'constructor': Node, 'getFuseId': getFuseId });
     Decorator.prototype = Node.plugin;
     return Node;
   })();
@@ -49,6 +49,7 @@
   /*--------------------------------------------------------------------------*/
 
   Node.addStatics(function() {
+
     var SKIPPED_KEYS = { 'constructor': 1, 'callSuper': 1, 'getFuseId': 1 },
 
     fuseId = 3,
@@ -56,7 +57,7 @@
     createGeneric = function(proto, methodName) {
       return Function('o,s',
         'function ' + methodName + '(node){' +
-        'var a=arguments,n=fuse.get(node),m=o.' + methodName +
+        'var a=arguments,n=fuse(node),m=o.' + methodName +
         ';return a.length' +
         '?m.apply(n,s.call(a,1))' +
         ':m.call(n)' +
@@ -68,7 +69,7 @@
       if (deep) {
         fuse.updateGenerics(Klass, deep);
       } else {
-        Obj._each(Klass.prototype, function(value, key, proto) {
+        fuse.Object._each(Klass.prototype, function(value, key, proto) {
           if (!SKIPPED_KEYS[key] && isFunction(proto[key]) && hasKey(proto, key))
             Klass[key] = createGeneric(proto, key);
         });

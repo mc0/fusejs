@@ -7,11 +7,17 @@
 
     FINAL_DOCUMENT_READY_STATES = { 'complete': 1, 'loaded': 1 },
 
-    doc = fuse._doc,
+    doc          = fuse._doc,
 
-    decoratedDoc = fuse.get(doc),
+    decoratedDoc = fuse.dom.Document(doc),
 
-    isFramed = true,
+    envTest      = fuse.env.test,
+
+    isFramed     = true,
+
+    isHostType   = fuse.Object.isHostType,
+
+    isSameOrigin = fuse.Object.isSameOrigin,
 
     Poller = function(method) {
       var poller = this,
@@ -24,7 +30,7 @@
     },
 
     cssDoneLoading = function() {
-      return (isCssLoaded = Func.TRUE)();
+      return (isCssLoaded = fuse.Function.TRUE)();
     },
 
     fireDomLoadedEvent = function() {
@@ -77,7 +83,7 @@
     },
 
     addImports = function(collection, sheet) {
-      return (addImports = isHostObject(sheet, 'imports')
+      return (addImports = isHostType(sheet, 'imports')
         ? function(collection, sheet) {
             var length = sheet.imports.length;
             while (length--) {
@@ -124,21 +130,21 @@
     },
 
     getSheet = function(element) {
-      return (getSheet = isHostObject(element, 'styleSheet')
+      return (getSheet = isHostType(element, 'styleSheet')
         ? function(element) { return element.styleSheet; }
         : function(element) { return element.sheet; }
       )(element);
     },
 
     getRules = function(sheet) {
-      return (getRules = isHostObject(sheet, 'rules')
+      return (getRules = isHostType(sheet, 'rules')
         ? function(sheet) { return sheet.rules; }
         : function(sheet) { return sheet.cssRules; }
       )(sheet);
     },
 
     addRule = function(sheet, selector, cssText) {
-      return (addRule = isHostObject(sheet, 'addRule')
+      return (addRule = isHostType(sheet, 'addRule')
         ? function(sheet, selector, cssText) { return sheet.addRule(selector, cssText); }
         : function(sheet, selector, cssText) { return sheet.insertRule(selector +
             '{' + cssText + '}', getRules(sheet).length); }
@@ -146,7 +152,7 @@
     },
 
     removeRule = function(sheet, index) {
-      return (removeRule = isHostObject(sheet, 'removeRule')
+      return (removeRule = isHostType(sheet, 'removeRule')
         ? function(sheet, index) { return sheet.removeRule(index); }
         : function(sheet, index) { return sheet.deleteRule(index); }
       )(sheet, index);
@@ -205,7 +211,7 @@
                   }
 
                   if (done) {
-                    cache = nil;
+                    cache = null;
                     return cssDoneLoading();
                   }
                   return done;

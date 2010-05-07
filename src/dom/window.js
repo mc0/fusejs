@@ -26,15 +26,17 @@
       return decorated;
     };
 
+    // weak fallback
     if (!isWindow(global)) {
-      // weak fallback
       isWindow = function(object) {
         return typeof object.frameElement !== 'undefined';
       };
     }
 
-    Class({ 'constructor': Window });
+    fuse.Class({ 'constructor': Window });
     Decorator.prototype = Window.plugin;
     Window.updateGenerics = Node.updateGenerics;
     return Window;
   })();
+
+  Window.plugin.getFuseId = Node.plugin.getFuseId;

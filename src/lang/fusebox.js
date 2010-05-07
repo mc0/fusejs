@@ -40,8 +40,8 @@
       }
       // last but not least try the iframe
       var doc = global.document;
-      if (isHostObject(global, 'frames') && doc &&
-          isHostObject(doc, 'createElement')) {
+      if (isHostType(global, 'frames') && doc &&
+          isHostType(doc, 'createElement')) {
         return IFRAME;
       }
     })(),
@@ -373,6 +373,14 @@
        __trimLeft           = strPlugin.trimLeft,
        __trimRight          = strPlugin.trimRight;
 
+      Function.FALSE           = function FALSE() { return false; };
+
+      Function.TRUE            = function TRUE() { return true; };
+
+      Function.IDENTITY        = IDENTITY;
+
+      Function.NOP             = NOP;
+
       Number.MAX_VALUE         = 1.7976931348623157e+308;
 
       Number.MIN_VALUE         = 5e-324;
@@ -425,18 +433,22 @@
       }
 
       // ES5 15.4.3.2
-      if (!isFunction(Array.isArray = __Array.isArray))
+      if (!isFunction(Array.isArray = __Array.isArray)) {
         Array.isArray = function isArray(value) {
           return sbToString.call(value) === '[object Array]';
         };
+      }
+
+      Date.now = function now() {
+        return instance.Number(__Date.now());
+      };
 
       // ES5 15.9.4.4
-      Date.now = (function() {
-        var now = function now() { return instance.Number(+new Date()); };
-        if (__Date.now)
-          now = function now() { return instance.Number(__Date.now()); };
-        return now;
-      })();
+      if (!isFunction(__Date.now)) {
+        Date.now = function now() {
+          return instance.Number(+new __Date());
+        };
+      }
 
       // ES5 15.9.4.2
       Date.parse = function parse(dateString) {
@@ -825,15 +837,16 @@
       /*----------------------------------------------------------------------*/
 
       // prevent JScript bug with named function expressions
-      var charAt = nil, charCodeAt = nil, create = nil, concat = nil,
-       every = nil, exec = nil, filter = nil, fromArray = nil, getDate = nil,
-       getDay = nil, getFullYear = nil, getHours = nil, getMilliseconds = nil,
-       getMinutes = nil, getMonth = nil, getSeconds = nil, getTime = nil,
-       getTimezoneOffset = nil, getUTCDate = nil, getUTCDay = nil,
-       getUTCFullYear = nil, getUTCHours = nil, getUTCMilliseconds = nil,
-       getUTCMinutes = nil, getUTCMonth = nil, getUTCSeconds = nil,
-       getYear = nil, join = nil, indexOf = nil, lastIndexOf = nil,
-       localeCompare = nil, match = nil, map = nil, push = nil, replace = nil,
+      var FALSE = nil, TRUE = nil, UTC = nil, charAt = nil, charCodeAt = nil,
+       create = nil, concat = nil, every = nil, exec = nil, filter = nil,
+       fromArray = nil, fromCharCode = nil, getDate = nil, getDay = nil,
+       getFullYear = nil, getHours = nil, getMilliseconds = nil, getMinutes = nil,
+       getMonth = nil, getSeconds = nil, getTime = nil, getTimezoneOffset = nil,
+       getUTCDate = nil, getUTCDay = nil, getUTCFullYear = nil, getUTCHours = nil,
+       getUTCMilliseconds = nil, getUTCMinutes = nil, getUTCMonth = nil,
+       getUTCSeconds = nil, getYear = nil, join = nil, indexOf = nil,
+       isArray = nil, lastIndexOf = nil, localeCompare = nil, match = nil,
+       map = nil, now = nil, parse = nil, push = nil, replace = nil,
        reverse = nil, search = nil, slice = nil, some = nil, sort = nil,
        split = nil, splice = nil, substr = nil, substring = nil,
        toExponential = nil, toFixed = nil, toISOString = nil, toJSON = nil,
@@ -936,9 +949,10 @@
     // assign Fusebox natives to Fuse object
     (function() {
       var backup, key, i = -1,
-       SKIPPED_KEYS = { 'constructor': 1 };
 
-      function createGeneric(proto, methodName) {
+      SKIPPED_KEYS = { 'constructor': 1 },
+
+      createGeneric = function(proto, methodName) {
         return Function('o,s',
           'function ' + methodName + '(thisArg){' +
           'var a=arguments,m=o.' + methodName +
@@ -946,16 +960,19 @@
           '?m.apply(thisArg,s.call(a,1))' +
           ':m.call(thisArg)' +
           '}return ' + methodName)(proto, slice);
-      }
+      },
 
-      function updateGenerics(deep) {
+      updateGenerics = function updateGenerics(deep) {
         var Klass = this;
-        if (deep) fuse.updateGenerics(Klass, deep);
-        else Obj._each(Klass.prototype, function(value, key, proto) {
-          if (!SKIPPED_KEYS[key] && isFunction(proto[key]) && hasKey(proto, key))
-            Klass[key] = createGeneric(proto, key);
-        });
-      }
+        if (deep) {
+          fuse.updateGenerics(Klass, deep);
+        } else {
+          fuse.Object._each(Klass.prototype, function(value, key, proto) {
+            if (!SKIPPED_KEYS[key] && isFunction(proto[key]) && hasKey(proto, key))
+              Klass[key] = createGeneric(proto, key);
+          });
+        }
+      };
 
       Fusebox(fuse);
 
@@ -991,7 +1008,3 @@
 
     return Fusebox;
   })();
-
-  // redefine private helpers using sandboxed methods
-  slice = fuse.Array.plugin.slice.raw;
-  toString = fuse.Object.plugin.toString;

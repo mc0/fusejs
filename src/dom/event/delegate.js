@@ -2,9 +2,7 @@
 
   (function(plugin) {
 
-    var stopDelegating,
-
-    BUTTON_EVENTS = { 'reset': 1, 'submit': 1 },
+    var BUTTON_EVENTS = { 'reset': 1, 'submit': 1 },
 
     EVENT_TYPE_ALIAS = { 'blur': 'delegate:blur', 'focus': 'delegate:focus' },
 
@@ -26,12 +24,6 @@
       'TEXTAREA': 1
     },
 
-    fire = Element.plugin.fire,
-
-    observe = Element.plugin.observe,
-
-    stopObserving = Element.plugin.stopObserving,
-
     addWatcher = NOP,
 
     removeWatcher = NOP,
@@ -41,7 +33,7 @@
       var events = domData[id] && domData[id].events;
       if (!events || !events[type]) {
         // observe a dummy handler to create the dispatcher
-        observe.call(element, type, NOP);
+        fuse(element).observe(type, NOP);
         // remove dummy handler while keeping the array intact
         (events || (events = domData[id].events))[type].handlers.length = 0;
       }
@@ -119,8 +111,8 @@
       };
     }
 
+    plugin.delegate          =
     Document.plugin.delegate =
-    Element.plugin.delegate  =
     Window.plugin.delegate   = function delegate(type, selector, delegatee) {
       var ec, handler, handlers, i = -1,
        element = this.raw || this,
@@ -151,7 +143,8 @@
       handler = selector ? createHandler(selector, delegatee) : delegatee;
       handler._delegatee = delegatee;
       handler._selector  = selector;
-      observe.call(this, type, handler);
+
+      plugin.observe.call(this, type, handler);
 
       // add a watcher for non-bubbling events to signal
       // the event system when manual bubbling is needed
@@ -166,9 +159,8 @@
       return this;
     };
 
-    stopDelegating =
+    plugin.stopDelegating          =
     Document.plugin.stopDelegating =
-    Element.plugin.stopDelegating  =
     Window.plugin.stopDelegating   = function stopDelegating(type, selector, delegatee) {
       var ec, handler, handlers, i = -1,
        element = this.raw || this,
@@ -187,7 +179,7 @@
       // observing all delegatees on the element
       if (!type) {
         eachKey(events, function(handlers, type) {
-          stopDelegating.call(element, type);
+          plugin.stopDelegating.call(element, type);
         });
         return this;
       }
@@ -196,14 +188,14 @@
 
         // if told exactly which delegatee to remove
         if (isNumber(delegatee)) {
-          stopObserving.call(this, type, delegatee);
+          plugin.stopObserving.call(this, type, delegatee);
         }
         else if (selector) {
           // if nothing is omitted
           if (delegatee) {
             while (handler = handlers[++i]) {
               if (handler._delegatee === delegatee && handler._selector === selector) {
-                stopObserving.call(this, type, handler);
+                plugin.stopObserving.call(this, type, handler);
                 break;
               }
             }
@@ -250,4 +242,4 @@
 
     // prevent JScript bug with named function expressions
     var delegate = nil;
-  })(Event.plugin);
+  })(Element.plugin);

@@ -6,9 +6,9 @@
     match = function match(element, selectors, context) {
       function match(element, selectors, context) {
         return __match(
-          element.raw || fuse.get(element).raw,
+          element.raw || fuse(element).raw,
           String(selectors || ''),
-          context && fuse.get(context).raw);
+          context && fuse(context).raw);
       }
 
       __match = NW.Dom.match;
@@ -20,7 +20,7 @@
         var i = -1, result = NodeList();
         __select(
           String(selectors || ''),
-          context && fuse.get(context).raw,
+          context && fuse(context).raw,
           function(node) {
             result[++i] = node;
             callback && callback(node);

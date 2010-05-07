@@ -1,7 +1,10 @@
  /*------------------------------- AJAX: BASE -------------------------------*/
 
-  fuse.ajax.Base = Class(function() {
-    var Base = function Base(url, options) {
+  fuse.ajax.Base = fuse.Class(function() {
+
+    var Obj = fuse.Object,
+
+    Base = function Base(url, options) {
       var customHeaders, queryString, body = null,
        location = global.location,
        defaults = Base.defaults,
@@ -23,8 +26,8 @@
 
       var encoding = options.encoding,
        headers = options.headers,
-       method = options.method.toLowerCase(),
-       params = options.parameters;
+       method  = options.method.toLowerCase(),
+       params  = options.parameters;
 
       // if no url is provided use the window's location data
       if (!url || url == '') {

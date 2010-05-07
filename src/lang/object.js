@@ -1,12 +1,9 @@
   /*------------------------------ LANG: OBJECT ------------------------------*/
 
-  Obj = fuse.Object;
-
   eachKey =
-  Obj._each = (function() {
-    var _each;
-
+  fuse.Object._each = (function() {
     // use switch statement to avoid creating a temp variable
+    var _each;
     switch (function() {
       var key, count = 0, klass = function() { this.toString = 1; };
       klass.prototype.toString = 1;
@@ -62,7 +59,10 @@
           if (object) {
             for (key in object) {
               if (!(skipProto && key === 'prototype')) {
-                callback(object[key], key, object);
+                // exit early if callback result is false
+                if (callback(object[key], key, object) === false) {
+                  break;
+                }
               }
             }
           }
@@ -78,7 +78,7 @@
   // Use fuse.Object.hasKey() on object Objects only as it may error on DOM Classes
   // https://bugzilla.mozilla.org/show_bug.cgi?id=375344
   hasKey =
-  Obj.hasKey = (function() {
+  fuse.Object.hasKey = (function() {
     var objectProto = Object.prototype,
      hasOwnProperty = objectProto.hasOwnProperty;
 
@@ -135,76 +135,49 @@
 
   /*--------------------------------------------------------------------------*/
 
+  fuse.Object.isFunction = isFunction;
+
+  fuse.Object.isHostType = isHostType;
+
   isArray =
-  Obj.isArray = fuse.Array.isArray;
+  fuse.Object.isArray = fuse.Array.isArray;
 
   isElement =
-  Obj.isElement = function isElement(value) {
+  fuse.Object.isElement = function isElement(value) {
     return !!value && value.nodeType === ELEMENT_NODE;
   };
 
-  Obj.isFunction = isFunction;
-
   isHash =
-  Obj.isHash = function isHash(value) {
+  fuse.Object.isHash = function isHash(value) {
     var Hash = fuse.Hash;
     return !!value && value.constructor === Hash && value !== Hash.prototype;
   };
 
   isNumber =
-  Obj.isNumber = function isNumber(value) {
+  fuse.Object.isNumber = function isNumber(value) {
     return toString.call(value) === '[object Number]' && isFinite(value);
   };
 
   // ES5 4.3.2
   isPrimitive =
-  Obj.isPrimitive = function isPrimitive(value) {
+  fuse.Object.isPrimitive = function isPrimitive(value) {
     var type = typeof value;
     return value == null || type === 'boolean' || type === 'number' || type === 'string';
   };
 
   isRegExp =
-  Obj.isRegExp = function isRegExp(value) {
+  fuse.Object.isRegExp = function isRegExp(value) {
     return toString.call(value) === '[object RegExp]';
   };
 
-  // https://developer.mozilla.org/En/Same_origin_policy_for_JavaScript
-  // http://www.iana.org/assignments/port-numbers
-  isSameOrigin =
-  Obj.isSameOrigin = (function() {
-    var isSameOrigin = function isSameOrigin(url) {
-      var domainIndex, urlDomain,
-       result    = true,
-       docDomain = fuse._doc.domain,
-       parts     = String(url).match(reUrlParts) || [];
-
-      if (parts[0]) {
-        urlDomain = parts[2];
-        domainIndex = urlDomain.indexOf(docDomain);
-        result = parts[1] === protocol &&
-          (!domainIndex || urlDomain.charAt(domainIndex -1) == '.') &&
-            (parts[3] || defaultPort) === (port || defaultPort);
-      }
-      return result;
-    },
-
-    loc         = global.location,
-    protocol    = loc.protocol,
-    port        = loc.port,
-    reUrlParts  = /([^:]+:)\/\/(?:[^:]+(?:\:[^@]+)?@)?([^\/:$]+)(?:\:(\d+))?/,
-    defaultPort = protocol === 'ftp:' ? 21 : protocol === 'https:' ? 443 : 80;
-
-    return isSameOrigin;
-  })();
-
   isString =
-  Obj.isString = function isString(value) {
+  fuse.Object.isString = function isString(value) {
     return toString.call(value) === '[object String]';
   };
 
   /*--------------------------------------------------------------------------*/
 
-  (function() {
+  (function(Obj) {
     var toQueryPair = function(key, value) {
       return fuse.String(typeof value === 'undefined' ? key :
         key + '=' + encodeURIComponent(value == null ? '' : value));
@@ -250,8 +223,36 @@
       return true;
     };
 
+    // https://developer.mozilla.org/En/Same_origin_policy_for_JavaScript
+    // http://www.iana.org/assignments/port-numbers
+    Obj.isSameOrigin = (function() {
+      var loc      = global.location,
+       protocol    = loc.protocol,
+       port        = loc.port,
+       reUrlParts  = /([^:]+:)\/\/(?:[^:]+(?:\:[^@]+)?@)?([^\/:$]+)(?:\:(\d+))?/,
+       defaultPort = protocol === 'ftp:' ? 21 : protocol === 'https:' ? 443 : 80,
+
+      isSameOrigin = function isSameOrigin(url) {
+        var domainIndex, urlDomain,
+         result    = true,
+         docDomain = fuse._doc.domain,
+         parts     = String(url).match(reUrlParts) || [];
+
+        if (parts[0]) {
+          urlDomain = parts[2];
+          domainIndex = urlDomain.indexOf(docDomain);
+          result = parts[1] === protocol &&
+            (!domainIndex || urlDomain.charAt(domainIndex -1) == '.') &&
+              (parts[3] || defaultPort) === (port || defaultPort);
+        }
+        return result;
+      };
+
+      return isSameOrigin;
+    })();
+
     // ES5 15.2.3.14
-    if (!Obj.keys) {
+    if (!isFunction(Obj.keys)) {
       Obj.keys = function keys(object) {
         if (isPrimitive(object)) throw new TypeError;
 
@@ -298,7 +299,7 @@
 
     // prevent JScript bug with named function expressions
     var _extend =    nil,
-     clone =         nil, 
+     clone =         nil,
      each =          nil,
      extend =        nil,
      isEmpty =       nil,
@@ -306,4 +307,4 @@
      values =        nil,
      toHTML =        nil,
      toQueryString = nil;
-  })();
+  })(fuse.Object);

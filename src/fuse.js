@@ -3,16 +3,14 @@
 
   // private vars
   var DATA_ID_PROP, DOCUMENT_FRAGMENT_NODE, DOCUMENT_NODE, ELEMENT_NODE,
-   IDENTITY, NOP, TEXT_NODE, Class, Document, Element, Enumerable, Event, Form,
-   Func, Obj, Node, NodeList, Window, $break, fuse, addArrayMethods,
-   addNodeListMethod, concatList, domData, eachKey, envAddTest, envTest,
-   escapeRegExpChars, expando, fromElement, getDocument, getNodeName, getWindow,
-   getOrCreateTagClass, hasKey, isArray, isElement, isHash, isHostObject,
-   isFunction, isNumber, isPrimitive, isRegExp, isSameOrigin, isString, nil,
+   IDENTITY, NOP, TEXT_NODE, Document, Element, Node, NodeList, Window, $break,
+   addArrayMethods, addNodeListMethod, concatList, domData, eachKey, envAddTest,
+   envTest, escapeRegExpChars, expando, fromElement, getDocument, getNodeName,
+   getWindow, getOrCreateTagClass, hasKey, isArray, isElement, isHash,
+   isHostType, isFunction, isNumber, isPrimitive, isRegExp, isString, nil,
    prependList, returnOffset, setTimeout, slice, toInteger, toString, undef,
    userAgent;
 
-  fuse =
   global.fuse = function fuse() { };
 
   fuse._body  =
@@ -23,7 +21,6 @@
   fuse._root  =
   fuse._scrollEl = null;
 
-  fuse.debug   = false;
   fuse.version = '<%= FUSEJS_VERSION %>';
 
   /*--------------------------------------------------------------------------*/
@@ -76,12 +73,14 @@
   // typeof document.createElement('div').offsetParent -> unknown
   // typeof document.createElement -> object
   // typeof Image.create -> string
-  isHostObject = (function() {
-    var NON_HOST_TYPES = { 'boolean': 1, 'number': 1, 'string': 1, 'undefined': 1 };
-    return function(object, property) {
+  isHostType = (function() {
+    var NON_HOST_TYPES = { 'boolean': 1, 'number': 1, 'string': 1, 'undefined': 1 },
+
+    isHostType = function isHostType(object, property) {
       var type = typeof object[property];
       return type === 'object' ? !!object[property] : !NON_HOST_TYPES[type];
     };
+    return isHostType;
   })();
 
   // ES5 9.4 ToInteger implementation
@@ -143,7 +142,7 @@
 
       while (key = keys[++i]) {
         if (!object[key]) {
-          Klass = Class(object.constructor.superclass || object, { 'constructor': key });
+          Klass = fuse.Class(object.constructor.superclass || object, { 'constructor': key });
           object = object[key] = new Klass;
           object.plugin = Klass.plugin;
         } else {
@@ -156,7 +155,7 @@
     updateSubClassGenerics = function(object) {
       var subclass, subclasses = object.subclasses || [], i = -1;
       while (subclass = subclasses[++i]) {
-        subclass.updateGenerics && subclass.updateGenerics();
+        if (isFunction(subclass.updateGenerics)) subclass.updateGenerics();
         updateSubClassGenerics(subclass);
       }
     },
@@ -170,7 +169,7 @@
       while (path = paths[++i]) {
         object = isString(path) ? fuse.getNS(path) : path;
         if (object) {
-          object.updateGenerics && object.updateGenerics();
+          if (isFunction(object.updateGenerics)) object.updateGenerics();
           deep && updateSubClassGenerics(object);
         }
       }
@@ -224,7 +223,7 @@
    'dom/selector/nwmatcher.js',
 
    'dom/event/event.js',
-   'dom/event/dom-loaded.js',
+   'dom/event/delegate.js',
 
    'ajax/ajax.js',
    'ajax/responders.js',
@@ -247,21 +246,27 @@
 
   addArrayMethods(fuse.Array);
 
-  if (Element && NodeList) {
-    // add Element methods to fuse.dom.NodeList
-    eachKey(Element.plugin, addNodeListMethod);
-    if (Form) {
-      eachKey(Form, addNodeListMethod);
-    }
-    if (fuse.dom.InputElement) {
-      eachKey(fuse.dom.InputElement.plugin, addNodeListMethod);
-    }
-    // pave any fuse.dom.NodeList methods that fuse.Array shares
-    // you may call element first(), last(), and contains() by using invoke()
-    // ex: elements.invoke('first');
-    addArrayMethods(fuse.dom.NodeList);
-  }
+  (function(dom) {
+    var Field, Form, NodeList;
+    if (dom && (NodeList = dom.NodeList)) {
+      if (Form = dom.FormElement) eachKey(Form.plugin, addNodeListMethod);
+      if (Field = dom.InputElement) eachKey(Field.plugin, addNodeListMethod);
+      eachKey(dom.Element.plugin, addNodeListMethod);
 
-  // update native generics and element methods
-  fuse.updateGenerics(true);
+      // Pave any NodeList methods that fuse.Array shares
+      // Element first(), last(), and contains() may be called by using invoke()
+      // Ex: elements.invoke('first');
+      addArrayMethods(NodeList);
+    }
+  })(fuse.dom);
+
 })(this);
+
+(function(global) {
+<%= include(
+  'dom/event/dispatcher.js',
+  'dom/event/dom-loaded.js') %>
+})(this);
+
+// update native generics and element methods
+fuse.updateGenerics(true);

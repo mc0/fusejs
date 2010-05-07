@@ -1,14 +1,6 @@
   /*----------------------------- LANG: FUNCTIONS ----------------------------*/
 
-  Func =
-  fuse.Function;
-
-  (function(plugin) {
-
-    Func.FALSE    = function FALSE() { return false; };
-    Func.TRUE     = function TRUE() { return true; };
-    Func.IDENTITY = IDENTITY;
-    Func.NOP      = NOP;
+  (function(Func) {
 
     // ES5 15.3.4.5
     Func.bind = function bind(fn, thisArg) {
@@ -147,6 +139,8 @@
 
     /*------------------------------------------------------------------------*/
 
+    var plugin = Func.plugin;
+
     // native support
     if (isFunction(plugin.bind)) {
       var __bind = Func.bind;
@@ -213,4 +207,4 @@
      defer =               nil,
      methodize =           nil,
      wrap =                nil;
-  })(Func.plugin);
+  })(fuse.Function);

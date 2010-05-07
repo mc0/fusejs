@@ -10,15 +10,19 @@
       }
     })();
 
-    var buttonPlugin = dom.ButtonElement.plugin,
+    var dom        = fuse.dom,
 
-    inputPlugin      = dom.InputElement.plugin,
+    buttonPlugin   = dom.ButtonElement.plugin,
 
-    optionPlugin     = dom.OptionElement.plugin,
+    inputPlugin    = dom.InputElement.plugin,
 
-    selectPlugin     = dom.SelectElement.plugin,
+    optionPlugin   = dom.OptionElement.plugin,
 
-    textAreaPlugin   = dom.TextAreaElement.plugin,
+    selectPlugin   = dom.SelectElement.plugin,
+
+    textAreaPlugin = dom.TextAreaElement.plugin,
+
+    toQueryString  = fuse.Object.toQueryString,
 
     CHECKED_INPUT_TYPES = {
       'checkbox': 1,
@@ -123,7 +127,7 @@
       }
       pair = { };
       pair[name] = PLUGINS[getNodeName(element)].getValue.call(this);
-      return Obj.toQueryString(pair);
+      return toQueryString(pair);
     };
 
     selectPlugin.serialize = function serialize() {
@@ -138,7 +142,7 @@
       }
       pair = { };
       pair[name] = value;
-      return Obj.toQueryString(pair);
+      return toQueryString(pair);
     };
 
     textAreaPlugin.select =
@@ -236,4 +240,4 @@
      select =        nil,
      setValue =      nil,
      serialize =     nil;
-  })(fuse.dom);
+  })();

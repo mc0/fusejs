@@ -6,7 +6,7 @@
     };
 
     plugin.clone = function clone(options) {
-      options = Obj._extend({
+      options = fuse.Object._extend({
         'global':     this.global,
         'ignoreCase': this.ignoreCase,
         'multiline':  this.multiline

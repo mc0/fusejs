@@ -36,7 +36,7 @@
       return __apply.call(this, thisArg, argArray);
     };
 
-    Class(fuse.ajax.Base, { 'constructor': Request });
+    fuse.Class(fuse.ajax.Base, { 'constructor': Request });
     Decorator.prototype = Request.plugin;
     return Request;
   })();
@@ -47,8 +47,9 @@
   /*--------------------------------------------------------------------------*/
 
   (function(plugin) {
-    var reHTTP = /^https?:/,
-      Responders = fuse.ajax.Responders;
+    var isSameOrigin = fuse.Object.isSameOrigin,
+     reHTTP = /^https?:/,
+     responders = fuse.ajax.responders;
 
     plugin._useStatus   = true;
     plugin._timerID     = nil;
@@ -59,7 +60,9 @@
     plugin.statusText   = fuse.String('');
     plugin.timedout     = false;
 
-    plugin.headerJSON = plugin.responseJSON = plugin.responseXML = nil;
+    plugin.headerJSON   =
+    plugin.responseJSON =
+    plugin.responseXML  = nil;
 
     plugin.abort = function abort() {
       var xhr = this.raw;
@@ -81,13 +84,13 @@
       } catch (e) {
         this.dispatchException(e);
       }
-      Responders && Responders.dispatch(eventName, this, this.headerJSON);
+      responders && responders.dispatch(eventName, this, this.headerJSON);
     };
 
     plugin.dispatchException = function dispatchException(exception) {
       var callback = this.options.onException;
       callback && callback(this, exception);
-      Responders && Responders.dispatch('onException', this, exception);
+      responders && responders.dispatch('onException', this, exception);
 
       // throw error if not caught by a request onException handler
       if (!callback) throw exception;

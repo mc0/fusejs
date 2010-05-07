@@ -3,12 +3,12 @@
   (function(object, NodeList) {
     var match = function match(element, selectors) {
       return Sizzle(String(selectors || ''), null, null,
-        [element.raw || fuse.get(element).raw]).length === 1;
+        [element.raw || fuse(element).raw]).length === 1;
     },
 
     query = function(selectors, context, callback, List) {
       var node, i = -1, result = Sizzle(String(selectors || ''),
-        context && fuse.get(context).raw || fuse._doc, List);
+        context && fuse(context).raw || fuse._doc, List);
       if (callback) {
         while (node = result[++i]) callback(node);
       }

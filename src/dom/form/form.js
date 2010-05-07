@@ -2,19 +2,21 @@
 
   Element.extendByTag('form');
 
-  Form = fuse.dom.FormElement;
+  (function(plugin) {
 
-  (function(plugin, dom) {
+    var Obj        = fuse.Object,
 
-    var buttonPlugin = dom.ButtonElement.plugin,
+    dom            = fuse.dom,
 
-    inputPlugin      = dom.InputElement.plugin,
+    buttonPlugin   = dom.ButtonElement.plugin,
 
-    optionPlugin     = dom.OptionElement.plugin,
+    inputPlugin    = dom.InputElement.plugin,
 
-    selectPlugin     = dom.SelectElement.plugin,
+    optionPlugin   = dom.OptionElement.plugin,
 
-    textAreaPlugin   = dom.TextAreaElement.plugin,
+    selectPlugin   = dom.SelectElement.plugin,
+
+    textAreaPlugin = dom.TextAreaElement.plugin,
 
     CHECKED_INPUT_TYPES = {
       'checkbox': 1,
@@ -142,12 +144,11 @@
     };
 
     plugin.request = function request(options) {
-      options = Obj.clone(options);
-
       var params = options.parameters,
-       submit = options.submit,
-       action = plugin.getAttribute.call(this, 'action');
+       submit    = options.submit,
+       
 
+      options = Obj.clone(options);
       delete options.submit;
       options.parameters = plugin.serialize.call(this, { 'submit':submit, 'hash':true });
 
@@ -197,14 +198,14 @@
       if (element = elements[0]) {
         do {
           // avoid checking for element ids if we are iterating the default nodeList
-          if (checkString && isString(element) &&                         
+          if (checkString && isString(element) &&
              !(element = doc.getElementById(element))) {
             continue;
           } else {
             element = element.raw || element;
           }
 
-          // skip if not a form control 
+          // skip if not a form control
           nodeName = getNodeName(element);
           if (!CONTROL_NODE_NAMES[nodeName]) {
             continue;
@@ -272,4 +273,4 @@
      reset =             nil,
      serializeElements = nil,
      serialize =         nil;
-  })(Form.plugin, fuse.dom);
+  })(fuse.dom.FormElement.plugin);

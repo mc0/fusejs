@@ -1,3 +1,7 @@
+* Expose fuse.Object.isHostType(object, property). [jddalton]
+
+* Fix memory leak caused by the closure around the framework. [jddalton]
+
 * Add fuse.dom.Element, Document, and Window methods delegate(type, selector, handler) and stopDelegating([type, selector, handler]). [jddalton]
 
 * Add fuse.dom.Document match()/query() method and nodeType property. [jddalton]

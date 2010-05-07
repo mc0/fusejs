@@ -1,12 +1,30 @@
   /*------------------------------ LANG: CONSOLE -----------------------------*/
 
-  fuse.addNS('Console');
+  fuse.addNS('console');
 
-  (function(Console) {
+  // set the debug flag based on the fuse.js debug query parameter
+  fuse.debug = (function() {
+    var script, i = -1,
+     reDebug    = /(^|&)debug=(1|true)(&|$)/,
+     reFilename = /(^|\/)fuse\.js\?/,
+     scripts    = fuse._doc && fuse._doc.getElementsByTagName('script');
+
+    if (scripts) {
+      while (script = scripts[++i]) {
+        if (reFilename.test(script.src) &&
+            reDebug.test(script.src.split('?')[1])) {
+          return true;
+        }
+      }
+    }
+    return false;
+  })();
+
+  (function(console) {
 
     var object,
 
-    error = Func.FALSE,
+    error = fuse.Function.FALSE,
 
     info = error,
 
@@ -24,19 +42,19 @@
     },
 
     hasGlobalConsole = (
-      isHostObject(global, 'console') &&
-      isHostObject(global.console, 'info') &&
-      isHostObject(global.console, 'error')),
+      isHostType(global, 'console') &&
+      isHostType(global.console, 'info') &&
+      isHostType(global.console, 'error')),
 
     hasOperaConsole = (
-      isHostObject(global, 'opera') &&
-      isHostObject(global.opera, 'postError')),
+      isHostType(global, 'opera') &&
+      isHostType(global.opera, 'postError')),
 
     hasJaxerConsole = (
-      isHostObject(global, 'Jaxer') &&
-      isHostObject(global.Jaxer, 'Log') &&
-      isHostObject(global.Jaxer.Log, 'info') &&
-      isHostObject(global.Jaxer.Log, 'error'));
+      isHostType(global, 'Jaxer') &&
+      isHostType(global.Jaxer, 'Log') &&
+      isHostType(global.Jaxer.Log, 'info') &&
+      isHostType(global.Jaxer.Log, 'error'));
 
     if (hasOperaConsole) {
       object = global.opera;
@@ -66,6 +84,6 @@
       };
     }
 
-    Console.error = error;
-    Console.info  = info;
-  })(fuse.Console);
+    console.error = error;
+    console.info  = info;
+  })(fuse.console);

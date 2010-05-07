@@ -48,18 +48,19 @@
       }
     },
 
-    dom = fuse.dom,
+    stripScripts    = fuse.String.plugin.stripScripts,
 
-    stripScripts   = fuse.String.plugin.stripScripts,
+    evalScripts     = fuse.String.plugin.evalScripts,
 
-    evalScripts    = fuse.String.plugin.evalScripts,
-
-    isScriptable   = stripScripts && evalScripts,
+    isScriptable    = stripScripts && evalScripts,
 
     reOpenScriptTag = /<script/i,
 
-    rePositions = /^(?:(?:before|top|bottom|after)(?:,|$))+$/i,
+    rePositions     = /^(?:(?:before|top|bottom|after)(?:,|$))+$/i,
 
+    toHTML = fuse.Object.toHTML,
+
+    getFragmentFromString = fuse.dom.getFragmentFromString,
 
     getByTagName = function(node, tagName) {
       var result = [], child = node.firstChild;
@@ -87,7 +88,7 @@
           stripScripts.call(content) : content;
         if (stripped != '') {
           insertElement(element,
-            dom.getFragmentFromString(stripped, parentNode || element),
+            getFragmentFromString(stripped, parentNode || element),
             parentNode);
         }
         // only evalScripts if there are scripts
@@ -99,7 +100,7 @@
       else if (content) {
         // process toHTML
         if (typeof content.toHTML === 'function') {
-          return insertContent(element, parentNode, Obj.toHTML(content), position);
+          return insertContent(element, parentNode, toHTML(content), position);
         }
         // process toElement
         if (typeof content.toElement === 'function') {
@@ -204,7 +205,7 @@
           }
         } else if (typeof content !== 'object') {
           insertions = defaultPosition;
-        } else if (!rePositions.test(Obj.keys(content))) {
+        } else if (!rePositions.test(fuse.Object.keys(content))) {
           insertions = defaultPosition;
         }
       }
@@ -232,7 +233,7 @@
         stripped = isScriptable && reOpenScriptTag.test(content) ?
           stripScripts.call(content) : content;
         content = stripped == '' ? '' :
-          dom.getFragmentFromString(stripped, element.parentNode);
+          getFragmentFromString(stripped, element.parentNode);
         if (html != stripped) {
           setTimeout(function() { evalScripts.call(html); }, 10);
         }
@@ -241,7 +242,7 @@
       else if (content) {
         // process toHTML
         if (typeof content.toHTML === 'function') {
-          return plugin.replace.call(this, Obj.toHTML(content));
+          return plugin.replace.call(this, toHTML(content));
         }
         // process toElement
         if (typeof content.toElement === 'function') {
@@ -279,7 +280,7 @@
       else if (content) {
         // process toHTML
         if (typeof content.toHTML === 'function') {
-          return plugin.update.call(this, Obj.toHTML(content));
+          return plugin.update.call(this, toHTML(content));
         }
         // process toElement
         if (typeof content.toElement === 'function') {
@@ -369,7 +370,7 @@
             stripScripts.call(content) : content;
           if (stripped != '') {
             if (isBuggy) {
-              element.appendChild(dom.getFragmentFromString(stripped, element));
+              element.appendChild(getFragmentFromString(stripped, element));
             } else {
               element.innerHTML = stripped;
             }
@@ -382,7 +383,7 @@
         else if (content) {
           // process toHTML
           if (typeof content.toHTML === 'function') {
-            return plugin.update.call(this, Obj.toHTML(content));
+            return plugin.update.call(this, toHTML(content));
           }
           // process toElement
           if (typeof content.toElement === 'function') {

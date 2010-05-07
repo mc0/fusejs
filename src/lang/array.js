@@ -4,9 +4,11 @@
 
     var plugin = List.plugin,
 
-    funcApply  = Func.plugin.apply,
+    funcPlugin = fuse.Function.plugin,
 
-    funcCall   = Func.plugin.call,
+    funcApply  = funcPlugin.apply,
+
+    funcCall   = funcPlugin.call,
 
     filterCallback = function(value) {
       return value != null;
@@ -23,7 +25,7 @@
       // Safari 2.x will crash when accessing a non-existent property of a
       // node list, not in the document, that contains a text node unless we
       // use the `in` operator
-      var object = Obj(iterable);
+      var object = fuse.Object(iterable);
       if ('toArray' in object) return object.toArray();
       if ('item' in iterable)  return List.fromNodeList(iterable);
 
@@ -560,8 +562,8 @@
     }
 
     // assign any missing Enumerable methods
-    if (Enumerable) {
-      eachKey(Enumerable, function(value, key, object) {
+    if (fuse.Enumerable) {
+      eachKey(fuse.Enumerable, function(value, key, object) {
         if (hasKey(object, key) && typeof plugin[key] !== 'function') {
           plugin[key] = value;
         }

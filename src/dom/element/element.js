@@ -7,7 +7,7 @@
       : fromElement(tagName);
   };
 
-  Class(Node, { 'constructor': Element });
+  fuse.Class(Node, { 'constructor': Element });
 
   // add/pave statics
   (function() {
@@ -36,7 +36,7 @@
     },
 
     addMixins = function addMixins() {
-      Class.statics.addMixins.apply(this, arguments);
+      fuse.Class.statics.addMixins.apply(this, arguments);
       isMixin = true;
       addToNodeList.apply(this, arguments);
       isMixin = false;
@@ -44,7 +44,7 @@
     },
 
     addPlugins = function addPlugins() {
-      Class.statics.addPlugins.apply(this, arguments);
+      fuse.Class.statics.addPlugins.apply(this, arguments);
       return addToNodeList.apply(this, arguments);
     };
 
@@ -77,28 +77,25 @@
       return fuse.String((this.raw || this).innerHTML).blank();
     };
 
-    plugin.isDetached = (function() {
-      var isDetached = function isDetached() {
-        var element = this.raw || this;
-        return !(element.parentNode &&
-          plugin.contains.call(element.ownerDocument, element));
-      };
+    plugin.isDetached = function isDetached() {
+      var element = this.raw || this;
+      return !(element.parentNode &&
+        plugin.contains.call(element.ownerDocument, element));
+    };
 
-      if (envTest('ELEMENT_SOURCE_INDEX', 'DOCUMENT_ALL_COLLECTION')) {
-        isDetached = function isDetached() {
-          var element = this.raw || this;
-          return element.ownerDocument.all[element.sourceIndex] !== element;
-        };
-      }
-      if (envTest('ELEMENT_COMPARE_DOCUMENT_POSITION')) {
-        isDetached = function isDetached() {
-          /* DOCUMENT_POSITION_DISCONNECTED = 0x01 */
-          var element = this.raw || this;
-          return (element.ownerDocument.compareDocumentPosition(element) & 1) === 1;
-        };
-      }
-      return isDetached;
-    })();
+    if (envTest('ELEMENT_SOURCE_INDEX', 'DOCUMENT_ALL_COLLECTION')) {
+      plugin.isDetached = function isDetached() {
+        var element = this.raw || this;
+        return element.ownerDocument.all[element.sourceIndex] !== element;
+      };
+    }
+    else if (envTest('ELEMENT_COMPARE_DOCUMENT_POSITION')) {
+      plugin.isDetached = function isDetached() {
+        /* DOCUMENT_POSITION_DISCONNECTED = 0x01 */
+        var element = this.raw || this;
+        return (element.ownerDocument.compareDocumentPosition(element) & 1) === 1;
+      };
+    }
 
     // prevent JScript bug with named function expressions
     var identify = nil, isDetached = nil, isEmpty = nil;

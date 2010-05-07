@@ -158,8 +158,8 @@
     };
 
     plugin.clonePosition = function clonePosition(source, options) {
-      source  = fuse.get(source);
-      options = Obj._extend({
+      source  = fuse(source);
+      options = fuse.Object._extend({
         'offsetLeft': 0,
         'offsetTop':  0,
         'setLeft':    1,
@@ -301,7 +301,7 @@
     plugin.getCumulativeOffset = (function() {
 
       function getCumulativeOffset(ancestor) {
-        ancestor = fuse.get(ancestor);
+        ancestor = fuse(ancestor);
         var backup, elemStyle, result;
         if (!isElement(ancestor)) ancestor = null;
 

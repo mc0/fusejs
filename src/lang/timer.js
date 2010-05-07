@@ -1,7 +1,9 @@
   /*------------------------ LANG: TIMER -----------------------*/
 
   fuse.Timer = (function() {
-    var Klass = function() { },
+    var Obj = fuse.Object,
+
+    Klass = function() { },
 
     Timer = function Timer(callback, interval, options) {
       var instance = __instance || new Klass;
@@ -50,7 +52,7 @@
       return __apply.call(this, thisArg, argArray);
     };
 
-    Class({ 'constructor': Timer });
+    fuse.Class({ 'constructor': Timer });
     Klass.prototype = Timer.plugin;
     return Timer;
   })();

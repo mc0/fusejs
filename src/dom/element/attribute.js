@@ -15,7 +15,7 @@
       return (this.raw || this).hasAttribute(name);
     };
 
-    if (!isHostObject(fuse._docEl, 'hasAttribute')) {
+    if (!isHostType(fuse._docEl, 'hasAttribute')) {
       hasAttribute = function hasAttribute(name) {
         // IE6/7 fails to detect value attributes as well as colspan and rowspan
         // attributes with a value of 1

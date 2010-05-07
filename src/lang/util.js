@@ -54,7 +54,7 @@
       };
 
       util.$F = function $F(element) {
-        element = fuse.get(element);
+        element = fuse(element);
         return element && element.getValue
           ? element.getValue()
           : null;

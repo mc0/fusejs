@@ -12,65 +12,65 @@
 
     'DOCUMENT_ALL_COLLECTION': function() {
       // true for all but Firefox
-      isHostObject(fuse._doc, 'all');
+      isHostType(fuse._doc, 'all');
     },
 
     'DOCUMENT_CREATE_EVENT': function() {
       // true for all but IE
-      return isHostObject(fuse._doc, 'createEvent');
+      return isHostType(fuse._doc, 'createEvent');
     },
 
     'DOCUMENT_CREATE_EVENT_OBJECT': function() {
       // true for IE
-      return isHostObject(fuse._doc, 'createEventObject');
+      return isHostType(fuse._doc, 'createEventObject');
     },
 
     'DOCUMENT_RANGE': function(){
       // true for all but IE
-      return isHostObject(fuse._doc, 'createRange');
+      return isHostType(fuse._doc, 'createRange');
     },
 
     'DOCUMENT_RANGE_CREATE_CONTEXTUAL_FRAGMENT': function() {
       if (envTest('DOCUMENT_RANGE'))
-        return isHostObject(fuse._doc.createRange(), 'createContextualFragment');
+        return isHostType(fuse._doc.createRange(), 'createContextualFragment');
     },
 
     'ELEMENT_ADD_EVENT_LISTENER': function() {
       // true for all but IE
-      return isHostObject(fuse._doc, 'addEventListener');
+      return isHostType(fuse._doc, 'addEventListener');
     },
 
     'ELEMENT_ATTACH_EVENT': function() {
       // true for IE
-      return isHostObject(fuse._doc, 'attachEvent') &&
+      return isHostType(fuse._doc, 'attachEvent') &&
         !envTest('ELEMENT_ADD_EVENT_LISTENER');
     },
 
     'ELEMENT_BOUNDING_CLIENT_RECT': function() {
       // true for IE, Firefox 3
-      return isHostObject(fuse._docEl, 'getBoundingClientRect');
+      return isHostType(fuse._docEl, 'getBoundingClientRect');
     },
 
     'ELEMENT_COMPARE_DOCUMENT_POSITION': function() {
       // true for Firefox and Opera 9.5+
-      return isHostObject(fuse._docEl, 'compareDocumentPosition');
+      return isHostType(fuse._docEl, 'compareDocumentPosition');
     },
 
     'ELEMENT_COMPUTED_STYLE': function() {
       // true for all but IE
-      return isHostObject(fuse._doc, 'defaultView') &&
-        isHostObject(fuse._doc.defaultView, 'getComputedStyle');
+      return isHostType(fuse._doc, 'defaultView') &&
+        isHostType(fuse._doc.defaultView, 'getComputedStyle');
     },
 
     'ELEMENT_CURRENT_STYLE': function() {
       // true for IE
-      return isHostObject(fuse._docEl, 'currentStyle') &&
+      return isHostType(fuse._docEl, 'currentStyle') &&
         !envTest('ELEMENT_COMPUTED_STYLE');
     },
 
     'ELEMENT_CONTAINS': function() {
       // true for all but Safari 2
-      if(isHostObject(fuse._docEl, 'contains')) {
+      if(isHostType(fuse._docEl, 'contains')) {
         var result, div = fuse._div;
         div.innerHTML = '<div><\/div><div><div><\/div><\/div>';
 
@@ -84,17 +84,17 @@
     // features
     'ELEMENT_DISPATCH_EVENT': function() {
       // true for all but IE
-      return isHostObject(fuse._docEl, 'dispatchEvent');
+      return isHostType(fuse._docEl, 'dispatchEvent');
     },
 
     'ELEMENT_DO_SCROLL': function() {
       // true for IE
-      return isHostObject(fuse._docEl, 'doScroll');
+      return isHostType(fuse._docEl, 'doScroll');
     },
 
     'ELEMENT_FIRE_EVENT': function() {
       // true for IE
-      return isHostObject(fuse._docEl, 'fireEvent');
+      return isHostType(fuse._docEl, 'fireEvent');
     },
 
     'ELEMENT_GET_ATTRIBUTE_IFLAG': function() {
@@ -118,14 +118,14 @@
     'ELEMENT_MS_CSS_FILTERS': function() {
       // true for IE
       var docEl = fuse._docEl, elemStyle = docEl.style;
-      return isHostObject(docEl, 'filters') &&
+      return isHostType(docEl, 'filters') &&
         typeof elemStyle.filter === 'string' &&
         typeof elemStyle.opacity !== 'string';
     },
 
     'ELEMENT_REMOVE_NODE': function() {
       // true for IE and Opera
-      return isHostObject(fuse._docEl, 'removeNode');
+      return isHostType(fuse._docEl, 'removeNode');
     },
 
     'ELEMENT_SOURCE_INDEX': function() {

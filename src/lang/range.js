@@ -7,8 +7,8 @@
       var instance = __instance || new Klass;
       __instance = null;
 
-      instance.start     = Obj(start);
-      instance.end       = Obj(end);
+      instance.start     = fuse.Object(start);
+      instance.end       = fuse.Object(end);
       instance.exclusive = exclusive;
       return instance;
     },
@@ -27,7 +27,7 @@
       return __apply.call(this, thisArg, argArray);
     };
 
-    Class({ 'constructor': Range });
+    fuse.Class({ 'constructor': Range });
     Klass.prototype = Range.plugin;
     return Range;
   })();
@@ -35,15 +35,13 @@
   /*--------------------------------------------------------------------------*/
 
   (function(plugin) {
-    var __max = Enumerable && Enumerable.max,
-
-    __min = Enumerable && Enumerable.min,
+    var __max, __min,
 
     buildCache = function(thisArg, callback) {
       var c = thisArg._cache = fuse.Array(), i = 0,
-       value = c.start = thisArg.start = Obj(thisArg.start);
+       value = c.start = thisArg.start = fuse.Object(thisArg.start);
 
-      c.end = thisArg.end = Obj(thisArg.end);
+      c.end = thisArg.end = fuse.Object(thisArg.end);
       c.exclusive = thisArg.exclusive;
 
       if (callback) {
@@ -129,8 +127,11 @@
     };
 
     // assign any missing Enumerable methods
-    if (Enumerable) {
-      eachKey(Enumerable, function(value, key, object) {
+    if (fuse.Enumerable) {
+      __max = fuse.Enumerable.max;
+      __min = fuse.Enumerable.min;
+
+      eachKey(fuse.Enumerable, function(value, key, object) {
         if (hasKey(object, key) && typeof plugin[key] !== 'function') {
           plugin[key] = value;
         }

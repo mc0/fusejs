@@ -302,6 +302,7 @@
         typeof s.KhtmlOpacity  !== 'undefined' ? 'KhtmlOpacity'  : false;
     })(fuse._div.style);
 
+
     plugin.getDimensions = function getDimensions(options) {
       return {
         'width':  plugin.getWidth.call(this, options),

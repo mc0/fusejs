@@ -2,7 +2,7 @@
 
   (function(object, NodeList) {
     var match = function match(element, selectors) {
-      element = element.raw || fuse.get(element).raw;
+      element = element.raw || fuse(element).raw;
       var node, i = -1, result = acme.query(String(selectors || ''),
         fuse.getDocument(element));
 
@@ -14,7 +14,7 @@
 
     query = function(selectors, context, callback, toList) {
       var node, i = -1, result = toList(acme.query(String(selectors || ''),
-        context && fuse.get(context).raw || fuse._doc));
+        context && fuse(context).raw || fuse._doc));
       if (callback) {
         while (node = result[++i]) callback(node);
       }

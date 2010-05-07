@@ -39,7 +39,7 @@
   envAddTest({
     'ACTIVE_X_OBJECT': function() {
       // true for IE
-      return isHostObject(global, 'ActiveXObject');
+      return isHostType(global, 'ActiveXObject');
     },
 
     'JSON': function() {

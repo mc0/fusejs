@@ -121,7 +121,7 @@
     };
 
     plugin.toQueryParams = function toQueryParams(separator) {
-      var match = String(this).split('?'), object = Obj();
+      var match = String(this).split('?'), object = fuse.Object();
 
       // if ? (question mark) is present and there is no query after it
       if (match.length > 1 && !match[1]) return object;

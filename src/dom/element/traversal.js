@@ -15,7 +15,7 @@
     prevElement   = 'previousElementSibling',
 
     getSome = function(element, property, selectors, count) {
-      var match, result = null, i = 0;
+      var match, isSingle = count == null, result = null, i = 0;
       if (!element) return result;
 
       // handle when a callback and optional thisArg is passed
@@ -31,17 +31,15 @@
           count = selectors;
           selectors = null;
         }
-
-        if (count > 1) {
+        if (!isSingle) {
+          if (count < 1) count = 1;
           result = NodeList();
-        } else {
-          count = 1;
         }
 
         // handle no arguments
         if (selectors == null) {
           // handle returning first match
-          if (count == 1) {
+          if (isSingle) {
             do {
               if (element.nodeType === ELEMENT_NODE)
                 return fromElement(element);
@@ -57,10 +55,9 @@
         }
         // handle when selectors are passed
         else if (isString(selectors)) {
-          match = fuse.dom.selector.match;
-
           // handle returning first match
-          if (count == 1) {
+          match = fuse.dom.selector.match;
+          if (isSingle) {
             do {
               if (element.nodeType === ELEMENT_NODE && match(element, selectors))
                 return fromElement(element);
@@ -79,8 +76,8 @@
       return result;
     };
 
-    if (isHostObject(fuse._docEl, nextElement) &&
-        isHostObject(fuse._docEl, prevElement)) {
+    if (isHostType(fuse._docEl, nextElement) &&
+        isHostType(fuse._docEl, prevElement)) {
       nextNode  = nextElement;
       prevNode  = prevElement;
       firstNode = 'firstElementChild';
@@ -130,6 +127,7 @@
 
     plugin.down = function down(selectors, count) {
       var match, node, nodes, result = null, i = 0, j = 0,
+       isSingle = count == null,
        element = this.raw || this;
 
       // handle when a callback and optional thisArg is passed
@@ -146,17 +144,15 @@
           count = selectors;
           selectors = null;
         }
-
-        if (count > 1) {
+        if (!isSingle) {
+          if (count < 1) count = 1;
           result = NodeList();
-        } else {
-          count = 1;
         }
 
         // handle no arguments
         if (selectors == null) {
           // handle returning first match
-          if (count == 1) {
+          if (isSingle) {
             return plugin.first.call(this);
           }
 
@@ -173,7 +169,7 @@
           nodes = element.getElementsByTagName('*');
 
           // handle returning first match
-          if (count == 1) {
+          if (isSingle) {
             while (node = nodes[i++]) {
               if (node.nodeType === ELEMENT_NODE && match(node, selectors))
                 return fromElement(node);
@@ -247,7 +243,7 @@
 
   Element.plugin.contains = (function() {
     var contains = function contains(descendant) {
-      if (descendant = fuse.get(descendant)) {
+      if (descendant = fuse(descendant)) {
         var element = this.raw || this;
         descendant = descendant.raw || descendant;
         while (descendant = descendant.parentNode)
@@ -259,7 +255,7 @@
     if (envTest('ELEMENT_COMPARE_DOCUMENT_POSITION')) {
       contains = function contains(descendant) {
         /* DOCUMENT_POSITION_CONTAINS = 0x08 */
-        if (descendant = fuse.get(descendant)) {
+        if (descendant = fuse(descendant)) {
           var element = this.raw || this;
           return ((descendant.raw || descendant)
             .compareDocumentPosition(element) & 8) === 8;
@@ -273,7 +269,7 @@
         if (this.nodeType !== ELEMENT_NODE)
           return __contains.call(this, descendant);
 
-        descendant = fuse.get(descendant);
+        descendant = fuse(descendant);
         var descendantElem = descendant.raw || descendant,
          element = this.raw || this;
 

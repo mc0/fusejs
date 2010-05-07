@@ -3,6 +3,8 @@
   (function() {
     var strInspect,
 
+    Obj         = fuse.Object,
+
     elemPlugin  = fuse.dom && fuse.dom.Element.plugin,
 
     eventPlugin = fuse.dom && fuse.dom.Event.plugin,
@@ -84,8 +86,8 @@
         : "'" + string.replace(reWithSingleQuotes, escapeSpecialChars) + "'");
     };
 
-    if (Enumerable) {
-      Enumerable.inspect = function inspect() {
+    if (fuse.Enumerable) {
+      fuse.Enumerable.inspect = function inspect() {
         // called normally or called Obj.inspect(fuse.Enumerable)
         return isFunction(this._each)
           ? fuse.String('#<Enumerable:' + this.toArray().inspect() + '>')

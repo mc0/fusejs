@@ -75,9 +75,10 @@
   /*--------------------------------------------------------------------------*/
 
   (function(plugin) {
-    var elemPlugin = Element.plugin,
-     funcApply = Func.plugin.apply,
-     funcCall  = Func.plugin.call;
+    var elemPlugin = fuse.dom.Element.plugin,
+     funcPlugin    = fuse.Function.plugin,
+     funcApply     = funcPlugin.apply,
+     funcCall      = funcPlugin.call;
 
     plugin.get = function get(index) {
       var result, object = Object(this), length = object.length >>> 0;

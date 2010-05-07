@@ -1,6 +1,5 @@
   /*---------------------------- LANG: ENUMERABLE ----------------------------*/
 
-  Enumerable =
   fuse.Enumerable = { };
 
   (function(mixin) {
@@ -226,4 +225,4 @@
      sortBy =      nil,
      toArray =     nil,
      zip =         nil;
-  })(Enumerable);
+  })(fuse.Enumerable);

@@ -12,7 +12,7 @@
         pattern = fuse.RegExp.clone(pattern, { 'global': true });
       }
       if (pattern.constructor !== fuse.RegExp) {
-        pattern = Obj(pattern);
+        pattern = fuse.Object(pattern);
       }
 
       var instance = __instance || new Klass;
@@ -38,7 +38,7 @@
       return __call.apply(this, arguments);
     };
 
-    Class({ 'constructor': Template });
+    fuse.Class({ 'constructor': Template });
     Klass.prototype = Template.plugin;
     return Template;
   })();

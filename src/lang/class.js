@@ -2,7 +2,6 @@
   /* Based on work by Alex Arnell, John Resig, T.J. Crowder & Prototype core  */
   /* http://blog.niftysnippets.org/2009/09/simple-efficient-supercalls-in.html*/
 
-  Class =
   fuse.Class = (function() {
     var Subclass = function() { },
 
@@ -72,7 +71,7 @@
 
   /*--------------------------------------------------------------------------*/
 
-  Class.mixins = (function() {
+  fuse.Class.mixins = (function() {
     var callSuper = function callSuper(method) {
       var $super, args, callee = method.callee;
       if (callee) {
@@ -93,7 +92,7 @@
 
   /*--------------------------------------------------------------------------*/
 
-  Class.statics = (function() {
+  fuse.Class.statics = (function() {
     var addMixins = function addMixins() {
       var arg, j, jmax,
        args = arguments, i = -1, imax = args.length,
@@ -199,7 +198,7 @@
   /*--------------------------------------------------------------------------*/
 
   // replace placeholder objects with inheritable namespaces
-  global.fuse = Class({ 'constructor': fuse });
+  global.fuse = fuse.Class({ 'constructor': fuse });
 
   (function(__env) {
     delete fuse.env;
@@ -209,5 +208,5 @@
     env.test       = __env.test;
 
     env.addNS('agent');
-    Obj._extend(env.agent, __env.agent);
+    fuse.Object._extend(env.agent, __env.agent);
   })(fuse.env);

@@ -1,43 +1,41 @@
   /*---------------------------- AJAX: RESPONDERS ----------------------------*/
 
+  fuse.addNS('ajax.responders');
+
   fuse.ajax.activeRequestCount = 0;
 
   // TODO: Utilize custom events for responders
-  (function(Responders) {
-    Responders.responders = {
+  (function(responders) {
+    // This pattern, based on work by Dean Edwards and John Resig, allows a
+    // responder to error out without stopping the other responders from firing.
+    // http://groups.google.com/group/jquery-dev/browse_thread/thread/2a14c2da6bcbb5f
+    var dispatcher = function(index, handlers, request, json) {
+      index = index || 0;
+      var error, length = handlers.length;
+      try {
+        while (index < length) {
+          handlers[index](request, json);
+          index++;
+        }
+      } catch (e) {
+        error = e;
+        dispatcher(index + 1, handlers, request, json);
+      } finally {
+        if (error) throw error;
+      }
+    };
+
+    responders.responders = {
       'onCreate': fuse.Array(function() { fuse.ajax.activeRequestCount++; }),
       'onDone':   fuse.Array(function() { fuse.ajax.activeRequestCount--; })
     };
 
-    Responders.dispatch = (function() {
-      // This pattern, based on work by Dean Edwards and John Resig, allows a
-      // responder to error out without stopping the other responders from firing.
-      // http://groups.google.com/group/jquery-dev/browse_thread/thread/2a14c2da6bcbb5f
-      var __dispatch = function(index, handlers, request, json) {
-        index = index || 0;
-        var error, length = handlers.length;
-        try {
-          while (index < length) {
-            handlers[index](request, json);
-            index++;
-          }
-        } catch (e) {
-          error = e;
-          __dispatch(index + 1, handlers, request, json);
-        } finally {
-          if (error) throw error;
-        }
-      },
+    responders.dispatch = function dispatch(handlerName, request, json) {
+      var handlers = this.responders[handlerName];
+      if (handlers) dispatcher(0, handlers, request, json);
+    };
 
-      dispatch = function dispatch(handlerName, request, json) {
-        var handlers = this.responders[handlerName];
-        if (handlers) __dispatch(0, handlers, request, json);
-      };
-
-      return dispatch;
-    })();
-
-    Responders.register = function register(responder) {
+    responders.register = function register(responder) {
       var found, handler, handlers, length, method, name,
        responders = this.responders;
 
@@ -70,7 +68,7 @@
       }
     };
 
-    Responders.unregister = function unregister(responder) {
+    responders.unregister = function unregister(responder) {
       var handler, name, handlers, length, result,
        responders = this.responders;
 
@@ -80,7 +78,7 @@
         if (handlers = responders[name]) {
           i = 0;
           method = responder[name];
-          result = fuse.Array(); 
+          result = fuse.Array();
 
           // rebuild handlers list excluding the handle that is tied to the responder method
           while (handler = handlers[i++])
@@ -91,5 +89,5 @@
     };
 
     // prevent JScript bug with named function expressions
-    var register = nil, unregister = nil;
-  })(fuse.ajax.Responders = { });
+    var dispatch = nil, register = nil, unregister = nil;
+  })(fuse.ajax.responders);

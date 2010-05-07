@@ -13,8 +13,8 @@
       __instance = null;
 
       instance.container = {
-        'success': fuse.get(container.success || container),
-        'failure': fuse.get(container.failure || (container.success ? null : container))
+        'success': fuse(container.success || container),
+        'failure': fuse(container.failure || (container.success ? null : container))
       };
 
       options[callbackName] = function(request, json) {
@@ -40,7 +40,7 @@
       return __apply.call(this, thisArg, argArray);
     };
 
-    Class(fuse.ajax.Request, { 'constructor': Updater });
+    fuse.Class(fuse.ajax.Request, { 'constructor': Updater });
     Klass.prototype = Updater.plugin;
     return Updater;
   })();

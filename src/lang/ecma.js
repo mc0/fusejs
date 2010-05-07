@@ -1,8 +1,8 @@
   /*----------------------------- LANG: ES5 BUGS -----------------------------*/
 
-  (function(regPlugin, strPlugin) {
-    var __apply   = Func.plugin.apply,
-    __call        = Func.plugin.call,
+  (function(funcPlugin, regPlugin, strPlugin) {
+    var __apply   = funcPlugin.apply,
+    __call        = funcPlugin.call,
     __exec        = regPlugin.exec,
     __lastIndexOf = strPlugin.lastIndexOf,
     __match       = strPlugin.match,
@@ -535,4 +535,4 @@
      trim =        nil,
      trimLeft =    nil,
      trimRight =   nil;
-  })(fuse.RegExp.plugin, fuse.String.plugin);
+  })(fuse.Function.plugin, fuse.RegExp.plugin, fuse.String.plugin);

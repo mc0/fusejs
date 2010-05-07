@@ -1,12 +1,12 @@
   /*-------------------------- FORM: TIMED OBSERVER --------------------------*/
 
-  (function() {
-    var BaseTimedObserver = Class(fuse.Timer, function() {
+  (function(Form, Field) {
+    var BaseTimedObserver = fuse.Class(fuse.Timer, function() {
       var BaseTimedObserver = function BaseTimedObserver(element, callback, interval, options) {
         // this._super() equivalent
         fuse.Timer.call(this, callback, interval, options);
 
-        this.element = fuse.get(element);
+        this.element = fuse(element);
         this.lastValue = this.getValue();
         this.start();
         return this;
@@ -21,14 +21,9 @@
       };
 
       return { 'constructor': BaseTimedObserver, 'execute': execute };
-    }),
+    });
 
     /*------------------------------------------------------------------------*/
-
-    Field = fuse.dom.InputElement,
-
-    getValue = nil;
-
 
     Field.Observer =
     Field.TimedObserver = (function() {
@@ -38,7 +33,7 @@
         return BaseTimedObserver.call(new Klass, element, callback, interval, options);
       };
 
-      Class(BaseTimedObserver, { 'constructor': FieldTimedObserver });
+      fuse.Class(BaseTimedObserver, { 'constructor': FieldTimedObserver });
       Klass.prototype = FieldTimedObserver.plugin;
       return FieldTimedObserver;
     })();
@@ -55,7 +50,7 @@
         return BaseTimedObserver.call(new Klass, element, callback, interval, options);
       };
 
-      Class(BaseTimedObserver, { 'constructor': FormTimedObserver });
+      fuse.Class(BaseTimedObserver, { 'constructor': FormTimedObserver });
       Klass.prototype = FormTimedObserver.plugin;
       return FormTimedObserver;
     })();
@@ -63,4 +58,7 @@
     Form.Observer.plugin.getValue = function getValue() {
       return this.element.serialize();
     };
-  })();
+
+    // prevent JScript bug with named function expressions
+    var getValue = nil;
+  })(fuse.dom.FormElement, fuse.dom.InputElement);

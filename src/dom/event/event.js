@@ -1,6 +1,5 @@
   /*---------------------------------- EVENT ---------------------------------*/
 
-  Event =
   fuse.dom.Event = (function() {
     var Decorator = function(event, currTarget) {
       var getCurrentTarget = 
@@ -30,34 +29,35 @@
       return decorated;
     };
 
-    Class({ 'constructor': Event });
+    fuse.Class({ 'constructor': Event });
     Decorator.prototype = Event.plugin;
+
+    Event.addStatics({
+      'KEY_BACKSPACE': 8,
+      'KEY_DELETE':    46,
+      'KEY_DOWN':      40,
+      'KEY_END':       35,
+      'KEY_ESC':       27,
+      'KEY_HOME':      36,
+      'KEY_INSERT':    45,
+      'KEY_LEFT':      37,
+      'KEY_PAGEDOWN':  34,
+      'KEY_PAGEUP':    33,
+      'KEY_RETURN':    13,
+      'KEY_RIGHT':     39,
+      'KEY_TAB':       9,
+      'KEY_UP':        38,
+      'updateGenerics': Node.updateGenerics
+    });
+
     return Event;
   })();
 
-  Event.addStatics({
-    'KEY_BACKSPACE': 8,
-    'KEY_DELETE':    46,
-    'KEY_DOWN':      40,
-    'KEY_END':       35,
-    'KEY_ESC':       27,
-    'KEY_HOME':      36,
-    'KEY_INSERT':    45,
-    'KEY_LEFT':      37,
-    'KEY_PAGEDOWN':  34,
-    'KEY_PAGEUP':    33,
-    'KEY_RETURN':    13,
-    'KEY_RIGHT':     39,
-    'KEY_TAB':       9,
-    'KEY_UP':        38,
-    'updateGenerics': Node.updateGenerics
-  });
-
   /*--------------------------------------------------------------------------*/
 
-  (function(plugin) {
+  (function(Event) {
 
-    var domLoadDispatcher, winLoadDispatcher, stopObserving,
+    var stopObserving,
 
     BUGGY_EVENT_TYPES = { 'error': 1, 'load': 1 },
 
@@ -68,6 +68,8 @@
     CLICK_PROP = 'which',
 
     EVENT_TYPE_ALIAS = { 'blur': 'delegate:blur', 'focus': 'delegate:focus' },
+
+    plugin = Event.plugin,
 
     arrIndexOf = fuse.Array.plugin.indexOf.raw,
 
@@ -191,7 +193,7 @@
         return false;
       }
       ec.handlers.unshift(handler);
-      return ec.dispatcher ? false : (ec.dispatcher = createDispatcher(id, type));
+      return ec.dispatcher ? false : (ec.dispatcher = Event.createDispatcher(id, type));
     },
 
     addObserver = function(element, type, handler) {
@@ -202,55 +204,6 @@
       return Function('v', 'function ' + name + '(){return v;} return ' + name)(value);
     },
 
-    // Event dispatchers manage several handlers and ensure
-    // FIFO execution order. They are attached as the primary event
-    // listener and execute all handlers they manage.
-    createDispatcher = function(id, type, bubble) {
-      return function(event) {
-        // shallow copy handlers to avoid issues with nested observe/stopObserving
-        var parentNode,
-         data      = domData[id],
-         decorator = data.decorator,
-         node      = decorator.raw || decorator,
-         ec        = data.events[type],
-         handlers  = slice.call(ec.handlers, 0);
-
-        event = Event(event || getWindow(node).event, decorator);
-        dispatch(handlers.length, handlers, decorator, event);
-
-        // bubble if flagged by delegation
-        if (ec._bubbleForDelegation && event.isBubbling() &&
-            (parentNode = node.parentNode)) {
-          // cancel real bubbling
-          event.stopBubbling();
-          // fake out and set it to bubbling
-          event.isBubbling = createGetter('isBubbling', true);
-          // start manual bubbling
-          decorator.fire.call(parentNode, EVENT_TYPE_ALIAS[type] || type, null, event);
-        }
-      };
-    },
-
-    // This pattern, based on work by Dean Edwards and John Resig and allows a
-    // handler to error out without stopping the other handlers from firing.
-    // http://groups.google.com/group/jquery-dev/browse_thread/thread/2a14c2da6bcbb5f
-    dispatch = function(length, handlers, decorator, event) {
-      var error;
-      try {
-        while (length--) {
-          // stop event if handler result is false
-          if (handlers[length].call(decorator, event, decorator) === false) {
-            event.stop();
-          }
-        }
-      } catch (e) {
-        error = e;
-        dispatch(length, handlers, decorator, event);
-      } finally {
-        if (error) throw error;
-      }
-    },
-
     getOrCreateCache = function(id, type) {
       var data = domData[id], events = data.events || (data.events = { });
       return events[type] || (events[type] = { 'handlers': [], 'dispatcher': false });
@@ -258,50 +211,6 @@
 
     removeObserver = function(element, type, handler) {
       element.removeEventListener(type, handler, false);
-    },
-
-    // ensure that the dom:loaded event has finished executing its observers
-    // before allowing the window onload event to proceed
-    domLoadWrapper = function(event) {
-      var doc = fuse._doc, docEl = fuse._docEl,
-       decoratedDoc = fuse.get(doc);
-
-      if (!decoratedDoc.isLoaded()) {
-        event = Event(event || global.event, doc);
-        event.type = 'dom:loaded';
-
-        // define pseudo private body and root properties
-        fuse._body     =
-        fuse._scrollEl = doc.body;
-        fuse._root     = docEl;
-
-        if (envTest('BODY_ACTING_AS_ROOT')) {
-          fuse._root = doc.body;
-          fuse._info.root = fuse._info.body;
-        }
-        if (envTest('BODY_SCROLL_COORDS_ON_DOCUMENT_ELEMENT')) {
-          fuse._scrollEl = docEl;
-          fuse._info.scrollEl = fuse._info.docEl;
-        }
-
-        decoratedDoc.isLoaded = createGetter('isLoaded', true);
-        domLoadDispatcher(event);
-        decoratedDoc.stopObserving('DOMContentLoaded').stopObserving('dom:loaded');
-      }
-    },
-
-    winLoadWrapper = function(event) {
-      event || (event = global.event);
-      if (!fuse.get(fuse._doc).isLoaded()) {
-        domLoadWrapper(event);
-      }
-      else if (domData[2] && domData[2].events['dom:loaded']) {
-        return setTimeout(function() { winLoadWrapper(event); }, 10);
-      }
-      event = Event(event, global);
-      event.type = 'load';
-      winLoadDispatcher(event);
-      fuse.get(global).stopObserving('load');
     };
 
     /*------------------------------------------------------------------------*/
@@ -336,25 +245,8 @@
             element[attrName] = null;
           }
         };
-
-        var __createDispatcher = createDispatcher;
-        createDispatcher = function(id, type) {
-          var dispatcher = __createDispatcher(id, type);
-          dispatcher._isDispatcher = true;
-          return dispatcher;
-        };
       }
     }
-
-    // avoid Function#wrap for better performance esp.
-    // in winLoadWrapper which could be called every 10ms
-    domLoadDispatcher = createDispatcher(2, 'dom:loaded');
-    addObserver(fuse.get(fuse._doc).raw, 'dom:loaded',
-      (getOrCreateCache(2, 'dom:loaded').dispatcher = domLoadWrapper));
-
-    winLoadDispatcher = createDispatcher(1, 'load');
-    addObserver(fuse.get(global).raw, 'load',
-      (getOrCreateCache(1, 'load').dispatcher = winLoadWrapper));
 
     /*------------------------------------------------------------------------*/
 
@@ -600,7 +492,7 @@
               element.checked = checked;
             }
           }
-          else if (isHostObject(element, type)) {
+          else if (isHostType(element, type)) {
             // temporarily remove handler so its not triggered
             if (typeof element[attrName] === 'function') {
               backup = element[attrName];
@@ -715,4 +607,4 @@
      preventDefault =   nil,
      stop =             nil,
      stopBubbling =     nil;
-  })(Event.plugin);
+  })(fuse.dom.Event);

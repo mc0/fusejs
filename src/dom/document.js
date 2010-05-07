@@ -1,7 +1,8 @@
   /*----------------------------- DOM: DOCUMENT ------------------------------*/
 
-  Document = 
+  Document =
   fuse.dom.Document = (function() {
+
     var Decorator = function() { },
 
     Document = function Document(node) {
@@ -37,7 +38,7 @@
       return decorated;
     };
 
-    Class(Node, { 'constructor': Document });
+    fuse.Class(Node, { 'constructor': Document });
     Decorator.prototype = Document.plugin;
     Document.updateGenerics = Node.updateGenerics;
     return Document;
@@ -85,9 +86,7 @@
       return this[arguments[0]]();
     };
 
-    plugin.getFuseId = function getFuseId() {
-      return Node.getFuseId(this.raw || this);
-    };
+    plugin.getFuseId = Node.plugin.getFuseId;
 
     viewport.getDimensions = function getDimensions() {
       return { 'width': this.getWidth(), 'height': this.getHeight() };
@@ -101,7 +100,7 @@
       return define.call(this, 'getWidth');
     };
 
-    viewport.getScrollOffsets =  function getScrollOffsets() {
+    viewport.getScrollOffsets = function getScrollOffsets() {
       return define.call(this, 'getScrollOffsets');
     };
 

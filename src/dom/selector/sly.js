@@ -3,12 +3,12 @@
   (function(object, NodeList) {
     var match = function match(element, selectors) {
       return Sly(String(selectors || ''))
-        .match(element.raw || fuse.get(element).raw);
+        .match(element.raw || fuse(element).raw);
     },
 
     query = function(selectors, context, callback, toList) {
       var node, i = -1, result = toList(Sly(String(selectors || ''),
-        context && fuse.get(context).raw || fuse._doc));
+        context && fuse(context).raw || fuse._doc));
       if (callback) {
         while (node = result[++i]) callback(node);
       }

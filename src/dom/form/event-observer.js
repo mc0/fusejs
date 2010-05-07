@@ -1,14 +1,14 @@
   /*-------------------------- FORM: EVENT OBSERVER --------------------------*/
 
-  (function() {
-    var BaseEventObserver = Class(function() {
-      var CHECKED_INPUT_TYPES = { 'checkbox': 1, 'radio': 1 },
+  (function(Form, Field) {
+    var CHECKED_INPUT_TYPES = { 'checkbox': 1, 'radio': 1 },
 
-      BaseEventObserver = function BaseEventObserver(element, callback) {
-        var member, name, i = -1, 
+    BaseEventObserver = fuse.Class(function() {
+      var BaseEventObserver = function BaseEventObserver(element, callback) {
+        var member, name, i = -1,
          eventObserver = this, onElementEvent = this.onElementEvent;
 
-        this.element = fuse.get(element);
+        this.element = fuse(element);
         element = element.raw || element;
 
         this.onElementEvent = function(event) {
@@ -23,7 +23,7 @@
         this.group =
           (name && fuse.query(element.nodeName +
           '[name="' + name + '"]', getDocument(element)).get()) ||
-          NodeList(fuse.get(element));
+          NodeList(fuse(element));
 
         this.callback = callback;
         this.lastValue = this.getValue();
@@ -33,7 +33,7 @@
         }
         return this;
       },
-      
+
       onElementEvent = function onElementEvent(event) {
         var value = this.getValue();
         if (String(this.lastValue) != String(value)) {
@@ -43,7 +43,7 @@
       },
 
       registerCallback = function registerCallback(element) {
-        var type, decorator = fuse.get(element);
+        var type, decorator = fuse(element);
         element = decorator.raw || decorator;
         if (type = element.type) {
           decorator.observe(CHECKED_INPUT_TYPES[type] ? 'click' : 'change',
@@ -62,16 +62,9 @@
         'registerCallback': registerCallback,
         'registerFormCallbacks': registerFormCallbacks
       };
-    }),
+    });
 
     /*------------------------------------------------------------------------*/
-
-    CHECKED_INPUT_TYPES = { 'checkbox': 1, 'radio': 1 },
-
-    Field = fuse.dom.InputElement,
-
-    getValue = nil;
-
 
     Field.EventObserver = (function() {
       var Klass = function() { },
@@ -80,7 +73,7 @@
         return BaseEventObserver.call(new Klass, element, callback);
       };
 
-      Class(BaseEventObserver, { 'constructor': FieldEventObserver });
+      fuse.Class(BaseEventObserver, { 'constructor': FieldEventObserver });
       Klass.prototype = FieldEventObserver.plugin;
       return FieldEventObserver;
     })();
@@ -109,7 +102,7 @@
         return BaseEventObserver.call(new Klass, element, callback);
       };
 
-      Class(BaseEventObserver, { 'constructor': FormEventObserver });
+      fuse.Class(BaseEventObserver, { 'constructor': FormEventObserver });
       Klass.prototype = FormEventObserver.plugin;
       return FormEventObserver;
     })();
@@ -117,4 +110,7 @@
     Form.EventObserver.plugin.getValue = function getValue() {
       return this.element.serialize();
     };
-  })();
+
+    // prevent JScript bug with named function expressions
+    var getValue = nil;
+  })(fuse.dom.FormElement, fuse.dom.InputElement);
