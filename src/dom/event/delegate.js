@@ -24,16 +24,16 @@
       'TEXTAREA': 1
     },
 
-    addWatcher = NOP,
+    addWatcher = NOOP,
 
-    removeWatcher = NOP,
+    removeWatcher = NOOP,
 
     addBubbler = function(element, id, type) {
       // initialize event type data if it isn't
       var events = domData[id] && domData[id].events;
       if (!events || !events[type]) {
         // observe a dummy handler to create the dispatcher
-        fuse(element).observe(type, NOP);
+        fuse(element).observe(type, NOOP);
         // remove dummy handler while keeping the array intact
         (events || (events = domData[id].events))[type].handlers.length = 0;
       }

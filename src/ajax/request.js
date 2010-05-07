@@ -69,7 +69,7 @@
       if (this.readyState != 4) {
         // clear onreadystatechange handler to stop some browsers calling
         // it when the request is aborted
-        xhr.onreadystatechange = NOP;
+        xhr.onreadystatechange = NOOP;
         xhr.abort();
 
         // skip to complete readyState and flag it as aborted
@@ -111,7 +111,7 @@
     plugin.onTimeout = function onTimeout() {
       var xhr = this.raw;
       if (this.readyState != 4) {
-        xhr.onreadystatechange = NOP;
+        xhr.onreadystatechange = NOOP;
         xhr.abort();
 
         // skip to complete readyState and flag it as timedout
@@ -293,7 +293,7 @@
             successOrFailure : status)] = 1;
 
           // remove event handler to avoid memory leak in IE
-          xhr.onreadystatechange = NOP;
+          xhr.onreadystatechange = NOOP;
 
           // set responseXML
           responseXML = xhr.responseXML;

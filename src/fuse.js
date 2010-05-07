@@ -3,7 +3,7 @@
 
   // private vars
   var DATA_ID_PROP, DOCUMENT_FRAGMENT_NODE, DOCUMENT_NODE, ELEMENT_NODE,
-   IDENTITY, NOP, TEXT_NODE, Document, Element, Node, NodeList, Window, $break,
+   IDENTITY, NOOP, TEXT_NODE, Document, Element, Node, NodeList, Window, $break,
    addArrayMethods, addNodeListMethod, concatList, domData, eachKey, envAddTest,
    envTest, escapeRegExpChars, expando, fromElement, getDocument, getNodeName,
    getWindow, getOrCreateTagClass, hasKey, isArray, isElement, isHash,
@@ -30,8 +30,8 @@
 
   IDENTITY = function IDENTITY(x) { return x; };
 
-  NOP =
-  addNodeListMethod = function NOP() { };
+  NOOP =
+  addNodeListMethod = function NOOP() { };
 
   addArrayMethods = function(List) {
     var callbacks = addArrayMethods.callbacks, i = -1;

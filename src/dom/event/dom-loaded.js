@@ -9,7 +9,7 @@
 
     doc          = fuse._doc,
 
-    decoratedDoc = fuse.dom.Document(doc),
+    decoratedDoc = fuse(doc),
 
     envTest      = fuse.env.test,
 

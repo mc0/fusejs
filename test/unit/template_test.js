@@ -243,7 +243,7 @@ new Test.Unit.Runner({
       '`null` not returned');
 
     this.assertEqual('aundefinedc',
-      source.sub('b', fuse.Function.NOP),
+      source.sub('b', fuse.Function.NOOP),
       '`undefined` not returned');
 
     // test with empty pattern (String#gsub is used by String#sub)

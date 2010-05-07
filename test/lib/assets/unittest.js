@@ -22,7 +22,7 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 (function(global) {
-  var NOP   = function() { },
+  var NOOP  = function() { },
 
    slice    = [].slice,
 
@@ -504,9 +504,9 @@
   Test.Unit.Testcase = fuse.Class([Test.Unit.Assertions, {
     'initialize': function(name, test, setup, teardown) {
       this.name     = name;
-      this.test     = test     || NOP;
-      this.setup    = setup    || NOP;
-      this.teardown = teardown || NOP;
+      this.test     = test     || NOOP;
+      this.setup    = setup    || NOOP;
+      this.teardown = teardown || NOOP;
       this.messages = [];
       this.actions  = { };
     },

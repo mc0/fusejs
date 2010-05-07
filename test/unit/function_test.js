@@ -4,7 +4,7 @@ new Test.Unit.Runner({
     function methodWithoutArguments() { return this.hi };
     function methodWithArguments() { return this.hi + ',' + $A(arguments).join(',') };
 
-    var bind = fuse.Function.bind, func = fuse.Function.NOP;
+    var bind = fuse.Function.bind, func = fuse.Function.NOOP;
 
     this.assertNotIdentical(func, bind(func, null));
 

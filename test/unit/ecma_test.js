@@ -148,11 +148,11 @@ new Test.Unit.Runner({
       }), 'Should replace with a case insensitive flag.');
 
     this.assertEqual(source,
-      source.replace('.*', fuse.Function.NOP),
+      source.replace('.*', fuse.Function.NOOP),
       'Should escape regular expression special characters.');
 
     this.assertEqual(source,
-      source.replace('X', fuse.Function.NOP),
+      source.replace('X', fuse.Function.NOOP),
       'Should not replace when a match is not found.');
 
     /*
@@ -170,7 +170,7 @@ new Test.Unit.Runner({
     */
 
     this.assertEqual('foo undefined boz',
-      source.replace('boo', fuse.Function.NOP),
+      source.replace('boo', fuse.Function.NOOP),
       'Should convert undefined value to "undefined".');
 
     this.assertEqual('foo null boz',

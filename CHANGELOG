@@ -19,7 +19,7 @@
 
 * Wrap apply() and call() of Array and String methods to ensure `thisArg` is not null or undefined. [jddalton]
 
-* Move fuse.emptyFunction to fuse.Function.NOP and remove fuse.Object.isUndefined. [jddalton]
+* Move fuse.emptyFunction to fuse.Function.NOOP and remove fuse.Object.isUndefined. [jddalton]
   Note: Backwards compatibility warning.
 
 * Separate the fuse.util methods into their own /lang/util.js file. [jddalton]

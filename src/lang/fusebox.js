@@ -379,7 +379,7 @@
 
       Function.IDENTITY        = IDENTITY;
 
-      Function.NOP             = NOP;
+      Function.NOOP            = NOOP;
 
       Number.MAX_VALUE         = 1.7976931348623157e+308;
 
@@ -867,7 +867,7 @@
       return instance;
     },
 
-    postProcess = NOP,
+    postProcess = NOOP,
 
     Klass = function() { },
 

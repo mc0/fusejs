@@ -30,8 +30,8 @@ new Test.Unit.Runner({
   },
 
   'testEachChaining': function() {
-    this.assertEqual(Fixtures.Primes, Fixtures.Primes.each(fuse.Function.NOP));
-    this.assertEqual(3, Fixtures.Basic.each(fuse.Function.NOP).size());
+    this.assertEqual(Fixtures.Primes, Fixtures.Primes.each(fuse.Function.NOOP));
+    this.assertEqual(3, Fixtures.Basic.each(fuse.Function.NOOP).size());
   },
 
   'testEnumContext': function() {

@@ -67,8 +67,8 @@
     return createDispatcher;
   })();
 
-  fuse(fuse._doc).observe('dom:loaded', fuse.Function.NOP);
-  fuse(global).observe('load', fuse.Function.NOP);
+  fuse(fuse._doc).observe('dom:loaded', fuse.Function.NOOP);
+  fuse(global).observe('load', fuse.Function.NOOP);
 
   // ensure that the dom:loaded event has finished executing its observers
   // before allowing the window onload event to proceed
