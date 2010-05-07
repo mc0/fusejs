@@ -14,7 +14,7 @@
       instance.executing = false;
 
       instance.onTimerEvent = function() { onTimerEvent.call(instance); };
-      instance.options = Obj._extend(Obj.clone(Timer.defaults), options);
+      instance.options = Obj.extend(Obj.clone(Timer.defaults), options);
       return instance;
     },
 

@@ -15,7 +15,7 @@
       }
       if (node.nodeType !== TEXT_NODE) {
         // return cached if available
-        id = getFuseId.call(node);
+        id = Node.getFuseId(node);
         if ((data = domData[id]).decorator) {
           return data.decorator;
         }
@@ -69,7 +69,7 @@
       if (deep) {
         fuse.updateGenerics(Klass, deep);
       } else {
-        fuse.Object._each(Klass.prototype, function(value, key, proto) {
+        fuse.Object.each(Klass.prototype, function(value, key, proto) {
           if (!SKIPPED_KEYS[key] && isFunction(proto[key]) && hasKey(proto, key))
             Klass[key] = createGeneric(proto, key);
         });

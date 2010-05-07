@@ -140,7 +140,7 @@ new Test.Unit.Runner({
      self.assertEqual(0, index);
      self.assertEqual(source, array);
      self.assertEqual(thisArg, this);
-     throw fuse.$break;
+     return false;
    }, thisArg);
 
    var results = fuse.Array();

@@ -3,7 +3,7 @@ new Test.Unit.Runner({
   'testEachBreak': function() {
     var result = 0;
     Fixtures.Basic.each(function(value) {
-      if ((result = value) == 2) throw fuse.$break;
+      if ((result = value) == 2) return false;
     });
 
     this.assertEqual(2, result);
@@ -25,7 +25,7 @@ new Test.Unit.Runner({
       self.assertEqual(1, item);
       self.assertEqual(0, index);
       self.assertEqual(Fixtures.Basic, iterable);
-      throw fuse.$break;
+      return false;
     });
   },
 

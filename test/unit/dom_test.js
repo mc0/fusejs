@@ -89,38 +89,38 @@ new Test.Unit.Runner({
       var element = document.createElement(tag),
        nodeName = element.nodeName.toUpperCase();
 
-      this.assertEqual(element, fuse.get(element).raw,
+      this.assertEqual(element, fuse(element).raw,
         nodeName + ' failed to return from fuse(element)');
 
       // test if elements are extended
       this.assertRespondsTo('show',
-        fuse.get(element),
+        fuse(element),
         nodeName + ' failed to be extended.');
     }, this);
 
     // ensure text nodes don't get extended
     fuse.Array(null, '', 'a', 'aa').each(function(content) {
-      var textNode = fuse.get(document.createTextNode(content));
+      var textNode = fuse(document.createTextNode(content));
       this.assert(typeof textNode.show === 'undefined');
     }, this);
 
     // don't extend XML documents
     var xmlDoc = (new DOMParser()).parseFromString('<note><to>Sam</to></note>', 'text/xml');
-    this.assertUndefined(fuse.get(xmlDoc.firstChild).hide);
+    this.assertUndefined(fuse(xmlDoc.firstChild).hide);
   },
 
   'testFuseGetReextendsDiscardedNodes': function() {
-    this.assertRespondsTo('show', fuse.get('discard_1'));
+    this.assertRespondsTo('show', fuse('discard_1'));
 
     $('element_reextend_test').raw.innerHTML += '<div id="discard_2"></div>';
-    this.assertRespondsTo('show', fuse.get('discard_1'));
+    this.assertRespondsTo('show', fuse('discard_1'));
   },
 
   'testFuseGetAfterAddMethods': function() {
     var span = fuse.dom.Element('span');
     fuse.dom.Element.extend({ 'testMethod': fuse.Function.IDENTITY });
 
-    this.assertRespondsTo('testMethod', fuse.get(span));
+    this.assertRespondsTo('testMethod', fuse(span));
     delete fuse.dom.Element.plugin.testMethod;
   },
 
@@ -1062,9 +1062,9 @@ new Test.Unit.Runner({
     var element = $('navigation_test_f');
 
     // specify a count
-    this.assertElementMatches(element.up(),  'ul');
-    this.assertElementMatches(element.up(0), 'ul');
-    this.assertElementMatches(element.up(1), 'ul');
+    this.assertElementMatches(element.up(),     'ul');
+    this.assertElementMatches(element.up(0)[0], 'ul');
+    this.assertElementMatches(element.up(1)[0], 'ul');
 
     this.assertEnumEqual(
       [fuse(element.raw.parentNode), fuse(element.raw.parentNode.parentNode)],
@@ -1094,8 +1094,8 @@ new Test.Unit.Runner({
     var element = $('navigation_test');
 
     this.assertElementMatches(element.down(),  'li.first');
-    this.assertElementMatches(element.down(0), 'li.first');
-    this.assertElementMatches(element.down(1), 'li.first');
+    this.assertElementMatches(element.down(0)[0], 'li.first');
+    this.assertElementMatches(element.down(1)[0], 'li.first');
     this.assertElementMatches(element.down(2)[1], 'em');
     this.assertElementMatches(element.down('li', 6)[5], 'li.last');
     this.assertElementMatches(element.down('ul').down('li', 2)[1], 'li#navigation_test_f');

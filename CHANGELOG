@@ -1,3 +1,7 @@
+* Remove fuse.$break and allow returning false to exit out of an iteration method. [jddalton]
+
+* Remove fuse.Object methods _extend() and _each(). [jddalton]
+
 * Expose fuse.Object.isHostType(object, property). [jddalton]
 
 * Fix memory leak caused by the closure around the framework. [jddalton]

@@ -208,5 +208,5 @@
     env.test       = __env.test;
 
     env.addNS('agent');
-    fuse.Object._extend(env.agent, __env.agent);
+    fuse.Object.extend(env.agent, __env.agent);
   })(fuse.env);

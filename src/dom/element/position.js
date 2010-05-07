@@ -159,7 +159,7 @@
 
     plugin.clonePosition = function clonePosition(source, options) {
       source  = fuse(source);
-      options = fuse.Object._extend({
+      options = fuse.Object.extend({
         'offsetLeft': 0,
         'offsetTop':  0,
         'setLeft':    1,

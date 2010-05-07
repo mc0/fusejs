@@ -3,7 +3,7 @@
 
   // private vars
   var DATA_ID_PROP, DOCUMENT_FRAGMENT_NODE, DOCUMENT_NODE, ELEMENT_NODE,
-   IDENTITY, NOOP, TEXT_NODE, Document, Element, Node, NodeList, Window, $break,
+   IDENTITY, NOOP, TEXT_NODE, Document, Element, Node, NodeList, Window,
    addArrayMethods, addNodeListMethod, concatList, domData, eachKey, envAddTest,
    envTest, escapeRegExpChars, expando, fromElement, getDocument, getNodeName,
    getWindow, getOrCreateTagClass, hasKey, isArray, isElement, isHash,
@@ -11,7 +11,10 @@
    prependList, returnOffset, setTimeout, slice, toInteger, toString, undef,
    userAgent;
 
-  global.fuse = function fuse() { };
+  global.fuse = (function() {
+    var fuse = function fuse() { };
+    return fuse;
+  })();
 
   fuse._body  =
   fuse._div   =
@@ -24,9 +27,6 @@
   fuse.version = '<%= FUSEJS_VERSION %>';
 
   /*--------------------------------------------------------------------------*/
-
-  $break =
-  fuse.$break = function $break() { };
 
   IDENTITY = function IDENTITY(x) { return x; };
 
@@ -253,7 +253,7 @@
       if (Field = dom.InputElement) eachKey(Field.plugin, addNodeListMethod);
       eachKey(dom.Element.plugin, addNodeListMethod);
 
-      // Pave any NodeList methods that fuse.Array shares
+      // Pave any NodeList methods that fuse.Array shares.
       // Element first(), last(), and contains() may be called by using invoke()
       // Ex: elements.invoke('first');
       addArrayMethods(NodeList);

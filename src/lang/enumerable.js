@@ -3,14 +3,16 @@
   fuse.Enumerable = { };
 
   (function(mixin) {
+    var $break = function $break() { };
+
     mixin.contains = function contains(value) {
       var result = 0;
       this.each(function(item) {
         // basic strict match
-        if (item === value && result++) throw $break; 
+        if (item === value && result++) return false; 
         // match String and Number object instances
         try {
-          if (item.valueOf() === value.valueOf() && result++) throw $break;
+          if (item.valueOf() === value.valueOf() && result++) return false;
         } catch (e) { }
       });
 
@@ -20,7 +22,8 @@
     mixin.each = function each(callback, thisArg) {
       try {
         this._each(function(value, index, iterable) {
-          callback.call(thisArg, value, index, iterable);
+          if (callback.call(thisArg, value, index, iterable) === false)
+            throw $break;
         });
       } catch (e) {
         if (e !== $break) throw e;
@@ -44,7 +47,7 @@
       var result = true;
       this.each(function(value, index, iterable) {
         if (!callback.call(thisArg, value, index, iterable)) {
-          result = false; throw $break;
+          return (result = false);
         }
       });
       return result;
@@ -63,7 +66,7 @@
     mixin.first = function first(callback, thisArg) {
       if (callback == null) {
         var result;
-        this.each(function(value) { result = value; throw $break; });
+        this.each(function(value) { result = value; return false; });
         return result;
       }
       return this.toArray().first(callback, thisArg);
@@ -159,7 +162,7 @@
       var result = false;
       this.each(function(value, index, iterable) {
         if (callback.call(thisArg, value, index, iterable)) {
-          result = true; throw $break;
+          return !(result = true);
         }
       });
       return result;

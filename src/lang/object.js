@@ -1,9 +1,9 @@
   /*------------------------------ LANG: OBJECT ------------------------------*/
 
   eachKey =
-  fuse.Object._each = (function() {
+  fuse.Object.each = (function() {
     // use switch statement to avoid creating a temp variable
-    var _each;
+    var each;
     switch (function() {
       var key, count = 0, klass = function() { this.toString = 1; };
       klass.prototype.toString = 1;
@@ -18,15 +18,17 @@
           'toLocaleString', 'toString', 'valueOf'
         ];
 
-        _each = function _each(object, callback) {
+        each = function each(object, callback) {
           if (object) {
             var key, i = -1;
             for (key in object) {
               callback(object[key], key, object);
             }
             while(key = shadowed[++i]) {
+              // exit early if callback result is false
               if (hasKey(object, key)) {
-                callback(object[key], key, object);
+                  callback(object[key], key, object);
+                
               }
             }
           }
@@ -38,13 +40,18 @@
       case 2:
         // Tobie Langel: Safari 2 broken for-in loop
         // http://tobielangel.com/2007/1/29/for-in-loop-broken-in-safari/
-        _each = function _each(object, callback) {
+        each = function each(object, callback, thisArg) {
           var key, keys = { }, skipProto = isFunction(object);
           if (object)  {
+            if (thisArg) {
+              var __callback = callback;
+              callback = function(v, k, o) { return __callback(v, k, o); };
+            }
             for (key in object) {
               if (!(skipProto && key === 'prototype') &&
-                  !hasKey(keys, key) && (keys[key] = 1)) {
-                callback(object[key], key, object);
+                  !hasKey(keys, key) && (keys[key] = 1) &&
+                  callback(object[key], key, object) === false) {
+                break;
               }
             }
           }
@@ -54,15 +61,17 @@
         break;
 
       default: // Others
-        _each = function _each(object, callback) {
+        each = function each(object, callback, thisArg) {
           var key, skipProto = isFunction(object);
           if (object) {
+            if (thisArg) {
+              var __callback = callback;
+              callback = function(v, k, o) { return __callback(v, k, o); };
+            }
             for (key in object) {
-              if (!(skipProto && key === 'prototype')) {
-                // exit early if callback result is false
-                if (callback(object[key], key, object) === false) {
-                  break;
-                }
+              if (!(skipProto && key === 'prototype') &&
+                  callback(object[key], key, object) === false) {
+                break;
               }
             }
           }
@@ -70,7 +79,7 @@
         };
     }
 
-    return _each;
+    return each;
   })();
 
   /*--------------------------------------------------------------------------*/
@@ -183,30 +192,10 @@
         key + '=' + encodeURIComponent(value == null ? '' : value));
     };
 
-    Obj._extend = function _extend(destination, source) {
-      if (source) {
-        for (var key in source) {
-          destination[key] = source[key];
-        }
-      }
-      return destination;
-    };
-
     Obj.clone = function clone(object) {
-      if (object && typeof object.clone === 'function')
-        return object.clone();
-      return Obj.extend(Obj(), object);
-    };
-
-    Obj.each = function each(object, callback, thisArg) {
-      try {
-        eachKey(object, function(value, key, object) {
-          callback.call(thisArg, value, key, object);
-        });
-      } catch (e) {
-        if (e !== $break) throw e;
-      }
-      return object;
+      return object && isFunction(object.clone)
+        ? object.clone()
+        : Obj.extend(Obj(), object);
     };
 
     Obj.extend = function extend(destination, source) {
@@ -215,12 +204,13 @@
     };
 
     Obj.isEmpty = function isEmpty(object) {
+      var result = true;
       if (object) {
-        for (var key in object) {
-          if (hasKey(object, key)) return false;
-        }
+        eachKey(object, function(value, key) {
+          if (hasKey(object, key)) return (result = false);
+        });
       }
-      return true;
+      return result;
     };
 
     // https://developer.mozilla.org/En/Same_origin_policy_for_JavaScript
@@ -298,8 +288,7 @@
     };
 
     // prevent JScript bug with named function expressions
-    var _extend =    nil,
-     clone =         nil,
+    var clone =      nil,
      each =          nil,
      extend =        nil,
      isEmpty =       nil,

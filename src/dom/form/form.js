@@ -154,7 +154,7 @@
 
       if (params) {
         if (isString(params)) params = fuse.String.toQueryParams(params);
-        Obj._extend(options.parameters, params);
+        Obj.extend(options.parameters, params);
       }
       if (plugin.hasAttribute.call(this, 'method') && !options.method) {
         options.method = plugin.getAttribute.call(this, 'method');

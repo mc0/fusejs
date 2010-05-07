@@ -22,7 +22,7 @@
       Base.defaults.headers = defaultHeaders;
 
       defaults.headers = Obj.clone(defaultHeaders);
-      options = this.options = Obj._extend(defaults, options);
+      options = this.options = Obj.extend(defaults, options);
 
       var encoding = options.encoding,
        headers = options.headers,

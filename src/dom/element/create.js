@@ -1,86 +1,6 @@
   /*----------------------------- ELEMENT: CREATE ----------------------------*/
 
-  // shared by primary closure
-  getOrCreateTagClass = (function() {
-
-    var dom = fuse.dom,
-
-    reTagName = /^[A-Z0-9]+$/,
-
-    TAG_NAME_CLASSES = (function() {
-      var T = {
-        'A':        'AnchorElement',
-        'CAPTION':  'TableCaptionElement',
-        'COL':      'TableColElement',
-        'DEL':      'ModElement',
-        'DIR':      'DirectoryElement',
-        'DL':       'DListElement',
-        'H1':       'HeadingElement',
-        'IFRAME':   'IFrameElement',
-        'IMG':      'ImageElement',
-        'INS':      'ModElement',
-        'FIELDSET': 'FieldSetElement',
-        'FRAMESET': 'FrameSetElement',
-        'OL':       'OListElement',
-        'OPTGROUP': 'OptGroupElement',
-        'P':        'ParagraphElement',
-        'Q':        'QuoteElement',
-        'TBODY':    'TableSectionElement',
-        'TD':       'TableCellElement',
-        'TEXTAREA': 'TextAreaElement',
-        'TR':       'TableRowElement',
-        'UL':       'UListElement'
-      };
-
-      T['TH'] = T['TD'];
-      T['COLGROUP'] = T['COL'];
-      T['TFOOT'] = T['THEAD'] =  T['TBODY'];
-      T['H2'] = T['H3'] = T['H4'] = T['H5'] = T['H6'] = T['H1'];
-      return T;
-    })();
-
-    return function(tagName) {
-      var upperCased, TagClass,
-       tagClassName = TAG_NAME_CLASSES[tagName];
-
-      if (!tagClassName) {
-        upperCased = tagName.toUpperCase();
-        tagClassName = TAG_NAME_CLASSES[upperCased];
-
-        if (!tagClassName) {
-          if (reTagName.test(upperCased)) {
-            // camel-cased name
-            tagClassName =
-            TAG_NAME_CLASSES[upperCased] =
-              tagName.charAt(0).toUpperCase() +
-              tagName.slice(1).toLowerCase()  +
-              'Element';
-          } else {
-            tagClassName = 'UnknownElement';
-          }
-        }
-        TAG_NAME_CLASSES[tagName] = tagClassName;
-      }
-      if (!(TagClass = dom[tagClassName])) {
-        TagClass =
-        dom[tagClassName] = fuse.Class(Element, {
-          'constructor': Function('fn',
-            'function ' + tagClassName + '(element){' +
-            'return element&&(element.raw?element:fn(element))' +
-            '}return ' + tagClassName)(fromElement)
-        });
-
-        TagClass.addMixins = Element.addMixins;
-        TagClass.addPlugins = Element.addPlugins;
-        TagClass.updateGenerics = Element.updateGenerics;
-      }
-      return TagClass;
-    };
-  })();
-
-  /*--------------------------------------------------------------------------*/
-
- (function(__fuse) {
+  (function() {
 
     var getFragmentFromString,
 
@@ -237,22 +157,6 @@
       return (data.decorator = new Decorator(element));
     },
 
-    fuse = function fuse(object, attributes, context) {
-      if (isString(object)) {
-        if (attributes && typeof attributes.nodeType !== 'string') {
-          return create(object, attributes, context);
-        }
-        context = attributes;
-        if (object.charAt(0) == '<') {
-          return create(object, context);
-        }
-        object = (context || fuse._doc).getElementById(object || expando);
-        return object && fromElement(object);
-      }
-      // attempt window decorator first, and then node decorator
-      return Node(Window(object));
-    },
-
     getById = function getById(id, context) {
       var element = (context || fuse._doc).getElementById(id || expando);
       return element && fromElement(element);
@@ -390,34 +294,137 @@
       getFragmentFromString = getDocumentFragment;
     }
 
-    // keep API consistent
-    fuse.get = function get(object, attributes, context) {
-      return fuse(object, attributes, context);
-    };
-
-    Element.from = function from(object, attributes, context) {
-      return fuse(object, attributes, context);
-    };
-
-    // redefine global.fuse
-    __fuse.Class({ 'constructor': fuse });
-    eachKey(__fuse, function(value, key) {
-      if (hasKey(__fuse, key))
-        fuse[key] = value;
-    });
-
     // expose
     Element.create      = create;
     Element.extendByTag = extendByTag;
     Element.fromElement = fromElement;
+    Element.from = function from(object, attributes, context) {
+      return fuse(object, attributes, context);
+    };
 
-    global.fuse  = fuse;
     fuse.getById = getById;
     fuse.dom.getFragmentFromString = getFragmentFromString;
+    fuse.get = function get(object, attributes, context) {
+      return fuse(object, attributes, context);
+    };
 
     // prevent JScript bug with named function expressions
     var from = nil, get = nil;
-  })(fuse);
+  })();
 
-  // private alias
+  /*--------------------------------------------------------------------------*/
+
+  global.fuse = (function(__fuse) {
+    // micro-optimization
+    var Node     = __fuse.dom.Node,
+     Window      = __fuse.dom.Window,
+     create      = Element.create,
+     fromElement = Element.fromElement,
+
+    fuse = function fuse(object, attributes, context) {
+      if (isString(object)) {
+        if (attributes && typeof attributes.nodeType !== 'string') {
+          return create(object, attributes, context);
+        }
+        context = attributes;
+        if (object.charAt(0) == '<') {
+          return create(object, context);
+        }
+        object = (context || fuse._doc).getElementById(object || expando);
+        return object && fromElement(object);
+      }
+      // attempt window decorator first, and then node decorator
+      return Node(Window(object));
+    };
+
+    // copy old fuse properties to new global.fuse
+    __fuse.Class({ 'constructor': fuse });
+    eachKey(__fuse, function(value, key) {
+      if (hasKey(__fuse, key)) fuse[key] = value;
+    });
+
+    return fuse;
+  })(global.fuse);
+
+  /*--------------------------------------------------------------------------*/
+
+  // define private vars shared by primary closure
+
   fromElement = Element.fromElement;
+
+  getOrCreateTagClass = (function() {
+
+    var dom = fuse.dom,
+
+    reTagName = /^[A-Z0-9]+$/,
+
+    TAG_NAME_CLASSES = (function() {
+      var T = {
+        'A':        'AnchorElement',
+        'CAPTION':  'TableCaptionElement',
+        'COL':      'TableColElement',
+        'DEL':      'ModElement',
+        'DIR':      'DirectoryElement',
+        'DL':       'DListElement',
+        'H1':       'HeadingElement',
+        'IFRAME':   'IFrameElement',
+        'IMG':      'ImageElement',
+        'INS':      'ModElement',
+        'FIELDSET': 'FieldSetElement',
+        'FRAMESET': 'FrameSetElement',
+        'OL':       'OListElement',
+        'OPTGROUP': 'OptGroupElement',
+        'P':        'ParagraphElement',
+        'Q':        'QuoteElement',
+        'TBODY':    'TableSectionElement',
+        'TD':       'TableCellElement',
+        'TEXTAREA': 'TextAreaElement',
+        'TR':       'TableRowElement',
+        'UL':       'UListElement'
+      };
+
+      T['TH'] = T['TD'];
+      T['COLGROUP'] = T['COL'];
+      T['TFOOT'] = T['THEAD'] =  T['TBODY'];
+      T['H2'] = T['H3'] = T['H4'] = T['H5'] = T['H6'] = T['H1'];
+      return T;
+    })();
+
+    return function(tagName) {
+      var upperCased, TagClass,
+       tagClassName = TAG_NAME_CLASSES[tagName];
+
+      if (!tagClassName) {
+        upperCased = tagName.toUpperCase();
+        tagClassName = TAG_NAME_CLASSES[upperCased];
+
+        if (!tagClassName) {
+          if (reTagName.test(upperCased)) {
+            // camel-cased name
+            tagClassName =
+            TAG_NAME_CLASSES[upperCased] =
+              tagName.charAt(0).toUpperCase() +
+              tagName.slice(1).toLowerCase()  +
+              'Element';
+          } else {
+            tagClassName = 'UnknownElement';
+          }
+        }
+        TAG_NAME_CLASSES[tagName] = tagClassName;
+      }
+      if (!(TagClass = dom[tagClassName])) {
+        TagClass =
+        dom[tagClassName] = fuse.Class(Element, {
+          'constructor': Function('fn',
+            'function ' + tagClassName + '(element){' +
+            'return element&&(element.raw?element:fn(element))' +
+            '}return ' + tagClassName)(fromElement)
+        });
+
+        TagClass.addMixins = Element.addMixins;
+        TagClass.addPlugins = Element.addPlugins;
+        TagClass.updateGenerics = Element.updateGenerics;
+      }
+      return TagClass;
+    };
+  })();

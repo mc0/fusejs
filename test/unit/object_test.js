@@ -28,27 +28,6 @@ new Test.Unit.Runner({
       'Failed to iterate correctly over the object properties');
   },
 
-  'testSimpleObjectExtend': function() {
-    var object = { 'foo': 'foo', 'bar': [1, 2, 3] };
-
-    // test empty/null/undefined sources
-    this.assertIdentical(object, fuse.Object._extend(object),
-      'Failed when passing no source.');
-
-    this.assertIdentical(object, fuse.Object._extend(object, null),
-      'Failed when passing a null source.');
-
-    this.assertIdentical(object, fuse.Object._extend(object, undef),
-      'Failed when passing an undefined source.');
-
-    this.assertHashEqual({ 'foo': 'foo', 'bar': [1, 2, 3] }, object);
-
-    this.assertIdentical(object, fuse.Object._extend(object, { 'bla': 123 }));
-    this.assertHashEqual({ 'foo': 'foo', 'bar': [1, 2, 3], 'bla': 123 }, object);
-    this.assertHashEqual({ 'foo': 'foo', 'bar': [1, 2, 3], 'bla': null },
-      fuse.Object._extend(object, { 'bla': null }));
-  },
-
   'testObjectExtend': function() {
     var object = { 'foo': 'foo', 'bar': [1, 2, 3] };
 
@@ -287,6 +266,32 @@ new Test.Unit.Runner({
     // test window object
     this.assert(fuse.Object.hasKey(window, 'fuse'));
     this.assert(!fuse.Object.hasKey(window, 'abc123xyz'));
+  },
+
+  'testObjectIsHostType': function() {
+    var object = {
+      'boolean': true,
+      'function': function() { },
+      'object':   { },
+      'null':    null,
+      'number':  3,
+      'string':  'foo',
+      'undef':   undef
+    };
+
+    this.assert(fuse.Object.isHostType(object, 'function'));
+    this.assert(fuse.Object.isHostType(object, 'object'));
+    this.assert(fuse.Object.isHostType(fuse._div, 'style'));
+
+    this.assert(!fuse.Object.isHostType(object, 'boolean'));
+    this.assert(!fuse.Object.isHostType(object, 'null'));
+    this.assert(!fuse.Object.isHostType(object, 'number'));
+    this.assert(!fuse.Object.isHostType(object, 'string'));
+    this.assert(!fuse.Object.isHostType(object, 'undef'));
+
+    this.assertNothingRaised(function() {
+      fuse.Object.isHostType(fuse._div, 'offsetParent');
+    });
   },
 
   'testObjectIsPrimitive': function() {

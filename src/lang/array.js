@@ -44,11 +44,6 @@
 
     /*------------------------------------------------------------------------*/
 
-    plugin._each = function _each(callback) {
-      this.forEach(callback);
-      return this;
-    };
-
     plugin.clear = function clear() {
       var object = Object(this);
 
@@ -176,10 +171,21 @@
     })();
 
     plugin.each = function each(callback, thisArg) {
-      try {
-        plugin.forEach.call(this, callback, thisArg);
-      } catch (e) {
-        if (e !== $break) throw e;
+      var i = -1, object = Object(this),
+       length = object.length >>> 0;
+
+      if (thisArg) {
+        while (++i < length) {
+          if (i in object && callback.call(thisArg, object[i], i, object) === false) {
+            break;
+          }
+        }
+      } else {
+        while (++i < length) {
+          if (i in object && callback(object[i], i, object) === false) {
+            break;
+          }
+        }
       }
       return this;
     };
@@ -563,6 +569,11 @@
 
     // assign any missing Enumerable methods
     if (fuse.Enumerable) {
+      plugin._each = function _each(callback) {
+        this.forEach(callback);
+        return this;
+      };
+
       eachKey(fuse.Enumerable, function(value, key, object) {
         if (hasKey(object, key) && typeof plugin[key] !== 'function') {
           plugin[key] = value;

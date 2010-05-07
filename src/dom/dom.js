@@ -56,11 +56,11 @@
   // Safari 2.0.x returns `Abstract View` instead of `global`
   if (isHostType(fuse._doc, 'defaultView') && fuse._doc.defaultView === global) {
     getWindow = function getWindow(element) {
-      return getDocument(element).defaultView || element;
+      return getDocument(element).defaultView;
     };
   } else if (isHostType(fuse._doc, 'parentWindow')) {
     getWindow = function getWindow(element) {
-      return getDocument(element).parentWindow || element;
+      return getDocument(element).parentWindow;
     };
   }
 
