@@ -455,7 +455,7 @@
 
       event = Event(event || null, element);
       event.type = type && String(type);
-      event.memo || (event.memo = memo || { });
+      event.memo = memo || event.memo || { };
 
       // change checked state before calling handlers
       if (type === 'click' && getNodeName(element) === 'INPUT' &&

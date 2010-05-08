@@ -2,11 +2,13 @@
 
   (function(plugin) {
 
-    var BUTTON_EVENTS = { 'reset': 1, 'submit': 1 },
+    var BUTTON_TYPES    = { 'image': 1, 'reset': 1, 'submit': 1 },
 
-    EVENT_TYPE_ALIAS = { 'blur': 'delegate:blur', 'focus': 'delegate:focus' },
+    EVENT_TYPE_ALIAS    = { 'blur': 'delegate:blur', 'focus': 'delegate:focus' },
 
-    REAL_EVENT_TYPE = { 'delegate:blur': 'blur', 'delegate:focus': 'focus' },
+    REAL_EVENT_TYPE     = { 'delegate:blur': 'blur', 'delegate:focus': 'focus' },
+
+    CHANGEABLE_ELEMENTS = { 'INPUT': 1, 'SELECT': 1, 'TEXTAREA': 1 },
 
     NON_BUBBLING_EVENTS = {
       'change': 1,
@@ -28,13 +30,15 @@
 
     removeWatcher = NOOP,
 
+    getFuseId = Node.getFuseId,
+
     addBubbler = function(element, id, type) {
       // initialize event type data if it isn't
       var events = domData[id] && domData[id].events;
       if (!events || !events[type]) {
-        // observe a dummy handler to create the dispatcher
+        // observe using a dummy handler to indirectly create the event dispatcher
         fuse(element).observe(type, NOOP);
-        // remove dummy handler while keeping the array intact
+        // remove the dummy handler while keeping the handlers array intact
         (events || (events = domData[id].events))[type].handlers.length = 0;
       }
       // flag event system to manually bubble after all the
@@ -42,45 +46,79 @@
       events[type]._bubbleForDelegation = true;
     },
 
+    createGetter = function(name, value) {
+      return Function('v', 'function ' + name + '(){return v;} return ' + name)(value);
+    },
+
     createHandler = function(selector, delegatee) {
+      // normal usage
+      if (selector) {
+        return function(event) {
+          var type, match = event.findElement(selector, this.raw || this);
+          if (match) {
+            type = event.type;
+            if (type = REAL_EVENT_TYPE[type]) {
+              event.type = type;
+              event.stopBubbling();
+            }
+            event.getDelegator = createGetter('getDelegator', this);
+            event.getCurrentTarget = createGetter('getCurrentTarget', match);
+            return delegatee.call(match, event);
+          }
+        };
+      }
+      // power usage
       return function(event) {
-        var type, target = event.findElement(selector, this.raw || this);
-        if (target) {
-          type = event.type;
-          event.type = REAL_EVENT_TYPE[type] || type;
-          return delegatee.call(target, event, target);
+        type = event.type;
+        if (type = REAL_EVENT_TYPE[type]) {
+          event.type = type;
+          event.stopBubbling();
         }
+        return delegatee.call(this, event);
       };
     },
 
+    // for IE
     onBeforeActivate = function() {
-      var id, data, type,
+      var id, data, form, type,
        target = global.event.srcElement,
        nodeName = target && getNodeName(target);
 
       // ensure we patch the elements event data only once
       if (PROBLEM_ELEMENTS[nodeName]) {
-        id = Node.getFuseId(target);
+        id = getFuseId(target);
         data = domData[id];
         if (!data._patchedForDelegation) {
-          if (nodeName !== 'LABEL') {
-            // bubble change/reset/submit
-            if (!BUTTON_EVENTS[type = target.type]) {
-              type = 'change';
+          // form controls
+          if (nodeName !== 'FORM') {
+            if (CHANGEABLE_ELEMENTS[nodeName] && !BUTTON_TYPES[target.type]) {
+              addBubbler(target, id, 'change');
             }
-            addBubbler(target, id, type);
+            addBubbler(target, id, 'blur');
+            addBubbler(target, id, 'focus');
+            data._patchedForDelegation = true;
           }
-          addBubbler(target, id, 'blur');
-          addBubbler(target, id, 'focus');
-          data._patchedForDelegation = true;
+          // form element
+          if (form = target.form || target) {
+            if (form !== target) {
+              id   = getFuseId(form);
+              data = domData[id];
+            }
+            if (!data._patchedForDelegation) {
+              addBubbler(form, id, 'reset');
+              addBubbler(form, id, 'submit');
+              data._patchedForDelegation = true;
+            }
+          }
         }
       }
     },
 
+    // for others
     onCapture = function(event) {
       var data, id, target = (event.raw || event).target;
       if (PROBLEM_ELEMENTS[getNodeName(target)]) {
-        id = Node.getFuseId(target);
+        id = getFuseId(target);
         data = domData[id];
         if (!data._patchedForDelegation) {
           addBubbler(target, id, 'blur');
@@ -102,6 +140,8 @@
     }
     // JScript
     else if (envTest('ELEMENT_ATTACH_EVENT')) {
+      PROBLEM_ELEMENTS.FORM = 1;
+
       addWatcher = function(element) {
         element.attachEvent('onbeforeactivate', onBeforeActivate);
       };
@@ -114,9 +154,9 @@
     plugin.delegate          =
     Document.plugin.delegate =
     Window.plugin.delegate   = function delegate(type, selector, delegatee) {
-      var ec, handler, handlers, i = -1,
+      var docId, ec, handler, handlers, i = -1,
        element = this.raw || this,
-       id      = Node.getFuseId(this),
+       id      = getFuseId(this),
        data    = domData[id],
        events  = data.events;
 
@@ -140,21 +180,18 @@
       }
 
       // indicate handler is a delegator and pass to Element#observe
-      handler = selector ? createHandler(selector, delegatee) : delegatee;
+      handler = createHandler(selector, delegatee);
       handler._delegatee = delegatee;
       handler._selector  = selector;
 
       plugin.observe.call(this, type, handler);
 
-      // add a watcher for non-bubbling events to signal
-      // the event system when manual bubbling is needed
-      if (NON_BUBBLING_EVENTS[type]) {
-        id = Node.getFuseId(this);
-        data = domData[id];
-        if (!data._watchForDelegation) {
-          addWatcher(element);
-          data._watchForDelegation = true;
-        }
+      // if not already watching on the element, add a watcher for
+      // non-bubbling events to signal the event system when manual
+      // bubbling is needed
+      if (NON_BUBBLING_EVENTS[type] && !data._watchForDelegation) {
+        addWatcher(element);
+        data._watchForDelegation = true;
       }
       return this;
     };
@@ -165,7 +202,7 @@
       var ec, handler, handlers, i = -1,
        element = this.raw || this,
        isEmpty = true,
-       id      = Node.getFuseId(this),
+       id      = getFuseId(this),
        data    = domData[id];
        events  = data.events;
 
@@ -224,6 +261,7 @@
           return this;
         }
       } else  {
+        // bail when no event data
         return this;
       }
 
