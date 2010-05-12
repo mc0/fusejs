@@ -368,13 +368,15 @@
         if (TREAT_AS_STRING[toString.call(content)]) {
           stripped = isScriptable && reOpenScriptTag.test(content) ?
             stripScripts.call(content) : content;
-          if (stripped != '') {
-            if (isBuggy) {
+
+          if (isBuggy) {
+            if (stripped != '') {
               element.appendChild(getFragmentFromString(stripped, element));
-            } else {
-              element.innerHTML = stripped;
             }
+          } else {
+            element.innerHTML = stripped;
           }
+
           if (content != stripped) {
             setTimeout(function() { evalScripts.call(content); }, 10);
           }
