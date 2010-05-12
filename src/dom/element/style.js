@@ -347,12 +347,19 @@
         return fuse.Number(parseFloat(this.style[OPACITY_PROP]));
       };
 
-      if (!OPACITY_PROP) {
+      if (envTest('ELEMENT_MS_CSS_FILTERS')) {
+        getOpacity = function getOpacity() {
+          var element = this.raw || this,
+           result = (element.currentStyle || element.style).filter.match(reOpacity);
+          return fuse.Number(result && result[1] ? parseFloat(result[1]) / 100 : 1.0);
+        };
+      }
+      else if (!OPACITY_PROP) {
         getOpacity = function getOpacity() {
           return fuse.Number(1);
         };
       }
-      if (envTest('ELEMENT_COMPUTED_STYLE')) {
+      else if (envTest('ELEMENT_COMPUTED_STYLE')) {
         getOpacity = function getOpacity() {
           var element = this.raw || this,
            style = element.ownerDocument.defaultView.getComputedStyle(element, null);
@@ -361,13 +368,7 @@
             : element.style[OPACITY_PROP]));
         };
       }
-      else if (envTest('ELEMENT_MS_CSS_FILTERS')) {
-        getOpacity = function getOpacity() {
-          var element = this.raw || this,
-           result = (element.currentStyle || element.style).filter.match(reOpacity);
-          return fuse.Number(result && result[1] ? parseFloat(result[1]) / 100 : 1.0);
-        };
-      }
+
       return getOpacity;
     })();
 
@@ -386,11 +387,6 @@
         return this;
       };
 
-      if (!OPACITY_PROP) {
-        setOpacity = function setOpacity(value) {
-          // do nothing
-        };
-      }
       if (envTest('ELEMENT_MS_CSS_FILTERS')) {
         setOpacity = function setOpacity(value) {
           // strip alpha from filter style
@@ -420,6 +416,11 @@
             elemStyle.filter = filter + 'alpha(opacity=' + (value * 100) + ')';
           }
           return this;
+        };
+      }
+      else if (!OPACITY_PROP) {
+        setOpacity = function setOpacity(value) {
+          // do nothing
         };
       }
 

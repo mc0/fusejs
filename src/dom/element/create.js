@@ -399,13 +399,10 @@
         tagClassName = TAG_NAME_CLASSES[upperCased];
 
         if (!tagClassName) {
+          // camel-case name
           if (reTagName.test(upperCased)) {
-            // camel-cased name
             tagClassName =
-            TAG_NAME_CLASSES[upperCased] =
-              tagName.charAt(0).toUpperCase() +
-              tagName.slice(1).toLowerCase()  +
-              'Element';
+            TAG_NAME_CLASSES[upperCased] = capitalize(tagName.toLowerCase()) + 'Element';
           } else {
             tagClassName = 'UnknownElement';
           }

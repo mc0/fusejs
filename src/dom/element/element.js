@@ -36,7 +36,7 @@
     },
 
     addMixins = function addMixins() {
-      fuse.Class.statics.addMixins.apply(this, arguments);
+      fuse.Class.defaults.statics.addMixins.apply(this, arguments);
       isMixin = true;
       addToNodeList.apply(this, arguments);
       isMixin = false;
@@ -44,7 +44,7 @@
     },
 
     addPlugins = function addPlugins() {
-      fuse.Class.statics.addPlugins.apply(this, arguments);
+      fuse.Class.defaults.statics.addPlugins.apply(this, arguments);
       return addToNodeList.apply(this, arguments);
     };
 

@@ -20,19 +20,21 @@
      $w = fuse.util.$w;
 
     fuse(document).observe('dom:loaded', function() {
-      function refresh() {
+      var engineItem,
+
+      refresh = function() {
         var loc = window.location;
         loc.replace(loc.protocol + '//' + loc.hostname + loc.pathname +
           '?engine=' + engineEl.raw.options[engineEl.raw.selectedIndex].text +
           '&debug='  + $F(debugEl));
-      }
+      },
 
-      function getQueryParam(key, defaultValue) {
+      getQueryParam = function(key, defaultValue) {
         var pattern = new RegExp('[?&]' + key + '=([^&]+)');
         return (window.location.href.match(pattern) || [0, defaultValue])[1];
       }
 
-      var loadScriptFile = (function() {
+      loadScriptFile = (function() {
         var head = fuse.get(document.getElementsByTagName('HEAD')[0]);
         return function(url) {
           fuse.ajax.Request(url, {
@@ -44,23 +46,23 @@
             }
           });
         };
-      })();
+      })(),
 
-      var engineItem, i = 0,
-       expando     = '_fuse' + String(+new Date).slice(0, 10),
-       debugParam  = getQueryParam('debug', '0') == 1,
-       engineParam = getQueryParam('engine', 'NWMatcher'),
-       debugEl     = $('debug-switch'),
-       engineEl    = $('selector-engine'),
-       engineItems = engineEl.raw.options;
+      i           = -1,
+      expando     = '_fuse' + String(+new Date).slice(0, 10),
+      debugParam  = getQueryParam('debug', '0') == 1,
+      engineParam = getQueryParam('engine', 'NWMatcher'),
+      debugEl     = $('debug-switch'),
+      engineEl    = $('selector-engine'),
+      engineItems = engineEl.raw.options;
 
       // set active debug state in it's dropdown list
       debugEl.setValue(debugParam ? '1' : '0');
 
       // set active css engine in it's dropdown list
-      while (engineItem = engineItems[i++]) {
+      while (engineItem = engineItems[++i]) {
         if (engineItem.text === engineParam) {
-          engineItems[engineEl.raw.selectedIndex = i - 1];
+          engineItems[engineEl.raw.selectedIndex = i];
           break;
         }
       }
