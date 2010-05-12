@@ -71,7 +71,7 @@ new Test.Unit.Runner({
     delete fuse.dom.DivElement.plugin.toOutput;
   },
 
-  'testfuseGet': function() {
+  'testFuseGet': function() {
     var element = $('element_extend_test');
     this.assertRespondsTo('show', element);
 
