@@ -23,7 +23,7 @@ new Test.Unit.Runner({
       klass = fuse.Class(Fixtures.Animal, { '_regexp': regexp });
     }, 'Class creation failed when the subclass contains a regular expression as a property.');
 
-    this.assertEqual(regexp, new klass()._regexp, 'The regexp property should exist.');
+    this.assertEqual(String(regexp), String(new klass()._regexp), 'The regexp property should exist.');
   },
 
   'testClassInstantiation': function() {

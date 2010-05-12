@@ -1,3 +1,7 @@
+* Break array/object references on the prototype when calling a constructor that is defined with an `initialize` method on its prototype. [jddalton]
+
+* Make fuse.Class automatically break array/object references assigned to the prototype of a constructor when using addPlugins() and addMixins(). [jddalton]
+
 * Make fuse.Object.clone() work with Array, Boolean, Number, RegExp, and String objects. [jddalton]
 
 * Make the event object passed to delegate() masquerade as that of the matched element and add getDelegator() to the event object. [jddalton]

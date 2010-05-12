@@ -5,19 +5,27 @@
   fuse.Class = (function() {
     var Subclass = function() { },
 
-    createNamedClass = function(name) {
-      return Function(
+    clone = fuse.Object.clone,
+
+    createNamedClass = function(name, LINKED_KEYS) {
+      return Function('clone,LK',
         'function ' + name + '(){' +
-        'var i,c=this;' +
-        'return (i=c.initialize)&&i.apply(c,arguments)' +
-        '}return ' + name)();
+        'var k,m,c=this;' +
+        'if(m=c.initialize){' +
+        'for(k in LK){c[k]=clone(c[k])}' +
+        'return m.apply(c,arguments);' +
+        '}} return ' + name)(clone, LINKED_KEYS);
     },
 
     Class = function Class(Superclass, plugins, mixins, statics) {
-      var Klass, arg, plugin, i = 0,
-       args = slice.call(arguments, 0),
-       first = args[0];
+      var Klass, arg, mixins, plugin, i = 0,
+       LINKED_KEYS     = { },
+       args            = slice.call(arguments, 0),
+       defaults        = Class.defaults,
+       first           = args[0];
+       isAutoUnlinking = true;
 
+      // resolve superclass
       if (isString(first)) {
         Superclass = createNamedClass(args.shift());
       } else if (typeof first === 'function' && first.subclasses) {
@@ -26,24 +34,30 @@
         Superclass = null;
       }
 
-      // auto execute plugins if they are closures and convert to array if not already
       plugins = args[0];
+      mixins  = args[1];
+
+      // auto execute plugins if they are closures and convert to array if not already
       if (typeof plugins === 'function') plugins = plugins();
       if (!isArray(plugins)) plugins = [plugins];
 
       // search properties for a custom `constructor` method
       while ((plugin = plugins[i++])) {
         if (hasKey(plugin, 'constructor')) {
+          // power usage
           if (typeof plugin.constructor === 'function') {
             Klass = plugin.constructor;
-          } else if (isString(plugin.constructor)) {
-            Klass = createNamedClass(plugin.constructor);
+            isAutoUnlinking = false;
+          }
+          // normal usage
+          else if (isString(plugin.constructor)) {
+            Klass = createNamedClass(plugin.constructor, LINKED_KEYS);
           }
           delete plugin.constructor;
         }
       }
 
-      Klass = Klass || createNamedClass('UnnamedClass');
+      Klass = Klass || createNamedClass('UnnamedClass', LINKED_KEYS);
 
       if (Superclass) {
         // note: Safari 2, inheritance won't work with Klass.prototype = new Function;
@@ -57,10 +71,20 @@
       plugin = Klass.plugin = Klass.prototype;
 
       // add statics/mixins/plugins to the Klass
-      Class.statics
-        .addStatics.call(Klass, Class.statics, args[2])
+      Class.defaults.statics
+        .addStatics.call(Klass, defaults.statics, args[2])
         .addPlugins(plugins)
-        .addMixins(Class.mixins, args[1]);
+        .addMixins(defaults.mixins, mixins);
+
+      // flag keys of object/array references to be
+      // automatically unlinked in the constructor
+      if (isAutoUnlinking) {
+        eachKey(Klass.plugin, function(value, key, object) {
+          if (hasKey(object, key) && value && typeof value === 'object') {
+            LINKED_KEYS[key] = 1;
+          }
+        });
+      }
 
       plugin.constructor = Klass;
       return Klass;
@@ -69,9 +93,15 @@
     return Class;
   })();
 
+  fuse.Class.defaults = { };
+
+  fuse.Class.mixins   = { };
+
+  fuse.Class.statics  = { };
+
   /*--------------------------------------------------------------------------*/
 
-  fuse.Class.mixins = (function() {
+  fuse.Class.defaults.mixins = (function() {
     var callSuper = function callSuper(method) {
       var $super, args, callee = method.callee;
       if (callee) {
@@ -92,7 +122,7 @@
 
   /*--------------------------------------------------------------------------*/
 
-  fuse.Class.statics = (function() {
+  fuse.Class.defaults.statics = (function() {
     var addMixins = function addMixins() {
       var arg, j, jmax,
        args = arguments, i = -1, imax = args.length,
@@ -107,10 +137,18 @@
 
         j = -1; jmax = arg.length;
         while (++j < jmax) {
-          eachKey(arg[j], function(method, key) {
-            // flag as mixin if not used as a $super
-            if (isFunction(method) && !method.$super)
-              (prototype[key] = method)._isMixin = true;
+          eachKey(arg[j], function(value, key, object) {
+            if (hasKey(object, key)) {
+              if (isFunction(value)) {
+                // flag as mixin if not used as a $super
+                if (!value.$super) {
+                  value._isMixin = true;
+                }
+              } else if (value && typeof value === 'object') {
+                value = fuse.Object.clone(value);
+              }
+              prototype[key] = value;
+            }
           });
         }
       }
@@ -133,27 +171,31 @@
 
         j = -1; jmax = arg.length;
         while (++j < jmax) {
-          eachKey(arg[j], function(method, key) {
-            var protoMethod = prototype[key],
-             superMethod = superProto && superProto[key];
-
-            // avoid typeof === `function` because Safari 3.1+ mistakes
-            // regexp instances as typeof `function`
-            if (isFunction(method)) {
-              // flag as $super if not used as a mixin
-              if (isFunction(superMethod) && !superMethod._isMixin)
-                method.$super = superMethod;
-
-              if (isFunction(protoMethod)) {
-                k = subLength;
-                while (k--) {
-                  otherMethod = subclasses[k].prototype[key];
-                  if (otherMethod && otherMethod.$super)
-                    otherMethod.$super = method;
+          eachKey(arg[j], function(value, key, object) {
+            if (hasKey(object, key)) {
+              var protoMethod = prototype[key],
+               superMethod = superProto && superProto[key];
+  
+              // avoid typeof === `function` because Safari 3.1+ mistakes
+              // regexp instances as typeof `function`
+              if (isFunction(value)) {
+                // flag as $super if not used as a mixin
+                if (isFunction(superMethod) && !superMethod._isMixin) {
+                  value.$super = superMethod;
                 }
+                if (isFunction(protoMethod)) {
+                  k = subLength;
+                  while (k--) {
+                    otherMethod = subclasses[k].prototype[key];
+                    if (otherMethod && otherMethod.$super)
+                      otherMethod.$super = value;
+                  }
+                }
+              } else if (value && typeof value === 'object') {
+                value = fuse.Object.clone(value);
               }
+              prototype[key] = value;
             }
-            prototype[key] = method;
           });
         }
       }
@@ -171,8 +213,8 @@
 
         j = -1; jmax = arg.length;
         while (++j < jmax) {
-          eachKey(arg[j], function(method, key) {
-            if (isFunction(method)) Klass[key] = method;
+          eachKey(arg[j], function(value, key, object) {
+            if (hasKey(object, key)) Klass[key] = value;
           });
         }
       }
