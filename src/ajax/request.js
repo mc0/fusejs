@@ -13,7 +13,7 @@
       decorated.raw = fuse.ajax.create();
 
       decorated.onTimeout =
-        function() { onTimeout.call(request); };
+        function() { onTimeout.call(decorated); };
 
       decorated.onStateChange =
         function(event, forceState) { onStateChange.call(decorated, event, forceState); };
@@ -38,31 +38,46 @@
 
     fuse.Class(fuse.ajax.Base, { 'constructor': Request });
     Decorator.prototype = Request.plugin;
+
+    Request.addMixins(fuse.Class.mixins.event);
+    Request.READY_STATES = fuse.Array('unsent', 'opened', 'headersReceived', 'loading', 'done');
     return Request;
   })();
-
-  fuse.ajax.Request.Events =
-    fuse.Array('Unsent', 'Opened', 'HeadersReceived', 'Loading', 'Done');
 
   /*--------------------------------------------------------------------------*/
 
   (function(plugin) {
-    var isSameOrigin = fuse.Object.isSameOrigin,
-     reHTTP = /^https?:/,
-     responders = fuse.ajax.responders;
+    var EVENT_TYPES = ['abort', 'exception', 'failure', 'success', 'timeout'],
+    
+    isSameOrigin = fuse.Object.isSameOrigin,
+
+    reHTTP = /^https?:/,
+
+    responders = fuse.ajax.responders,
+
+    fireEvent = fuse.Class.mixins.event.fire,
+
+    fireException = function(request, exception) {
+      fireEvent.call(request, 'exception', request, exception);
+      responders && responders.fire('exception', request, exception);
+      // throw error if not caught by a request exception handler
+      var handlers = request._events.exception;
+      if (!handlers || !handlers.length) throw exception;
+    };
 
     plugin._useStatus   = true;
     plugin._timerID     = nil;
-    plugin.aborted      = false;
     plugin.readyState   = fuse.Number(0);
     plugin.responseText = fuse.String('');
     plugin.status       = fuse.Number(0);
     plugin.statusText   = fuse.String('');
-    plugin.timedout     = false;
 
     plugin.headerJSON   =
     plugin.responseJSON =
     plugin.responseXML  = nil;
+
+    plugin.isAborted    = createGetter('isAborted', false);
+    plugin.isTimedout   = createGetter('isTimedout', false);
 
     plugin.abort = function abort() {
       var xhr = this.raw;
@@ -73,27 +88,25 @@
         xhr.abort();
 
         // skip to complete readyState and flag it as aborted
-        this.aborted = true;
+        this.isAborted = createGetter('isAborted', true);
         this.setReadyState(4);
       }
     };
 
-    plugin.dispatch = function dispatch(eventName, callback) {
+    plugin.fire = function fire(eventType) {
+      var useCall = arguments.length < 2;
       try {
-        callback && callback(this, this.headerJSON);
+        if (useCall) {
+          fireEvent.call(this, eventType);
+        } else {
+          fireEvent.apply(this, arguments);
+        }
       } catch (e) {
-        this.dispatchException(e);
+        fireException(this, e);
       }
-      responders && responders.dispatch(eventName, this, this.headerJSON);
-    };
-
-    plugin.dispatchException = function dispatchException(exception) {
-      var callback = this.options.onException;
-      callback && callback(this, exception);
-      responders && responders.dispatch('onException', this, exception);
-
-      // throw error if not caught by a request onException handler
-      if (!callback) throw exception;
+      if (responders) {
+        responders.fire.apply(responders, arguments);
+      }
     };
 
     plugin.getAllHeaders = function getAllHeaders() {
@@ -115,7 +128,7 @@
         xhr.abort();
 
         // skip to complete readyState and flag it as timedout
-        this.timedout = true;
+        this.isTimedout = createGetter('isTimedout', true);
         this.setReadyState(4);
       }
     };
@@ -133,10 +146,25 @@
     plugin.request = function request(url, options) {
       // treat request() as the constructor and call Base as $super
       // if first call or new options are passed
-      if (!this.options || options)
+      if (!this.options || options) {
         fuse.ajax.Base.call(this, url, options);
 
-      options = this.options;
+        options = this.options;
+        
+        var eventType, handler, i = -1, j = i;
+        while (eventType = fuse.ajax.Request.READY_STATES[++i]) {
+          if (handler = options['on' + capitalize(eventType)]) {
+            this.observe(eventType, handler);
+          }
+        }
+        while (eventType = EVENT_TYPES[++j]) {
+          if (handler = options['on' + capitalize(eventType)]) {
+            this.observe(eventType, handler);
+          }
+        }
+      } else {
+        options = this.options;
+      }
 
       var key,
        async     = options.asynchronous,
@@ -147,7 +175,8 @@
        xhr       = this.raw;
 
       // reset flags
-      this.aborted = this.timedout = false;
+      this.isAborted  = createGetter('isAborted', false);
+      this.isTimedout = createGetter('isTimedout', false);
 
       // reset response values
       this.headerJSON   = this.responseJSON = this.responseXML = null;
@@ -167,7 +196,7 @@
         this._timerID = setTimeout(this.onTimeout, timeout * this.timerMultiplier);
 
       // fire onCreate callbacks
-      this.dispatch('onCreate', options.onCreate);
+      this.fire('create', options.onCreate);
 
       // trigger uninitialized readyState 0
       this.onStateChange(null, 0);
@@ -190,20 +219,22 @@
         if (!async) this.onStateChange();
       }
       catch (e) {
-        this.dispatchException(e);
+        fireException(this, e);
       }
     };
 
     plugin.setReadyState = function setReadyState(readyState) {
-      var eventName, json, responseText, status, statusText, successOrFailure, i = 0,
-       aborted    = this.aborted,
-       eventNames = [],
+      var eventType, heandlers, json, responseText,
+       status, statusText, successOrFailure, i = -1,
+       events     = this._events,
+       eventTypes = [],
        skipped    = { },
        options    = this.options,
-       evalJSON   = options.evalJSON,
-       timedout   = this.timedout,
        url        = this.url,
-       xhr        = this.raw;
+       xhr        = this.raw,
+       isAborted  = this.isAborted(),
+       isTimedout = this.isTimedout(),
+       evalJSON   = options.evalJSON;
 
       // exit if no headers and wait for state 3 to fire states 2 and 3
       if (readyState == 2 && this.getAllHeaders() == '' &&
@@ -212,7 +243,7 @@
       this.readyState = fuse.Number(readyState);
 
       // clear response values on aborted/timedout requests
-      if (aborted || timedout) {
+      if (isAborted || isTimedout) {
         this.headerJSON   = this.responseJSON = this.responseXML = null;
         this.responseText = fuse.String('');
         this.status       = fuse.Number(0);
@@ -255,7 +286,7 @@
           try {
             this.headerJSON = json.evalJSON(options.sanitizeJSON || !isSameOrigin(url));
           } catch (e) {
-            this.dispatchException(e);
+            fireException(this, e);
           }
         }
       }
@@ -268,25 +299,25 @@
 
         responseText = this.responseText;
 
-        // typecast status to string
-        status = String(status);
-
         // clear timeout timer
         if (timerID != null) {
           global.clearTimeout(timerID);
           this._timerID = null;
         }
 
-        if (aborted) {
-          eventNames.push('Abort', status);
+        if (isAborted) {
+          eventTypes.push('abort');
+          if (status != null) eventTypes.push(status);
         }
-        else if (timedout) {
-          eventNames.push('Timeout', status);
+        else if (isTimedout) {
+          eventTypes.push('timeout');
+          if (status != null) eventTypes.push(status);
         }
         else {
           // don't call global/request onSuccess/onFailure callbacks on aborted/timedout requests
-          successOrFailure = this.isSuccess() ? 'Success' : 'Failure';
-          eventNames.push(status, successOrFailure);
+          if (status != null) eventTypes.push(status);
+          successOrFailure = this.isSuccess() ? 'success' : 'failure';
+          eventTypes.push(successOrFailure);
 
           // skip success/failure request events if status handler exists
           skipped['on' + (options['on' + status] ?
@@ -306,7 +337,7 @@
               this.responseJSON = responseText.evalJSON(options.sanitizeJSON ||
                 !isSameOrigin(url));
             } catch (e) {
-              this.dispatchException(e);
+              fireException(this, e);
             }
           }
 
@@ -317,18 +348,26 @@
             try {
               global.eval(String(fuse.String.unfilterJSON(responseText)));
             } catch (e) {
-              this.dispatchException(e);
+              fireException(this, e);
             }
           }
         }
       }
 
-      // add readyState to the list of events to dispatch
-      eventNames.push(fuse.ajax.Request.Events[readyState]);
+      // add readyState to the list of events to fire
+      eventTypes.push(fuse.ajax.Request.READY_STATES[readyState]);
 
-      while (eventName = eventNames[i++]) {
-        eventName = 'on' + eventName;
-        this.dispatch(eventName, !skipped[eventName] && options[eventName]);
+      while (eventType = eventTypes[++i]) {
+        // temporarily remove handlers so only responders are called
+        if (skipped[eventType]) {
+          handlers = events[eventType];
+          events[eventType] = null;
+          this.fire(eventType, this, this.headerJSON);
+          events[eventType] = handlers;
+        }
+        else {
+          this.fire(eventType, this, this.headerJSON);
+        }
       }
     };
 
@@ -342,14 +381,13 @@
     };
 
     // prevent JScript bug with named function expressions
-    var abort =          nil,
-     dispatch =          nil,
-     dispatchException = nil,
-     getHeader =         nil,
-     getAllHeaders =     nil,
-     isSuccess =         nil,
-     onStateChange =     nil,
-     onTimeout =         nil,
-     request =           nil,
-     setReadyState =     nil;
+    var abort =      nil,
+     fire =          nil,
+     getHeader =     nil,
+     getAllHeaders = nil,
+     isSuccess =     nil,
+     onStateChange = nil,
+     onTimeout =     nil,
+     request =       nil,
+     setReadyState = nil;
   })(fuse.ajax.Request.plugin);

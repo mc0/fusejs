@@ -6,7 +6,7 @@
     Klass = function() { },
 
     Updater = function Updater(container, url, options) {
-      var callbackName = 'on' + Request.Events[4],
+      var callbackName = 'on' + capitalize(Request.READY_STATES[4]),
        instance = __instance || new Klass,
        onDone = options[callbackName];
 
@@ -22,8 +22,11 @@
         onDone && onDone(request, json);
       };
 
-      // instance._super() equivalent
+      // this._super() equivalent
       fuse.ajax.Request.call(instance, url, options);
+      if (onDone) options[callbackName] = onDone;
+
+      return instance;
     },
 
     __instance,
@@ -57,7 +60,8 @@
         }
         if (options.insertion) {
           if (isString(options.insertion)) {
-            insertion = { }; insertion[options.insertion] = responseText;
+            insertion = { };
+            insertion[options.insertion] = responseText;
             receiver.insert(insertion);
           } else {
             options.insertion(receiver, responseText);

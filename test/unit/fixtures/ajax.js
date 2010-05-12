@@ -54,4 +54,4 @@ var Fixtures = {
 };
 
 // make all timers/delays use seconds
-fuse.Timer.options.multiplier = 1000;
+fuse.Timer.defaults.multiplier = 1000;

@@ -10,7 +10,7 @@
 
     TimedUpdater = function TimedUpdater(container, url, options) {
       var onDone,
-       callbackName = 'on' + Request.Events[4],
+       callbackName = 'on' + capitalize(Request.READY_STATES[4]),
        instance     = __instance || new Klass,
        options      = Obj.extend(Obj.clone(TimedUpdater.defaults), options);
 

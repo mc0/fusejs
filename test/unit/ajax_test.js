@@ -7,9 +7,9 @@ new Test.Unit.Runner({
 
   'teardown': function() {
     // hack to cleanup responders
-    fuse.ajax.Responders.responders = {
-      'onCreate': fuse.Array(function() { fuse.ajax.activeRequestCount++ }),
-      'onDone':   fuse.Array(function() { fuse.ajax.activeRequestCount-- })
+    fuse.ajax.responders._events = {
+      'create': [function() { fuse.ajax.activeRequestCount++ }],
+      'done':   [function() { fuse.ajax.activeRequestCount-- }]
     };
   },
 
@@ -58,7 +58,7 @@ new Test.Unit.Runner({
   'testRequestAbort': function() {
     var abortedFlag, fired = { };
 
-    fuse.ajax.Responders.register({
+    fuse.ajax.responders.register({
       'onFailure': function() { fired.failureResponder = true },
       'onSuccess': function() { fired.successResponder = true },
       'onAbort':   function() { fired.abortResponder   = true }
@@ -70,7 +70,7 @@ new Test.Unit.Runner({
       'onAbort':   function() { fired.abort   = true },
       'onFailure': function() { fired.failure = true },
       'onSuccess': function() { fired.success = true },
-      'onDone':    function(request) { abortedFlag = request.aborted }
+      'onDone':    function(request) { abortedFlag = request.isAborted() }
     });
 
     request.abort();
@@ -94,13 +94,13 @@ new Test.Unit.Runner({
       'onSuccess responder should not fire');
 
     this.assert(abortedFlag,
-      'failed to set request.aborted flag');
+      'failed to set request.isAborted() flag');
   },
 
   'testRequestTimeout': function() {
     var timedoutFlag, fired = { };
 
-    fuse.ajax.Responders.register({
+    fuse.ajax.responders.register({
       'onFailure': function() { fired.failureResponder = true },
       'onSuccess': function() { fired.successResponder = true },
       'onTimeout': function() { fired.timeoutResponder = true }
@@ -111,7 +111,7 @@ new Test.Unit.Runner({
       'timerMultiplier': 1,
       'timeout':   10, // ms
       'onTimeout': function() { fired.timeout = true },
-      'onDone':    function(request) { timedoutFlag = request.timedout }
+      'onDone':    function(request) { timedoutFlag = request.isTimedout() }
     });
 
     this.wait(50, function() {
@@ -134,7 +134,7 @@ new Test.Unit.Runner({
         'onSuccess responder should not fire');
 
       this.assert(timedoutFlag,
-        'failed to set request.timedout flag');
+        'failed to set request.isTimedout() flag');
 
       // test timerMultiplier
       request.abort();
@@ -194,7 +194,7 @@ new Test.Unit.Runner({
     fuse.ajax.Updater('content', '../fixtures/content.html', {
       'method':   'get',
       'insertion': function(element, content) {
-        Element.insert(element, { 'top': content });
+        $(element).insert({ 'top': content });
       }
     });
 
@@ -227,7 +227,7 @@ new Test.Unit.Runner({
     };
 
     var request = fuse.ajax.Updater('content', '../fixtures/content.html', options);
-    request.options.onDone = function() { };
+    request.options.onDone = fuse.Function.NOOP;
     this.assertIdentical(fuse.Function.NOOP, options.onDone,
       'failed to clone options object');
   },
@@ -237,22 +237,22 @@ new Test.Unit.Runner({
      dummyResponder = { 'onDone': fuse.Function.NOOP };
 
     // check for internal responder
-    for (i in fuse.ajax.Responders.responders) count++;
+    for (i in fuse.ajax.responders._events) count++;
     this.assertEqual(2, count, 'Failed default responders count');
 
     // ensure register() works
-    fuse.ajax.Responders.register(dummyResponder);
-    this.assertEqual(2, fuse.ajax.Responders.responders['onDone'].length,
+    fuse.ajax.responders.register(dummyResponder);
+    this.assertEqual(2, fuse.ajax.responders._events['done'].length,
       'Failed to register an `onDone` responder');
 
     // don't add twice
-    fuse.ajax.Responders.register(dummyResponder);
-    this.assertEqual(2, fuse.ajax.Responders.responders['onDone'].length,
+    fuse.ajax.responders.register(dummyResponder);
+    this.assertEqual(2, fuse.ajax.responders._events['done'].length,
       'Added a duplicate responder');
 
     // ensure unregister() works
-    fuse.ajax.Responders.unregister(dummyResponder);
-    this.assertEqual(1, fuse.ajax.Responders.responders['onDone'].length,
+    fuse.ajax.responders.unregister(dummyResponder);
+    this.assertEqual(1, fuse.ajax.responders._events['done'].length,
       'Failed to unregister an `onDone` responder');
 
 
@@ -260,7 +260,7 @@ new Test.Unit.Runner({
     var responderCounter = 0,
      increaseCounter = function() { responderCounter++; };
 
-    fuse.ajax.Responders.register({
+    fuse.ajax.responders.register({
       'onCreate':  increaseCounter,
       'onLoading': increaseCounter,
       'onSuccess': increaseCounter,
@@ -298,9 +298,9 @@ new Test.Unit.Runner({
   'testRespondersCanBeHash': function(){
     var hashResponder = $H({ 'onDone': fuse.Function.NOOP });
 
-    fuse.ajax.Responders.register(hashResponder);
-    this.assertEqual(2, fuse.ajax.Responders.responders['onDone'].length);
-    fuse.ajax.Responders.unregister(hashResponder);
+    fuse.ajax.responders.register(hashResponder);
+    this.assertEqual(2, fuse.ajax.responders._events['done'].length);
+    fuse.ajax.responders.unregister(hashResponder);
   },
 
   'testEvalResponseShouldBeCalledBeforeOnComplete': function() {
@@ -392,7 +392,7 @@ new Test.Unit.Runner({
           'request object is not passed to callbacks') }, this)
     });
 
-    fuse.ajax.Request.Events.each(function(state){
+    fuse.ajax.Request.READY_STATES.each(function(state){
       options['on' + state] = options.onCreate;
     });
 
@@ -423,7 +423,9 @@ new Test.Unit.Runner({
           }, this)
       }));
     }
-    else this.info(message);
+    else {
+      this.info(message);
+    }
   },
 
   'testResponseJSON': function() {
@@ -470,7 +472,9 @@ new Test.Unit.Runner({
           }, this)
       }));
     }
-    else this.info(message);
+    else {
+      this.info(message);
+    }
 
     fuse.ajax.Request('../fixtures/data.json',
       extendDefault({
