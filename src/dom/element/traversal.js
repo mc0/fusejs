@@ -15,7 +15,7 @@
     prevElement   = 'previousElementSibling',
 
     getSome = function(element, property, selectors, count) {
-      var match, isSingle = count == null, result = null, i = 0;
+      var isSingle, match, result = null, i = 0;
       if (!element) return result;
 
       // handle when a callback and optional thisArg is passed
@@ -31,7 +31,7 @@
           count = selectors;
           selectors = null;
         }
-        if (!isSingle) {
+        if (!(isSingle = count == null)) {
           if (count < 1) count = 1;
           result = NodeList();
         }
@@ -126,8 +126,7 @@
     };
 
     plugin.down = function down(selectors, count) {
-      var match, node, nodes, result = null, i = 0, j = 0,
-       isSingle = count == null,
+      var isSingle, match, node, nodes,result = null, i = 0, j = 0,
        element = this.raw || this;
 
       // handle when a callback and optional thisArg is passed
@@ -144,7 +143,7 @@
           count = selectors;
           selectors = null;
         }
-        if (!isSingle) {
+        if (!(isSingle = count == null)) {
           if (count < 1) count = 1;
           result = NodeList();
         }
