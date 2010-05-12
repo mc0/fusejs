@@ -157,7 +157,7 @@
         return false;
       };
 
-      if (typeof plugin.indexOf === 'function') {
+      if (isFunction(plugin.indexOf)) {
         var __contains = contains;
         contains = function contains(value) {
           // attempt a fast strict search first
@@ -233,7 +233,7 @@
       };
 
       // use Array#reduce if available
-      if (typeof plugin.reduce === 'function') {
+      if (isFunction(plugin.reduce)) {
         var __inject = inject;
         inject = function inject(accumulator, callback, thisArg) {
           return thisArg
