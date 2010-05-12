@@ -193,9 +193,28 @@
     };
 
     Obj.clone = function clone(object) {
-      return object && isFunction(object.clone)
-        ? object.clone()
-        : Obj.extend(Obj(), object);
+      if (object) {
+        if (isFunction(object.clone)) {
+          return object.clone();
+        }
+        if (typeof object === 'object') {
+          var constructor = object.constructor;
+          switch (toString.call(object)) {
+            case '[object RegExp]' :
+              return constructor(object.source,
+                (object.global     ? 'g' : '') +
+                (object.ignoreCase ? 'i' : '') +
+                (object.multiline  ? 'm' : ''));
+            case '[object Number]' :
+            case '[object String]' : return new constructor(object);
+            case '[object Boolean]': return new constructor(object == true);
+            case '[object Date]'   : return new constructor(+object);
+            case '[object Array]'  : return object.slice(0);
+          }
+          return Obj.extend(Obj(), object);
+        }
+      }
+      return Obj();
     };
 
     Obj.extend = function extend(destination, source) {

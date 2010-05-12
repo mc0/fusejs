@@ -95,6 +95,31 @@ new Test.Unit.Runner({
     this.assertEqual('custom',
       fuse.Object.clone({ 'clone': function() { return 'custom' } }),
       'Custom clone method on object.');
+
+    var array = [1, 2, 3];
+    clone = fuse.Object.clone([1, 2, 3]);
+    this.assert(array !== clone, 'Should not return original array.');
+    this.assertEnumEqual(array, clone, 'Failed to clone array.');
+
+    var date = new Date(new Date - 1000);
+    clone = fuse.Object.clone(date);
+    this.assert(date !== clone, 'Should not return original date.');
+    this.assertEqual(+date, +clone, 'Failed to clone date.');
+
+    var number = new Number(3);
+    clone = fuse.Object.clone(number);
+    this.assert(number !== clone, 'Should not return original number object.');
+    this.assertEqual(number, clone, 'Failed to clone number object.');
+
+    var string = new String('oh hia');
+    clone = fuse.Object.clone(string);
+    this.assert(string !== clone, 'Should not return original string object.');
+    this.assertEqual(string, clone, 'Failed to clone string object.');
+
+    var bool = new Boolean(false);
+    clone = fuse.Object.clone(bool);
+    this.assert(bool !== clone, 'Should not return original boolean object.');
+    this.assertEqual(bool, clone, 'Failed to clone boolean object.');
   },
 
   'testObjectToHTML': function() {

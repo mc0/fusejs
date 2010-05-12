@@ -124,10 +124,23 @@
       instance || (instance = new Klass);
 
       from = function(value) {
-        switch (sbToString.call(value)) {
+        var type = sbToString.call(value);
+        switch (type) {
           case '[object Array]':
             if (value.constructor !== instance.Array) {
               return instance.Array.fromArray(value);
+            }
+            break;
+
+          case '[object Boolean]':
+            if (value.constructor !== instance.Boolean) {
+              return instance.Boolean(value == true);
+            }
+            break;
+
+          case '[object Date]':
+            if (value.constructor !== instance.Date) {
+              return instance.Date(+value);
             }
             break;
 
@@ -140,9 +153,12 @@
             }
             break;
 
-          case '[object Boolean]': return instance.Boolean(value);
-          case '[object Number]':  return instance.Number(value);
-          case '[object String]':  return instance.String(value);
+          case '[object Number]' :
+          case '[object String]' :
+            type = type.slice(8,-1);
+            if (value.constructor !== instance[type]) {
+              return instance[type](value);
+            }
         }
         return value;
       };
