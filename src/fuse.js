@@ -191,6 +191,7 @@
 
    'lang/object.js',
    'lang/class.js',
+   'lang/event.js',
 
    'lang/function.js',
    'lang/enumerable.js',

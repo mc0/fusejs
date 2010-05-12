@@ -1,3 +1,5 @@
+* Add support for custom events to fuse.Class via the fuse.Class.mixins.event mixin. [jddalton]
+
 * Break array/object references on the prototype when calling a constructor that is defined with an `initialize` method on its prototype. [jddalton]
 
 * Make fuse.Class automatically break array/object references assigned to the prototype of a constructor when using addPlugins() and addMixins(). [jddalton]
