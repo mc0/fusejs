@@ -2,20 +2,28 @@
 
   // Seperate from primary closure to avoid memory leaks in IE6
 
-  var createGetter = function(name, value) {
-    return Function('v', 'function ' + name + '(){return v;} return ' + name)(value);
-  };
+  // grab private methods passed by primary closure
+  var addObserver, createGetter, getOrCreateCache;
+  (function(Event) {
+    addObserver      = Event._addObserver;
+    createGetter     = Event._createGetter;
+    getOrCreateCache = Event._getOrCreateCache;
 
+    delete Event._addObserver;
+    delete Event.createGetter;
+    delete Event._getOrCreateCache;
+  })(fuse.dom.Event);
+
+  // Event dispatchers manage several handlers and ensure
+  // FIFO execution order. They are attached as the primary event
+  // listener and execute all handlers they manage.
   fuse.dom.Event.createDispatcher = (function() {
 
     var EVENT_TYPE_ALIAS = { 'blur': 'delegate:blur', 'focus': 'delegate:focus' },
 
     slice = [].slice,
 
-    // Event dispatchers manage several handlers and ensure
-    // FIFO execution order. They are attached as the primary event
-    // listener and execute all handlers they manage.
-    createDispatcher = function(id, type) {
+    createDispatcher = function createDispatcher(id, type) {
       return function(event) {
         // shallow copy handlers to avoid issues with nested observe/stopObserving
         var error, msg, parentNode,
@@ -29,8 +37,8 @@
 
         event = global.fuse.dom.Event(event || getWindow(node).event, decorator);
         while (length--) {
-          // This pattern, based on work by Dean Edwards, John Resig and MochiKit allows a
-          // handler to error out without stopping the other handlers from firing.
+          // This pattern, based on work by Dean Edwards, John Resig, and MochiKit
+          // allows a handler to error out without stopping the other handlers from firing.
           // http://groups.google.com/group/jquery-dev/browse_thread/thread/2a14c2da6bcbb5f
           try {
             // stop event if handler result is false
@@ -69,11 +77,11 @@
       };
     };
 
-    // JScript
+    // DOM Level 0
     if (!fuse.env.test('ELEMENT_ADD_EVENT_LISTENER') &&
         !fuse.env.test('ELEMENT_ATTACH_EVENT')) {
       var __createDispatcher = createDispatcher;
-      createDispatcher = function(id, type) {
+      createDispatcher = function createDispatcher(id, type) {
         var dispatcher = __createDispatcher(id, type);
         dispatcher._isDispatcher = true;
         return dispatcher;
@@ -81,70 +89,3 @@
     }
     return createDispatcher;
   })();
-
-  // observe using a dummy handler to indirectly create the event dispatchers
-  // and later remove the dummy handler while keeping the handlers array intact
-  fuse(fuse._doc).observe('dom:loaded', fuse.Function.NOOP);
-  fuse(global).observe('load', fuse.Function.NOOP);
-
-  // ensure that the dom:loaded event has finished executing its observers
-  // before allowing the window onload event to proceed
-  (function(ec) {
-    var __dispatcher = ec.dispatcher;
-    ec.dispatcher = function(event) {
-      event || (event = global.event);
-      var domData = fuse.dom.data;
-
-      // make dom:loaded dispatch if it hasn't
-      if (!fuse.dom.Document(fuse._doc).isLoaded()) {
-        domData[2].events['dom:loaded'].dispatcher(event);
-      }
-      // try again later if dom:loaded is still executing handlers
-      else if (domData[2] && domData[2].events['dom:loaded']) {
-        return setTimeout(function() { ec.dispatcher(event); }, 10);
-      }
-      // prepare event wrapper
-      event = fuse.dom.Event(event, global);
-      event.type = 'load';
-      __dispatcher(event);
-
-      // clear event cache
-      fuse(global).stopObserving('load');
-    };
-
-    // remove dummy handler
-    ec.handlers.length = 0;
-  })(fuse.dom.data[1].events.load);
-
-  // perform feature tests and define pseudo private
-  // body/root properties when the dom is loaded
-  (function(ec) {
-    var __dispatcher = ec.dispatcher;
-    ec.dispatcher = function(event) {
-      var doc = fuse._doc, docEl = fuse._docEl, decorated = fuse(doc);
-      if (!decorated.isLoaded()) {
-        fuse._body     =
-        fuse._scrollEl = doc.body;
-        fuse._root     = docEl;
-
-        if (fuse.env.test('BODY_ACTING_AS_ROOT')) {
-          fuse._root = doc.body;
-          fuse._info.root = fuse._info.body;
-        }
-        if (fuse.env.test('BODY_SCROLL_COORDS_ON_DOCUMENT_ELEMENT')) {
-          fuse._scrollEl = docEl;
-          fuse._info.scrollEl = fuse._info.docEl;
-        }
-
-        event = fuse.dom.Event(event || global.event, doc);
-        event.type = 'dom:loaded';
-
-        decorated.isLoaded = createGetter('isLoaded', true);
-        __dispatcher(event);
-        decorated.stopObserving('DOMContentLoaded').stopObserving('dom:loaded');
-      }
-    };
-
-    // remove dummy handler
-    ec.handlers.length = 0;
-  })(fuse.dom.data[2].events['dom:loaded']);

@@ -2,7 +2,7 @@
 
   fuse.dom.Event = (function() {
     var Decorator = function(event, currTarget) {
-      var getCurrentTarget = 
+      var getCurrentTarget =
       this.getCurrentTarget = function getCurrentTarget() {
         var getCurrentTarget = function getCurrentTarget() { return currTarget; };
         if (currTarget) currTarget = fromElement(Window(currTarget));
@@ -69,9 +69,19 @@
 
     EVENT_TYPE_ALIAS = { 'blur': 'delegate:blur', 'focus': 'delegate:focus' },
 
+    getFuseId = Node.getFuseId,
+
     plugin = Event.plugin,
 
-    arrIndexOf = fuse.Array.plugin.indexOf.raw,
+    arrIndexOf = (function(fn) {
+      return fn && fn.raw || function(value) {
+        var length = this.length;
+        while (length--) {
+          if (this[length] === value) return length;
+        }
+        return -1;
+      };
+    })(fuse.Array.plugin.indexOf),
 
     defineIsClick = function() {
       var object = this.raw ? plugin : this,
@@ -200,10 +210,6 @@
       element.addEventListener(type, handler, false);
     },
 
-    createGetter = function(name, value) {
-      return Function('v', 'function ' + name + '(){return v;} return ' + name)(value);
-    },
-
     getOrCreateCache = function(id, type) {
       var data = domData[id], events = data.events || (data.events = { });
       return events[type] || (events[type] = { 'handlers': [], 'dispatcher': false });
@@ -230,7 +236,7 @@
       else {
         addObserver = function(element, type, handler) {
           var attrName = 'on' + type,
-           id = Node.getFuseId(element), oldHandler = element[attrName];
+           id = getFuseId(element), oldHandler = element[attrName];
 
           if (oldHandler) {
             if (oldHandler._isDispatcher) return false;
@@ -465,7 +471,7 @@
       }
 
       do {
-        id   = element.nodeType === ELEMENT_NODE ? element[DATA_ID_PROP] : Node.getFuseId(element);
+        id   = element.nodeType === ELEMENT_NODE ? element[DATA_ID_PROP] : getFuseId(element);
         data = id && domData[id];
         ec   = data && data.events && data.events[type];
 
@@ -524,7 +530,7 @@
     Element.plugin.observe  =
     Window.plugin.observe   = function observe(type, handler) {
       var element = this.raw || this,
-       dispatcher = addCache(Node.getFuseId(element), type, handler);
+       dispatcher = addCache(getFuseId(element), type, handler);
 
       if (!dispatcher) return this;
       addObserver(element, type, dispatcher);
@@ -537,10 +543,10 @@
     Window.plugin.stopObserving   = function stopObserving(type, handler) {
       var ec, foundAt, length,
        element = this.raw || this,
-       id      = Node.getFuseId(this),
+       id      = getFuseId(this),
        events  = domData[id].events;
 
-      if (!events)return this;
+      if (!events) return this;
       type = isString(type) ? type && String(type) : null;
 
       // if the event type is omitted we stop
@@ -560,6 +566,7 @@
           return this;
         }
       } else {
+        // bail when no event data
         return this;
       }
 
@@ -586,6 +593,11 @@
       }
       return this;
     };
+
+    // temporarily assign to fuse.dom.Event to pass to the secondary closure
+    Event._addObserver      = addObserver;
+    Event._createGetter     = createGetter;
+    Event._getOrCreateCache = getOrCreateCache;
 
     // prevent JScript bug with named function expressions
     var cancel =        nil,

@@ -4,25 +4,17 @@
   // private vars
   var DATA_ID_PROP, DOCUMENT_FRAGMENT_NODE, DOCUMENT_NODE, ELEMENT_NODE,
    IDENTITY, NOOP, TEXT_NODE, Document, Element, Node, NodeList, Window,
-   addArrayMethods, addNodeListMethod, concatList, domData, eachKey, envAddTest,
-   envTest, escapeRegExpChars, expando, fromElement, getDocument, getNodeName,
-   getWindow, getOrCreateTagClass, hasKey, isArray, isElement, isHash,
-   isHostType, isFunction, isNumber, isPrimitive, isRegExp, isString, nil,
-   prependList, returnOffset, setTimeout, slice, toInteger, toString, undef,
-   userAgent;
+   addArrayMethods, addNodeListMethod, capitalize, concatList, createGetter,
+   domData, eachKey, envAddTest, envTest, escapeRegExpChars, expando,
+   fromElement, getDocument, getNodeName, getWindow, getOrCreateTagClass,
+   hasKey, isArray, isElement, isHash, isHostType, isFunction, isNumber,
+   isPrimitive, isRegExp, isString, nil, prependList, returnOffset, setTimeout,
+   slice, toInteger, toString, undef, userAgent;
 
   global.fuse = (function() {
     var fuse = function fuse() { };
     return fuse;
   })();
-
-  fuse._body  =
-  fuse._div   =
-  fuse._doc   =
-  fuse._docEl =
-  fuse._info  =
-  fuse._root  =
-  fuse._scrollEl = null;
 
   fuse.version = '<%= FUSEJS_VERSION %>';
 
@@ -40,10 +32,18 @@
 
   addArrayMethods.callbacks = [];
 
+  capitalize = function(string) {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+  };
+
   concatList = function(list, otherList) {
     var pad = list.length, length = otherList.length;
     while (length--) list[pad + length] = otherList[length];
     return list;
+  };
+
+  createGetter = function(name, value) {
+    return Function('v', 'function ' + name + '(){return v;} return ' + name)(value);
   };
 
   escapeRegExpChars = (function() {
@@ -225,13 +225,6 @@
    'dom/event/event.js',
    'dom/event/delegate.js',
 
-   'ajax/ajax.js',
-   'ajax/responders.js',
-   'ajax/base.js',
-   'ajax/request.js',
-   'ajax/updater.js',
-   'ajax/timed-updater.js',
-
    'lang/console.js',
    'lang/hash.js',
    'lang/range.js',
@@ -242,7 +235,14 @@
    'lang/grep.js',
    'lang/inspect.js',
    'lang/json.js',
-   'lang/ecma.js') %>
+   'lang/ecma.js',
+
+   'ajax/ajax.js',
+   'ajax/responders.js',
+   'ajax/base.js',
+   'ajax/request.js',
+   'ajax/updater.js',
+   'ajax/timed-updater.js') %>
 
   addArrayMethods(fuse.Array);
 

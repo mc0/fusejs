@@ -46,10 +46,6 @@
       events[type]._bubbleForDelegation = true;
     },
 
-    createGetter = function(name, value) {
-      return Function('v', 'function ' + name + '(){return v;} return ' + name)(value);
-    },
-
     createHandler = function(selector, delegatee) {
       // normal usage
       if (selector) {

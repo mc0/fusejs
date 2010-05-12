@@ -1,7 +1,71 @@
   /*--------------------------- EVENT: DOM-LOADED ----------------------------*/
 
-  // Support for the "dom:loaded" event is based on work by Dan Webb,
-  // Matthias Miller, Dean Edwards, John Resig and Diego Perini.
+  (function(createDispatcher) {
+
+    var domLoadDispatcher = createDispatcher(2, 'dom:loaded'),
+
+    winLoadDispatcher = createDispatcher(1, 'load'),
+
+    domLoadWrapper = function(event) {
+      var doc = fuse._doc, docEl = fuse._docEl, decorated = fuse(doc);
+      if (!decorated.isLoaded()) {
+        fuse._body     =
+        fuse._scrollEl = doc.body;
+        fuse._root     = docEl;
+
+        if (fuse.env.test('BODY_ACTING_AS_ROOT')) {
+          fuse._root = doc.body;
+          fuse._info.root = fuse._info.body;
+        }
+        if (fuse.env.test('BODY_SCROLL_COORDS_ON_DOCUMENT_ELEMENT')) {
+          fuse._scrollEl = docEl;
+          fuse._info.scrollEl = fuse._info.docEl;
+        }
+
+        event = fuse.dom.Event(event || global.event, doc);
+        event.type = 'dom:loaded';
+
+        decorated.isLoaded = createGetter('isLoaded', true);
+        domLoadDispatcher(event);
+        decorated.stopObserving('DOMContentLoaded').stopObserving('dom:loaded');
+      }
+    },
+
+    winLoadWrapper = function(event) {
+      event || (event = global.event);
+      var domData = fuse.dom.data;
+
+      // make dom:loaded dispatch if it hasn't
+      if (!fuse(fuse._doc).isLoaded()) {
+        domLoadWrapper(event);
+      }
+      // try again later if dom:loaded is still executing handlers
+      else if (domData[2] && domData[2].events['dom:loaded']) {
+        return setTimeout(function() { winLoadWrapper(event); }, 10);
+      }
+      // prepare event wrapper
+      event = fuse.dom.Event(event, global);
+      event.type = 'load';
+      winLoadDispatcher(event);
+
+      // clear event cache
+      fuse(global).stopObserving('load');
+    };
+
+    // Ensure that the dom:loaded event has finished executing its observers
+    // before allowing the window onload event to proceed
+    addObserver(fuse.get(fuse._doc).raw, 'dom:loaded',
+      (getOrCreateCache(2, 'dom:loaded').dispatcher = domLoadWrapper));
+
+    // Perform feature tests and define pseudo private
+    // body/root properties when the dom is loaded
+    addObserver(fuse.get(global).raw, 'load',
+      (getOrCreateCache(1, 'load').dispatcher = winLoadWrapper));
+
+  })(fuse.dom.Event.createDispatcher);
+
+  /*--------------------------------------------------------------------------*/
+
   (function() {
     var cssPoller, readyStatePoller,
 
@@ -21,9 +85,10 @@
 
     Poller = function(method) {
       var poller = this,
-      callback   = function() {
-        if (!method() && poller.id != null)
+      callback = function() {
+        if (!method() && poller.id != null) {
           poller.id = setTimeout(callback, 10);
+        }
       };
 
       this.id = setTimeout(callback, 10);
@@ -48,9 +113,10 @@
     getSheetElements = function() {
       var i = 0, link, links = doc.getElementsByTagName('LINK'),
        result = fuse.Array.fromNodeList(doc.getElementsByTagName('STYLE'));
-      while (link = links[i++])
+      while (link = links[i++]) {
         if (link.rel.toLowerCase() === 'stylesheet')
           result.push(link);
+      }
       return result;
     },
 
@@ -83,140 +149,172 @@
     },
 
     addImports = function(collection, sheet) {
-      return (addImports = isHostType(sheet, 'imports')
-        ? function(collection, sheet) {
-            var length = sheet.imports.length;
-            while (length--) {
-              if (isSameOrigin(sheet.imports[length].href)) {
-                collection.push(sheet.imports[length]);
-                addImports(collection, sheet.imports[length]);
-              }
-            }
-            return collection;
-          }
-        : function(collection, sheet) {
-            // Catch errors on partially loaded elements. Firefox may also
-            // error when accessing css rules of sources using the file:// protocol
-            try {
-              var ss, rules = getRules(sheet), length = rules.length;
-            } catch(e) {
+      addImports = function(collection, sheet) {
+        // Catch errors on partially loaded elements. Firefox may also
+        // error when accessing css rules of sources using the file:// protocol
+        try {
+          var ss, rules = getRules(sheet), length = rules.length;
+        } catch(e) {
+          return false;
+        }
+        while (length--) {
+          // bail when sheet is null on rules
+          ss = rules[length].styleSheet;
+          if (ss === null) return false;
+          if (ss && isSameOrigin(ss.href)) {
+            collection.push(ss);
+            if (!addImports(collection, ss))
               return false;
-            }
-            while (length--) {
-              // bail when sheet is null on rules
-              ss = rules[length].styleSheet;
-              if (ss === null) return false;
-              if (ss && isSameOrigin(ss.href)) {
-                collection.push(ss);
-                if (!addImports(collection, ss))
-                  return false;
-              }
-            }
-            return collection;
           }
-      )(collection, sheet);
+        }
+        return collection;
+      };
+
+      if (isHostType(sheet, 'imports')) {
+        addImports = function(collection, sheet) {
+          var length = sheet.imports.length;
+          while (length--) {
+            if (isSameOrigin(sheet.imports[length].href)) {
+              collection.push(sheet.imports[length]);
+              addImports(collection, sheet.imports[length]);
+            }
+          }
+          return collection;
+        };
+      }
+      return addImports(collection, sheet);
     },
 
     getStyle = function(element, styleName) {
-      return (getStyle = envTest('ELEMENT_COMPUTED_STYLE')
-        ? function(element, styleName) {
-            var style = element.ownerDocument.defaultView.getComputedStyle(element, null);
-            return (style || element.style)[styleName];
-          }
-        : function(element, styleName) {
-            return (element.currentStyle || element.style)[styleName];
-          }
-      )(element, styleName);
+      getStyle = function(element, styleName) {
+        var style = element.ownerDocument.defaultView.getComputedStyle(element, null);
+        return (style || element.style)[styleName];
+      };
+
+      if (!envTest('ELEMENT_COMPUTED_STYLE')) {
+        getStyle = function(element, styleName) {
+          return (element.currentStyle || element.style)[styleName];
+        };
+      }
+      return getStyle(element, styleName);
     },
 
     getSheet = function(element) {
-      return (getSheet = isHostType(element, 'styleSheet')
-        ? function(element) { return element.styleSheet; }
-        : function(element) { return element.sheet; }
-      )(element);
+      getSheet = function(element) {
+        return element.sheet;
+      };
+
+      if (isHostType(element, 'styleSheet')) {
+        getSheet = function(element) {
+          return element.styleSheet;
+        };
+      }
+      return getSheet(element);
     },
 
     getRules = function(sheet) {
-      return (getRules = isHostType(sheet, 'rules')
-        ? function(sheet) { return sheet.rules; }
-        : function(sheet) { return sheet.cssRules; }
-      )(sheet);
+      getRules = function(sheet) {
+        return sheet.cssRules;
+      };
+
+      if (isHostType(sheet, 'rules')) {
+        getRules = function(sheet) {
+          return sheet.rules;
+        };
+      }
+      return getRules(sheet);
     },
 
     addRule = function(sheet, selector, cssText) {
-      return (addRule = isHostType(sheet, 'addRule')
-        ? function(sheet, selector, cssText) { return sheet.addRule(selector, cssText); }
-        : function(sheet, selector, cssText) { return sheet.insertRule(selector +
-            '{' + cssText + '}', getRules(sheet).length); }
-      )(sheet, selector, cssText);
+      addRule = function(sheet, selector, cssText) {
+        return sheet.insertRule(selector + '{' + cssText + '}', getRules(sheet).length);
+      };
+
+      if (isHostType(sheet, 'addRule')) {
+        addRule = function(sheet, selector, cssText) {
+          return sheet.addRule(selector, cssText);
+        };
+      }
+      return addRule(sheet, selector, cssText);
     },
 
     removeRule = function(sheet, index) {
-      return (removeRule = isHostType(sheet, 'removeRule')
-        ? function(sheet, index) { return sheet.removeRule(index); }
-        : function(sheet, index) { return sheet.deleteRule(index); }
-      )(sheet, index);
+      removeRule = function(sheet, index) {
+        return sheet.deleteRule(index);
+      };
+
+      if (isHostType(sheet, 'removeRule')) {
+        removeRule = function(sheet, index) {
+          return sheet.removeRule(index);
+        };
+      }
+      return removeRule(sheet, index);
+    },
+
+    injectRules = function(sheetElements, cache) {
+      var className, length, sheets = getSheetObjects(sheetElements);
+      if (!sheets) return false;
+      length = sheets.length;
+      while (length--) {
+        className = 'fuse_css_loaded_' + cache.length;
+        cache.push({ 'className': className, 'sheet': sheets[length] });
+        addRule(sheets[length], '.' + className, 'margin-top: -1234px!important;');
+      }
+      return true;
     },
 
     isCssLoaded = function() {
       var sheetElements = getSheetElements();
-      return !sheetElements.length
-        ? cssDoneLoading()
-        : (isCssLoaded = function() {
-            var cache = [];
-            return !(function() {
-              var sheets = getSheetObjects(sheetElements);
-              if (!sheets) return false;
+      if (!sheetElements.length) return cssDoneLoading();
 
-              var className, length = sheets.length;
-              while (length--) {
-                className = 'fuse_css_loaded_' + cache.length;
-                cache.push({ 'className': className, 'sheet': sheets[length] });
-                addRule(sheets[length], '.' + className, 'margin-top: -1234px!important;');
+      isCssLoaded = function() {
+        var cache = [];
+        if (!injectRules(sheetElements, cache)) return false;
+
+        isCssLoaded = function() {
+          var c, lastIndex, rules, length = cache.length, done = true;
+          while (length--) {
+            c = cache[length];
+            rules = getRules(c.sheet);
+            lastIndex = rules.length && rules.length - 1;
+
+            // if styleSheet was still loading when test rule
+            // was added it will have removed the rule.
+            if (rules[lastIndex].selectorText.indexOf(c.className) > -1) {
+              done = false;
+
+              // if the styleSheet has only the test rule then skip
+              if (rules.length === 1) {
+                continue;
               }
-              return true;
-            })()
-              ? false
-              : (isCssLoaded = function() {
-                  var c, lastIndex, rules, length = cache.length, done = true;
-                  while (length--) {
-                    c = cache[length];
-                    rules = getRules(c.sheet);
-                    lastIndex = rules.length && rules.length - 1;
+              // add dummy element to body to test css rules
+              if (!c.div) {
+                c.div = doc.createElement('div');
+                c.div.className = c.className;
+                c.div.style.cssText = 'position:absolute;visibility:hidden;';
+              }
 
-                    // if styleSheet was still loading when test rule
-                    // was added it will have removed the rule.
-                    if (rules[lastIndex].selectorText.indexOf(c.className) > -1) {
-                      done = false;
+              doc.body.appendChild(c.div);
 
-                      // if the styleSheet has only the test rule then skip
-                      if (rules.length === 1) continue;
+              // when loaded clear cache entry
+              if (getStyle(c.div, 'marginTop') === '-1234px') {
+                cache.splice(length, 1);
+              }
 
-                      if (!c.div) {
-                        c.div = doc.createElement('div');
-                        c.div.className = c.className;
-                        c.div.style.cssText = 'position:absolute;visibility:hidden;';
-                      }
-
-                      doc.body.appendChild(c.div);
-
-                      // when loaded clear cache entry
-                      if (getStyle(c.div, 'marginTop') === '-1234px')
-                        cache.splice(length, 1);
-
-                      // cleanup
-                      removeRule(c.sheet, lastIndex);
-                      doc.body.removeChild(c.div);
-                    }
-                  }
-
-                  if (done) {
-                    cache = null;
-                    return cssDoneLoading();
-                  }
-                  return done;
-                })();
-          })();
+              // cleanup
+              removeRule(c.sheet, lastIndex);
+              doc.body.removeChild(c.div);
+            }
+          }
+          if (done) {
+            cache = null;
+            return cssDoneLoading();
+          }
+          return done;
+        };
+        return isCssLoaded();
+      };
+      return isCssLoaded();
     };
 
     Poller.prototype.clear = function() {
