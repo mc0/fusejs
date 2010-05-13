@@ -1,3 +1,5 @@
+* Make the readyState poller for the dom:loaded event fire sooner and avoid the poller if the window is already loaded. [jddalton]
+
 * Move toQueryString() and toQueryParam() methods to /lang/query.js and remove `parseQuery` alias. [jddalton]
   Note: Backwards compatibility warning.
 

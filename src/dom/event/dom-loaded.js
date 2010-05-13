@@ -69,7 +69,7 @@
   (function() {
     var cssPoller, readyStatePoller,
 
-    FINAL_DOCUMENT_READY_STATES = { 'complete': 1, 'loaded': 1 },
+    FINAL_DOCUMENT_READY_STATES = { 'loaded': 1, 'interactive': 1, 'complete': 1 },
 
     doc          = fuse._doc,
 
@@ -138,8 +138,8 @@
       if (decoratedDoc.isLoaded()) {
         return readyStatePoller.clear();
       }
-      // Not sure if readyState is ever `loaded` in
-      // Safari 2.x but we check to be on the safe side
+      // Safari 2 hits `loaded` while others may hit `interactive`
+      // or `complete` and should be able to interact with the dom at that time.
       if (FINAL_DOCUMENT_READY_STATES[doc.readyState] ||
           event && event.type === 'DOMContentLoaded') {
         readyStatePoller.clear();
@@ -323,36 +323,42 @@
 
     /*------------------------------------------------------------------------*/
 
-    // Ensure the document is not in a frame because
-    // doScroll() will not throw an error when the document
-    // is framed. Fallback on document readyState.
-    if (!envTest('ELEMENT_ADD_EVENT_LISTENER') && envTest('ELEMENT_DO_SCROLL')) {
-
-      // Avoid a potential browser hang when checking global.top (thanks Rich Dougherty)
-      // The value of frameElement can be null or an object.
-      // Checking global.frameElement could throw if not accessible.
-      try { isFramed = global.frameElement != null; } catch(e) { }
-
-      // Derived with permission from Diego Perini's IEContentLoaded
-      // http://javascript.nwbox.com/IEContentLoaded/
-      if (!isFramed) {
-        checkDomLoadedState = function() {
-          if (decoratedDoc.isLoaded()) {
-            return readyStatePoller.clear();
-          }
-          if (doc.readyState === 'complete') {
-            fireDomLoadedEvent();
-          } else {
-            try { fuse._div.doScroll(); } catch(e) { return; }
-            fireDomLoadedEvent();
-          }
-        };
-      }
-    } else if (envTest('ELEMENT_ADD_EVENT_LISTENER')) {
-      decoratedDoc.observe('DOMContentLoaded', checkDomLoadedState);
+    if (doc.readyState === 'complete') {
+      // fire dom:loaded and window load events if window is already loaded
+      fuse(global).fire('load');
     }
+    else {
+      // Ensure the document is not in a frame because
+      // doScroll() will not throw an error when the document
+      // is framed. Fallback on document readyState.
+      if (!envTest('ELEMENT_ADD_EVENT_LISTENER') && envTest('ELEMENT_DO_SCROLL')) {
 
-    // readystate and poller are used (first one to complete wins)
-    decoratedDoc.observe('readystatechange', checkDomLoadedState);
-    readyStatePoller = new Poller(checkDomLoadedState);
+        // Avoid a potential browser hang when checking global.top (thanks Rich Dougherty)
+        // The value of frameElement can be null or an object.
+        // Checking global.frameElement could throw if not accessible.
+        try { isFramed = global.frameElement != null; } catch(e) { }
+
+        // Derived with permission from Diego Perini's IEContentLoaded
+        // http://javascript.nwbox.com/IEContentLoaded/
+        if (!isFramed) {
+          checkDomLoadedState = function() {
+            if (decoratedDoc.isLoaded()) {
+              return readyStatePoller.clear();
+            }
+            if (FINAL_DOCUMENT_READY_STATES[doc.readyState]) {
+              fireDomLoadedEvent();
+            } else {
+              try { fuse._div.doScroll(); } catch(e) { return; }
+              fireDomLoadedEvent();
+            }
+          };
+        }
+      } else if (envTest('ELEMENT_ADD_EVENT_LISTENER')) {
+        decoratedDoc.observe('DOMContentLoaded', checkDomLoadedState);
+      }
+
+      // readystate and poller are used (first one to complete wins)
+      decoratedDoc.observe('readystatechange', checkDomLoadedState);
+      readyStatePoller = new Poller(checkDomLoadedState);
+    }
   })();
