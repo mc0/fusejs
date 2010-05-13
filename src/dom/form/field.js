@@ -22,8 +22,6 @@
 
     textAreaPlugin = dom.TextAreaElement.plugin,
 
-    toQueryString  = fuse.Object.toQueryString,
-
     CHECKED_INPUT_TYPES = {
       'checkbox': 1,
       'radio':    1
@@ -127,7 +125,7 @@
       }
       pair = { };
       pair[name] = PLUGINS[getNodeName(element)].getValue.call(this);
-      return toQueryString(pair);
+      return fuse.Object.toQueryString(pair);
     };
 
     selectPlugin.serialize = function serialize() {
@@ -142,7 +140,7 @@
       }
       pair = { };
       pair[name] = value;
-      return toQueryString(pair);
+      return fuse.Object.toQueryString(pair);
     };
 
     textAreaPlugin.select =

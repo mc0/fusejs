@@ -144,7 +144,7 @@
       fuse.Function.delay(fuse.Function.bind(this.runTests, this), 0.1);
     },
 
-    'queryParams': fuse.String(window.location.search).parseQuery(),
+    'queryParams': fuse.String(window.location.search).toQueryParams(),
 
     'getTests': function(testcases) {
       var tests, options = this.options;

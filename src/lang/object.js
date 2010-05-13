@@ -187,10 +187,6 @@
   /*--------------------------------------------------------------------------*/
 
   (function(Obj) {
-    var toQueryPair = function(key, value) {
-      return fuse.String(typeof value === 'undefined' ? key :
-        key + '=' + encodeURIComponent(value == null ? '' : value));
-    };
 
     Obj.clone = function clone(object) {
       if (object) {
@@ -289,30 +285,12 @@
         : fuse.String(object == null ? '' : object);
     };
 
-    Obj.toQueryString = function toQueryString(object) {
-      var result = [];
-      eachKey(object, function(value, key) {
-        if (hasKey(object, key)) {
-          key = encodeURIComponent(key);
-          if (value && isArray(value)) {
-            var i = result.length, j = 0, length = i + value.length;
-            while (i < length) result[i++] = toQueryPair(key, value[j++]);
-          }
-          else if (!value || toString.call(value) !== '[object Object]') {
-            result.push(toQueryPair(key, value));
-          }
-        }
-      });
-      return fuse.String(result.join('&'));
-    };
-
     // prevent JScript bug with named function expressions
-    var clone =      nil,
-     each =          nil,
-     extend =        nil,
-     isEmpty =       nil,
-     keys =          nil,
-     values =        nil,
-     toHTML =        nil,
-     toQueryString = nil;
+    var clone = nil,
+     each =     nil,
+     extend =   nil,
+     isEmpty =  nil,
+     keys =     nil,
+     values =   nil,
+     toHTML =   nil;
   })(fuse.Object);

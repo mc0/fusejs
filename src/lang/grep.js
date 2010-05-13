@@ -1,8 +1,7 @@
   /*------------------------------- LANG: GREP -------------------------------*/
 
   addArrayMethods.callbacks.push(function(List) {
-    var plugin = List.plugin,
-     toArray = plugin.clone || plugin.slice;
+    var plugin = List.plugin, toArray = plugin.clone || plugin.slice;
 
     plugin.grep = function grep(pattern, callback, thisArg) {
       if (toArray && (!pattern || pattern == '' ||
@@ -31,16 +30,13 @@
   (function() {
     if (fuse.Enumerable) {
       fuse.Enumerable.grep = function grep(pattern, callback, thisArg) {
-        if (!pattern || pattern == '' ||
-            isRegExp(pattern) &&!pattern.source) {
+        if (!pattern || pattern == '' || isRegExp(pattern) &&!pattern.source) {
           return this.toArray();
         }
-
         var result = fuse.Array();
         if (isString(pattern)) {
           pattern = new RegExp(escapeRegExpChars(pattern));
         }
-
         callback || (callback = IDENTITY);
         this._each(function(value, index, iterable) {
           if (pattern.test(value))
@@ -52,16 +48,13 @@
 
     if (fuse.Hash) {
       fuse.Hash.plugin.grep = function grep(pattern, callback, thisArg) {
-        if (!pattern || pattern == '' ||
-            isRegExp(pattern) && !pattern.source) {
+        if (!pattern || pattern == '' || isRegExp(pattern) && !pattern.source) {
           return this.clone();
         }
-
         var key, pair, value, i = 0, pairs = this._pairs, result = new $H();
         if (isString(pattern)) {
           pattern = new RegExp(escapeRegExpChars(pattern));
         }
-
         callback || (callback = IDENTITY);
         while (pair = pairs[i++]) {
           if (pattern.test(value = pair[1]))

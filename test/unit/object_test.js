@@ -56,20 +56,6 @@ new Test.Unit.Runner({
       'Failed to extend shadowed `DontEnum` properties.');
   },
 
-  'testObjectToQueryString': function() {
-    this.assertEqual('a=A&b=B&c=C&d=D%23',
-      fuse.Object.toQueryString({ 'a':'A', 'b':'B', 'c':'C', 'd':'D#' }),
-      'Failed with simple object');
-
-    this.assertEqual('a=A&b=B&toString=bar&valueOf=',
-      fuse.Object.toQueryString(Fixtures.mixed_dont_enum),
-      'Failed to enumerate over shadowed properties like `toString` and `valueOf`');
-
-    this.assertEqual('0=a&1=b&2=c',
-      fuse.Object.toQueryString(fuse.Array('a', 'b', 'c')),
-      'Enumerated over inherited properties');
-  },
-
   'testObjectClone': function() {
     var object = { 'foo': 'foo', 'bar': [1, 2, 3] };
 

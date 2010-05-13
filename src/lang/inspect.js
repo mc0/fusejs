@@ -3,32 +3,15 @@
   (function() {
     var strInspect,
 
-    Obj         = fuse.Object,
+    strPlugin = fuse.String.plugin,
 
-    elemPlugin  = fuse.dom && fuse.dom.Element.plugin,
-
-    eventPlugin = fuse.dom && fuse.dom.Event.plugin,
-
-    hashPlugin  = fuse.Hash && fuse.Hash.plugin,
-
-    strPlugin   = fuse.String.plugin,
+    specialChars = { '\\': '\\\\', '"' : '\\"', "'" : "\\'" },
 
     // charCodes 0-31 and \ and '
     reWithSingleQuotes = /[\x00-\x1f\\']/g,
 
     // charCodes 0-31 and \ and "
     reWithDoubleQuotes = /[\x00-\x1f\\"]/g,
-
-    specialChars = {
-      '\b': '\\b',
-      '\f': '\\f',
-      '\n': '\\n',
-      '\r': '\\r',
-      '\t': '\\t',
-      '\\': '\\\\',
-      '"' : '\\"',
-      "'" : "\\'"
-    },
 
     escapeSpecialChars = function(match) {
       return specialChars[match];
@@ -37,7 +20,7 @@
     inspectPlugin = function(plugin) {
       var result, backup = plugin.inspect;
       plugin.inspect = expando;
-      result = Obj.inspect(plugin).replace(expando, String(backup));
+      result = fuse.Object.inspect(plugin).replace(expando, String(backup));
       plugin.inspect = backup;
       return result;
     };
@@ -45,33 +28,12 @@
     // populate specialChars with control characters
     (function(i, key) {
       while (--i) {
-        key = String.fromCharCode(i);
-        if (!specialChars[key]) {
-          specialChars[key] = '\\u' + ('0000' + i.toString(16)).slice(-4);
-        }
+        specialChars[String.fromCharCode(i)] =
+          '\\u' + ('0000' + i.toString(16)).slice(-4);
       }
     })(32);
 
     /*------------------------------------------------------------------------*/
-
-    addArrayMethods.callbacks.push(function(List) {
-      var plugin = List.plugin;
-      plugin.inspect = function inspect() {
-        // called Obj.inspect(fuse.Array.plugin) or Obj.inspect(fuse.Array)
-        if (this === plugin || this == global || this == null) {
-          return inspectPlugin(plugin);
-        }
-        // called normally fuse.Array(...).inspect()
-        var result = [], object = Object(this), length = object.length >>> 0;
-        while (length--) {
-          result[length] = Obj.inspect(object[length]);
-        }
-        return fuse.String('[' + result.join(', ') + ']');
-      };
-
-      // prevent JScript bug with named function expressions
-      var inspect = nil;
-    });
 
     strInspect =
     strPlugin.inspect = function inspect(useDoubleQuotes) {
@@ -86,6 +48,65 @@
         : "'" + string.replace(reWithSingleQuotes, escapeSpecialChars) + "'");
     };
 
+    fuse.Object.inspect = function inspect(value) {
+      var classType, object, result;
+      if (value != null) {
+        object = fuse.Object(value);
+
+        // this is not duplicating checks, one is a type check for host objects
+        // and the other is an internal [[Class]] check because Safari 3.1
+        // mistakes regexp instances as typeof `function`
+        if (typeof object.inspect === 'function' &&
+            isFunction(object.inspect)) {
+          return object.inspect();
+        }
+        // attempt to avoid inspecting DOM nodes.
+        // IE treats nodes like objects:
+        // IE7 and below are missing the node's constructor property
+        // IE8 node constructors are typeof "object"
+        try {
+          classType = toString.call(object);
+          if (classType === '[object Object]' && typeof object.constructor === 'function') {
+            result = [];
+            eachKey(object, function(value, key) {
+              hasKey(object, key) &&
+                result.push(strInspect.call(key) + ': ' + fuse.Object.inspect(object[key]));
+            });
+            return fuse.String('{' + result.join(', ') + '}');
+          }
+        } catch (e) { }
+      }
+      // try coercing to string
+      try {
+        return fuse.String(value);
+      } catch (e) {
+        // probably caused by having the `toString` of an object call inspect()
+        if (e.constructor === global.RangeError) {
+          return fuse.String('...');
+        }
+        throw e;
+      }
+    };
+
+    addArrayMethods.callbacks.push(function(List) {
+      var plugin = List.plugin;
+      plugin.inspect = function inspect() {
+        // called Obj.inspect(fuse.Array.plugin) or Obj.inspect(fuse.Array)
+        if (this === plugin || this == global || this == null) {
+          return inspectPlugin(plugin);
+        }
+        // called normally fuse.Array(...).inspect()
+        var result = [], object = Object(this), length = object.length >>> 0;
+        while (length--) {
+          result[length] = fuse.Object.inspect(object[length]);
+        }
+        return fuse.String('[' + result.join(', ') + ']');
+      };
+
+      // prevent JScript bug with named function expressions
+      var inspect = nil;
+    });
+
     if (fuse.Enumerable) {
       fuse.Enumerable.inspect = function inspect() {
         // called normally or called Obj.inspect(fuse.Enumerable)
@@ -95,7 +116,8 @@
       };
     }
 
-    if (hashPlugin) {
+    if (fuse.Hash) {
+      var hashPlugin = fuse.Hash.plugin;
       hashPlugin.inspect = function inspect() {
         // called Obj.inspect(fuse.Hash.plugin) or generic if added later
         if (this === hashPlugin || this == global || this == null) {
@@ -104,13 +126,14 @@
         // called normally fuse.Hash(...).inspect()
         var pair, i = -1, pairs = this._pairs, result = [];
         while (pair = pairs[++i]) {
-          result[i] = pair[0].inspect() + ': ' + Obj.inspect(pair[1]);
+          result[i] = pair[0].inspect() + ': ' + fuse.Object.inspect(pair[1]);
         }
         return '#<Hash:{' + result.join(', ') + '}>';
       };
     }
 
-    if (elemPlugin) {
+    if (fuse.dom) {
+      var elemPlugin = fuse.dom.Element.plugin;
       elemPlugin.inspect = function inspect() {
         // called Obj.inspect(Element.plugin) or Obj.inspect(Element)
         if (this === elemPlugin || this == global || this == null) {
@@ -132,7 +155,8 @@
       };
     }
 
-    if (eventPlugin) {
+    if (fuse.dom.Event) {
+      var eventPlugin = fuse.dom.Event.plugin;
       eventPlugin.inspect = function inspect() {
         // called Obj.inspect(Event.plugin) or called normally event.inspect()
         return this === eventPlugin
@@ -141,45 +165,6 @@
       };
     }
 
-    Obj.inspect = function inspect(value) {
-      var classType, object, result;
-      if (value != null) {
-        object = Obj(value);
-
-        // this is not duplicating checks, one is a type check for host objects
-        // and the other is an internal [[Class]] check because Safari 3.1
-        // mistakes regexp instances as typeof `function`
-        if (typeof object.inspect === 'function' &&
-            isFunction(object.inspect)) {
-          return object.inspect();
-        }
-
-        // attempt to avoid inspecting DOM nodes.
-        // IE treats nodes like objects:
-        // IE7 and below are missing the node's constructor property
-        // IE8 node constructors are typeof "object"
-        try {
-          classType = toString.call(object);
-          if (classType === '[object Object]' && typeof object.constructor === 'function') {
-            result = [];
-            eachKey(object, function(value, key) {
-              hasKey(object, key) &&
-                result.push(strInspect.call(key) + ': ' + Obj.inspect(object[key]));
-            });
-            return fuse.String('{' + result.join(', ') + '}');
-          }
-        } catch (e) { }
-      }
-
-      // try coercing to string
-      try {
-        return fuse.String(value);
-      } catch (e) {
-        // probably caused by having the `toString` of an object call inspect()
-        if (e.constructor === global.RangeError) {
-          return fuse.String('...');
-        }
-        throw e;
-      }
-    };
+    // prevent JScript bug with named function expressions
+    var inspect = nil;
   })();

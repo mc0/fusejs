@@ -243,10 +243,6 @@
       return result;
     };
 
-    plugin.toQueryString = function toQueryString() {
-      return fuse.Object.toQueryString(this._object);
-    };
-
     plugin.values = function values() {
       return fuse.Array.fromArray(this._values);
     };
@@ -279,19 +275,18 @@
     };
 
     // prevent JScript bug with named function expressions
-    var clear =      nil,
-     clone =         nil,
-     contains =      nil,
-     filter =        nil,
-     get =           nil,
-     keys =          nil,
-     keyOf =         nil,
-     map =           nil,
-     partition =     nil,
-     size =          nil,
-     toArray =       nil,
-     toObject =      nil,
-     toQueryString = nil,
-     values =        nil,
-     zip =           nil;
+    var clear =  nil,
+     clone =     nil,
+     contains =  nil,
+     filter =    nil,
+     get =       nil,
+     keys =      nil,
+     keyOf =     nil,
+     map =       nil,
+     partition = nil,
+     size =      nil,
+     toArray =   nil,
+     toObject =  nil,
+     values =    nil,
+     zip =       nil;
   })(fuse.Hash.plugin, fuse.Hash);

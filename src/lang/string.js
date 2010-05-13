@@ -25,10 +25,7 @@
     },
 
     replace = envTest('STRING_REPLACE_COERCE_FUNCTION_TO_STRING') ?
-      plugin.replace : ''.replace,
-
-    split = envTest('STRING_SPLIT_BUGGY_WITH_REGEXP') ?
-       plugin.split : ''.split,
+      plugin.replace : plugin.replace.raw,
 
     toUpperCase = function(match, character) {
       return character ? character.toUpperCase() : '';
@@ -120,47 +117,6 @@
       return fuse.String(this).split('');
     };
 
-    plugin.toQueryParams = function toQueryParams(separator) {
-      var match = String(this).split('?'), object = fuse.Object();
-
-      // if ? (question mark) is present and there is no query after it
-      if (match.length > 1 && !match[1]) return object;
-
-      // grab the query before the # (hash) and\or spaces
-      (match = (match = match[1] || match[0]).split('#')) &&
-        (match = match[0].split(' ')[0]);
-
-      // bail if empty string
-      if (!match) return object;
-
-      var pair, key, value, index, i = -1,
-       pairs  = split.call(match, separator || '&'),
-       length = pairs.length;
-
-      // iterate over key-value pairs
-      while (++i < length) {
-        value = undef;
-        index = (pair = pairs[i]).indexOf('=');
-        if (pair && index) {
-          if (index != -1) {
-            key = decodeURIComponent(pair.slice(0, index));
-            value = pair.slice(index + 1);
-            if (value) value = decodeURIComponent(value);
-          } else {
-            key = pair;
-          }
-
-          if (hasKey(object, key)) {
-            if (!isArray(object[key])) object[key] = [object[key]];
-            object[key].push(value);
-          } else {
-            object[key] = value;
-          }
-        }
-      }
-      return object;
-    };
-
     plugin.truncate = function truncate(length, truncation) {
       var endIndex, string = String(this);
       length = +length;
@@ -241,9 +197,6 @@
       plugin.trimRight.raw = plugin.trimRight;
     }
 
-    // aliases
-    plugin.parseQuery = plugin.toQueryParams;
-
     // prevent JScript bug with named function expressions
     var blank =        nil,
       camelize =       nil,
@@ -258,7 +211,6 @@
       startsWith =     nil,
       stripScripts =   nil,
       toArray =        nil,
-      toQueryParams =  nil,
       times =          nil,
       trim =           nil,
       trimLeft =       nil,

@@ -1,3 +1,6 @@
+* Move toQueryString() and toQueryParam() methods to /lang/query.js and remove `parseQuery` alias. [jddalton]
+  Note: Backwards compatibility warning.
+
 * Rewrite fuse.ajax.responders and fuse.ajax.Request to use custom class events. [jddalton]
 
 * Add support for custom events to fuse.Class via the fuse.Class.mixins.event mixin. [jddalton]

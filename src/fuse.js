@@ -233,10 +233,11 @@
    'lang/timer.js',
    'lang/util.js',
 
+   'lang/ecma.js',
    'lang/grep.js',
    'lang/inspect.js',
+   'lang/query.js',
    'lang/json.js',
-   'lang/ecma.js',
 
    'ajax/ajax.js',
    'ajax/responders.js',

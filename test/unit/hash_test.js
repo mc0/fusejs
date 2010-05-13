@@ -340,42 +340,6 @@ new Test.Unit.Runner({
     this.assertHashNotEqual(object, hash.toObject());
   },
 
-  'testToQueryString': function() {
-    this.assertEqual('',                   $H({ }).toQueryString());
-    this.assertEqual('a%23=A',             $H({'a#': 'A'}).toQueryString());
-    this.assertEqual('a=A%23',             $H(Fixtures.one).toQueryString());
-    this.assertEqual('a=A&b=B&c=C&d=D%23', $H(Fixtures.many).toQueryString());
-    this.assertEqual('a=b&c',              $H(Fixtures.value_undefined).toQueryString());
-    this.assertEqual('a=b&c',              $H(fuse.String.toQueryParams('a=b&c')).toQueryString());
-    this.assertEqual('a=b&c=',             $H(Fixtures.value_null).toQueryString());
-    this.assertEqual('a=b&c=0',            $H(Fixtures.value_zero).toQueryString());
-
-    this.assertEqual('color=r&color=g&color=b',
-      $H(Fixtures.multiple).toQueryString());
-
-    this.assertEqual('color=r&color=&color=g&color&color=0',
-      $H(Fixtures.multiple_nil).toQueryString());
-
-    this.assertEqual('color=&color',
-      $H(Fixtures.multiple_all_nil).toQueryString());
-
-    this.assertEqual('', $H(Fixtures.multiple_empty).toQueryString());
-    this.assertEqual('', $H({ 'foo':{ }, 'bar':{ } }).toQueryString());
-
-    this.assertEqual('stuff%5B%5D=%24&stuff%5B%5D=a&stuff%5B%5D=%3B',
-      $H(Fixtures.multiple_special).toQueryString());
-
-    this.assertHashEqual(Fixtures.multiple_special,
-      $H(Fixtures.multiple_special).toQueryString().toQueryParams());
-
-    this.assertEqual('a=A&b=B&toString=bar&valueOf=',
-      $H(Fixtures.mixed_dont_enum).toQueryString());
-
-    this.assertEqual('0=a&1=b&2=c',
-      $H(fuse.Array('a', 'b', 'c')).toQueryString(),
-      'Enumerated over inherited properties');
-  },
-
   'testUnset': function() {
     var hash = $H(Fixtures.many);
     this.assertHashEqual({ 'a':'A', 'c': 'C', 'd':'D#' }, hash.unset('b'));
