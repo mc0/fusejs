@@ -136,12 +136,12 @@
 
     checkDomLoadedState = function(event) {
       if (decoratedDoc.isLoaded()) {
-        return readyStatePoller.clear();
+        readyStatePoller.clear();
       }
-      // Safari 2 hits `loaded` while others may hit `interactive`
-      // or `complete` and should be able to interact with the dom at that time.
-      if (FINAL_DOCUMENT_READY_STATES[doc.readyState] ||
-          event && event.type === 'DOMContentLoaded') {
+      // Safari hits `loaded` while others may hit `interactive` or `complete`
+      // and should be able to interact with the dom at that time.
+      else if ((event && event.type === 'DOMContentLoaded') ||
+          (FINAL_DOCUMENT_READY_STATES[doc.readyState] && isModifiable())) {
         readyStatePoller.clear();
         decoratedDoc.stopObserving('readystatechange', checkDomLoadedState);
         if (!checkCssAndFire()) cssPoller = new Poller(checkCssAndFire);
@@ -263,6 +263,18 @@
       return true;
     },
 
+    isModifiable = function() {
+      var body, parent, sibling, result = false;
+      try {
+        body    = doc.body;
+        parent  = body.parentNode;
+        sibling = body.nextSibling;
+        parent.insertBefore(parent.removeChild(body), sibling);
+        result = true;
+      } catch(e) { }
+      return result;
+    },
+
     isCssLoaded = function() {
       var sheetElements = getSheetElements();
       if (!sheetElements.length) return cssDoneLoading();
@@ -325,40 +337,37 @@
 
     if (doc.readyState === 'complete') {
       // fire dom:loaded and window load events if window is already loaded
-      fuse(global).fire('load');
+      return fuse(global).fire('load');
     }
-    else {
-      // Ensure the document is not in a frame because
-      // doScroll() will not throw an error when the document
-      // is framed. Fallback on document readyState.
-      if (!envTest('ELEMENT_ADD_EVENT_LISTENER') && envTest('ELEMENT_DO_SCROLL')) {
 
-        // Avoid a potential browser hang when checking global.top (thanks Rich Dougherty)
-        // The value of frameElement can be null or an object.
-        // Checking global.frameElement could throw if not accessible.
-        try { isFramed = global.frameElement != null; } catch(e) { }
+    if (envTest('ELEMENT_ADD_EVENT_LISTENER')) {
+      decoratedDoc.observe('DOMContentLoaded', checkDomLoadedState);
+    }
+    // Weak inference used as IE 6/7 have the operation aborted error
+    else if (envTest('ELEMENT_DO_SCROLL') && !envTest('JSON')) {
+      // Avoid a potential browser hang when checking global.top (thanks Rich Dougherty)
+      // The value of frameElement can be null or an object.
+      // Checking global.frameElement could throw if not accessible.
+      try { isFramed = global.frameElement != null; } catch(e) { }
 
-        // Derived with permission from Diego Perini's IEContentLoaded
-        // http://javascript.nwbox.com/IEContentLoaded/
-        if (!isFramed) {
-          checkDomLoadedState = function() {
-            if (decoratedDoc.isLoaded()) {
-              return readyStatePoller.clear();
-            }
-            if (FINAL_DOCUMENT_READY_STATES[doc.readyState]) {
-              fireDomLoadedEvent();
-            } else {
-              try { fuse._div.doScroll(); } catch(e) { return; }
-              fireDomLoadedEvent();
-            }
-          };
+      // doScroll will not throw an error when in an iframe
+      // so we rely on the event system to fire the dom:loaded event
+      // before the window onload in IE6/7
+      if (isFramed) return;
+
+      // Derived with permission from Diego Perini's IEContentLoaded
+      // http://javascript.nwbox.com/IEContentLoaded/
+      checkDomLoadedState = function() {
+        if (decoratedDoc.isLoaded()) {
+          readyStatePoller.clear();
+        } else {
+          try { fuse._div.doScroll(); } catch(e) { return; }
+          fireDomLoadedEvent();
         }
-      } else if (envTest('ELEMENT_ADD_EVENT_LISTENER')) {
-        decoratedDoc.observe('DOMContentLoaded', checkDomLoadedState);
-      }
-
-      // readystate and poller are used (first one to complete wins)
-      decoratedDoc.observe('readystatechange', checkDomLoadedState);
-      readyStatePoller = new Poller(checkDomLoadedState);
+      };
     }
+
+    // readystate and poller are used (first one to complete wins)
+    decoratedDoc.observe('readystatechange', checkDomLoadedState);
+    readyStatePoller = new Poller(checkDomLoadedState);
   })();
