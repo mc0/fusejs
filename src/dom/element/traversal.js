@@ -14,28 +14,38 @@
 
     prevElement   = 'previousElementSibling',
 
-    getSome = function(element, property, selectors, count) {
+    getSome = function(element, property, count, selectors, thisArg) {
       var isSingle, match, result = null, i = 0;
       if (!element) return result;
 
+      if (toString.call(count) !== '[object Number]') {
+        selectors = count;
+        count = null;
+      }
+      if (!(isSingle = count == null)) {
+        if (count < 1) count = 1;
+        result = NodeList();
+      }
+
       // handle when a callback and optional thisArg is passed
-      // thisArg = count, callback = selectors;
+      // callback = selectors;
       if (typeof selectors === 'function') {
-        do {
-          if (element.nodeType === ELEMENT_NODE && selectors.call(count, element))
-            return fromElement(element);
-        } while (element = (element.raw || element)[property]);
+        // handle returning first match
+        if (isSingle) {
+          do {
+            if (element.nodeType === ELEMENT_NODE && selectors.call(thisArg, element))
+              return fromElement(element);
+          } while (element = element[property]);
+        }
+        // handle returning a number of matches
+        else {
+          do {
+            if (i < count && element.nodeType === ELEMENT_NODE && selectors.call(count, element))
+              result[i++] = fromElement(element);
+          } while (element = element[property]);
+        }
       }
       else {
-        if (isNumber(selectors)) {
-          count = selectors;
-          selectors = null;
-        }
-        if (!(isSingle = count == null)) {
-          if (count < 1) count = 1;
-          result = NodeList();
-        }
-
         // handle no arguments
         if (selectors == null) {
           // handle returning first match
@@ -125,38 +135,48 @@
       return result;
     };
 
-    plugin.down = function down(selectors, count) {
-      var isSingle, match, node, nodes,result = null, i = 0, j = 0,
+    plugin.down = function down(count, selectors, thisArg) {
+      var isSingle, match, node, nodes, result = null, i = 0, j = 0,
        element = this.raw || this;
 
-      // handle when a callback and optional thisArg is passed
-      // thisArg = count, callback = selectors;
-      if (typeof selectors === 'function') {
+      if (toString.call(count) !== '[object Number]') {
+        selectors = count;
+        count = null;
+      }
+      if (!(isSingle = count == null)) {
+        if (count < 1) count = 1;
+        result = NodeList();
+      }
+      if (!(isSingle && selectors == null)) {
         nodes = element.getElementsByTagName('*');
-        while (node = nodes[i++]) {
-          if (node.nodeType === ELEMENT_NODE && selectors.call(count, node))
-            return fromElement(node);
+      }
+
+      // handle when a callback and optional thisArg is passed
+      // callback = selectors;
+      if (typeof selectors === 'function') {
+        // handle returning first match
+        if (isSingle) {
+          while (node = nodes[i++]) {
+            if (node.nodeType === ELEMENT_NODE && selectors.call(thisArg, node))
+              return fromElement(node);
+          }
+        }
+        // handle returning a number of matches
+        else {
+          while (node = nodes[i++]) {
+            if (j < count && node.nodeType === ELEMENT_NODE && selectors.call(count, node))
+              result[j++] = fromElement(node);
+          }
         }
       }
       else {
-        if (isNumber(selectors)) {
-          count = selectors;
-          selectors = null;
-        }
-        if (!(isSingle = count == null)) {
-          if (count < 1) count = 1;
-          result = NodeList();
-        }
-
         // handle no arguments
         if (selectors == null) {
           // handle returning first match
           if (isSingle) {
             return plugin.first.call(this);
           }
-
           // handle returning a number of matches
-          nodes = element.getElementsByTagName('*');
           while (node = nodes[i++]) {
             if (j < count && node.nodeType === ELEMENT_NODE)
               result[j++] = fromElement(node);
@@ -164,10 +184,8 @@
         }
         // handle when selectors are passed
         else if (isString(selectors)) {
-          match = fuse.dom.selector.match;
-          nodes = element.getElementsByTagName('*');
-
           // handle returning first match
+          match = fuse.dom.selector.match;
           if (isSingle) {
             while (node = nodes[i++]) {
               if (node.nodeType === ELEMENT_NODE && match(node, selectors))
@@ -177,8 +195,7 @@
           // handle returning a number of matches
           else {
             while (node = nodes[i++]) {
-              if (j < count && node.nodeType === ELEMENT_NODE &&
-                  match(node, selectors))
+              if (j < count && node.nodeType === ELEMENT_NODE && match(node, selectors))
                 result[j++] = fromElement(node);
             }
           }
@@ -187,40 +204,40 @@
       return result;
     };
 
-    plugin.next = function next(selectors, count) {
-      return getSome((this.raw || this)[nextNode], nextNode, selectors, count);
+    plugin.next = function next(count, selectors, thisArg) {
+      return getSome((this.raw || this)[nextNode], nextNode, count, selectors, thisArg);
     };
 
-    plugin.previous = function previous(selectors, count) {
-      return getSome((this.raw || this)[prevNode], prevNode, selectors, count);
+    plugin.previous = function previous(count, selectors, thisArg) {
+      return getSome((this.raw || this)[prevNode], prevNode, count, selectors, thisArg);
     };
 
-    plugin.up = function up(selectors, count) {
-      return getSome((this.raw || this).parentNode, 'parentNode', selectors, count);
+    plugin.up = function up(count, selectors, thisArg) {
+      return getSome((this.raw || this).parentNode, 'parentNode', count, selectors, thisArg);
     };
 
-    plugin.first = function first(selectors, count) {
-      return getSome((this.raw || this)[firstNode], nextNode, selectors, count);
+    plugin.first = function first(count, selectors, thisArg) {
+      return getSome((this.raw || this)[firstNode], nextNode, count, selectors, thisArg);
     };
 
-    plugin.last = function last(selectors, count) {
-      return getSome((this.raw || this)[lastNode], prevNode, selectors, count);
+    plugin.last = function last(count, selectors, thisArg) {
+      return getSome((this.raw || this)[lastNode], prevNode, count, selectors, thisArg);
     };
 
-    plugin.getAncestors = function getAncestors(selectors) {
-      return getSome((this.raw || this).parentNode, 'parentNode', selectors, Infinity) || NodeList();
+    plugin.getAncestors = function getAncestors(selectors, thisArg) {
+      return getSome((this.raw || this).parentNode, 'parentNode', Infinity, selectors, thisArg) || NodeList();
     };
 
-    plugin.getDescendants = function getDescendants(selectors) {
-      return plugin.down.call(this, selectors, Infinity);
+    plugin.getDescendants = function getDescendants(selectors, thisArg) {
+      return plugin.down.call(this, Infinity, selectors, thisArg);
     };
 
-    plugin.getNextSiblings = function getNextSiblings(selectors) {
-      return getSome((this.raw || this)[nextNode], nextNode, selectors, Infinity) || NodeList();
+    plugin.getNextSiblings = function getNextSiblings(selectors, thisArg) {
+      return getSome((this.raw || this)[nextNode], nextNode, Infinity, selectors, thisArg) || NodeList();
     };
 
-    plugin.getPreviousSiblings = function getPreviousSiblings(selectors) {
-      return getSome((this.raw || this)[prevNode], prevNode, selectors, Infinity) || NodeList();
+    plugin.getPreviousSiblings = function getPreviousSiblings(selectors, thisArg) {
+      return getSome((this.raw || this)[prevNode], prevNode, Infinity, selectors, thisArg) || NodeList();
     };
 
     // prevent JScript bug with named function expressions

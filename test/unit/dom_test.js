@@ -1072,7 +1072,7 @@ new Test.Unit.Runner({
       'Should return an array of 2 parent elements');
 
     this.assertElementMatches(element.up(3)[2], 'ul#navigation_test');
-    this.assertElementMatches(element.up('ul', 2)[1], 'ul#navigation_test');
+    this.assertElementMatches(element.up(2, 'ul')[1], 'ul#navigation_test');
 
     this.assertEqual(null, element.up('garbage'));
     this.assertEqual(6, element.up(7).length);
@@ -1097,8 +1097,8 @@ new Test.Unit.Runner({
     this.assertElementMatches(element.down(0)[0], 'li.first');
     this.assertElementMatches(element.down(1)[0], 'li.first');
     this.assertElementMatches(element.down(2)[1], 'em');
-    this.assertElementMatches(element.down('li', 6)[5], 'li.last');
-    this.assertElementMatches(element.down('ul').down('li', 2)[1], 'li#navigation_test_f');
+    this.assertElementMatches(element.down(6, 'li')[5], 'li.last');
+    this.assertElementMatches(element.down('ul').down(2, 'li')[1], 'li#navigation_test_f');
     this.assertElementMatches(element.down('.non-existant, .first'), 'li.first');
 
     this.assertEqual(

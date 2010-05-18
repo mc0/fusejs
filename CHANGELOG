@@ -1,3 +1,12 @@
+* Change argument order in dom traversal methods. [jddalton]
+  New argument order for up/down/next/previous/first/last methods:
+    (/* empty */)
+    (count)
+    (count, selector)
+    (count, callback, thisArg)
+    (selector)
+    (callback, thisArg)
+
 * Make the readyState poller for the dom:loaded event fire sooner and avoid the poller if the window is already loaded. [jddalton]
 
 * Move toQueryString() and toQueryParam() methods to /lang/query.js and remove `parseQuery` alias. [jddalton]
