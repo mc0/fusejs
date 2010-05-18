@@ -7,9 +7,6 @@
 [submodule "vendor/sizzle"]
 	path = vendor/sizzle
 	url = git://github.com/jeresig/sizzle.git
-[submodule "vendor/slick"]
-	path = vendor/slick
-	url = git://github.com/mootools/slick.git
 [submodule "vendor/sly"]
 	path = vendor/sly
 	url = git://github.com/digitarald/sly.git
