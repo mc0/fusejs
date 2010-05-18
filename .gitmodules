@@ -10,3 +10,6 @@
 [submodule "vendor/sly"]
 	path = vendor/sly
 	url = git://github.com/digitarald/sly.git
+[submodule "vendor/slick"]
+	path = vendor/slick
+	url = git://github.com/mootools/slick.git
