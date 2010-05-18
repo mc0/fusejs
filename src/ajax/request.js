@@ -1,25 +1,24 @@
   /*---------------------------- AJAX: REQUEST -------------------------------*/
 
   fuse.ajax.Request = (function() {
-    var Decorator = function() { },
+    var Klass = function() { },
 
     Request = function Request(url, options) {
-      var decorated  = __instance || new Decorator,
-       onStateChange = decorated.onStateChange,
-       onTimeout     = decorated.onTimeout;
+      var instance   = __instance || new Klass,
+       onStateChange = instance.onStateChange,
+       onTimeout     = instance.onTimeout;
 
       __instance = null;
+      instance.raw = fuse.ajax.create();
 
-      decorated.raw = fuse.ajax.create();
+      instance.onTimeout = 
+        function() { onTimeout.call(instance); };
 
-      decorated.onTimeout =
-        function() { onTimeout.call(decorated); };
+      instance.onStateChange =
+        function(event, forceState) { onStateChange.call(instance, event, forceState); };
 
-      decorated.onStateChange =
-        function(event, forceState) { onStateChange.call(decorated, event, forceState); };
-
-      decorated.request(url, options);
-      return decorated;
+      instance.request(url, options);
+      return instance;
     },
 
     __instance,
@@ -37,7 +36,7 @@
     };
 
     fuse.Class(fuse.ajax.Base, { 'constructor': Request });
-    Decorator.prototype = Request.plugin;
+    Klass.prototype = Request.plugin;
 
     Request.addMixins(fuse.Class.mixins.event);
     Request.READY_STATES = fuse.Array('unsent', 'opened', 'headersReceived', 'loading', 'done');
@@ -66,7 +65,7 @@
     };
 
     plugin._useStatus   = true;
-    plugin._timerID     = nil;
+    plugin._timerId     = nil;
     plugin.readyState   = fuse.Number(0);
     plugin.responseText = fuse.String('');
     plugin.status       = fuse.Number(0);
@@ -167,12 +166,12 @@
       }
 
       var key,
-       async     = options.asynchronous,
-       body      = this.body,
-       headers   = options.headers,
-       timeout   = options.timeout,
-       url       = String(this.url),
-       xhr       = this.raw;
+       async   = options.asynchronous,
+       body    = this.body,
+       headers = options.headers,
+       timeout = options.timeout,
+       url     = String(this.url),
+       xhr     = this.raw;
 
       // reset flags
       this.isAborted  = createGetter('isAborted', false);
@@ -192,8 +191,9 @@
           reHTTP.test(global.location.protocol) : false);
 
       // start timeout timer if provided
-      if (timeout != null)
-        this._timerID = setTimeout(this.onTimeout, timeout * this.timerMultiplier);
+      if (timeout != null) {
+        this._timerId = setTimeout(this.onTimeout, timeout * this.timerMultiplier);
+      }
 
       // fire onCreate callbacks
       this.fire('create', options.onCreate);
@@ -209,8 +209,9 @@
         xhr.onreadystatechange = this.onStateChange;
 
         // set headers
-        for (key in headers)
+        for (key in headers) {
           xhr.setRequestHeader(key, headers[key]);
+        }
 
         // if body is a string ensure it's a primitive
         xhr.send(isString(body) ? String(body) : body);
@@ -224,8 +225,8 @@
     };
 
     plugin.setReadyState = function setReadyState(readyState) {
-      var eventType, heandlers, json, responseText,
-       status, statusText, successOrFailure, i = -1,
+      var contentType, evalJS, eventType, heandlers, json, responseText,
+       responseXML, status, statusText, successOrFailure, timerId, i = -1,
        events     = this._events,
        eventTypes = [],
        skipped    = { },
@@ -292,30 +293,31 @@
       }
 
       if (readyState == 4) {
-        var responseXML,
-         contentType = this.getHeader('Content-type') || '',
-         evalJS = options.evalJS,
-         timerID = this._timerID;
-
+        contentType  = this.getHeader('Content-type') || '',
+        evalJS       = options.evalJS,
+        timerId      = this._timerId;
         responseText = this.responseText;
 
         // clear timeout timer
-        if (timerID != null) {
-          global.clearTimeout(timerID);
-          this._timerID = null;
+        if (timerId != null) {
+          global.clearTimeout(timerId);
+          this._timerId = null;
         }
 
+        if (status != null) {
+          status = String(status);
+        }
         if (isAborted) {
           eventTypes.push('abort');
-          if (status != null) eventTypes.push(status);
+          if (status) eventTypes.push(status);
         }
         else if (isTimedout) {
           eventTypes.push('timeout');
-          if (status != null) eventTypes.push(status);
+          if (status) eventTypes.push(status);
         }
         else {
           // don't call global/request onSuccess/onFailure callbacks on aborted/timedout requests
-          if (status != null) eventTypes.push(status);
+          if (status) eventTypes.push(status);
           successOrFailure = this.isSuccess() ? 'success' : 'failure';
           eventTypes.push(successOrFailure);
 

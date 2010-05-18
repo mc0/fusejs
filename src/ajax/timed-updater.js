@@ -6,7 +6,7 @@
 
     Request = fuse.ajax.Request,
 
-    Klass = function() { },
+    Klass   = function() { },
 
     TimedUpdater = function TimedUpdater(container, url, options) {
       var onDone,
