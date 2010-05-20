@@ -28,19 +28,19 @@
         decorated.isLoaded = createGetter('isLoaded', true);
         domLoadDispatcher(event);
         decorated.stopObserving('DOMContentLoaded').stopObserving('dom:loaded');
+        delete fuse.dom.data[2].events['dom:loaded'];
       }
     },
 
     winLoadWrapper = function(event) {
       event || (event = global.event);
-      var domData = fuse.dom.data;
 
       // make dom:loaded dispatch if it hasn't
       if (!fuse(fuse._doc).isLoaded()) {
         domLoadWrapper(event);
       }
       // try again later if dom:loaded is still executing handlers
-      else if (domData[2] && domData[2].events['dom:loaded']) {
+      else if (fuse.dom.data[2].events['dom:loaded']) {
         return setTimeout(function() { winLoadWrapper(event); }, 10);
       }
       // prepare event wrapper
