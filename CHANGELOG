@@ -1,3 +1,5 @@
+* Optimize event findElement(), getPointerX(), and getPointerX() methods by reducing the number of elements that are decorated. [jddalton]
+
 * Make the IE `dom:loaded` event only use the doScroll() technique when using less than IE8. [jddalton]
 
 * Change argument order in dom traversal methods. [jddalton]

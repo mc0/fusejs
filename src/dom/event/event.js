@@ -139,7 +139,9 @@
     definePointerXY = function() {
       var info = fuse._info,
 
-      doc = getDocument(this.getTarget() || global),
+      currTarget = this.getCurrentTarget(),
+
+      doc = getDocument(currTarget.raw || currTarget),
 
       object = this.raw && doc[info.root.property] &&
         doc[info.scrollEl.property] ? plugin : this,
@@ -163,9 +165,10 @@
       // IE and others
       if (typeof this.raw.pageX !== 'number') {
         getPointerX = function getPointerX() {
-          var doc, root, scrollEl, x = 0;
+          var currTarget, doc, root, scrollEl, x = 0;
           if (this.raw) {
-            doc = getDocument(this.getTarget() || global);
+            currTarget = this.getCurrentTarget();
+            doc = getDocument(currTarget.raw || currTarget);
             root = doc[info.root.property];
             scrollEl = doc[info.scrollEl.property];
             x = this.raw.clientX + scrollEl.scrollLeft - root.clientLeft;
@@ -176,9 +179,10 @@
         };
 
         getPointerY = function getPointerY() {
-          var doc, root, scrollEl, y = 0;
+          var currTarget, doc, root, scrollEl, y = 0;
           if (this.raw) {
-            doc = getDocument(this.getTarget() || global);
+            currTarget = this.getCurrentTarget();
+            doc = getDocument(currTarget.raw || currTarget);
             root = doc[info.root.property];
             scrollEl = doc[info.scrollEl.property];
             y = this.raw.clientY + scrollEl.scrollTop - root.clientTop;
@@ -192,7 +196,7 @@
       object.getPointerX = getPointerX;
       object.getPointerY = getPointerY;
 
-      doc = object = nil;
+      currTarget = doc = object = nil;
       return this[arguments[0]]();
     },
 
@@ -213,6 +217,52 @@
     getOrCreateCache = function(id, type) {
       var data = domData[id], events = data.events || (data.events = { });
       return events[type] || (events[type] = { 'handlers': [], 'dispatcher': false });
+    },
+
+    getEventTarget = function(decorator) {
+      getEventTarget = function(decorator) {
+        var currRaw, type,
+         event = decorator.raw,
+         currTarget = decorator.getCurrentTarget(),
+         node = currTarget;
+
+        if (event) {
+          currRaw = currTarget.raw || currTarget;
+          node = event.target || currTarget;
+          type = event.type;
+
+          // 1) Firefox screws up the "load" and "error" events on images
+          // 2) Firefox also screws up the "click" event when
+          //    moving between radio buttons via arrow keys.
+          // 3) Force window to return window
+          if (BUGGY_EVENT_TYPES[type] ||
+              (getNodeName(currRaw) === 'INPUT' &&
+              currRaw.type === 'radio' && type === 'click') ||
+              currRaw == getWindow(currRaw)) {
+            node = currTarget;
+          }
+          // Fix a Safari bug where a text node gets passed as the target of an
+          // anchor click rather than the anchor itself.
+          else if (node.nodeType === TEXT_NODE) {
+            node = node.parentNode;
+          }
+        }
+        return node;
+      };
+
+      if (typeof decorator.raw.target === 'undefined') {
+        getEventTarget = function(decorator) {
+          var node, event = decorator.raw;
+          if (event) {
+            node = event.srcElement;
+          }
+          if (!node) {
+            node = decorator.getCurrentTarget();
+          }
+          return node;
+        };
+      };
+      return getEventTarget(decorator);
     },
 
     removeObserver = function(element, type, handler) {
@@ -313,53 +363,14 @@
       },
 
       getTarget = function getTarget() {
-        var currRaw, type,
-         event = this.raw,
-         currTarget = this.getCurrentTarget(),
-         node = currTarget;
-
-        if (event) {
-          currRaw = currTarget.raw || currTarget;
-          node = event.target || currTarget;
-          type = event.type;
-
-          // 1) Firefox screws up the "load" and "error" events on images
-          // 2) Firefox also screws up the "click" event when
-          //    moving between radio buttons via arrow keys.
-          // 3) Force window to return window
-          if (BUGGY_EVENT_TYPES[type] ||
-              (getNodeName(currRaw) === 'INPUT' &&
-              currRaw.type === 'radio' && type === 'click') ||
-              currRaw == getWindow(currRaw)) {
-            node = currTarget;
-          }
-          // Fix a Safari bug where a text node gets passed as the target of an
-          // anchor click rather than the anchor itself.
-          else if (node.nodeType === TEXT_NODE) {
-            node = node.parentNode;
-          }
-          node = fromElement(node);
-        }
-        return setTarget(this, node);
+        var node = getEventTarget(this);
+        return setTarget(this, node && fromElement(node));
       };
 
       // fired events have no raw
       if (!this.raw) {
         return setTarget(this, this.getCurrentTarget());
       }
-      if (typeof this.raw.target === 'undefined') {
-        getTarget = function getTarget() {
-          var node, event = this.raw;
-          if (event && (node = event.srcElement)) {
-            node = fromElement(node);
-          }
-          if (!node) {
-            node = this.getCurrentTarget();
-          }
-          return setTarget(this, node);
-        };
-      };
-
       plugin.getTarget = getTarget;
       return this.getTarget();
     };
@@ -408,17 +419,22 @@
     };
 
     plugin.findElement = function findElement(selectors, untilElement) {
-      var match = fuse.dom.selector.match, element = this.getTarget();
-      if (selectors == null || selectors == '' || !element || match(element, selectors)) {
-        return element;
-      }
-      if (element = (element.raw || element).parentNode) {
-        do {
-          if (element === untilElement)
-            break;
-          if (element.nodeType === ELEMENT_NODE && match(element, selectors))
-            return fromElement(element);
-        } while (element = element.parentNode);
+      var match = fuse.dom.selector.match,
+       element = this.getTarget === plugin.getTarget ? getEventTarget(this) : this.getTarget();
+
+      element = element.raw || element;
+      if (element !== untilElement) {
+        if (selectors == null || selectors == '' || !element || match(element, selectors)) {
+          return element;
+        }
+        if (element = (element.raw || element).parentNode) {
+          do {
+            if (element === untilElement)
+              break;
+            if (element.nodeType === ELEMENT_NODE && match(element, selectors))
+              return fromElement(element);
+          } while (element = element.parentNode);
+        }
       }
       return null;
     };
@@ -561,7 +577,7 @@
         // if the handler is omitted we stop
         // observing all handlers of that type
         if (handler == null) {
-          length = ec.handlers.length;
+          length = ec.handlers.length || 1;
           while (length--) stopObserving.call(element, type, length);
           return this;
         }
@@ -573,7 +589,8 @@
       if (isNumber(handler)) {
         // bail if handler is a delegator
         foundAt = handler;
-        if (ec.handlers[foundAt]._delegatee) {
+        handler = ec.handlers[foundAt];
+        if (handler && handler._delegatee) {
           foundAt = -1;
         }
       } else {
