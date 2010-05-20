@@ -200,6 +200,12 @@
    'lang/regexp.js',
    'lang/string.js',
 
+   'lang/console.js',
+   'lang/hash.js',
+   'lang/range.js',
+   'lang/template.js',
+   'lang/timer.js',
+
    'dom/dom.js',
    'dom/features.js',
    'dom/node.js',
@@ -226,18 +232,12 @@
    'dom/event/event.js',
    'dom/event/delegate.js',
 
-   'lang/console.js',
-   'lang/hash.js',
-   'lang/range.js',
-   'lang/template.js',
-   'lang/timer.js',
-   'lang/util.js',
-
    'lang/ecma.js',
    'lang/grep.js',
    'lang/inspect.js',
    'lang/query.js',
    'lang/json.js',
+   'lang/util.js',
 
    'ajax/ajax.js',
    'ajax/responders.js',
