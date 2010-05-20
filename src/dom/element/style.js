@@ -233,7 +233,8 @@
   // Note: For performance we normalize all spaces to \x20.
   // http://www.w3.org/TR/html5/infrastructure.html#space-character
   (function(plugin) {
-    var split = fuse.String.plugin.split,
+
+    var split      = fuse.String.plugin.split,
      reEdgeSpaces  = /[\t\n\r\f]/g,
      reExtraSpaces = /\x20{2,}/g;
 
@@ -293,7 +294,10 @@
   /*--------------------------------------------------------------------------*/
 
   (function(plugin) {
+
     var getFuseId = Node.getFuseId,
+
+    TABLE_ELEMENTS = { 'THEAD': 1, 'TBODY': 1, 'TR': 1 },
 
     OPACITY_PROP = (function(s) {
       return typeof s.opactiy  !== 'undefined' ? 'opacity'       :
@@ -323,16 +327,15 @@
     };
 
     plugin.show = function show() {
-      var element = this.raw || this,
-       data = domData[getFuseId(element)],
+      var data, element = this.raw || this,
        elemStyle = element.style,
        display = elemStyle.display;
 
       if (display === 'none') {
+        data = domData[getFuseId(element)],
         elemStyle.display = data.madeHidden || '';
+        delete data.madeHidden;
       }
-
-      delete data.madeHidden;
       return this;
     };
 
@@ -341,16 +344,15 @@
     };
 
     plugin.getOpacity = (function() {
-      var reOpacity = /alpha\(opacity=(.*)\)/,
-
-      getOpacity = function getOpacity() {
+      var getOpacity = function getOpacity() {
         return fuse.Number(parseFloat(this.style[OPACITY_PROP]));
       };
 
       if (envTest('ELEMENT_MS_CSS_FILTERS')) {
+        var reFilterOpacity = /alpha\(opacity=(.*)\)/;
         getOpacity = function getOpacity() {
           var element = this.raw || this,
-           result = (element.currentStyle || element.style).filter.match(reOpacity);
+           result = (element.currentStyle || element.style).filter.match(reFilterOpacity);
           return fuse.Number(result && result[1] ? parseFloat(result[1]) / 100 : 1.0);
         };
       }
@@ -375,9 +377,9 @@
     plugin.setOpacity = (function() {
       var nearOne = 0.99999,
        nearZero   = 0.00001,
-       reAlpha    = /alpha\([^)]*\)/i,
+       reAlpha    = /alpha\([^)]*\)/i;
 
-      setOpacity = function setOpacity(value) {
+      var setOpacity = function setOpacity(value) {
         if (value > nearOne) {
           value = 1;
         } if (value < nearZero && !isString(value)) {
@@ -419,9 +421,7 @@
         };
       }
       else if (!OPACITY_PROP) {
-        setOpacity = function setOpacity(value) {
-          // do nothing
-        };
+        setOpacity = function setOpacity(value) { /* do nothing */ };
       }
 
       return setOpacity;
@@ -430,10 +430,7 @@
     plugin.isVisible = function isVisible() {
       if (!fuse._body) return false;
 
-      var __isVisible, isVisible,
-       TABLE_ELEMENTS = { 'THEAD': 1, 'TBODY': 1, 'TR': 1 };
-
-      isVisible = function isVisible() {
+      var isVisible = function isVisible() {
         // handles IE and the fallback solution
         var element = this.raw || this, currStyle = element.currentStyle;
         return currStyle !== null && (currStyle || element.style).display !== 'none' &&
@@ -447,10 +444,8 @@
           return !!(compStyle && (element.offsetHeight || element.offsetWidth));
         };
       }
-
       if (envTest('TABLE_ELEMENTS_RETAIN_OFFSET_DIMENSIONS_WHEN_HIDDEN')) {
-        __isVisible = isVisible;
-
+        var __isVisible = isVisible;
         isVisible = function isVisible() {
           if (__isVisible.call(this)) {
             var element = this.raw || this, nodeName = getNodeName(element);
