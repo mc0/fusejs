@@ -144,11 +144,9 @@
     };
 
     plugin.request = function request(options) {
-      var params = options.parameters,
-       submit    = options.submit,
-       
-
       options = Obj.clone(options);
+      var params = options.parameters, submit = options.submit;
+
       delete options.submit;
       options.parameters = plugin.serialize.call(this, { 'submit':submit, 'hash':true });
 
@@ -159,7 +157,7 @@
       if (plugin.hasAttribute.call(this, 'method') && !options.method) {
         options.method = plugin.getAttribute.call(this, 'method');
       }
-      return fuse.ajax.Request(action, options);
+      return fuse.ajax.Request(plugin.getAttribute.call(this, 'action'), options);
     };
 
     plugin.reset = function reset() {
