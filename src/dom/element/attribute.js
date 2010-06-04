@@ -8,10 +8,7 @@
   };
 
   (function(plugin) {
-    var ATTRIBUTE_NODES_SHARED_ON_CLONED_ELEMENTS =
-      envTest('ATTRIBUTE_NODES_SHARED_ON_CLONED_ELEMENTS'),
-
-    hasAttribute = function hasAttribute(name) {
+    var hasAttribute = function hasAttribute(name) {
       return (this.raw || this).hasAttribute(name);
     };
 
@@ -74,10 +71,6 @@
           element.removeAttribute(contentName);
         }
         else {
-          if (ATTRIBUTE_NODES_SHARED_ON_CLONED_ELEMENTS &&
-              plugin.hasAttribute.call(this, contentName)) {
-            element.removeAttribute(contentName);
-          }
           element.setAttribute(contentName,
             value === true ? name : String(value));
         }
@@ -92,9 +85,7 @@
   /*--------------------------------------------------------------------------*/
 
   (function(T) {
-    var INPUT_DEFAULT_VALUE,
-
-    plugin = Element.plugin,
+    var plugin = Element.plugin,
 
     getAttribute = function(element, contentName) {
       return element.getAttribute(contentName);
@@ -179,6 +170,13 @@
     // mandate type getter
     T.read.type = getAttribute;
 
+    // mandate getter/setter for checked and selected attributes
+    // http://www.w3.org/TR/DOM-Level-2-HTML/html.html#ID-37770574
+    T.read.checked   = getDefault('Checked');
+    T.write.checked  = setDefault('Checked');
+    T.read.selected  = getDefault('Selected');
+    T.write.selected = setDefault('Selected');
+
     // mandate flag attributes set and return their name
     splitEach('checked disabled isMap multiple noHref noResize noShade ' +
       'noWrap readOnly selected',
@@ -196,42 +194,38 @@
         T.read['on' + name] = getEvent;
     });
 
+    // mandate getAttribute/setAttribute for value
+    // http://www.w3.org/TR/DOM-Level-2-HTML/html.html#ID-26091157
+    Element.extendByTag(['input', 'textarea'], function() {
+      var __getAttribute = plugin.getAttribute,
+       __setAttribute = plugin.setAttribute,
+
+      getAttribute = function getAttribute(name) {
+        return name == 'value'
+          ? getValue(this.raw || this)
+          : __getAttribute.call(this, name);
+      },
+
+      setAttribute = function setAttribute(name, value) {
+        name == 'value'
+          ? setValue(this.raw || this, value)
+          : __setAttribute.call(this, name, value);
+        return this;
+      };
+
+      return { 'getAttribute': getAttribute, 'setAttribute': setAttribute };
+    });
+ 
     // capability checks
     (function() {
       var checkbox, input, node, value,
-       doc    = fuse._doc,
-       form   = doc.createElement('form'),
-       label  = doc.createElement('label'),
-       select = doc.createElement('select');
+       doc   = fuse._doc,
+       form  = doc.createElement('form'),
+       label = doc.createElement('label');
 
       label.htmlFor = label.className = 'x';
       label.setAttribute('style', 'display:block');
       form.setAttribute('enctype', 'multipart/form-data');
-
-      if (envTest('CREATE_ELEMENT_WITH_HTML')) {
-        checkbox = doc.createElement('<input type="checkbox">');
-        input = doc.createElement('<input type="text">');
-      } else {
-        checkbox = doc.createElement('input');
-        input = checkbox.cloneNode(false);
-        checkbox.type = 'checkbox';
-        input.type = 'text';
-      }
-
-      // test defaultValue
-      INPUT_DEFAULT_VALUE = 'defaultValue' in input;
-
-      // test defaultChecked
-      if ('defaultChecked' in checkbox) {
-        T.read.checked  = getDefault('Checked');
-        T.write.checked = setDefault('Checked');
-      }
-
-      // test defaultSelected
-      if ('defaultSelected' in select) {
-        T.read.selected  = getDefault('Selected');
-        T.write.selected = setDefault('Selected');
-      }
 
       // translate content name `htmlFor`
       if (label.getAttribute('htmlFor') === 'x') {
@@ -269,29 +263,6 @@
         splitEach('href longdesc src', function(name) { T.read[name] = getExact; });
       }
     })();
-
-    // getter/setter for input element value
-    if (INPUT_DEFAULT_VALUE) {
-      Element.extendByTag('input', function() {
-        var __getAttribute = plugin.getAttribute,
-         __setAttribute = plugin.setAttribute,
-
-        getAttribute = function getAttribute(name) {
-          return name == 'value'
-            ? getValue(this.raw || this)
-            : __getAttribute.call(this, name);
-        },
-
-        setAttribute = function setAttribute(name, value) {
-          name == 'value'
-            ? setValue(this.raw || this, value)
-            : __setAttribute.call(this, name, value);
-          return this;
-        };
-
-        return { 'getAttribute': getAttribute, 'setAttribute': setAttribute };
-      });
-    }
 
     // setter for button element value
     if (envTest('BUTTON_VALUE_CHANGES_AFFECT_INNER_CONTENT')) {

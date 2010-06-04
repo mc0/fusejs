@@ -74,6 +74,11 @@
         strPlugin.split : strPlugin.split.raw).call(this, separator);
     };
 
+
+    plugin.clone = function clone() {
+      return fuse.Template(this.template, this.pattern);
+    };
+
     plugin.preparse = function preparse() {
       var backslash, chain, escaped, prop, temp, token, tokens, j, i = 1,
        template = String(this.template),
@@ -192,7 +197,7 @@
     };
 
     // prevent JScript bug with named function expressions
-    var preparse = nil, parse = nil;
+    var clone = nil, preparse = nil, parse = nil;
   })(fuse.Template.plugin);
 
   /*--------------------------------------------------------------------------*/

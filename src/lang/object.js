@@ -188,26 +188,45 @@
 
   (function(Obj) {
 
-    Obj.clone = function clone(object) {
+    Obj.clone = function clone(object, deep) {
       if (object) {
         if (isFunction(object.clone)) {
-          return object.clone();
+          return object.clone(deep);
         }
         if (typeof object === 'object') {
-          var constructor = object.constructor;
+          var length, result, constructor = object.constructor, i = -1;
           switch (toString.call(object)) {
+            case '[object Array]'  :
+              if (deep) {
+                result = constructor();
+                length = object.length;
+                while (++i < length) result[i] = Obj.clone(object[i], deep);
+              } else {
+                result = object.slice(0);
+              }
+              return result;
+
             case '[object RegExp]' :
               return constructor(object.source,
                 (object.global     ? 'g' : '') +
                 (object.ignoreCase ? 'i' : '') +
                 (object.multiline  ? 'm' : ''));
+
             case '[object Number]' :
             case '[object String]' : return new constructor(object);
             case '[object Boolean]': return new constructor(object == true);
             case '[object Date]'   : return new constructor(+object);
-            case '[object Array]'  : return object.slice(0);
           }
-          return Obj.extend(Obj(), object);
+
+          result = Obj();
+          if (deep) {
+            eachKey(object, function(value, key) {
+             result[key] = Obj.clone(value, deep);
+            });
+          } else {
+            Obj.extend(result, object);
+          }
+          return result;
         }
       }
       return Obj();

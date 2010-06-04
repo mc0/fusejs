@@ -93,6 +93,10 @@
       }
     };
 
+    plugin.clone = function clone() {
+      return fuse.Range(this.start, this.end, this.exclusive);
+    };
+
     plugin.max = function max(callback, thisArg) {
       var result;
       if (!callback) {
@@ -139,7 +143,7 @@
     }
 
     // prevent JScript bug with named function expressions
-    var _each = nil, max = nil, min = nil, size = nil, toArray = nil;
+    var _each = nil, clone = nil, max = nil, min = nil, size = nil, toArray = nil;
   })(fuse.Range.plugin);
 
   /*--------------------------------------------------------------------------*/

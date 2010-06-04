@@ -341,7 +341,8 @@
     // IE fails to set the BUTTON element's `type` attribute without using the sTag
     // http://dev.rubyonrails.org/ticket/10548
 
-    if (envTest('CREATE_ELEMENT_WITH_HTML')) {
+    if (envTest('NAME_ATTRIBUTE_IS_READONLY') &&
+        envTest('CREATE_ELEMENT_WITH_HTML')) {
       var __create = create;
       create = function create(tagName, context) {
         var attrs, element, id, isCached, isDecorated, name, nodes, type, result = null;

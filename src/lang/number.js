@@ -16,6 +16,10 @@
       return fuse.Number(__ceil(this));
     };
 
+    plugin.clone = function clone() {
+      return fuse.Number(this);
+    };
+
     plugin.floor = function floor() {
       return fuse.Number(__floor(this));
     };
@@ -50,6 +54,7 @@
     // prevent JScript bug with named function expressions
     var abs =         nil,
      ceil =           nil,
+     clone =          nil,
      floor =          nil,
      round =          nil,
      times =          nil,

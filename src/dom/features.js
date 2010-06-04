@@ -115,6 +115,19 @@
         typeof fuse._div.innerText === 'string';
     },
 
+    'ELEMENT_MERGE_ATTRIBUTES': function() {
+      // true for IE
+      var result, element, div = fuse._div;
+      if (isHostType(div, 'mergeAttributes')) {
+        element = fuse._doc.createElement('div');
+        div.id = 'x';
+        element.mergeAttributes(div);
+        result = element.id === 'x';
+        div.id = null;
+      }
+      return result;
+    },
+
     'ELEMENT_MS_CSS_FILTERS': function() {
       // true for IE
       var docEl = fuse._docEl, elemStyle = docEl.style;
@@ -151,13 +164,11 @@
   envAddTest({
     'ATTRIBUTE_NODES_SHARED_ON_CLONED_ELEMENTS': function() {
       // true for some IE6
-      var node, clone, div = fuse._div;
-      (node = document.createAttribute('id')).value = 'x';
-
+      var clone, div = fuse._div, node = fuse._doc.createAttribute('id');
+      node.value = 'x';
       div.setAttributeNode(node);
       clone = div.cloneNode(false);
       div.setAttribute('id', 'y');
-
       return !!((node = clone.getAttributeNode('id')) && node.value == 'y');
     },
 
@@ -261,25 +272,6 @@
       return result;
     },
 
-    'ELEMENT_OBJECT_AND_RELATIVES_FAILS_TO_INHERIT_FROM_PROTOTYPE': function() {
-      // IE8 bugs:
-      // Must reference Element as a property of global when assigning
-      // properties to its prototype or it will create a seperate instance
-      // for Element and global.Element.
-
-      // HTMLObjectElement, HTMLAppletElement and HTMLEmbedElement objects
-      // don't inherit from their prototypes. Creating an APPLET element
-      // will alert a warning message if Java is not installed.
-      if (envTest('ELEMENT_SPECIFIC_EXTENSIONS')) {
-        var element = fuse._doc.createElement('object'),
-         prototype = global.Element.prototype;
-        prototype[expando] = true;
-        var result = !element[expando];
-        delete prototype[expando];
-        return result;
-      }
-    },
-
     'ELEMENT_TABLE_INNERHTML_INSERTS_TBODY': function() {
       // true for IE and Firefox 3
       var div = fuse._div;
@@ -294,6 +286,25 @@
       var div = fuse._div;
       div.innerHTML = '<p>x<\/p><!--y-->';
       var result = div.getElementsByTagName('*').length === 2;
+      div.innerHTML = '';
+      return result;
+    },
+
+    'INPUT_VALUE_PROPERTY_SETS_ATTRIBUTE': function() {
+      // true for IE
+      var input = fuse._doc.createElement('input');
+      input.setAttribute('value', 'x');
+      input.value = 'y';
+      return input.cloneNode(false).getAttribute('value') === 'y';
+    },
+
+    'NAME_ATTRIBUTE_IS_READONLY': function() {
+      // true for IE6/7
+      var result, div = fuse._div,
+       node = div.appendChild(fuse._doc.createElement('input'));
+
+      node.name = 'x';
+      result = !!div.getElementsByTagName('*')['x'];
       div.innerHTML = '';
       return result;
     },

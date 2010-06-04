@@ -46,6 +46,10 @@
         string.slice(1).toLowerCase());
     };
 
+    plugin.clone = function clone() {
+      return fuse.String(this);
+    };
+
     plugin.contains = function contains(pattern) {
       return String(this).indexOf(pattern) > -1;
     };
@@ -201,6 +205,7 @@
     var blank =        nil,
       camelize =       nil,
       capitalize =     nil,
+      clone =          nil,
       contains =       nil,
       endsWith =       nil,
       evalScripts =    nil,

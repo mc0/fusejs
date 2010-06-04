@@ -4,6 +4,12 @@
 
     var TREAT_AS_STRING = { '[object Number]': 1, '[object String]': 1 },
 
+    CHECKED_INPUT_TYPES = { 'checkbox': 1, 'radio': 1 },
+
+    PROPS_TO_COPY = { 'OPTION': 'selected', 'TEXTAREA': 'value' },
+
+    DEFAULTS_TO_COPY = { 'selected': 'defaultSelected', 'value': 'defaultValue' },
+
     INSERTABLE_NODE_TYPES = { '1': 1, '3': 1, '8': 1, '10': 1, '11': 1 },
 
     INSERT_POSITIONS_TO_METHODS = {
@@ -78,6 +84,62 @@
       }
       return result;
     },
+
+    cloneNode = function(source) {
+      return source.cloneNode(false);
+    },
+
+    createCloner = function() {
+      return function(source, deep, cloneData, cloneEvents, excludes, context) {
+        var addDispatcher, data, id, length, node, nodes, srcData, srcEvents, i = -1, 
+         element = cloneNode(source, excludes, null, context);
+
+        if (excludes) {
+          length = excludes.length;
+          while (length--) {
+            element.removeAttribute(excludes[length]);
+          }
+        }
+
+        if (cloneData || cloneEvents) {
+          id ||  (id = fromElement(element).getFuseId());
+          data = domData[id];
+          srcData = domData[getFuseId(source)];
+          srcEvents = srcData.events;
+
+          if (cloneData) {
+            delete srcData.events;
+            fuse.Object.extend(data, srcData);
+            srcEvents && (srcData.events = srcEvents);
+          }
+          if (cloneEvents && srcEvents) {
+            // copy delegation watcher
+            if (srcData._isWatchingDelegation) {
+              fuse.dom.Event._addWatcher(element, data);
+            }
+            // copy events
+            addDispatcher = fuse.dom.Event._addDispatcher;
+            eachKey(srcEvents, function(ec, type) {
+              addDispatcher(element, type, null, id);
+              data.events[type].handlers = ec.handlers.slice(0);
+            });
+          }
+        }
+
+  		  if (deep) {
+  		    cloner = createCloner();
+  		    nodes  = source.childNodes;
+    		  while (node = nodes[++i]) {
+    	      element.appendChild(node.nodeType === ELEMENT_NODE
+    	        ? cloner(node, deep, events, excludes, context)
+    	        : node.cloneNode(false));
+    		  }
+  		  }
+  			return element;
+      };
+    },
+
+    cloner = createCloner(),
 
     insertContent = function(element, parentNode, content, position) {
       var stripped, insertElement = ELEMENT_INSERT_METHODS[position],
@@ -155,6 +217,7 @@
       }
     };
 
+    /*------------------------------------------------------------------------*/
 
     plugin.cleanWhitespace = function cleanWhitespace() {
       // removes whitespace-only text node children
@@ -169,6 +232,21 @@
         node = nextNode;
       }
       return this;
+    };
+
+    plugin.clone = function clone(deep) {
+      var context, excludes, element = this.raw || this;
+      if (deep && typeof deep === 'object') {
+        excludes = deep.excludes;
+        context  = deep.context || getDocument(element);
+        if (excludes && !isArray(excludes)) {
+          excludes = [excludes];
+        }
+        result = cloner(element, deep.deep, deep.data, deep.events, excludes, context);
+      } else {
+        result = cloner(element, deep, null, null, null, getDocument(element));
+      }
+      return fromElement(result);
     };
 
     plugin.insertBefore = function insertBefore(content) {
@@ -323,8 +401,17 @@
       return wrapper;
     };
 
+    /*------------------------------------------------------------------------*/
 
-    // fix inserting script elements in Safari <= 2.0.2 and Firefox 2.0.0.2
+    // Optimized for IE/Opera
+    if (envTest('ELEMENT_REMOVE_NODE')) {
+      plugin.remove = function remove() {
+        (this.raw || this).removeNode(true);
+        return this;
+      };
+    }
+
+    // Fix inserting script elements in Safari <= 2.0.2 and Firefox 2.0.0.2
     if (envTest('ELEMENT_SCRIPT_FAILS_TO_EVAL_TEXT')) {
       var __replaceElement = replaceElement;
       replaceElement = function(element, node) {
@@ -346,15 +433,7 @@
       })(ELEMENT_INSERT_METHODS);
     }
 
-    // optimized for IE and Opera
-    if (envTest('ELEMENT_REMOVE_NODE')) {
-      plugin.remove = function remove() {
-        (this.raw || this).removeNode(true);
-        return this;
-      };
-    }
-
-    // fix browsers with buggy innerHTML implementations
+    // Fix browsers with buggy innerHTML implementations
     if (ELEMENT_INNERHTML_BUGGY) {
       plugin.update = function update(content) {
         var isBuggy, stripped, type, element  = this.raw || this,
@@ -413,9 +492,66 @@
       };
     }
 
+    // Fix cloning elements in IE 6/7
+    if (envTest('ELEMENT_MERGE_ATTRIBUTES') &&
+       (envTest('ATTRIBUTE_NODES_SHARED_ON_CLONED_ELEMENTS') ||
+        envTest('NAME_ATTRIBUTE_IS_READONLY'))) {
+
+      cloneNode = function(source, excludes, nodeName, context) {
+        var attributes = { }, setName = 1, setType = 1;
+        nodeName || (nodeName = getNodeName(source));
+        if (excludes) {
+          excludes = ' ' + excludes.join(' ') + ' ';
+          setName = excludes.indexOf(' name ') === -1;
+          setType = excludes.indexOf(' type ') === -1;
+        }
+        if (typeof source.submit === 'undefined') {
+          if (setName) attributes.name = source.name;
+          if (setType) attributes.type = source.type;
+        } else {
+          if (setName) attributes.name = plugin.getAttribute.call(source, 'name');
+          if (setType) attributes.type = plugin.getAttribute.call(source, 'type');
+        }
+        element = Element.create(nodeName, { 'attrs': attributes, 'context': context, 'decorate': false });
+        element.mergeAttributes(source);
+        return element;
+      };
+    }
+
+    // Fix form element attributes in IE
+    if (envTest('INPUT_VALUE_PROPERTY_SETS_ATTRIBUTE')) {
+      var __cloneNode = cloneNode;
+      cloneNode = function(source, excludes, nodeName, context) {
+        nodeName || (nodeName = getNodeName(source));
+        var defaultProp, element = __cloneNode(source, excludes, nodeName, context);
+
+        // copy troublesome attributes/properties
+        excludes = excludes && ' ' + excludes.join(' ') + ' ' || '';
+  		  if (nodeName === 'INPUT') {
+  		    if (excludes.indexOf(' value ') === -1) {
+  		      element.defaultValue = source.defaultValue;
+  		      element.value = source.value;
+  		    }
+  		    if (CHECKED_INPUT_TYPES[element.type] &&
+  		        excludes.indexOf(' checked ') === -1) {
+  		      element.defaultChecked = source.defaultChecked;
+  		      element.checked = source.checked;
+  		    }
+  		  }
+  		  else if (prop = PROPS_TO_COPY[nodeName] &&
+  		      excludes.indexOf(' ' + prop + ' ') === -1) {
+		      defaultProp = DEFAULTS_TO_COPY[prop];
+		      element[defaultProp]  = source[defaultProp];
+		      element[prop] = source[prop];
+  		  }
+  		  return element;
+      };
+    }
+
     // prevent JScript bug with named function expressions
     var append =       nil,
      cleanWhitespace = nil,
+     clone =           nil,
      insert =          nil,
      insertAfter =     nil,
      insertBefore =    nil,

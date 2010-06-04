@@ -155,8 +155,18 @@
       return this;
     };
 
-    plugin.clone = function clone() {
-      return new $H(this);
+    plugin.clone = function clone(deep) {
+      var result, pair, pairs, i = -1;
+      if (deep) {
+        result = $H();
+        pairs  = this._pairs;
+        while (pair = pairs[++i]) {
+          result.set(pair[0], fuse.Object.clone(pair[1], deep));
+        }
+      } else {
+        result = $H(this);
+      }
+      return result;
     };
 
     plugin.contains = function contains(value) {
@@ -171,7 +181,7 @@
     };
 
     plugin.filter = function filter(callback, thisArg) {
-      var key, pair, value, i = -1, pairs = this._pairs, result = new $H;
+      var key, pair, value, i = -1, pairs = this._pairs, result = $H();
       callback = callback || function(value) { return value != null; };
 
       while (pair = pairs[++i]) {
@@ -205,7 +215,7 @@
 
     plugin.map = function map(callback, thisArg) {
       if (!callback) return this;
-      var key, pair, i = -1, pairs = this._pairs, result = new $H;
+      var key, pair, i = -1, pairs = this._pairs, result = $H();
 
       if (thisArg) {
         while (pair = pairs[++i])
@@ -220,7 +230,7 @@
     plugin.partition = function partition(callback, thisArg) {
       callback || (callback = IDENTITY);
       var key, value, pair, i = -1, pairs = this._pairs,
-       trues = new $H, falses = new $H;
+       trues = $H(), falses = $H();
 
       while (pair = pairs[++i]) {
         (callback.call(thisArg, value = pair[1], key = pair[0], this) ?
@@ -253,7 +263,7 @@
        callback = IDENTITY,
        hashes   = [this],
        pairs    = this._pairs,
-       result   = new $H;
+       result   = $H();
 
       // if last argument is a function it is the callback
       if (typeof args[args.length - 1] === 'function') {
@@ -262,7 +272,7 @@
 
       length = args.length;
       while (length--) {
-        hashes[length + 1] = new $H(args[length]);
+        hashes[length + 1] = $H(args[length]);
       }
 
       length = hashes.length;
