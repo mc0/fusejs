@@ -7,34 +7,33 @@
 
     var Decorator = function() { },
 
-    Node = function Node(node) {
+    Node = function Node(node, isCached) {
       // quick return if falsy or decorated
-      var data, decorated, id;
+      var data, decorated;
       if (!node || node.raw) {
         return node;
       }
       if (node.nodeType !== TEXT_NODE) {
         // return cached if available
-        id = Node.getFuseId(node);
-        if ((data = domData[id]).decorator) {
-          return data.decorator;
+        if (isCached !== false) {
+          data = domData[Node.getFuseId(node)];
+          if (data.decorator) {
+            return data.decorator;
+          }
         }
         // pass to element decorator
         switch (node.nodeType) {
-          case ELEMENT_NODE:  return fromElement(node);
-          case DOCUMENT_NODE: return Document(node);
+          case ELEMENT_NODE:  return fromElement(node, isCached);
+          case DOCUMENT_NODE: return Document(node, isCached);
         }
       }
-      // use new Decorator, which has Node.plugin mapped to Decorator.prototype,
-      // to avoid `new` operator with fuse.dom.Node
+
       decorated = new Decorator;
       decorated.raw = node;
       decorated.nodeName = node.nodeName;
 
       // text node decorators are not cached
-      return data
-        ? (data.decorator = decorated)
-        : decorated;
+      return data ? (data.decorator = decorated) : decorated;
     },
 
     getFuseId = function getFuseId() {
@@ -82,35 +81,25 @@
 
       // quick return for nodes with ids
       // IE can avoid adding an expando on each node and use the `uniqueNumber` property instead.
-      if (id) {
-        domData[id] || (domData[id] = { });
-        return id;
-      }
-      // In IE window == document is true but not document == window.
-      // Use loose comparison because different `window` references for
-      // the same window may not strict equal each other.
-      win = getWindow(node);
-      if (node == win) {
-        // optimization flag is set in the Node factory to avoid
-        // resolving ids for windows when not needed
-        id = '1';
-        if (node != global) {
-          id = getFuseId(node.frameElement) + '-1';
-          domData[id] || (domData[id] = { });
+      if (!id) {
+        // In IE window == document is true but not document == window.
+        // Use loose comparison because different `window` references for
+        // the same window may not strict equal each other.
+        win = getWindow(node);
+        if (node == win) {
+          id = node == global ? '1' : getFuseId(node.frameElement) + '-1';
         }
-        return id;
+        else if (node.nodeType === DOCUMENT_NODE) {
+          // quick return for common case OR
+          // calculate id for foreign document objects
+          id = node === fuse._doc ? '2' : getFuseId(win.frameElement) + '-2';
+          domData[id] || (domData[id] = { 'nodes': { } });
+        }
+        else {
+          id = node._fuseId = fuseId++;
+        }
       }
-      else if (node.nodeType === DOCUMENT_NODE) {
-        // quick return for common case
-        if (node === fuse._doc) return '2';
-        // calculate id for foreign document objects
-        id = getFuseId(win.frameElement) + '-2';
-        domData[id] || (domData[id] = { 'nodes': { } });
-        return id;
-      }
-
-      id = node._fuseId = fuseId++;
-      domData[id] = { };
+      domData[id] || (domData[id] = { });
       return id;
     };
 
@@ -131,5 +120,8 @@
       'updateGenerics': updateGenerics
     };
   });
+
+  // define private var shared by primary closure
+  getFuseId = Node.getFuseId;
 
   Node.updateGenerics();

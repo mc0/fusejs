@@ -429,7 +429,7 @@
     }
 
     function isVisible(element) {
-      return fuse.get(element).isVisible();
+      return fuse(element).isVisible();
     }
 
     function assertVisible(element, message) {

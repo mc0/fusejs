@@ -8,20 +8,24 @@
 
     Decorator = function() { },
 
-    Window = function Window(object) {
+    Window = function Window(object, isCached) {
       // quick return if empty, decorated, or not a window object
+      var data, decorated;
       if (!object || object.raw || !isWindow(object)) {
         return object;
       }
-
-      // return cached if available
-      var decorated, id = Node.getFuseId(object), data = domData[id];
-      if (data.decorator) {
-        return data.decorator;
+      if (isCached === false) {
+        decorated = new Decorator;
+      } else {
+        // return cached if available
+        data = domData[Node.getFuseId(object)];
+        if (data.decorator) {
+          return data.decorator;
+        }
+        decorated =
+        data.decorator = new Decorator;
       }
 
-      decorated =
-      data.decorator = new Decorator;
       decorated.raw = object;
       return decorated;
     };

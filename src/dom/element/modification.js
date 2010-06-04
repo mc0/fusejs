@@ -58,9 +58,9 @@
 
     rePositions     = /^(?:(?:before|top|bottom|after)(?:,|$))+$/i,
 
-    toHTML = fuse.Object.toHTML,
+    toHTML          = fuse.Object.toHTML,
 
-    getFragmentFromString = fuse.dom.getFragmentFromString,
+    getFragmentFromHTML = fuse.dom.getFragmentFromHTML,
 
     getByTagName = function(node, tagName) {
       var result = [], child = node.firstChild;
@@ -80,15 +80,19 @@
     },
 
     insertContent = function(element, parentNode, content, position) {
-      var stripped, insertElement = ELEMENT_INSERT_METHODS[position];
+      var stripped, insertElement = ELEMENT_INSERT_METHODS[position],
+       type = toString.call(content);
 
       // process string / number
-      if (TREAT_AS_STRING[toString.call(content)]) {
-        stripped = isScriptable && reOpenScriptTag.test(content) ?
-          stripScripts.call(content) : content;
-        if (stripped != '') {
+      if (TREAT_AS_STRING[type]) {
+        if (isScriptable && reOpenScriptTag.test(content)) {
+          stripped = stripScripts.call(content);
+        } else {
+          stripped = type === '[object Number]' ? String(content) : content;
+        }
+        if (stripped) {
           insertElement(element,
-            getFragmentFromString(stripped, parentNode || element),
+            getFragmentFromHTML(stripped, parentNode || element),
             parentNode);
         }
         // only evalScripts if there are scripts
@@ -225,15 +229,18 @@
     };
 
     plugin.replace = function replace(content) {
-      var html, stripped, element = this.raw || this;
+      var html, stripped, element = this.raw || this,
+       type = toString.call(content);
 
       // process string / number
-      if (TREAT_AS_STRING[toString.call(content)]) {
+      if (TREAT_AS_STRING[type]) {
+        if (isScriptable && reOpenScriptTag.test(content)) {
+          stripped = stripScripts.call(content);
+        } else {
+          stripped = type === '[object Number]' ? String(content) : content;
+        }
         html = content;
-        stripped = isScriptable && reOpenScriptTag.test(content) ?
-          stripScripts.call(content) : content;
-        content = stripped == '' ? '' :
-          getFragmentFromString(stripped, element.parentNode);
+        content = getFragmentFromHTML(stripped, element.parentNode);
         if (html != stripped) {
           setTimeout(function() { evalScripts.call(html); }, 10);
         }
@@ -300,13 +307,13 @@
     plugin.wrap = function wrap(wrapper, attributes) {
       var rawWrapper, element = this.raw || this;
       if (isString(wrapper)) {
-        wrapper = Element.create(wrapper, attributes);
+        wrapper = Element.create(wrapper, { 'attrs': attributes, 'context': element });
       }
       if (isElement(wrapper)) {
         wrapper = plugin.setAttribute.call(wrapper, attributes);
       }
       else {
-        wrapper = Element.create('div', wrapper);
+        wrapper = Element.create('div', { 'attrs': wrapper, 'context': element });
       }
       rawWrapper = wrapper.raw || wrapper;
       if (element.parentNode) {
@@ -332,10 +339,10 @@
 
       (function(T) {
         var before = T.before, top = T.top, bottom = T.bottom, after = T.after;
-        T.before = function(element, node) { wrapper(before, element, node); };
-        T.top    = function(element, node) { wrapper(top,    element, node); };
-        T.bottom = function(element, node) { wrapper(bottom, element, node); };
-        T.after  = function(element, node) { wrapper(after,  element, node); };
+        T.after  = function(e, n, p) { wrapper(after,  e, n, p); };
+        T.before = function(e, n, p) { wrapper(before, e, n, p); };
+        T.top    = function(e, n) { wrapper(top,    e, n); };
+        T.bottom = function(e, n) { wrapper(bottom, e, n); };
       })(ELEMENT_INSERT_METHODS);
     }
 
@@ -350,7 +357,7 @@
     // fix browsers with buggy innerHTML implementations
     if (ELEMENT_INNERHTML_BUGGY) {
       plugin.update = function update(content) {
-        var isBuggy, stripped, element = this.raw || this,
+        var isBuggy, stripped, type, element  = this.raw || this,
          nodeName = getNodeName(element);
 
         // update script elements
@@ -365,13 +372,16 @@
           }
         }
         // process string / number
-        if (TREAT_AS_STRING[toString.call(content)]) {
-          stripped = isScriptable && reOpenScriptTag.test(content) ?
-            stripScripts.call(content) : content;
-
+        type = toString.call(content);
+        if (TREAT_AS_STRING[type]) {
+          if (isScriptable && reOpenScriptTag.test(content)) {
+            stripped = stripScripts.call(content);
+          } else {
+            stripped = type === '[object Number]' ? String(content) : content;
+          }
           if (isBuggy) {
-            if (stripped != '') {
-              element.appendChild(getFragmentFromString(stripped, element));
+            if (stripped) {
+              element.appendChild(getFragmentFromHTML(stripped, element));
             }
           } else {
             element.innerHTML = stripped;

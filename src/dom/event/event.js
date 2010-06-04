@@ -5,7 +5,7 @@
       var getCurrentTarget =
       this.getCurrentTarget = function getCurrentTarget() {
         var getCurrentTarget = function getCurrentTarget() { return currTarget; };
-        if (currTarget) currTarget = fromElement(Window(currTarget));
+        if (currTarget) currTarget = Node(Window(currTarget));
         this.getCurrentTarget = getCurrentTarget;
         return currTarget;
       };
@@ -68,8 +68,6 @@
     CLICK_PROP = 'which',
 
     EVENT_TYPE_ALIAS = { 'blur': 'delegate:blur', 'focus': 'delegate:focus' },
-
-    getFuseId = Node.getFuseId,
 
     plugin = Event.plugin,
 

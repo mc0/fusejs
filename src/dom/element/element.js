@@ -1,14 +1,5 @@
   /*-------------------------------- ELEMENT ---------------------------------*/
 
-  Element = 
-  fuse.dom.Element = function Element(tagName, attributes, context) {
-    return isString(tagName)
-      ? Element.create(tagName, attributes, context)
-      : fromElement(tagName);
-  };
-
-  fuse.Class(Node, { 'constructor': Element });
-
   // add/pave statics
   (function() {
     var isMixin = false,

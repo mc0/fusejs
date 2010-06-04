@@ -5,23 +5,23 @@
 
     var Decorator = function() { },
 
-    Document = function Document(node) {
+    Document = function Document(node, isCached) {
       // quick return if empty, decorated, or not a document node
+      var data, decorated, pluginViewport, viewport;
       if (!node || node.raw || node.nodeType !== DOCUMENT_NODE) {
         return node;
       }
-
-      var decorated, pluginViewport, viewport,
-       id = Node.getFuseId(node),
-       data = domData[id];
-
-      // return cached if available
-      if (data.decorator) {
-        return data.decorator;
+      if (isCached === false) {
+        decorated = new Decorator;
+      } else {
+        // return cached if available
+        data = domData[Node.getFuseId(node)];
+        if (data.decorator) {
+          return data.decorator;
+        }
+        decorated =
+        data.decorator = new Decorator;
       }
-
-      decorated =
-      data.decorator = new Decorator;
 
       pluginViewport = Document.plugin.viewport;
       viewport = decorated.viewport = { };
@@ -105,9 +105,5 @@
     };
 
     // prevent JScript bug with named function expressions
-    var getDimensions = nil,
-     getFuseId =        nil,
-     getHeight =        nil,
-     getWidth =         nil,
-     getScrollOffsets = nil;
+    var getDimensions = nil, getHeight = nil, getWidth = nil, getScrollOffsets = nil;
   })(Document.plugin);

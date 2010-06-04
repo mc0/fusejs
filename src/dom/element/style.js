@@ -295,9 +295,7 @@
 
   (function(plugin) {
 
-    var getFuseId = Node.getFuseId,
-
-    TABLE_ELEMENTS = { 'THEAD': 1, 'TBODY': 1, 'TR': 1 },
+    var TABLE_ELEMENTS = { 'THEAD': 1, 'TBODY': 1, 'TR': 1 },
 
     OPACITY_PROP = (function(s) {
       return typeof s.opactiy  !== 'undefined' ? 'opacity'       :

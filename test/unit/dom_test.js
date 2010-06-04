@@ -395,7 +395,7 @@ new Test.Unit.Runner({
 
   'testElementInsertScriptElement': function() {
     var head = document.getElementsByTagName('HEAD')[0],
-     script = fuse('script', { 'type': 'text/javascript' });
+     script = fuse('<script type="text/javascript">');
 
     script.raw.text = 'window.__testInsertScriptElement = true;';
     $(head).insert({ 'top': script });
@@ -632,7 +632,7 @@ new Test.Unit.Runner({
 
   'testElementUpdateScriptElement': function() {
     var head = document.getElementsByTagName('head')[0],
-     script = fuse('script', { 'type': 'text/javascript' });
+     script = fuse('<script type="text/javascript">');
 
     $(head).insert(script);
 
@@ -689,7 +689,7 @@ new Test.Unit.Runner({
       'Failed complex in table row.');
 
     // test passing object with "toElement" method
-    var newTD = fuse('TD', { 'id': 'i_am_another_td' });
+    var newTD = fuse('<td id="i_am_another_td">');
     newTD.insert(document.createTextNode('more tests'));
     $('third_row').update({ 'toElement': function() { return newTD.raw; } });
 
@@ -727,7 +727,7 @@ new Test.Unit.Runner({
       'Failed to update colgroup.');
 
     // test passing object with "toElement" method
-    var newCol = fuse('col', { 'className': 'baz' });
+    var newCol = fuse('<col class="baz">');
     colgroup.update({ 'toElement': function() { return newCol.raw; } });
 
     this.assertEqual(newCol, colgroup.down(),
@@ -762,7 +762,7 @@ new Test.Unit.Runner({
       'Failed to update opt-group element');
 
     // test passing object with "toElement" method
-    var newOption = fuse('option', { 'value': 'E', 'text': 'option E', 'selected': true });
+    var newOption = fuse('<option value="E" selected>option E</option>');
     select.down('optgroup').update({ 'toElement': function() { return newOption; } });
 
     this.assertEqual('E',
@@ -779,7 +779,7 @@ new Test.Unit.Runner({
       'Failed to update select element.');
 
     // test passing object with "toElement" method
-    var newOption = fuse('option', { 'value': '2', 'text': 'option 2', 'selected': true });
+    var newOption = fuse('<option value="2" selected>option 2</option>');
     select.update({ 'toElement': function() { return newOption.raw; } });
 
     this.assertEqual('2',
@@ -870,7 +870,7 @@ new Test.Unit.Runner({
   },
 
   'testElementReplaceWithScriptElement': function() {
-    var script = fuse('script', { 'type': 'text/javascript' });
+    var script = fuse('<script type="text/javascript">');
     script.update('window.__testReplaceWithScriptElement = true;');
 
     $('testdiv-replace-6').replace(script);
@@ -880,7 +880,7 @@ new Test.Unit.Runner({
     window.__testReplaceWithScriptElement = null;
 
     var fragment = document.createDocumentFragment();
-    fragment.appendChild(fuse('script', { 'type': 'text/javascript' })
+    fragment.appendChild(fuse('<script type="text/javascript">')
       .update('window.__testReplaceWithScriptInFragment = true;').raw);
 
     $('testdiv-replace-7').replace(fragment);
@@ -1783,15 +1783,22 @@ new Test.Unit.Runner({
     this.assertEqual('2', table.getAttribute('cellspacing'));
     this.assertEqual('3', table.getAttribute('cellpadding'));
 
-    var iframe = fuse('iframe', { 'frameborder': 0 });
+    var iframe = fuse('<iframe frameborder="0">');
     this.assertEqual(0, parseInt(iframe.getAttribute('frameborder')));
 
     $('attributes_with_issues_form').setAttribute('encType', 'multipart/form-data');
     this.assertEqual('multipart/form-data',
       $('attributes_with_issues_form').getAttribute('encType'));
 
-    var theForm = fuse('form',
-      { 'name':'encTypeForm', 'method':'post', 'action':'myPage.php', 'enctype':'multipart/form-data' });
+    var theForm = fuse('<form>', {
+      'attrs': {
+        'name':    'encTypeForm',
+        'method':  'post',
+        'action':  'myPage.php',
+        'enctype': 'multipart/form-data'
+      }
+    });
+
     this.assertEqual('multipart/form-data', theForm.getAttribute('encType'));
   },
 
@@ -1844,11 +1851,13 @@ new Test.Unit.Runner({
 
   'testElementCreate': function() {
     function testTags() {
-      var tag = XHTML_TAGS.pop(), index = XHTML_TAGS.length;
-      if (!tag) return false;
+      var element,
+       tag   = XHTML_TAGS.pop(),
+       index = XHTML_TAGS.length,
+       id    = tag + '_' + index;
 
-      var id = tag + '_' + index,
-       element = document.body.appendChild(fuse(tag, { 'id': id }).raw);
+      if (!tag) return false;
+      element = document.body.appendChild(fuse('<' + tag + ' id="' + id + '">').raw);
 
       self.assertEqual(tag, element.tagName.toLowerCase());
       self.assertEqual(element, document.body.lastChild);
@@ -1876,9 +1885,11 @@ new Test.Unit.Runner({
     // The delayed execution of the tests
     // helps prevent a crash in some OSX
     // versions of Opera 9.2x
-    if (fuse.env.agent.Opera)
+    if (fuse.env.agent.Opera) {
       recursiveTestTags();
-    else while (testTags()) { };
+    } else {
+      while (testTags()) { };
+    }
 
     /* window.ElementOld = function(tagName, attributes) {
       if (fuse.env.agent.IE && attributes && attributes.name) {
@@ -1900,10 +1911,10 @@ new Test.Unit.Runner({
     this.assertRespondsTo('update', fuse('<div>'));
 
     this.assertEqual('foobar',
-      fuse('a', { 'custom': 'foobar'}).getAttribute('custom'));
+      fuse('<a>', { 'attrs': { 'custom': 'foobar'} }).getAttribute('custom'));
 
-    var input = document.body.appendChild(fuse('input',
-      { 'id': 'my_input_field_id', 'name': 'my_input_field' }).raw);
+    var input = document.body.appendChild(
+      fuse('<input>', { 'attrs': { 'id': 'my_input_field_id', 'name': 'my_input_field' } }).raw);
 
     this.assertEqual(input, document.body.lastChild);
     this.assertEqual('my_input_field', document.body.lastChild.name);
@@ -1919,7 +1930,7 @@ new Test.Unit.Runner({
 
     // ensure name attribute case is respected even when
     // a similar element has been cached.
-    input = fuse('input', { 'name': 'MY_INPUT_FIELD' }).raw;
+    input = fuse('<input>', { 'attrs': { 'name': 'MY_INPUT_FIELD' } }).raw;
     this.assertEqual('MY_INPUT_FIELD', input.name,
       'Attribute did not respect case.');
 
@@ -1928,7 +1939,7 @@ new Test.Unit.Runner({
     input = $('write_attribute_input');
 
     $w('button input').each(function(tagName) {
-      var button = fuse(tagName, { 'type': 'reset'});
+      var button = fuse.dom.Element.create(tagName, { 'attrs': { 'type': 'reset'} });
       form.insert(button);
       input.setValue('something');
 
@@ -1936,7 +1947,7 @@ new Test.Unit.Runner({
         button.raw.click();
         this.assertEqual('', input.getValue());
       } catch(e) {
-        this.info('The "' + tagName +'" element does not support the click() method.');
+        this.info('The ' + tagName +' element does not support the click() method.');
       }
       button.remove();
     }, this);

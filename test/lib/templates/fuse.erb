@@ -35,7 +35,7 @@
       }
 
       loadScriptFile = (function() {
-        var head = fuse.get(document.getElementsByTagName('HEAD')[0]);
+        var head = fuse(document.getElementsByTagName('HEAD')[0]);
         return function(url) {
           fuse.ajax.Request(url, {
             'method': 'get',

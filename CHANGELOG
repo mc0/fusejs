@@ -1,3 +1,11 @@
+* Add caching/decorating options to fuse.dom.Element create(), from(), fromElement(), fromHTML(), and fromId(). [jddalton]
+
+* Rename fuse.dom.getFragmentFromString() to fuse.dom.getFragmentFromHTML(). [jddalton]
+
+* Add fuse.dom.Element methods fromId() and fromHTML(). [jddalton]
+
+* Remove fuse.get() and fuse.getById(). [jddalton]
+
 * Optimize event findElement(), getPointerX(), and getPointerX() methods by reducing the number of elements that are decorated. [jddalton]
 
 * Make the IE `dom:loaded` event only use the doScroll() technique when using less than IE8. [jddalton]

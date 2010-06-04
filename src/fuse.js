@@ -6,10 +6,10 @@
    IDENTITY, NOOP, TEXT_NODE, Document, Element, Node, NodeList, Window,
    addArrayMethods, addNodeListMethod, capitalize, concatList, createGetter,
    domData, eachKey, envAddTest, envTest, escapeRegExpChars, expando,
-   fromElement, getDocument, getNodeName, getWindow, getOrCreateTagClass,
-   hasKey, isArray, isElement, isHash, isHostType, isFunction, isNumber,
-   isPrimitive, isRegExp, isString, nil, prependList, returnOffset, setTimeout,
-   slice, toInteger, toString, undef, userAgent;
+   fromElement, getDocument, getFuseId, getNodeName, getWindow,
+   getOrCreateTagClass, hasKey, isArray, isElement, isHash, isHostType,
+   isFunction, isNumber, isPrimitive, isRegExp, isString, nil, prependList,
+   returnOffset, setTimeout, slice, toInteger, toString, undef, userAgent;
 
   global.fuse = (function() {
     var fuse = function fuse() { };
@@ -212,8 +212,8 @@
    'dom/document.js',
    'dom/window.js',
 
-   'dom/element/element.js',
    'dom/element/create.js',
+   'dom/element/element.js',
    'dom/element/modification.js',
    'dom/element/attribute.js',
    'dom/element/style.js',
