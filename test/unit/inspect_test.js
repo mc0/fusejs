@@ -50,7 +50,7 @@ new Test.Unit.Runner({
             callback(this.interior[key], key, this);
         }
       }
-    }, fuse.Enumerable);
+    }, fuse.Class.mixins.enumerable);
 
     this.assertEqual('#<Enumerable:[]>', (new EnumObject({ })).inspect());
 
@@ -58,8 +58,8 @@ new Test.Unit.Runner({
     this.assertEqual("#<Enumerable:['a', 'A', 'b', 'B', 'c', 'C', 'd', 'D#']>",
       new EnumObject(many).inspect());
 
-    this.assert('#<Enumerable:[]>' != fuse.Object.inspect(fuse.Enumerable.plugin),
-      'Failed to inspect fuse.Enumerable.plugin');
+    this.assert('#<Enumerable:[]>' != fuse.Object.inspect(fuse.Class.mixins.enumerable),
+      'Failed to inspect fuse.Class.mixins.enumerable');
   },
 
   'testEventInspect': function() {

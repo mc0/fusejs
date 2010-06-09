@@ -575,13 +575,13 @@
     }
 
     // assign any missing Enumerable methods
-    if (fuse.Enumerable) {
+    if (fuse.Class.mixins.enumerable) {
       plugin._each = function _each(callback) {
         this.forEach(callback);
         return this;
       };
 
-      eachKey(fuse.Enumerable, function(value, key, object) {
+      eachKey(fuse.Class.mixins.enumerable, function(value, key, object) {
         if (hasKey(object, key) && typeof plugin[key] !== 'function') {
           plugin[key] = value;
         }

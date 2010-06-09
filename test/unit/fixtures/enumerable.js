@@ -16,7 +16,7 @@ var EnumObject = fuse.Class({
         callback(this.interior[key], key, this);
     }
   }
-}, fuse.Enumerable);
+}, fuse.Class.mixins.enumerable);
 
 /*--------------------------------------------------------------------------*/
 

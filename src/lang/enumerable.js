@@ -1,6 +1,6 @@
   /*---------------------------- LANG: ENUMERABLE ----------------------------*/
 
-  fuse.Enumerable = { };
+  fuse.Class.mixins.enumerable = { };
 
   (function(mixin) {
     var $break = function $break() { };
@@ -228,4 +228,4 @@
      sortBy =      nil,
      toArray =     nil,
      zip =         nil;
-  })(fuse.Enumerable);
+  })(fuse.Class.mixins.enumerable);

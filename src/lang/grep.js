@@ -28,8 +28,8 @@
   });
 
   (function() {
-    if (fuse.Enumerable) {
-      fuse.Enumerable.grep = function grep(pattern, callback, thisArg) {
+    if (fuse.Class.mixins.enumerable) {
+      fuse.Class.mixins.enumerable.grep = function grep(pattern, callback, thisArg) {
         if (!pattern || pattern == '' || isRegExp(pattern) &&!pattern.source) {
           return this.toArray();
         }

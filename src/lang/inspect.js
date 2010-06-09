@@ -116,12 +116,12 @@
       var inspect = nil;
     });
 
-    if (fuse.Enumerable) {
-      fuse.Enumerable.inspect = function inspect() {
-        // called normally or called Obj.inspect(fuse.Enumerable)
+    if (fuse.Class.mixins.enumerable) {
+      fuse.Class.mixins.enumerable.inspect = function inspect() {
+        // called normally or called Obj.inspect(fuse.Class.mixins.enumerable)
         return isFunction(this._each)
           ? fuse.String('#<Enumerable:' + this.toArray().inspect() + '>')
-          : inspectPlugin(fuse.Enumerable);
+          : inspectPlugin(fuse.Class.mixins.enumerable);
       };
     }
 
