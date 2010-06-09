@@ -26,6 +26,10 @@
       'TEXTAREA': 1
     },
 
+    Event = fuse.dom.Event,
+
+    addDispatcher = Event._addDispatcher,
+
     addWatcher = NOOP,
 
     removeWatcher = NOOP,
@@ -36,14 +40,12 @@
       // initialize event type data if it isn't
       var events = domData[id] && domData[id].events;
       if (!events || !events[type]) {
-        // observe using a dummy handler to indirectly create the event dispatcher
-        fuse(element).observe(type, NOOP);
-        // remove the dummy handler while keeping the handlers array intact
-        (events || (events = domData[id].events))[type].handlers.length = 0;
+        addDispatcher(element, type, null, id);
+        events = domData[id].events;
       }
       // flag event system to manually bubble after all the
       // element's handlers for the event type have been executed 
-      events[type]._bubbleForDelegation = true;
+      events[type]._isBubblingForDelegation = true;
     },
 
     createHandler = function(selector, delegatee) {
@@ -84,7 +86,7 @@
       if (PROBLEM_ELEMENTS[nodeName]) {
         id = getFuseId(target);
         data = domData[id];
-        if (!data._patchedForDelegation) {
+        if (!data._isPatchedForDelegation) {
           // form controls
           if (nodeName !== 'FORM') {
             if (CHANGEABLE_ELEMENTS[nodeName] && !BUTTON_TYPES[target.type]) {
@@ -92,7 +94,7 @@
             }
             addBubbler(target, id, 'blur');
             addBubbler(target, id, 'focus');
-            data._patchedForDelegation = true;
+            data._isPatchedForDelegation = true;
           }
           // form element
           if (form = target.form || target) {
@@ -100,10 +102,10 @@
               id   = getFuseId(form);
               data = domData[id];
             }
-            if (!data._patchedForDelegation) {
+            if (!data._isPatchedForDelegation) {
               addBubbler(form, id, 'reset');
               addBubbler(form, id, 'submit');
-              data._patchedForDelegation = true;
+              data._isPatchedForDelegation = true;
             }
           }
         }
@@ -116,34 +118,38 @@
       if (PROBLEM_ELEMENTS[getNodeName(target)]) {
         id = getFuseId(target);
         data = domData[id];
-        if (!data._patchedForDelegation) {
+        if (!data._isPatchedForDelegation) {
           addBubbler(target, id, 'blur');
           addBubbler(target, id, 'focus');
-          data._patchedForDelegation = true;
+          data._isPatchedForDelegation = true;
         }
       }
     };
 
     // DOM Level 2
     if (envTest('ELEMENT_ADD_EVENT_LISTENER')) {
-      addWatcher = function(element) {
+      addWatcher = function(element, data) {
         element.addEventListener('focus', onCapture, true);
+        (data || domData[getFuseId(element)])._isWatchingDelegation = true;
       };
 
-      removeWatcher = function(element) {
+      removeWatcher = function(element, data) {
         element.removeEventListener('focus', onCapture, true);
+        delete (data || domData[getFuseId(element)])._isWatchingDelegation;
       };
     }
     // JScript
     else if (envTest('ELEMENT_ATTACH_EVENT')) {
       PROBLEM_ELEMENTS.FORM = 1;
 
-      addWatcher = function(element) {
+      addWatcher = function(element, data) {
         element.attachEvent('onbeforeactivate', onBeforeActivate);
+        (data || domData[getFuseId(element)])._isWatchingDelegation = true;
       };
 
-      removeWatcher = function(element) {
+      removeWatcher = function(element, data) {
         element.detachEvent('onbeforeactivate', onBeforeActivate);
+        delete (data || domData[getFuseId(element)])._isWatchingDelegation;
       };
     }
 
@@ -185,9 +191,8 @@
       // if not already watching on the element, add a watcher for
       // non-bubbling events to signal the event system when manual
       // bubbling is needed
-      if (NON_BUBBLING_EVENTS[type] && !data._watchForDelegation) {
-        addWatcher(element);
-        data._watchForDelegation = true;
+      if (NON_BUBBLING_EVENTS[type] && !data._isWatchingDelegation) {
+        addWatcher(element, data);
       }
       return this;
     };
@@ -268,12 +273,14 @@
 
       // if no handlers for any events then remove the watcher
       if (isEmpty) {
-        removeWatcher(element);
-        delete data._watchForDelegation;
+        removeWatcher(element, data);
       }
       return this;
     };
 
+    // expose implied private method
+    Event._addWatcher = addWatcher;
+
     // prevent JScript bug with named function expressions
-    var delegate = nil;
+    var delegate = nil, stopDelegating = nil;
   })(Element.plugin);

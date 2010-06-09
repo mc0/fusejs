@@ -1,8 +1,10 @@
   /*--------------------------- EVENT: DOM-LOADED ----------------------------*/
 
-  (function(createDispatcher) {
+  (function() {
 
-    var domLoadDispatcher = createDispatcher(2, 'dom:loaded'),
+    var createDispatcher = fuse.dom.Event._createDispatcher,
+
+    domLoadDispatcher = createDispatcher(2, 'dom:loaded'),
 
     winLoadDispatcher = createDispatcher(1, 'load'),
 
@@ -54,15 +56,12 @@
 
     // Ensure that the dom:loaded event has finished executing its observers
     // before allowing the window onload event to proceed
-    addObserver(fuse(fuse._doc).raw, 'dom:loaded',
-      (getOrCreateCache(2, 'dom:loaded').dispatcher = domLoadWrapper));
+    addDispatcher(fuse._doc, 'dom:loaded', domLoadWrapper);
 
     // Perform feature tests and define pseudo private
     // body/root properties when the dom is loaded
-    addObserver(fuse(global).raw, 'load',
-      (getOrCreateCache(1, 'load').dispatcher = winLoadWrapper));
-
-  })(fuse.dom.Event.createDispatcher);
+    addDispatcher(global, 'load', winLoadWrapper);
+  })();
 
   /*--------------------------------------------------------------------------*/
 

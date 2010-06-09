@@ -1,3 +1,5 @@
+* Add fuse.dom.Event._addDispatcher and rename other implied private methods. [jddalton]
+
 * Add `skipDataInit` argument to fuse.dom.Node.getFuseId(). [jddalton]
 
 * Add clone(deep) methods to Array, Element, Hash, Object, Number, Range, String, and Template. [FuseJS LH #18] [jddalton, Joe Gornick]

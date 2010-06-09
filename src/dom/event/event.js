@@ -205,7 +205,20 @@
         return false;
       }
       ec.handlers.unshift(handler);
-      return ec.dispatcher ? false : (ec.dispatcher = Event.createDispatcher(id, type));
+      return !ec.dispatcher && (ec.dispatcher = Event._createDispatcher(id, type));
+    },
+
+    addDispatcher = function(element, type, dispatcher, id) {
+      id || (id = getFuseId(element));
+      domData[id].decorator || fuse(element);
+      var ec = getOrCreateCache(id, type);
+
+      if (!ec.dispatcher) {
+        addObserver(element, type,
+          (ec.dispatcher = dispatcher || Event._createDispatcher(id, type)));
+        return true;
+      }
+      return false;
     },
 
     addObserver = function(element, type, handler) {
@@ -602,17 +615,16 @@
 
       // if no more handlers and not bubbling for
       // delegation then remove the event type data and dispatcher
-      if (!ec.handlers.length && !ec._bubbleForDelegation) {
+      if (!ec.handlers.length && !ec._isBubblingForDelegation) {
         removeObserver(element, type, ec.dispatcher);
         delete events[type];
       }
       return this;
     };
 
-    // temporarily assign to fuse.dom.Event to pass to the secondary closure
-    Event._addObserver      = addObserver;
-    Event._createGetter     = createGetter;
-    Event._getOrCreateCache = getOrCreateCache;
+    // expose implied private methods
+    Event._addDispatcher = addDispatcher;
+    Event._createGetter  = createGetter;
 
     // prevent JScript bug with named function expressions
     var cancel =        nil,

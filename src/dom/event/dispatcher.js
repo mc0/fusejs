@@ -2,22 +2,13 @@
 
   // Seperate from primary closure to avoid memory leaks in IE6
 
-  // grab private methods passed by primary closure
-  var addObserver, createGetter, getOrCreateCache;
-  (function(Event) {
-    addObserver      = Event._addObserver;
-    createGetter     = Event._createGetter;
-    getOrCreateCache = Event._getOrCreateCache;
-
-    delete Event._addObserver;
-    delete Event.createGetter;
-    delete Event._getOrCreateCache;
-  })(fuse.dom.Event);
+  var addDispatcher = fuse.dom.Event._addDispatcher,
+   createGetter = fuse.dom.Event._createGetter;
 
   // Event dispatchers manage several handlers and ensure
   // FIFO execution order. They are attached as the primary event
   // listener and execute all handlers they manage.
-  fuse.dom.Event.createDispatcher = (function() {
+  fuse.dom.Event._createDispatcher = (function() {
 
     var EVENT_TYPE_ALIAS = { 'blur': 'delegate:blur', 'focus': 'delegate:focus' },
 
@@ -28,14 +19,14 @@
         // shallow copy handlers to avoid issues with nested observe/stopObserving
         var error, msg, parentNode,
          errors    = [],
-         data      = global.fuse.dom.data[id],
+         data      = fuse.dom.data[id],
          decorator = data.decorator,
          node      = decorator.raw || decorator,
          ec        = data.events[type],
          handlers  = slice.call(ec.handlers, 0),
          length    = handlers.length;
 
-        event = global.fuse.dom.Event(event || getWindow(node).event, decorator);
+        event = fuse.dom.Event(event || getWindow(node).event, decorator);
         while (length--) {
           // This pattern, based on work by Dean Edwards, John Resig, and MochiKit
           // allows a handler to error out without stopping the other handlers from firing.
@@ -51,7 +42,7 @@
         }
 
         // bubble if flagged by delegation
-        if (ec._bubbleForDelegation && event.isBubbling() &&
+        if (ec._isBubblingForDelegation && event.isBubbling() &&
             (parentNode = node.parentNode)) {
           // cancel real bubbling
           event.stopBubbling();
