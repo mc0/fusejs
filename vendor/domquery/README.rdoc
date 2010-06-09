@@ -1,1 +1,1 @@
-http://extjs.com/deploy/ext/docs/output/DomQuery.jss.html
+http://www.extjs.com/deploy/ext/docs/source/DomQuery.html#cls-Ext.DomQuery

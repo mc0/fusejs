@@ -1,84 +1,109 @@
+/*!
+ * Ext JS Library 3.2.1
+ * Copyright(c) 2006-2010 Ext JS, Inc.
+ * licensing@extjs.com
+ * http://www.extjs.com/license
+ */
+
 /*
  * This is code is also distributed under MIT license for use
  * with jQuery and prototype JavaScript libraries.
  */
-// holder
-/***
- * @class Ext.DomQuery
-Provides high performance selector/xpath processing by compiling queries into reusable functions. New pseudo classes and matchers can be plugged. It works on HTML and XML documents (if a content node is passed in).
-<p>
-DomQuery supports most of the <a href="http://www.w3.org/TR/2005/WD-css3-selectors-20051215/">CSS3 selectors spec</a>, along with some custom selectors and basic XPath.</p>
 
-<p>
-All selectors, attribute filters and pseudos below can be combined infinitely in any order. For example "div.foo:nth-child(odd)[@foo=bar].bar:first" would be a perfectly valid selector. Node filters are processed in the order in which they appear, which allows you to optimize your queries for your document structure.
-</p>
-<h4>Element Selectors:</h4>
-<ul class="list">
-    <li> <b>*</b> any element</li>
-    <li> <b>E</b> an element with the tag E</li>
-    <li> <b>E F</b> All descendent elements of E that have the tag F</li>
-    <li> <b>E > F</b> or <b>E/F</b> all direct children elements of E that have the tag F</li>
-    <li> <b>E + F</b> all elements with the tag F that are immediately preceded by an element with the tag E</li>
-    <li> <b>E ~ F</b> all elements with the tag F that are preceded by a sibling element with the tag E</li>
-</ul>
-<h4>Attribute Selectors:</h4>
-<p>The use of @ and quotes are optional. For example, div[@foo='bar'] is also a valid attribute selector.</p>
-<ul class="list">
-    <li> <b>E[foo]</b> has an attribute "foo"</li>
-    <li> <b>E[foo=bar]</b> has an attribute "foo" that equals "bar"</li>
-    <li> <b>E[foo^=bar]</b> has an attribute "foo" that starts with "bar"</li>
-    <li> <b>E[foo$=bar]</b> has an attribute "foo" that ends with "bar"</li>
-    <li> <b>E[foo*=bar]</b> has an attribute "foo" that contains the substring "bar"</li>
-    <li> <b>E[foo%=2]</b> has an attribute "foo" that is evenly divisible by 2</li>
-    <li> <b>E[foo!=bar]</b> has an attribute "foo" that does not equal "bar"</li>
-</ul>
-<h4>Pseudo Classes:</h4>
-<ul class="list">
-    <li> <b>E:first-child</b> E is the first child of its parent</li>
-    <li> <b>E:last-child</b> E is the last child of its parent</li>
-    <li> <b>E:nth-child(<i>n</i>)</b> E is the <i>n</i>th child of its parent (1 based as per the spec)</li>
-    <li> <b>E:nth-child(odd)</b> E is an odd child of its parent</li>
-    <li> <b>E:nth-child(even)</b> E is an even child of its parent</li>
-    <li> <b>E:only-child</b> E is the only child of its parent</li>
-    <li> <b>E:checked</b> E is an element that is has a checked attribute that is true (e.g. a radio or checkbox) </li>
-    <li> <b>E:first</b> the first E in the resultset</li>
-    <li> <b>E:last</b> the last E in the resultset</li>
-    <li> <b>E:nth(<i>n</i>)</b> the <i>n</i>th E in the resultset (1 based)</li>
-    <li> <b>E:odd</b> shortcut for :nth-child(odd)</li>
-    <li> <b>E:even</b> shortcut for :nth-child(even)</li>
-    <li> <b>E:contains(foo)</b> E's innerHTML contains the substring "foo"</li>
-    <li> <b>E:nodeValue(foo)</b> E contains a textNode with a nodeValue that equals "foo"</li>
-    <li> <b>E:not(S)</b> an E element that does not match simple selector S</li>
-    <li> <b>E:has(S)</b> an E element that has a descendent that matches simple selector S</li>
-    <li> <b>E:next(S)</b> an E element whose next sibling matches simple selector S</li>
-    <li> <b>E:prev(S)</b> an E element whose previous sibling matches simple selector S</li>
-</ul>
-<h4>CSS Value Selectors:</h4>
-<ul class="list">
-    <li> <b>E{display=none}</b> css value "display" that equals "none"</li>
-    <li> <b>E{display^=none}</b> css value "display" that starts with "none"</li>
-    <li> <b>E{display$=none}</b> css value "display" that ends with "none"</li>
-    <li> <b>E{display*=none}</b> css value "display" that contains the substring "none"</li>
-    <li> <b>E{display%=2}</b> css value "display" that is evenly divisible by 2</li>
-    <li> <b>E{display!=none}</b> css value "display" that does not equal "none"</li>
-</ul>
+/**
+ * @class Ext.DomQuery
+ *
+ * Provides high performance selector/xpath processing by compiling queries into reusable functions. New pseudo classes and matchers can be plugged. It works on HTML and XML documents (if a content node is passed in).
+ * DomQuery supports most of the CSS3 selectors spec, along with some custom selectors and basic XPath.
+ *
+ * All selectors, attribute filters and pseudos below can be combined infinitely in any order. For example "div.foo:nth-child(odd)[@foo=bar].bar:first" would be a perfectly valid selector. Node filters are processed in the order in which they appear, which allows you to optimize your queries for your document structure.
+ *
+ * Element Selectors:
+ *
+ *      * any element
+ *      E an element with the tag E
+ *      E F All descendent elements of E that have the tag F
+ *      E > F or E/F all direct children elements of E that have the tag F
+ *      E + F all elements with the tag F that are immediately preceded by an element with the tag E
+ *      E ~ F all elements with the tag F that are preceded by a sibling element with the tag E
+ *
+ *
+ * Attribute Selectors:
+ * The use of @ and quotes are optional. For example, div[@foo='bar'] is also a valid attribute selector.
+ *
+ *      E[foo] has an attribute "foo"
+ *      E[foo=bar] has an attribute "foo" that equals "bar"
+ *      E[foo^=bar] has an attribute "foo" that starts with "bar"
+ *      E[foo$=bar] has an attribute "foo" that ends with "bar"
+ *      E[foo*=bar] has an attribute "foo" that contains the substring "bar"
+ *      E[foo%=2] has an attribute "foo" that is evenly divisible by 2
+ *      E[foo!=bar] has an attribute "foo" that does not equal "bar"
+ *
+ *
+ * Pseudo Classes:
+ *
+ *      E:first-child E is the first child of its parent
+ *      E:last-child E is the last child of its parent
+ *      E:nth-child(n) E is the nth child of its parent (1 based as per the spec)
+ *      E:nth-child(odd) E is an odd child of its parent
+ *      E:nth-child(even) E is an even child of its parent
+ *      E:only-child E is the only child of its parent
+ *      E:checked E is an element that is has a checked attribute that is true (e.g. a radio or checkbox)
+ *      E:first the first E in the resultset
+ *      E:last the last E in the resultset
+ *      E:nth(n) the nth E in the resultset (1 based)
+ *      E:odd shortcut for :nth-child(odd)
+ *      E:even shortcut for :nth-child(even)
+ *      E:contains(foo) E's innerHTML contains the substring "foo"
+ *      E:nodeValue(foo) E contains a textNode with a nodeValue that equals "foo"
+ *      E:not(S) an E element that does not match simple selector S
+ *      E:has(S) an E element that has a descendent that matches simple selector S
+ *      E:next(S) an E element whose next sibling matches simple selector S
+ *      E:prev(S) an E element whose previous sibling matches simple selector S
+ *      E:any(S1|S2|S2) an E element which matches any of the simple selectors S1, S2 or S3//\\
+ *
+ *
+ * CSS Value Selectors:
+ *
+ *      E{display=none} css value "display" that equals "none"
+ *      E{display^=none} css value "display" that starts with "none"
+ *      E{display$=none} css value "display" that ends with "none"
+ *      E{display*=none} css value "display" that contains the substring "none"
+ *      E{display%=2} css value "display" that is evenly divisible by 2
+ *      E{display!=none} css value "display" that does not equal "none"
+ *
+ *
  * @singleton
  */
 
 if (!window.Ext) Ext = { };
 
 Ext.DomQuery = function(){
-    var cache = {}, simpleCache = {}, valueCache = {};
-    var nonSpace = /\S/;
-    var trimRe = /^\s+|\s+$/g;
-    var tplRe = /\{(\d+)\}/g;
-    var modeRe = /^(\s?[\/>+~]\s?|\s|$)/;
-    var tagTokenRe = /^(#)?([\w-\*]+)/;
-    var nthRe = /(\d*)n\+?(\d*)/, nthRe2 = /\D/;
+    var cache = {}, 
+        simpleCache = {}, 
+        valueCache = {},
+        nonSpace = /\S/,
+        trimRe = /^\s+|\s+$/g,
+        tplRe = /\{(\d+)\}/g,
+        modeRe = /^(\s?[\/>+~]\s?|\s|$)/,
+        tagTokenRe = /^(#)?([\w-\*]+)/,
+        nthRe = /(\d*)n\+?(\d*)/, 
+        nthRe2 = /\D/,
+        // This is for IE MSXML which does not support expandos.
+        // IE runs the same speed using setAttribute, however FF slows way down
+        // and Safari completely fails so they need to continue to use expandos.
+        isIE = window.ActiveXObject ? true : false,
+        key = 30803;
+    
+    // this eval is stop the compressor from
+    // renaming the variable to something shorter
+    eval("var batch = 30803;");         
 
-    function child(p, index){
-        var i = 0;
-        var n = p.firstChild;
+    // Retrieve the child node from a particular
+    // parent at the specified index.
+    function child(parent, index){
+        var i = 0,
+            n = parent.firstChild;
         while(n){
             if(n.nodeType == 1){
                if(++i == index){
@@ -88,52 +113,65 @@ Ext.DomQuery = function(){
             n = n.nextSibling;
         }
         return null;
-    };
+    }
 
-    function next(n){
+    // retrieve the next element node
+    function next(n){   
         while((n = n.nextSibling) && n.nodeType != 1);
         return n;
-    };
+    }
 
+    // retrieve the previous element node 
     function prev(n){
         while((n = n.previousSibling) && n.nodeType != 1);
         return n;
-    };
+    }
 
-    function children(d){
-        var n = d.firstChild, ni = -1;
- 	    while(n){
- 	        var nx = n.nextSibling;
- 	        if(n.nodeType == 3 && !nonSpace.test(n.nodeValue)){
- 	            d.removeChild(n);
- 	        }else{
- 	            n.nodeIndex = ++ni;
- 	        }
- 	        n = nx;
- 	    }
- 	    return this;
- 	};
-
-    function byClassName(c, a, v){
-        if(!v){
-            return c;
+    // Mark each child node with a nodeIndex skipping and
+    // removing empty text nodes.
+    function children(parent){
+        var n = parent.firstChild,
+            nodeIndex = -1,
+            nextNode;
+        while(n){
+            nextNode = n.nextSibling;
+            // clean worthless empty nodes.
+            if(n.nodeType == 3 && !nonSpace.test(n.nodeValue)){
+                parent.removeChild(n);
+            }else{
+                // add an expando nodeIndex
+                n.nodeIndex = ++nodeIndex;
+            }
+            n = nextNode;
         }
-        var r = [], ri = -1, cn;
-        for(var i = 0, ci; ci = c[i]; i++){
-            if((' '+ci.className+' ').indexOf(v) != -1){
-                r[++ri] = ci;
+        return this;
+    }
+
+
+    // nodeSet - array of nodes
+    // cls - CSS Class
+    function byClassName(nodeSet, cls){
+        if(!cls){
+            return nodeSet;
+        }
+        var result = [], ri = -1;
+        for(var i = 0, ci; ci = nodeSet[i]; i++){
+            if((' '+ci.className+' ').indexOf(cls) != -1){
+                result[++ri] = ci;
             }
         }
-        return r;
+        return result;
     };
 
     function attrValue(n, attr){
+        // if its an array, use the first node.
         if(!n.tagName && typeof n.length != "undefined"){
             n = n[0];
         }
         if(!n){
             return null;
         }
+
         if(attr == "for"){
             return n.htmlFor;
         }
@@ -144,15 +182,23 @@ Ext.DomQuery = function(){
 
     };
 
+
+    // ns - nodes
+    // mode - false, /, >, +, ~
+    // tagName - defaults to "*"
     function getNodes(ns, mode, tagName){
         var result = [], ri = -1, cs;
         if(!ns){
             return result;
         }
         tagName = tagName || "*";
+        // convert to array
         if(typeof ns.getElementsByTagName != "undefined"){
             ns = [ns];
         }
+        
+        // no mode specified, grab all elements by tagName
+        // at any depth
         if(!mode){
             for(var i = 0, ni; ni = ns[i]; i++){
                 cs = ni.getElementsByTagName(tagName);
@@ -160,16 +206,20 @@ Ext.DomQuery = function(){
                     result[++ri] = ci;
                 }
             }
-        }else if(mode == "/" || mode == ">"){
+        // Direct Child mode (/ or >)
+        // E > F or E/F all direct children elements of E that have the tag     
+        } else if(mode == "/" || mode == ">"){
             var utag = tagName.toUpperCase();
             for(var i = 0, ni, cn; ni = ns[i]; i++){
-                cn = ni.children || ni.childNodes;
+                cn = ni.childNodes;
                 for(var j = 0, cj; cj = cn[j]; j++){
                     if(cj.nodeName == utag || cj.nodeName == tagName  || tagName == '*'){
                         result[++ri] = cj;
                     }
                 }
             }
+        // Immediately Preceding mode (+)
+        // E + F all elements with the tag F that are immediately preceded by an element with the tag E
         }else if(mode == "+"){
             var utag = tagName.toUpperCase();
             for(var i = 0, n; n = ns[i]; i++){
@@ -178,16 +228,20 @@ Ext.DomQuery = function(){
                     result[++ri] = n;
                 }
             }
+        // Sibling mode (~)
+        // E ~ F all elements with the tag F that are preceded by a sibling element with the tag E
         }else if(mode == "~"){
+            var utag = tagName.toUpperCase();
             for(var i = 0, n; n = ns[i]; i++){
-                while((n = n.nextSibling) && (n.nodeType != 1 || (tagName == '*' || n.tagName.toLowerCase()!=tagName)));
-                if(n){
-                    result[++ri] = n;
+                while((n = n.nextSibling)){
+                    if (n.nodeName == utag || n.nodeName == tagName || tagName == '*'){
+                        result[++ri] = n;
+                    }
                 }
             }
         }
         return result;
-    };
+    }
 
     function concat(a, b){
         if(b.slice){
@@ -206,76 +260,83 @@ Ext.DomQuery = function(){
         if(!tagName){
             return cs;
         }
-        var r = [], ri = -1;
+        var result = [], ri = -1;
         tagName = tagName.toLowerCase();
         for(var i = 0, ci; ci = cs[i]; i++){
-            if(ci.nodeType == 1 && ci.tagName.toLowerCase()==tagName){
-                r[++ri] = ci;
+            if(ci.nodeType == 1 && ci.tagName.toLowerCase() == tagName){
+                result[++ri] = ci;
             }
         }
-        return r;
-    };
+        return result;
+    }
 
-    function byId(cs, attr, id){
+    function byId(cs, id){
         if(cs.tagName || cs == document){
             cs = [cs];
         }
         if(!id){
             return cs;
         }
-        var r = [], ri = -1;
-        for(var i = 0,ci; ci = cs[i]; i++){
+        var result = [], ri = -1;
+        for(var i = 0, ci; ci = cs[i]; i++){
             if(ci && ci.id == id){
-                r[++ri] = ci;
-                return r;
+                result[++ri] = ci;
+                return result;
             }
         }
-        return r;
-    };
+        return result;
+    }
 
+    // operators are =, !=, ^=, $=, *=, %=, |= and ~=
+    // custom can be "{"
     function byAttribute(cs, attr, value, op, custom){
-        var r = [], ri = -1, st = custom=="{";
-        var f = Ext.DomQuery.operators[op];
+        var result = [], 
+            ri = -1, 
+            useGetStyle = custom == "{",            
+            fn = Ext.DomQuery.operators[op],        
+            a,      
+            innerHTML;
         for(var i = 0, ci; ci = cs[i]; i++){
-            var a;
-            if(st){
-                a = Ext.DomQuery.getStyle(ci, attr);
+            // skip non-element nodes.
+            if(ci.nodeType != 1){
+                continue;
             }
-            else if(attr == "class" || attr == "className"){
-                a = ci.className;
-            }else if(attr == "for"){
-                a = ci.htmlFor;
-            }else if(attr == "href"){
-                a = ci.getAttribute("href", 2);
+            
+            innerHTML = ci.innerHTML;
+            // we only need to change the property names if we're dealing with html nodes, not XML
+            if(innerHTML !== null && innerHTML !== undefined){
+                if(useGetStyle){
+                    a = Ext.DomQuery.getStyle(ci, attr);
+                } else if (attr == "class" || attr == "className"){
+                    a = ci.className;
+                } else if (attr == "for"){
+                    a = ci.htmlFor;
+                } else if (attr == "href"){
+                    // getAttribute href bug
+                    // http://www.glennjones.net/Post/809/getAttributehrefbug.htm
+                    a = ci.getAttribute("href", 2);
+                } else{
+                    a = ci.getAttribute(attr);
+                }
             }else{
                 a = ci.getAttribute(attr);
             }
-            if((f && f(a, value)) || (!f && a)){
-                r[++ri] = ci;
+            if((fn && fn(a, value)) || (!fn && a)){
+                result[++ri] = ci;
             }
         }
-        return r;
-    };
+        return result;
+    }
 
     function byPseudo(cs, name, value){
         return Ext.DomQuery.pseudos[name](cs, value);
-    };
-
-    // This is for IE MSXML which does not support expandos.
-    // IE runs the same speed using setAttribute, however FF slows way down
-    // and Safari completely fails so they need to continue to use expandos.
-    var isIE = window.ActiveXObject ? true : false;
-
-    // this eval is stop the compressor from
-    // renaming the variable to something shorter
-    eval("var batch = 30803;");
-
-    var key = 30803;
+    }
 
     function nodupIEXml(cs){
-        var d = ++key;
+        var d = ++key, 
+            r;
         cs[0].setAttribute("_nodup", d);
-        var r = [cs[0]];
+        r = [cs[0]];
         for(var i = 1, len = cs.length; i < len; i++){
             var c = cs[i];
             if(!c.getAttribute("_nodup") != d){
@@ -323,11 +384,11 @@ Ext.DomQuery = function(){
     }
 
     function quickDiffIEXml(c1, c2){
-        var d = ++key;
+        var d = ++key,
+            r = [];
         for(var i = 0, len = c1.length; i < len; i++){
             c1[i].setAttribute("_qdiff", d);
-        }
-        var r = [];
+        }        
         for(var i = 0, len = c2.length; i < len; i++){
             if(c2[i].getAttribute("_qdiff") != d){
                 r[r.length] = c2[i];
@@ -340,18 +401,18 @@ Ext.DomQuery = function(){
     }
 
     function quickDiff(c1, c2){
-        var len1 = c1.length;
+        var len1 = c1.length,
+                d = ++key,
+                r = [];
         if(!len1){
             return c2;
         }
-        if(isIE && c1[0].selectSingleNode){
+        if(isIE && typeof c1[0].selectSingleNode != "undefined"){
             return quickDiffIEXml(c1, c2);
-        }
-        var d = ++key;
+        }        
         for(var i = 0; i < len1; i++){
             c1[i]._qdiff = d;
-        }
-        var r = [];
+        }        
         for(var i = 0, len = c2.length; i < len; i++){
             if(c2[i]._qdiff != d){
                 r[r.length] = c2[i];
@@ -366,14 +427,15 @@ Ext.DomQuery = function(){
            return d.getElementById(id);
         }
         ns = getNodes(ns, mode, "*");
-        return byId(ns, null, id);
+        return byId(ns, id);
     }
 
     return {
         getStyle : function(el, name){
             return Ext.fly(el).getStyle(name);
         },
-        /**
+        
+         /**
          * Compiles a selector/xpath query into a reusable function. The returned function
          * takes one parameter "root" (optional), which is the context node from where the query should start.
          * @param {String} selector The selector/xpath query
@@ -383,139 +445,183 @@ Ext.DomQuery = function(){
         compile : function(path, type){
             type = type || "select";
 
-            var fn = ["var f = function(root){\n var mode; ++batch; var n = root || document;\n"];
-            var q = path, mode, lq;
-            var tk = Ext.DomQuery.matchers;
-            var tklen = tk.length;
-            var mm;
-
-            // accept leading mode switch
-            var lmode = q.match(modeRe);
+            // setup fn preamble
+            var fn = ["var f = function(root){\n var mode; ++batch; var n = root || document;\n"],
+                mode,           
+                lastPath,
+                matchers = Ext.DomQuery.matchers,
+                matchersLn = matchers.length,
+                modeMatch,
+                // accept leading mode switch
+                lmode = path.match(modeRe);
+            
             if(lmode && lmode[1]){
                 fn[fn.length] = 'mode="'+lmode[1].replace(trimRe, "")+'";';
-                q = q.replace(lmode[1], "");
+                path = path.replace(lmode[1], "");
             }
+            
             // strip leading slashes
             while(path.substr(0, 1)=="/"){
                 path = path.substr(1);
             }
 
-            while(q && lq != q){
-                lq = q;
-                var tm = q.match(tagTokenRe);
+            while(path && lastPath != path){
+                lastPath = path;
+                var tokenMatch = path.match(tagTokenRe);
                 if(type == "select"){
-                    if(tm){
-                        if(tm[1] == "#"){
-                            fn[fn.length] = 'n = quickId(n, mode, root, "'+tm[2]+'");';
+                    if(tokenMatch){
+                        // ID Selector
+                        if(tokenMatch[1] == "#"){
+                            fn[fn.length] = 'n = quickId(n, mode, root, "'+tokenMatch[2]+'");';                 
                         }else{
-                            fn[fn.length] = 'n = getNodes(n, mode, "'+tm[2]+'");';
+                            fn[fn.length] = 'n = getNodes(n, mode, "'+tokenMatch[2]+'");';
                         }
-                        q = q.replace(tm[0], "");
-                    }else if(q.substr(0, 1) != '@'){
+                        path = path.replace(tokenMatch[0], "");
+                    }else if(path.substr(0, 1) != '@'){
                         fn[fn.length] = 'n = getNodes(n, mode, "*");';
                     }
+                // type of "simple"
                 }else{
-                    if(tm){
-                        if(tm[1] == "#"){
-                            fn[fn.length] = 'n = byId(n, null, "'+tm[2]+'");';
+                    if(tokenMatch){
+                        if(tokenMatch[1] == "#"){
+                            fn[fn.length] = 'n = byId(n, "'+tokenMatch[2]+'");';
                         }else{
-                            fn[fn.length] = 'n = byTag(n, "'+tm[2]+'");';
+                            fn[fn.length] = 'n = byTag(n, "'+tokenMatch[2]+'");';
                         }
-                        q = q.replace(tm[0], "");
+                        path = path.replace(tokenMatch[0], "");
                     }
                 }
-                while(!(mm = q.match(modeRe))){
+                while(!(modeMatch = path.match(modeRe))){
                     var matched = false;
-                    for(var j = 0; j < tklen; j++){
-                        var t = tk[j];
-                        var m = q.match(t.re);
+                    for(var j = 0; j < matchersLn; j++){
+                        var t = matchers[j];
+                        var m = path.match(t.re);
                         if(m){
                             fn[fn.length] = t.select.replace(tplRe, function(x, i){
-                                                    return m[i];
-                                                });
-                            q = q.replace(m[0], "");
+                                return m[i];
+                            });
+                            path = path.replace(m[0], "");
                             matched = true;
                             break;
                         }
                     }
                     // prevent infinite loop on bad selector
                     if(!matched){
-                        throw 'Error parsing selector, parsing failed at "' + q + '"';
+                        throw 'Error parsing selector, parsing failed at "' + path + '"';
                     }
                 }
-                if(mm[1]){
-                    fn[fn.length] = 'mode="'+mm[1].replace(trimRe, "")+'";';
-                    q = q.replace(mm[1], "");
+                if(modeMatch[1]){
+                    fn[fn.length] = 'mode="'+modeMatch[1].replace(trimRe, "")+'";';
+                    path = path.replace(modeMatch[1], "");
                 }
             }
+            // close fn out
             fn[fn.length] = "return nodup(n);\n}";
+            
+            // eval fn and return it
             eval(fn.join(""));
             return f;
         },
 
-        /**
+        
+         /**
          * Selects a group of elements.
          * @param {String} selector The selector/xpath query (can be a comma separated list of selectors)
-         * @param {Node} root (optional) The start of the query (defaults to document).
-         * @return {Array}
+         * @param {Node/String} root (optional) The start of the query (defaults to document).
+         * @return {Array} An Array of DOM elements which match the selector. If there are
+         * no matches, and empty Array is returned.
          */
-        select : function(path, root, type){
-            if(!root || root == document){
-                root = document;
-            }
+        jsSelect: function(path, root, type){
+            // set root to doc if not specified.
+            root = root || document;
+            
             if(typeof root == "string"){
                 root = document.getElementById(root);
             }
-            var paths = path.split(",");
-            var results = [];
-            for(var i = 0, len = paths.length; i < len; i++){
-                var p = paths[i].replace(trimRe, "");
-                if(!cache[p]){
-                    cache[p] = Ext.DomQuery.compile(p);
-                    if(!cache[p]){
-                        throw p + " is not a valid selector";
+            var paths = path.split(","),
+                results = [];
+                
+            // loop over each selector
+            for(var i = 0, len = paths.length; i < len; i++){           
+                var subPath = paths[i].replace(trimRe, "");
+                // compile and place in cache
+                if(!cache[subPath]){
+                    cache[subPath] = Ext.DomQuery.compile(subPath);
+                    if(!cache[subPath]){
+                        throw subPath + " is not a valid selector";
                     }
                 }
-                var result = cache[p](root);
+                var result = cache[subPath](root);
                 if(result && result != document){
                     results = results.concat(result);
                 }
             }
+            
+            // if there were multiple selectors, make sure dups
+            // are eliminated
             if(paths.length > 1){
                 return nodup(results);
             }
             return results;
         },
+        isXml: function(el) {
+            var docEl = (el ? el.ownerDocument || el : 0).documentElement;
+            return docEl ? docEl.nodeName !== "HTML" : false;
+        },
+        select : document.querySelectorAll ? function(path, root, type) {
+            root = root || document;
+            if (!Ext.DomQuery.isXml(root)) {
+                try {
+                    var cs = root.querySelectorAll(path);
+                    return Ext.toArray(cs);
+                }
+                catch (ex) {}           
+            }       
+            return Ext.DomQuery.jsSelect.call(this, path, root, type);
+        } : function(path, root, type) {
+            return Ext.DomQuery.jsSelect.call(this, path, root, type);
+        },
 
-        /**
+        
+         /**
          * Selects a single element.
          * @param {String} selector The selector/xpath query
          * @param {Node} root (optional) The start of the query (defaults to document).
-         * @return {Element}
+         * @return {Element} The DOM element which matched the selector.
          */
         selectNode : function(path, root){
             return Ext.DomQuery.select(path, root)[0];
         },
 
-        /**
+        
+         /**
          * Selects the value of a node, optionally replacing null with the defaultValue.
          * @param {String} selector The selector/xpath query
          * @param {Node} root (optional) The start of the query (defaults to document).
          * @param {String} defaultValue
+         * @return {String}
          */
         selectValue : function(path, root, defaultValue){
             path = path.replace(trimRe, "");
             if(!valueCache[path]){
                 valueCache[path] = Ext.DomQuery.compile(path, "select");
             }
-            var n = valueCache[path](root);
+            var n = valueCache[path](root), v;
             n = n[0] ? n[0] : n;
-            var v = (n && n.firstChild ? n.firstChild.nodeValue : null);
+                    
+            // overcome a limitation of maximum textnode size
+            // Rumored to potentially crash IE6 but has not been confirmed.
+            // http://reference.sitepoint.com/javascript/Node/normalize
+            // https://developer.mozilla.org/En/DOM/Node.normalize          
+            if (typeof n.normalize == 'function') n.normalize();
+            
+            v = (n && n.firstChild ? n.firstChild.nodeValue : null);
             return ((v === null||v === undefined||v==='') ? defaultValue : v);
         },
 
-        /**
-         * Selects the value of a node, parsing integers and floats.
+        
+         /**
+         * Selects the value of a node, parsing integers and floats. Returns the defaultValue, or 0 if none is specified.
          * @param {String} selector The selector/xpath query
          * @param {Node} root (optional) The start of the query (defaults to document).
          * @param {Number} defaultValue
@@ -526,7 +632,8 @@ Ext.DomQuery = function(){
             return parseFloat(v);
         },
 
-        /**
+        
+         /**
          * Returns true if the passed element(s) match the passed simple selector (e.g. div.some-class or span:first-child)
          * @param {String/HTMLElement/Array} el An element id, element or array of elements
          * @param {String} selector The simple selector to test
@@ -536,18 +643,20 @@ Ext.DomQuery = function(){
             if(typeof el == "string"){
                 el = document.getElementById(el);
             }
-            var isArray = (el instanceof Array);
-            var result = Ext.DomQuery.filter(isArray ? el : [el], ss);
+            var isArray = Ext.isArray(el),
+                result = Ext.DomQuery.filter(isArray ? el : [el], ss);
             return isArray ? (result.length == el.length) : (result.length > 0);
         },
 
-        /**
+        
+         /**
          * Filters an array of elements to only include matches of a simple selector (e.g. div.some-class or span:first-child)
          * @param {Array} el An array of elements to filter
          * @param {String} selector The simple selector to test
          * @param {Boolean} nonMatches If true, it returns the elements that DON'T match
          * the selector instead of the ones that match
-         * @return {Array}
+         * @return {Array} An Array of DOM elements which match the selector. If there are
+         * no matches, and empty Array is returned.
          */
         filter : function(els, ss, nonMatches){
             ss = ss.replace(trimRe, "");
@@ -558,12 +667,15 @@ Ext.DomQuery = function(){
             return nonMatches ? quickDiff(result, els) : result;
         },
 
-        /**
+        
+         /**
          * Collection of matching regular expressions and code snippets.
+         * Each capture group within () will be replace the {} in the select
+         * statement as specified by their index.
          */
         matchers : [{
                 re: /^\.([\w-]+)/,
-                select: 'n = byClassName(n, null, " {1} ");'
+                select: 'n = byClassName(n, " {1} ");'
             }, {
                 re: /^\:([\w-]+)(?:\(((?:[^\s>\/]*|.*?))\))?/,
                 select: 'n = byPseudo(n, "{1}", "{2}");'
@@ -572,16 +684,17 @@ Ext.DomQuery = function(){
                 select: 'n = byAttribute(n, "{2}", "{4}", "{3}", "{1}");'
             }, {
                 re: /^#([\w-]+)/,
-                select: 'n = byId(n, null, "{1}");'
+                select: 'n = byId(n, "{1}");'
             },{
                 re: /^@([\w-]+)/,
                 select: 'return {firstChild:{nodeValue:attrValue(n, "{1}")}};'
             }
         ],
 
-        /**
+        
+         /**
          * Collection of operator comparison functions. The default operators are =, !=, ^=, $=, *=, %=, |= and ~=.
-         * New operators can be added as long as the match the format <i>c</i>= where <i>c</i> is any character other than space, &gt; &lt;.
+         * New operators can be added as long as the match the format c= where c is any character other than space, > <.
          */
         operators : {
             "=" : function(a, v){
@@ -610,9 +723,43 @@ Ext.DomQuery = function(){
             }
         },
 
-        /**
-         * Collection of "pseudo class" processors. Each processor is passed the current nodeset (array)
-         * and the argument (if any) supplied in the selector.
+        
+         /**
+         * 
+         * Object hash of "pseudo class" filter functions which are used when filtering selections. Each function is passed
+         * two parameters:
+         *
+         *  * c : Array
+         *  An Array of DOM elements to filter.
+         *
+         *  * v : String
+         *  The argument (if any) supplied in the selector.
+         *
+         *
+         * A filter function returns an Array of DOM elements which conform to the pseudo class.
+         *
+         * In addition to the provided pseudo classes listed above such as first-child and nth-child,
+         * developers may add additional, custom psuedo class filters to select elements according to application-specific requirements.
+         *
+         *
+         * For example, to filter <a> elements to only return links to external resources:
+         *
+         * Ext.DomQuery.pseudos.external = function(c, v){
+         *     var r = [], ri = -1;
+         *     for(var i = 0, ci; ci = c[i]; i++){
+         *         // Include in result set only if it's a link to an external resource
+         *         if(ci.hostname != location.hostname){
+         *             r[++ri] = ci;
+         *         }
+         *     }
+         *     return r;
+         * };
+         *
+         *
+         * Then external links could be gathered with the following statement:
+         * 
+         * var externalLinks = Ext.select("a:external");
+         * 
          */
         pseudos : {
             "first-child" : function(c){
@@ -638,9 +785,9 @@ Ext.DomQuery = function(){
             },
 
             "nth-child" : function(c, a) {
-                var r = [], ri = -1;
-                var m = nthRe.exec(a == "even" && "2n" || a == "odd" && "2n+1" || !nthRe2.test(a) && "n+" + a || a);
-                var f = (m[1] || 1) - 0, l = m[2] - 0;
+                var r = [], ri = -1,
+                        m = nthRe.exec(a == "even" && "2n" || a == "odd" && "2n+1" || !nthRe2.test(a) && "n+" + a || a),
+                        f = (m[1] || 1) - 0, l = m[2] - 0;
                 for(var i = 0, n; n = c[i]; i++){
                     var pn = n.parentNode;
                     if (batch != pn._batch) {
@@ -726,6 +873,20 @@ Ext.DomQuery = function(){
                 return Ext.DomQuery.filter(c, ss, true);
             },
 
+            "any" : function(c, selectors){
+                var ss = selectors.split('|'),
+                        r = [], ri = -1, s;
+                for(var i = 0, ci; ci = c[i]; i++){
+                    for(var j = 0; s = ss[j]; j++){
+                        if(Ext.DomQuery.is(ci, s)){
+                            r[++ri] = ci;
+                            break;
+                        }
+                    }
+                }
+                return r;
+            },
+
             "odd" : function(c){
                 return this["nth-child"](c, "odd");
             },
@@ -747,8 +908,8 @@ Ext.DomQuery = function(){
             },
 
             "has" : function(c, ss){
-                var s = Ext.DomQuery.select;
-                var r = [], ri = -1;
+                var s = Ext.DomQuery.select,
+                        r = [], ri = -1;
                 for(var i = 0, ci; ci = c[i]; i++){
                     if(s(ss, ci).length > 0){
                         r[++ri] = ci;
@@ -758,8 +919,8 @@ Ext.DomQuery = function(){
             },
 
             "next" : function(c, ss){
-                var is = Ext.DomQuery.is;
-                var r = [], ri = -1;
+                var is = Ext.DomQuery.is,
+                        r = [], ri = -1;
                 for(var i = 0, ci; ci = c[i]; i++){
                     var n = next(ci);
                     if(n && is(n, ss)){
@@ -770,8 +931,8 @@ Ext.DomQuery = function(){
             },
 
             "prev" : function(c, ss){
-                var is = Ext.DomQuery.is;
-                var r = [], ri = -1;
+                var is = Ext.DomQuery.is,
+                        r = [], ri = -1;
                 for(var i = 0, ci; ci = c[i]; i++){
                     var n = prev(ci);
                     if(n && is(n, ss)){
