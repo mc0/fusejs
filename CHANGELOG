@@ -1,3 +1,5 @@
+* Add `skipDataInit` argument to fuse.dom.Node.getFuseId(). [jddalton]
+
 * Add clone(deep) methods to Array, Element, Hash, Object, Number, Range, String, and Template. [FuseJS LH #18] [jddalton, Joe Gornick]
 
 * Add caching/decorating options to fuse.dom.Element create(), from(), fromElement(), fromHTML(), and fromId(). [jddalton]

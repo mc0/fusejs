@@ -90,7 +90,7 @@
     },
 
     createCloner = function() {
-      return function(source, deep, cloneData, cloneEvents, excludes, context) {
+      return function(source, deep, isData, isEvents, excludes, context) {
         var addDispatcher, data, id, length, node, nodes, srcData, srcEvents, i = -1, 
          element = cloneNode(source, excludes, null, context);
 
@@ -101,18 +101,22 @@
           }
         }
 
-        if (cloneData || cloneEvents) {
-          id ||  (id = fromElement(element).getFuseId());
-          data = domData[id];
-          srcData = domData[getFuseId(source)];
-          srcEvents = srcData.events;
+        if (isData || isEvents) {
+          srcData = domData[getFuseId(source, true)];
+          srcEvents = srcData && srcData.events;
 
-          if (cloneData) {
+          if (srcData && isData) {
+            id || (id = getFuseId(element));
+            data = domData[id];
+
             delete srcData.events;
             fuse.Object.extend(data, srcData);
             srcEvents && (srcData.events = srcEvents);
           }
-          if (cloneEvents && srcEvents) {
+          if (srcEvents && isEvents) {
+            id   || (id = getFuseId(element));
+            data || (data = domData[id]);
+
             // copy delegation watcher
             if (srcData._isWatchingDelegation) {
               fuse.dom.Event._addWatcher(element, data);
@@ -131,7 +135,7 @@
   		    nodes  = source.childNodes;
     		  while (node = nodes[++i]) {
     	      element.appendChild(node.nodeType === ELEMENT_NODE
-    	        ? cloner(node, deep, events, excludes, context)
+    	        ? cloner(node, deep, isData, isEvents, excludes, context)
     	        : node.cloneNode(false));
     		  }
   		  }

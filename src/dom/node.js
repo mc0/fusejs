@@ -36,8 +36,8 @@
       return data ? (data.decorator = decorated) : decorated;
     },
 
-    getFuseId = function getFuseId() {
-      return Node.getFuseId(this);
+    getFuseId = function getFuseId(skipDataInit) {
+      return Node.getFuseId(this, skipDataInit);
     };
 
     fuse.Class({ 'constructor': Node, 'getFuseId': getFuseId });
@@ -75,7 +75,7 @@
       }
     },
 
-    getFuseId = function getFuseId(node) {
+    getFuseId = function getFuseId(node, skipDataInit) {
       node = node.raw || node;
       var win, id = node[DATA_ID_PROP];
 
@@ -93,13 +93,20 @@
           // quick return for common case OR
           // calculate id for foreign document objects
           id = node === fuse._doc ? '2' : getFuseId(win.frameElement) + '-2';
-          domData[id] || (domData[id] = { 'nodes': { } });
+          skipDataInit || (skipDataInit = domData[id]);
+          if (!skipDataInit) {
+            skipDataInit =
+            domData[id] = { 'nodes': { } };
+          }
         }
         else {
           id = node._fuseId = fuseId++;
         }
       }
-      domData[id] || (domData[id] = { });
+      skipDataInit || (skipDataInit = domData[id]);
+      if (!skipDataInit) {
+        domData[id] = { };
+      }
       return id;
     };
 
