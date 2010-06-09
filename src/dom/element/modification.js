@@ -97,7 +97,7 @@
         if (excludes) {
           length = excludes.length;
           while (length--) {
-            element.removeAttribute(excludes[length]);
+            plugin.removeAttribute.call(element, excludes[length]);
           }
         }
 
