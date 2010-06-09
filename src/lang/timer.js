@@ -28,11 +28,11 @@
         try {
           this.execute();
           this.executing = false;
-          if (this.timerID !== null) this.start();
+          if (this._timerId !== null) this.start();
         }
         catch (e) {
           this.executing = false;
-          if (this.timerID !== null) this.start();
+          if (this._timerId !== null) this.start();
           throw e;
         }
       }
@@ -40,7 +40,7 @@
 
     __instance,
     __apply = Timer.apply,
-    __call = Timer.call;
+    __call  = Timer.call;
 
     Timer.call = function(thisArg) {
       __instance = thisArg;
@@ -63,16 +63,16 @@
     };
 
     plugin.start = function start() {
-      this.timerID = setTimeout(this.onTimerEvent,
+      this._timerId = setTimeout(this.onTimerEvent,
         this.interval * this.options.multiplier);
       return this;
     };
 
     plugin.stop = function stop() {
-      var id = this.timerID;
+      var id = this._timerId;
       if (id === null) return;
       global.clearTimeout(id);
-      this.timerID = null;
+      this._timerId = null;
       return this;
     };
 

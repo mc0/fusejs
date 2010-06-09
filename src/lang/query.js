@@ -33,8 +33,8 @@
       if (match.length > 1 && !match[1] ||
           !((match = (match = match[1] || match[0]).split('#')) &&
           (match = match[0].split(' ')[0]))) {
-        // bail if there is no query 
-        return object;    
+        // bail if there is no query
+        return object;
       }
 
       var pair, key, value, index, i = -1,

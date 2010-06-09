@@ -3,9 +3,16 @@
   (function() {
     var strInspect,
 
-    strPlugin = fuse.String.plugin,
-
-    specialChars = { '\\': '\\\\', '"' : '\\"', "'" : "\\'" },
+    SPECIAL_CHARS = {
+      '\b': '\\b',
+      '\f': '\\f',
+      '\n': '\\n',
+      '\r': '\\r',
+      '\t': '\\t',
+      '\\': '\\\\',
+      '"' : '\\"',
+      "'" : "\\'"
+    },
 
     // charCodes 0-31 and \ and '
     reWithSingleQuotes = /[\x00-\x1f\\']/g,
@@ -13,8 +20,10 @@
     // charCodes 0-31 and \ and "
     reWithDoubleQuotes = /[\x00-\x1f\\"]/g,
 
+    strPlugin = fuse.String.plugin,
+
     escapeSpecialChars = function(match) {
-      return specialChars[match];
+      return SPECIAL_CHARS[match];
     },
 
     inspectPlugin = function(plugin) {
@@ -25,11 +34,11 @@
       return result;
     };
 
-    // populate specialChars with control characters
+    // populate SPECIAL_CHARS with control characters
     (function(i, key) {
       while (--i) {
-        specialChars[String.fromCharCode(i)] =
-          '\\u' + ('0000' + i.toString(16)).slice(-4);
+        key = String.fromCharCode(i);
+        SPECIAL_CHARS[key] || (SPECIAL_CHARS[key] = '\\u' + ('0000' + i.toString(16)).slice(-4));
       }
     })(32);
 
