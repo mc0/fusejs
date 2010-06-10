@@ -89,9 +89,9 @@
 
 * Make inspect() methods support iterating over objects that have their own generic inspect() method. [jddalton]
 
-* Add native JSON support to the JSON methods and make them comply with ECMA specs. [FuseJS LH #22] [jddalton, kitsg, Tobie Langel]
+* Add native JSON support to the JSON methods and make them comply with ECMA specs. [FuseJS LH #22] [jddalton, Kit Goncharov, Tobie Langel]
 
-* Optimize fuse.dom.Element modification methods and add append(), prepend(), insertBefore(), and insertAfter() methods. [FuseJS LH #53] [jddalton, kangax, kitsg]
+* Optimize fuse.dom.Element modification methods and add append(), prepend(), insertBefore(), and insertAfter() methods. [FuseJS LH #53] [jddalton, kangax, Kit Goncharov]
 
 * Add `defaults` object to constructors to store default properties / options. [jddalton, Thomas Aylott]
 
@@ -109,7 +109,7 @@
 
 * Ensure fuse(document).viewport works with documents from iframes. [jddalton]
 
-* Fix cross-browser bugs with fuse.String match(), search(), split() and fuse.RegExp exec(), test(). [FuseJS LH #42] [jddalton, kitsg, Steve Levithan]
+* Fix cross-browser bugs with fuse.String match(), search(), split() and fuse.RegExp exec(), test(). [FuseJS LH #42] [jddalton, Kit Goncharov, Steve Levithan]
 
 * Make the fuse.Fusebox'ed Object constructor, when called as a function and passed a native RegExp instance, return a Fuseboxed RegExp instance. [jddalton]
 
@@ -481,7 +481,7 @@
 
 * Fix bug in Fuse.Object.isSameOrigin() that allowed urls ending with the same domain name to pass. [jddalton]
 
-* Ensure Fuse.Object.toQueryString() only enumerates over an object's own direct properties. [Prototype LH #126] [jddalton, kitsg, Peter Gyongyosi]
+* Ensure Fuse.Object.toQueryString() only enumerates over an object's own direct properties. [Prototype LH #126] [jddalton, Kit Goncharov, Peter Gyongyosi]
 
 * unit test: Add option to dynamically set the Fuse.debug flag in the test template. [jddalton]
 
@@ -497,7 +497,7 @@
 
 * Optimize the Element constructor giving it a massive performance boost in all browsers. [FuseJS LH #50] [Diego Perini, jddalton]
 
-* Tweaked a line in the Rakefile to automatically run `rake dist` before running `rake build_unit_tests`. [kitsg]
+* Tweaked a line in the Rakefile to automatically run `rake dist` before running `rake build_unit_tests`. [Kit Goncharov]
 
 * unit test: Change Fuse.Ajax.Request `onComplete` callback to `onDone` in the html template and update Fuse.Dom.Selector tests to reflect the changed doctype. [jddalton]
 
@@ -555,12 +555,12 @@
 * Changed the argument order in Form.TimedObserver and Field.TimedObserver to `element, callback, interval, options` for a more consistent API. [jddalton]
   Note: Backwards compatibility warning.
 
-* Make Fuse.Timer() operate on milliseconds instead of seconds and allow setting the millisecond `multiplier` via an options object as the third argument. [FuseJS LH #26] [kitsg, jddalton, Joe Gornick]
+* Make Fuse.Timer() operate on milliseconds instead of seconds and allow setting the millisecond `multiplier` via an options object as the third argument. [FuseJS LH #26] [Kit Goncharov, jddalton, Joe Gornick]
   Note: Backwards compatibility warning.
 
 * unit test: Fix minor Safari 2.x bugs in functional event tests. [jddalton]
 
-* Rename Fuse.Ajax.Base and Fuse.Ajax.TimedUpdater `defaultOptions` object to `options` and fix options related bugs in Fuse.Ajax.TimedUpdater. [jddalton, Joe Gornick, kitsg]
+* Rename Fuse.Ajax.Base and Fuse.Ajax.TimedUpdater `defaultOptions` object to `options` and fix options related bugs in Fuse.Ajax.TimedUpdater. [jddalton, Joe Gornick, Kit Goncharov]
   Note: Backwards compatibility warning.
 
 * Add Ext.DomQuery support and allow the active css engine to be dynamically set in the unit tests. [jddalton]
