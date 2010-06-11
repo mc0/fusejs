@@ -7,8 +7,8 @@
   <script type="text/javascript">
     var eventResults = { 'currentTarget': { } };
   </script>
-  <script src="../../../dist/fuse.js" type="text/javascript"></script>
-  <script src="../../lib/assets/unittest.js" type="text/javascript"></script>
+  <script src="../../../../dist/fuse.js" type="text/javascript"></script>
+  <script src="../resources/unittest.js" type="text/javascript"></script>
   <script type="text/javascript">
     var undef, nil = null,
      $  = fuse.util.$,
@@ -72,10 +72,10 @@
 
       // load selector engine and Fuse engine adapter
       fuse.String(engineItem.value).split('+').each(function(path) {
-        loadScriptFile('../../../vendor/' + path);
+        loadScriptFile('../../../../vendor/' + path);
       });
 
-      loadScriptFile('../../../src/dom/selector/' + engineItem.text.toLowerCase() + '.js');
+      loadScriptFile('../../../../src/dom/selector/' + engineItem.text.toLowerCase() + '.js');
 
       // attach event handlers to config controls
       debugEl.observe('change', refresh);
@@ -83,13 +83,13 @@
     });
   </script>
 
-  <link rel="stylesheet" href="../../lib/assets/test.css" type="text/css">
+  <link rel="stylesheet" href="../resources/test.css" type="text/css">
 <% if @css_fixtures_filename %>
-  <link rel="stylesheet" href="../fixtures/<%= @css_fixtures_filename %>" type="text/css">
+  <link rel="stylesheet" href="../source/fixtures/<%= @css_fixtures_filename %>" type="text/css">
 <% end %><% if @js_fixtures_filename %>
-  <script src="../fixtures/<%= @js_fixtures_filename %>" type="text/javascript" charset="utf-8"></script>
+  <script src="../source/fixtures/<%= @js_fixtures_filename %>" type="text/javascript" charset="utf-8"></script>
 <% end %>
-  <script src="../<%= @js_filename %>" type="text/javascript" charset="utf-8"></script>
+  <script src="../source/<%= @js_filename %>" type="text/javascript" charset="utf-8"></script>
 </head>
 <body>
 <h1>FuseJS Unit test file</h1>
