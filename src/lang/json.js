@@ -10,11 +10,10 @@
     fuse.Object.toJSON = function toJSON(value) {
       if (!STRINGABLE_TYPES[typeof value]) return;
 
-      var length, i = -1, result = [],
-       object = Object(value),
-       classType = toString.call(object);
+      var length, i = -1, result = [], object = Object(value),
+       classOf = toString.call(object);
 
-      switch (classType) {
+      switch (classOf) {
         case '[object Boolean]': return fuse.String(value);
         case '[object Number]' : return fuse.String(isFinite(value) ? value : 'null');
         case '[object String]' : return inspect.call(value, true);

@@ -67,7 +67,7 @@
         return function() {
           var idoc, iframe, result,
            parentNode = doc.body || doc.documentElement,
-           name       = 'sb_' + expando + counter++;
+           name       = expando + counter++;
 
           try {
             // set name attribute for IE6/7
@@ -118,14 +118,13 @@
        filterCallback = function(value) { return value != null; },
        glFunction     = global.Function,
        reStrict       = /^\s*(['"])use strict\1/,
-       sbSlice        = __Array.prototype.slice,
-       sbToString     = __Object.prototype.toString;
+       sbSlice        = __Array.prototype.slice;
 
       instance || (instance = new Klass);
 
       from = function(value) {
-        var type = sbToString.call(value);
-        switch (type) {
+        var classOf = toString.call(value);
+        switch (classOf) {
           case '[object Array]':
             if (value.constructor !== instance.Array) {
               return instance.Array.fromArray(value);
@@ -155,9 +154,9 @@
 
           case '[object Number]' :
           case '[object String]' :
-            type = type.slice(8,-1);
-            if (value.constructor !== instance[type]) {
-              return instance[type](value);
+            classOf = classOf.slice(8,-1);
+            if (value.constructor !== instance[classOf]) {
+              return instance[classOf](value);
             }
         }
         return value;
@@ -270,15 +269,13 @@
            toString = function toString() { return originalBody; },
            originalBody = body = args.pop();
 
-          argN = args.join(',');
-
           // ensure we aren't in strict mode and map arguments.callee to the wrapper
           if (body && body.search(reStrict) < 0) {
             body = 'arguments.callee = arguments.callee.' + expando + '; ' + body;
           }
 
           // create function using global.Function constructor
-          fn = new glFunction(argN, body);
+          fn = new glFunction(args.join(','), body);
 
           // ensure `thisArg` isn't set to the sandboxed global
           result = fn[expando] = new __Function('global, fn',
@@ -451,7 +448,7 @@
       // ES5 15.4.3.2
       if (!isFunction(Array.isArray = __Array.isArray)) {
         Array.isArray = function isArray(value) {
-          return sbToString.call(value) === '[object Array]';
+          return toString.call(value) === '[object Array]';
         };
       }
 
@@ -505,12 +502,12 @@
 
           // redefine RegExp to auto-fix \s issues
           RegExp = function RegExp(pattern, flags) {
-            return new RE((sbToString.call(pattern) === '[object RegExp]' ?
+            return new RE((toString.call(pattern) === '[object RegExp]' ?
               pattern.source : String(pattern))
                 .replace(reCharClass, newCharClass), flags);
           };
 
-          // associate properties of old RegExp to the redefined one
+          // map properties of old RegExp to the redefined one
           RegExp.SPECIAL_CHARS = RE.SPECIAL_CHARS;
           regPlugin = RegExp.plugin = RegExp.prototype = RE.prototype;
         }
@@ -840,6 +837,16 @@
         return String(__toUpperCase.call(this));
       }).raw = __toUpperCase;
 
+      // add [[Class]] property to eaches prototype as a fallback
+      // in case {}.toString.call(value) doesn't work on sandboxed natives
+      arrPlugin['[[Class]]']  = '[object Array]';
+      boolPlugin['[[Class]]'] = '[object Boolean]';
+      datePlugin['[[Class]]'] = '[object Date]';
+      funcPlugin['[[Class]]'] = '[object Function]';
+      numPlugin['[[Class]]']  = '[object Number]';
+      regPlugin['[[Class]]']  = '[object RegExp]';
+      strPlugin['[[Class]]']  = '[object String]';
+
       // point constructor properties to the native wrappers
       arrPlugin.constructor  = Array;
       boolPlugin.constructor = Boolean;
@@ -966,6 +973,8 @@
     (function() {
       var backup, key, i = -1,
 
+      __toString = {}.toString,
+
       SKIPPED_KEYS = { 'constructor': 1 },
 
       createGeneric = function(proto, methodName) {
@@ -1014,6 +1023,11 @@
         fuse.Number   = backup.Number;
         fuse.RegExp   = backup.RegExp;
         fuse.String   = backup.String;
+      }
+
+      // redifine `toString` if there are no issues
+      if (__toString.call(fuse.Array()) === '[object Array]') {
+        toString = __toString;
       }
 
       // assign sandboxed natives to Fuse and add `updateGeneric` methods

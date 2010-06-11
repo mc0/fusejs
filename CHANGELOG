@@ -1,3 +1,5 @@
+* Add fuse.Object.getClassOf() and provide a fallback in case {}.toString.call(...) fails to resolve sandboxed natives [[Class]]. [jddalton]
+
 * Move fuse.Enumerable to fuse.Class.mixins.enumerable. [FuseJS LH #68] [jddalton]
 
 * Add fuse.dom.Event._addDispatcher and rename other implied private methods. [jddalton]

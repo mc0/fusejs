@@ -108,17 +108,91 @@ new Test.Unit.Runner({
     this.assertEqual(bool, clone, 'Failed to clone boolean object.');
   },
 
-  'testObjectToHTML': function() {
-    this.assertEqual('',    fuse.Object.toHTML());
-    this.assertEqual('',    fuse.Object.toHTML(''));
-    this.assertEqual('',    fuse.Object.toHTML(null));
-    this.assertEqual('0',   fuse.Object.toHTML(0));
-    this.assertEqual('123', fuse.Object.toHTML(123));
+  'testObjectGetClassOf': function() {
+    this.assertEqual('Array',    fuse.Object.getClassOf([]));
+    this.assertEqual('Array',    fuse.Object.getClassOf(fuse.Array()));
+    this.assertEqual('Boolean',  fuse.Object.getClassOf(false));
+    this.assertEqual('Boolean',  fuse.Object.getClassOf(fuse.Boolean(false)));
+    this.assertEqual('Date',     fuse.Object.getClassOf(new Date));
+    this.assertEqual('Date',     fuse.Object.getClassOf(new fuse.Date()));
+    this.assertEqual('Function', fuse.Object.getClassOf(fuse.Function.NOOP));
+    this.assertEqual('Function', fuse.Object.getClassOf(fuse.Function('')));
+    this.assertEqual('Object',   fuse.Object.getClassOf({ }));
+    this.assertEqual('Object',   fuse.Object.getClassOf(fuse.Object()));
+    this.assertEqual('Number',   fuse.Object.getClassOf(1));
+    this.assertEqual('Number',   fuse.Object.getClassOf(fuse.Number(1)));
+    this.assertEqual('RegExp',   fuse.Object.getClassOf(/x/));
+    this.assertEqual('RegExp',   fuse.Object.getClassOf(fuse.RegExp('x')));
+    this.assertEqual('String',   fuse.Object.getClassOf('x'));
+    this.assertEqual('String',   fuse.Object.getClassOf(fuse.String('x')));
+  },
 
-    this.assertEqual('hello world', fuse.Object.toHTML('hello world'));
+  'testObjectHasKey': function() {
+    function A() { this.foo = 3 }
+    A.prototype = { 'foo': 4 };
 
-    this.assertEqual('hello world',
-      fuse.Object.toHTML({ 'toHTML': function() { return 'hello world' }}));
+    function B() { this.foo = 2 }
+    B.prototype = new A;
+
+    function C() { this.foo = 1 }
+    C.prototype = new B;
+
+    var c = new C, empty = { }, properties = fuse.Array('constructor',
+      'hasOwnProperty', 'isPrototypeOf', 'propertyIsEnumerable', 'toLocaleString',
+      'toString', 'valueOf');
+
+    this.assert(fuse.Object.hasKey(c, 'foo'),
+      'Expected c.foo as own property.');
+
+    delete c.foo;
+
+    this.assert(!fuse.Object.hasKey(c, 'foo'),
+      'Expected c.foo as inherited property.');
+
+    this.assertEqual(2, c.foo, 'Expected c.foo to equal 2');
+
+    delete C.prototype.foo;
+
+    this.assertEqual(3, c.foo,
+      'Expected c.foo to equal 3 after deleting C.prototype.foo.');
+
+    c.foo = undef;
+
+    this.assert(fuse.Object.hasKey(c, 'foo'),
+      'Expected c.foo, value set as undefined, as own property.');
+
+    this.assert(!fuse.Object.hasKey(C.prototype, 'foo'),
+      'Expected C.prototype.foo as inherited property.');
+
+    this.assertEqual(3, C.prototype.foo,
+      'Expected C.prototype.foo to equal 3');
+
+    C.prototype.foo = undef;
+
+    this.assert(fuse.Object.hasKey(A.prototype, 'foo',
+      'Expected A.prototype.foo as own property.'));
+
+    properties.each(function(property) {
+      this.assert(!fuse.Object.hasKey(empty, property),
+        'Expected "' + property + '" as inherited property');
+
+      // Safari 2 doesn't have many of the properties
+      if (Object.prototype[property]) {
+        this.assert(fuse.Object.hasKey(Object.prototype, property),
+          'Expected "' + property + '" as own property');
+      }
+    }, this);
+
+    this.assert(!fuse.Object.hasKey(0, 'toString'));
+    this.assert(!fuse.Object.hasKey('testing', 'valueOf'));
+
+    // test null/undefined values
+    this.assertRaise('TypeError', function() { fuse.Object.hasKey(null,  '') });
+    this.assertRaise('TypeError', function() { fuse.Object.hasKey(undef, '') });
+
+    // test window object
+    this.assert(fuse.Object.hasKey(window, 'fuse'));
+    this.assert(!fuse.Object.hasKey(window, 'abc123xyz'));
   },
 
   'testObjectIsArray': function() {
@@ -209,74 +283,6 @@ new Test.Unit.Runner({
     this.assert(!fuse.Object.isFunction(0));
     this.assert(!fuse.Object.isFunction(false));
     this.assert(!fuse.Object.isFunction(undef));
-  },
-
-  'testObjectHasKey': function() {
-    function A() { this.foo = 3 }
-    A.prototype = { 'foo': 4 };
-
-    function B() { this.foo = 2 }
-    B.prototype = new A;
-
-    function C() { this.foo = 1 }
-    C.prototype = new B;
-
-    var c = new C, empty = { }, properties = fuse.Array('constructor',
-      'hasOwnProperty', 'isPrototypeOf', 'propertyIsEnumerable', 'toLocaleString',
-      'toString', 'valueOf');
-
-    this.assert(fuse.Object.hasKey(c, 'foo'),
-      'Expected c.foo as own property.');
-
-    delete c.foo;
-
-    this.assert(!fuse.Object.hasKey(c, 'foo'),
-      'Expected c.foo as inherited property.');
-
-    this.assertEqual(2, c.foo, 'Expected c.foo to equal 2');
-
-    delete C.prototype.foo;
-
-    this.assertEqual(3, c.foo,
-      'Expected c.foo to equal 3 after deleting C.prototype.foo.');
-
-    c.foo = undef;
-
-    this.assert(fuse.Object.hasKey(c, 'foo'),
-      'Expected c.foo, value set as undefined, as own property.');
-
-    this.assert(!fuse.Object.hasKey(C.prototype, 'foo'),
-      'Expected C.prototype.foo as inherited property.');
-
-    this.assertEqual(3, C.prototype.foo,
-      'Expected C.prototype.foo to equal 3');
-
-    C.prototype.foo = undef;
-
-    this.assert(fuse.Object.hasKey(A.prototype, 'foo',
-      'Expected A.prototype.foo as own property.'));
-
-    properties.each(function(property) {
-      this.assert(!fuse.Object.hasKey(empty, property),
-        'Expected "' + property + '" as inherited property');
-
-      // Safari 2 doesn't have many of the properties
-      if (Object.prototype[property]) {
-        this.assert(fuse.Object.hasKey(Object.prototype, property),
-          'Expected "' + property + '" as own property');
-      }
-    }, this);
-
-    this.assert(!fuse.Object.hasKey(0, 'toString'));
-    this.assert(!fuse.Object.hasKey('testing', 'valueOf'));
-
-    // test null/undefined values
-    this.assertRaise('TypeError', function() { fuse.Object.hasKey(null,  '') });
-    this.assertRaise('TypeError', function() { fuse.Object.hasKey(undef, '') });
-
-    // test window object
-    this.assert(fuse.Object.hasKey(window, 'fuse'));
-    this.assert(!fuse.Object.hasKey(window, 'abc123xyz'));
   },
 
   'testObjectIsHostType': function() {
@@ -455,6 +461,19 @@ new Test.Unit.Runner({
 
     this.assertRaise('TypeError', function() { fuse.Object.keys(null) });
     this.assertRaise('TypeError', function() { fuse.Object.keys(3) });
+  },
+
+  'testObjectToHTML': function() {
+    this.assertEqual('',    fuse.Object.toHTML());
+    this.assertEqual('',    fuse.Object.toHTML(''));
+    this.assertEqual('',    fuse.Object.toHTML(null));
+    this.assertEqual('0',   fuse.Object.toHTML(0));
+    this.assertEqual('123', fuse.Object.toHTML(123));
+
+    this.assertEqual('hello world', fuse.Object.toHTML('hello world'));
+
+    this.assertEqual('hello world',
+      fuse.Object.toHTML({ 'toHTML': function() { return 'hello world' }}));
   },
 
   'testObjectValues': function() {

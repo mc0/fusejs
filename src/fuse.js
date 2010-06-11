@@ -94,6 +94,17 @@
       : Math.abs(number) < 2147483648 ? number | 0 : number - (number % 1);
   };
 
+  // used to access an object's internal [[Class]] property
+  // redefined later if there is no issues grabbing sandboxed natives [[Class]]
+  toString = {
+    'call': (function() {
+      var __toString = {}.toString;
+      return function(object) {
+        return object != null && object['[[Class]]'] || __toString.call(object);
+      };
+    })()
+  };
+
   // global.document.createDocumentFragment() nodeType
   DOCUMENT_FRAGMENT_NODE = 11;
 
@@ -117,9 +128,6 @@
 
   // shortcut
   setTimeout = global.setTimeout;
-
-  // used to access the an object's internal [[Class]] property
-  toString = {}.toString;
 
   // used for some required browser sniffing
   userAgent = global.navigator && navigator.userAgent || '';

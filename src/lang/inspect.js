@@ -58,7 +58,7 @@
     };
 
     fuse.Object.inspect = function inspect(value) {
-      var classType, object, result;
+      var classOf, object, result;
       if (value != null) {
         object = fuse.Object(value);
 
@@ -74,8 +74,8 @@
         // IE7 and below are missing the node's constructor property
         // IE8 node constructors are typeof "object"
         try {
-          classType = toString.call(object);
-          if (classType === '[object Object]' && typeof object.constructor === 'function') {
+          classOf = toString.call(object);
+          if (classOf === '[object Object]' && typeof object.constructor === 'function') {
             result = [];
             eachKey(object, function(value, key) {
               hasKey(object, key) &&

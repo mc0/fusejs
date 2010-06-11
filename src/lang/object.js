@@ -237,6 +237,10 @@
       return destination;
     };
 
+    Obj.getClassOf = function getClassOf(object) {
+      return fuse.String(toString.call(object).slice(8, -1));
+    };
+
     Obj.isEmpty = function isEmpty(object) {
       var result = true;
       if (object) {
@@ -305,11 +309,12 @@
     };
 
     // prevent JScript bug with named function expressions
-    var clone = nil,
-     each =     nil,
-     extend =   nil,
-     isEmpty =  nil,
-     keys =     nil,
-     values =   nil,
-     toHTML =   nil;
+    var clone =   nil,
+     each =       nil,
+     extend =     nil,
+     getClassOf = nil,
+     isEmpty =    nil,
+     keys =       nil,
+     values =     nil,
+     toHTML =     nil;
   })(fuse.Object);

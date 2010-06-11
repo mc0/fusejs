@@ -147,14 +147,14 @@
 
     insertContent = function(element, parentNode, content, position) {
       var stripped, insertElement = ELEMENT_INSERT_METHODS[position],
-       type = toString.call(content);
+       classOf = toString.call(content);
 
       // process string / number
-      if (TREAT_AS_STRING[type]) {
+      if (TREAT_AS_STRING[classOf]) {
         if (isScriptable && reOpenScriptTag.test(content)) {
           stripped = stripScripts.call(content);
         } else {
-          stripped = type === '[object Number]' ? String(content) : content;
+          stripped = classOf !== '[object String]' ? String(content) : content;
         }
         if (stripped) {
           insertElement(element,
@@ -312,14 +312,14 @@
 
     plugin.replace = function replace(content) {
       var html, stripped, element = this.raw || this,
-       type = toString.call(content);
+       classOf = toString.call(content);
 
       // process string / number
-      if (TREAT_AS_STRING[type]) {
+      if (TREAT_AS_STRING[classOf]) {
         if (isScriptable && reOpenScriptTag.test(content)) {
           stripped = stripScripts.call(content);
         } else {
-          stripped = type === '[object Number]' ? String(content) : content;
+          stripped = classOf !== '[object String]' ? String(content) : content;
         }
         html = content;
         content = getFragmentFromHTML(stripped, element.parentNode);
@@ -440,7 +440,7 @@
     // Fix browsers with buggy innerHTML implementations
     if (ELEMENT_INNERHTML_BUGGY) {
       plugin.update = function update(content) {
-        var isBuggy, stripped, type, element  = this.raw || this,
+        var classOf, isBuggy, stripped, element  = this.raw || this,
          nodeName = getNodeName(element);
 
         // update script elements
@@ -455,12 +455,12 @@
           }
         }
         // process string / number
-        type = toString.call(content);
-        if (TREAT_AS_STRING[type]) {
+        classOf = toString.call(content);
+        if (TREAT_AS_STRING[classOf]) {
           if (isScriptable && reOpenScriptTag.test(content)) {
             stripped = stripScripts.call(content);
           } else {
-            stripped = type === '[object Number]' ? String(content) : content;
+            stripped = classOf !== '[object String]' ? String(content) : content;
           }
           if (isBuggy) {
             if (stripped) {
