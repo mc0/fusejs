@@ -1,4 +1,4 @@
-/*  Fuse JavaScript framework, version <%= FUSEJS_VERSION %>
+/*  Fuse JavaScript framework, version <%= VERSION %>
  *  (c) 2008-2010 John-David Dalton
  *
  *  Prototype JavaScript framework, version 1.6.0.2

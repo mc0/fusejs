@@ -1,3 +1,7 @@
+* Switch to a pure-Ruby build system. [Kit Goncharov]
+  - To build FuseJS, run `ruby Build.rb -d` or `--dist`.
+  - To build the old unit tests, run `ruby Build.rb -t` or `--test`.
+
 * Add fuse.Object.getClassOf() and provide a fallback in case {}.toString.call(...) fails to resolve sandboxed natives [[Class]]. [jddalton]
 
 * Move fuse.Enumerable to fuse.Class.mixins.enumerable. [FuseJS LH #68] [jddalton]
