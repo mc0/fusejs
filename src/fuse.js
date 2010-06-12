@@ -1,4 +1,16 @@
-<%= include 'HEADER' %>
+/* FuseJS JavaScript framework, version <%= Version %>
+* (c) 2008-2010 John-David Dalton
+*
+* Prototype JavaScript framework, version 1.6.1
+* (c) 2008-2010 Sam Stephenson
+*
+* FuseJS and Prototype are distributed under an MIT-style license.
+* For details, see the FuseJS website: <http://www.fusejs.com/license.txt>
+* or the Prototype website: <http://www.prototypejs.org>
+*
+* Built: <%= Built %>
+* ----------------------------------------------------------------------------*/
+
 (function(global) {
 
   // private vars
@@ -16,7 +28,7 @@
     return fuse;
   })();
 
-  fuse.version = '<%= VERSION %>';
+  fuse.version = '<%= Version %>';
 
   /*--------------------------------------------------------------------------*/
 
@@ -191,69 +203,68 @@
 
     fuse.updateGenerics  = updateGenerics;
   })();
+  
+  //= require "env"
+  //= require "lang/features"
+  //= require "lang/fusebox"
 
-<%= include(
-   'env.js',
-   'lang/features.js',
-   'lang/fusebox.js',
+  //= require "lang/object"
+  //= require "lang/class"
+  //= require "lang/event"
 
-   'lang/object.js',
-   'lang/class.js',
-   'lang/event.js',
+  //= require "lang/function"
+  //= require "lang/enumerable"
+  //= require "lang/array"
+  //= require "lang/number"
+  //= require "lang/regexp"
+  //= require "lang/string"
 
-   'lang/function.js',
-   'lang/enumerable.js',
-   'lang/array.js',
-   'lang/number.js',
-   'lang/regexp.js',
-   'lang/string.js',
+  //= require "lang/console"
+  //= require "lang/hash"
+  //= require "lang/range"
+  //= require "lang/template"
+  //= require "lang/timer"
 
-   'lang/console.js',
-   'lang/hash.js',
-   'lang/range.js',
-   'lang/template.js',
-   'lang/timer.js',
+  //= require "dom/dom"
+  //= require "dom/features"
+  //= require "dom/node"
+  //= require "dom/document"
+  //= require "dom/window"
 
-   'dom/dom.js',
-   'dom/features.js',
-   'dom/node.js',
-   'dom/document.js',
-   'dom/window.js',
+  //= require "dom/element/create"
+  //= require "dom/element/element"
+  //= require "dom/element/modification"
+  //= require "dom/element/attribute"
+  //= require "dom/element/style"
+  //= require "dom/element/position"
+  //= require "dom/element/traversal"
 
-   'dom/element/create.js',
-   'dom/element/element.js',
-   'dom/element/modification.js',
-   'dom/element/attribute.js',
-   'dom/element/style.js',
-   'dom/element/position.js',
-   'dom/element/traversal.js',
+  //= require "dom/form/field"
+  //= require "dom/form/form"
+  //= require "dom/form/event-observer"
+  //= require "dom/form/timed-observer"
 
-   'dom/form/field.js',
-   'dom/form/form.js',
-   'dom/form/event-observer.js',
-   'dom/form/timed-observer.js',
+  //= require "dom/node-list"
+  //= require "dom/selector/selector"
+  //= require "dom/selector/nwmatcher"
 
-   'dom/node-list.js',
-   'dom/selector/selector.js',
-   'dom/selector/nwmatcher.js',
+  //= require "dom/event/event"
+  //= require "dom/event/delegate"
 
-   'dom/event/event.js',
-   'dom/event/delegate.js',
+  //= require "lang/ecma"
+  //= require "lang/grep"
+  //= require "lang/inspect"
+  //= require "lang/query"
+  //= require "lang/json"
+  //= require "lang/util"
 
-   'lang/ecma.js',
-   'lang/grep.js',
-   'lang/inspect.js',
-   'lang/query.js',
-   'lang/json.js',
-   'lang/util.js',
-
-   'ajax/ajax.js',
-   'ajax/responders.js',
-   'ajax/base.js',
-   'ajax/request.js',
-   'ajax/updater.js',
-   'ajax/timed-updater.js') %>
-
+  //= require "ajax/ajax"
+  //= require "ajax/responders"
+  //= require "ajax/base"
+  //= require "ajax/request"
+  //= require "ajax/updater"
+  //= require "ajax/timed-updater"
+  
   addArrayMethods(fuse.Array);
 
   (function(dom) {
@@ -273,9 +284,8 @@
 })(this);
 
 (function(global) {
-<%= include(
-  'dom/event/dispatcher.js',
-  'dom/event/dom-loaded.js') %>
+  //= require "dom/event/dispatcher.js"
+  //= require "dom/event/dom-loaded.js"
 })(this);
 
 // update native generics and element methods
