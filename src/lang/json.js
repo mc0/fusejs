@@ -1,13 +1,14 @@
   /*------------------------------- LANG: JSON -------------------------------*/
 
-  fuse.jsonFilter = /^\/\*-secure-([\s\S]*)\*\/\s*$/;
+  (function(Obj) {
 
-  (function() {
-    var inspect = fuse.String.plugin.inspect,
-     STRINGABLE_TYPES = { 'boolean': 1, 'object': 1, 'number': 1, 'string': 1 };
+    var STRINGABLE_TYPES = { 'boolean': 1, 'object': 1, 'number': 1, 'string': 1 },
+     inspect = fuse.String.plugin.inspect;
+
+    Obj.JSON_FILTER = /^\/\*-secure-([\s\S]*)\*\/\s*$/;
 
     // ES5 15.12.3
-    fuse.Object.toJSON = function toJSON(value) {
+    Obj.toJSON = function toJSON(value) {
       if (!STRINGABLE_TYPES[typeof value]) return;
 
       var length, i = -1, result = [], object = Object(value),
@@ -84,17 +85,18 @@
     }
 
     if (envTest('JSON')) {
-      fuse.Object.toJSON = function toJSON(object) {
+      Obj.toJSON = function toJSON(object) {
         if (object && typeof object.toJSON === 'function') {
           object = object.toJSON();
         }
-        return JSON.stringify(object);
+        var result = JSON.stringify(object)
+        return result != null ? fuse.String(result) : result;
       };
     }
 
     // prevent JScript bug with named function expressions
     var toJSON = nil;
-  })();
+  })(fuse.Object);
 
   /*--------------------------------------------------------------------------*/
 
@@ -109,7 +111,11 @@
       return problemChars[match];
     },
 
-    problemChars = { 
+    unfilter = function(string, filter) {
+      return string.replace(filter || fuse.Object.JSON_FILTER, '$1');
+    },
+
+    problemChars = {
      '\u0000': '\\u0000',
      '\u00ad': '\\u00ad',
      '\u070f': '\\u070f',
@@ -157,27 +163,27 @@
     };
 
     plugin.unfilterJSON = function unfilterJSON(filter) {
-      return fuse.String(String(this).replace(filter || fuse.jsonFilter, '$1'));
+      return unfilter(fuse.String(this), filter);
     };
 
     plugin.evalJSON = function evalJSON(sanitize) {
-      var json = plugin.unfilterJSON.call(this);
+      var json = unfilter(String(this));
       reProblemChars.lastIndex = 0;
 
       if (reProblemChars.test(json)) {
-        json = json.replace(reProblemChars, escapeProblemChars);
+        json = String(plugin.replace.call(json, reProblemChars, escapeProblemChars));
       }
       try {
-        if (!sanitize || json.isJSON())
-          return global.eval('(' + String(json) + ')');
+        if (!sanitize || plugin.isJSON.call(json))
+          return global.eval('(' + json + ')');
       } catch (e) { }
-      throw new SyntaxError('Badly formed JSON string: ' + json.inspect());
+      throw new SyntaxError('Badly formed JSON string: ' + plugin.inspect.call(json));
     };
 
     if (envTest('JSON')) {
       var __evalJSON = plugin.evalJSON;
       plugin.evalJSON = function evalJSON(sanitize) {
-         var result = json = plugin.unfilterJSON.call(this);
+         var result, json = unfilter(String(this));
          if (!sanitize) {
            try {
              result = JSON.parse(json);

@@ -203,7 +203,7 @@
 
     fuse.updateGenerics  = updateGenerics;
   })();
-  
+
   //= require "env"
   //= require "lang/features"
   //= require "lang/fusebox"
@@ -264,7 +264,7 @@
   //= require "ajax/request"
   //= require "ajax/updater"
   //= require "ajax/timed-updater"
-  
+
   addArrayMethods(fuse.Array);
 
   (function(dom) {

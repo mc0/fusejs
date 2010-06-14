@@ -62,7 +62,7 @@
       if (deep) {
         result = List();
         length = object.length >>> 0;
-        while (++i < length) result[i] = Obj.clone(object[i], deep);
+        while (++i < length) result[i] = fuse.Object.clone(object[i], deep);
       }
       else if (isArray(object)) {
         result = object.constructor !== List
