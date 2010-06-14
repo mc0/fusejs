@@ -16,7 +16,7 @@ module FuseJS
   class << self
     def build!
       puts "Building FuseJS..."
-      builder = Builder.new(:root => ROOT_PATH, :search => [SOURCE_PATH], :files => ["fuse.js"], :constants => BUILD)
+      builder = Builder.new(:root => ROOT_PATH, :search => [SOURCE_PATH], :files => ["fuse.js"], :constants => BUILD, :comments => true)
       FileUtils.mkdir_p FINAL_PATH
       builder.save File.join(FINAL_PATH, "fuse.js")
       puts "Done. Building legacy unit tests..."
