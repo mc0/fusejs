@@ -1,9 +1,9 @@
 FuseJS
 =======
 
-[![Fuse to Win](fusejs/raw/master/logo.png)](http://fusejs.com)
-
 **Note**: FuseJS is currently in *alpha*. This means that the API is **incomplete**, **buggy**, and **not** intended for production use.
+
+[![Fuse to Win](fusejs/raw/master/logo.png)](http://fusejs.com)
 
 JavaScript frameworks share similar features and functionality, such as DOM manipulation, event registration, and CSS selector engines. FuseJS attempts to incorporate the strengths of these frameworks into one stable, efficient, and optimized core JavaScript framework. 
 
@@ -30,12 +30,9 @@ The FuseJS source code is hosted on [GitHub](http://github.com). Check out a wor
 	$ git clone git://github.com/jdalton/fusejs.git
 	$ cd fusejs
 	$ git submodule init --update
-	
-To build FuseJS, you'll need [Ruby](http://www.ruby-lang.org) 1.8.2 or higher. From the repo's root directory, run:
 
-- `ruby Build.rb -d` or `--dist` to concatenate the source files in the `src/` directory and generate the composite in `dist/fuse.js`
-- `ruby Build.rb -t` or `--test` to build the legacy unit tests in `test/unit/legacy/build/`.
-	
+To build FuseJS, you'll need [Ruby](http://www.ruby-lang.org) 1.8.2 or higher. From the repo's root directory, run `ruby Build.rb` to automatically concatenate the source files, generate the composite in `dist/fuse.js`, and build the legacy unit tests in `test/unit/legacy/build/`.
+
 Once you fork FuseJS on GitHub and commit your changes, you may also [send a pull request](http://github.com/guides/pull-requests) if you'd like your feature or bug fix to be considered for the next release.
 
 Please make sure to update all unit tests in the `test/` directory as well: although the legacy `unittest.js`-based tests are still  available, we're currently in the process of porting our unit tests to the [Scotch](http://kitgoncharov.github.com/scotch) testing library.

@@ -1,3 +1,5 @@
+* Further simplify the Ruby build system. [Kit Goncharov]
+
 * Add all Scotch unit tests for `fuse.Array`. [Kit Goncharov]
 
 * Add a lightweight version of Sprockets to `Build.rb` for building FuseJS. [Kit Goncharov]

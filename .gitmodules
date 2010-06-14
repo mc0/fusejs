@@ -13,3 +13,6 @@
 [submodule "vendor/slick"]
 	path = vendor/slick
 	url = git://github.com/mootools/slick.git
+[submodule "vendor/scotch"]
+	path = vendor/scotch
+	url = git://github.com/kitgoncharov/scotch.git
