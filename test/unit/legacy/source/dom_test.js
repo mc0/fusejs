@@ -1847,6 +1847,10 @@ new Test.Unit.Runner({
     var input = $('write_attribute_input');
     this.assertNotIdentical(null, input.hasAttribute('readonly'));
     this.assertNotIdentical(null, input.hasAttribute('readOnly'));
+
+    var option = $('write_attribute_option');
+    option.setAttribute('selected', 'selected');
+    this.assertNotIdentical(false, option.hasAttribute('selected'));
   },
 
   'testElementCreate': function() {

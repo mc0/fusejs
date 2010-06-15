@@ -109,6 +109,16 @@
       return result;
     },
 
+    'ELEMENT_HAS_ATTRIBUTE': function() {
+      // true for all but IE
+      var result, doc = fuse._doc, option = doc.createElement('option');
+      if (isHostType(option, 'hasAttribute')) {
+        option.setAttribute('selected', 'selected');
+        result = !!option.hasAttribute('selected');
+      }
+      return result;
+    },
+
     'ELEMENT_INNER_TEXT': function() {
       // true for IE
       return !envTest('ELEMENT_TEXT_CONTENT') &&
