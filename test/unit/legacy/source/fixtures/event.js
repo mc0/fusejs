@@ -20,7 +20,7 @@ $(document).observe('dom:loaded', function(event) {
   $('img_load_test').observe('load', function(e) {
     if (e.getTarget() !== this)
       eventResults.currentTarget.imageOnLoadBug = true;
-  }).setAttribute('src', '../fixtures/logo.gif');
+  }).setAttribute('src', '../source/fixtures/logo.gif');
 
   body.insert('<img id="img_error_test">');
 
