@@ -130,7 +130,7 @@
   TEXT_NODE = 3;
 
   // a unqiue 15 char id used throughout fuse
-  expando = '_fuse' + String(+new Date).slice(0, 10);
+  expando = 'uid' + String(+new Date).slice(0, 12);
 
   // helps minify nullifying the JScript function declarations
   nil = null;

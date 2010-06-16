@@ -2,92 +2,162 @@
 
   fuse.Fusebox = (function() {
 
-    var SKIP_METHODS_RETURNING_ARRAYS,
+    var CLEANED_ACTIVEX, IS_MAP_CORRUPT, MODE,
 
-    ACTIVE_X_OBJECT = 1,
+    cache = [ ],
 
-    OBJECT__PROTO__ = 2,
+    counter = 1,
 
-    IFRAME = 3,
+    doc = global.document,
 
-    cache = [],
+    ACTIVEX_MODE = 1,
 
-    mode = (function()  {
-      // true for IE >= 5.5 (ActiveX object by itself is supported by IE4)
-      // note: use iframes when served from the file protocol to avoid an ActiveX warning.
-      //
-      // The htmlfile ActiveX object avoids https mixed content warnings and is a
-      // workaround for access denied errors thrown when using iframes to create
-      // sandboxes after the document.domain is set. Access will be denied until
-      // the iframe is loaded which disqualifies its use as a synchronous solution
-      // (Opera 9.25 is out of luck here).
-      if (envTest('ACTIVE_X_OBJECT') &&
-          global.location && global.location.protocol !== 'file:') {
-        try {
-          // ensure ActiveX is enabled
-          result = new ActiveXObject('htmlfile') && ACTIVE_X_OBJECT;
-          return result;
-        } catch (e) { }
-      }
-      // true for Carakan, JaegerMonkey, JavaScriptCore, KJS, Nitro, Rhino,
-      // SpiderMonkey, SquirrelFish (Extreme), Tamarin, TraceMonkey, V8
-      //
-      // Check "OBJECT__PROTO__" first because Firefox will permanently screw up
-      // other iframes on the page if an iframe is inserted and removed before the
-      // dom has loaded.
-      if (envTest('OBJECT__PROTO__')) {
-        return OBJECT__PROTO__;
-      }
-      // last but not least try the iframe
-      var doc = global.document;
-      if (isHostType(global, 'frames') && doc &&
-          isHostType(doc, 'createElement')) {
-        return IFRAME;
+    PROTO_MODE   = 2,
+
+    IFRAME_MODE  = 3,
+
+    HAS_ACTIVEX = (function() {
+      try {
+        // ensure ActiveX is enabled
+        return envTest('ACTIVE_X_OBJECT') && !!new ActiveXObject('htmlfile');
+      } catch (e) {
+        return false;
       }
     })(),
 
-    createSandbox = (function() {
-      if (mode === OBJECT__PROTO__) {
-        return function() { return global; };
-      }
-      // IE requires the iframe/htmlfile remain in the cache or it will be
-      // marked for garbage collection
-      var counter = 0, doc = global.document;
-      if (mode === ACTIVE_X_OBJECT) {
-        return function() {
-          var htmlfile = new ActiveXObject('htmlfile');
-          htmlfile.open();
-          htmlfile.write('<script>document.global = this;<\/script>');
-          htmlfile.close();
-          cache.push(htmlfile);
-          return htmlfile.global;
-        };
-      }
-      if (mode === IFRAME) {
-        return function() {
-          var idoc, iframe, result,
-           parentNode = doc.body || doc.documentElement,
-           name       = expando + counter++;
+    HAS_IFRAME = doc && isHostType(doc, 'createElement') &&
+      isHostType(global, 'frames') && 'src' in doc.createElement('iframe'),
+
+    HAS_PROTO = envTest('OBJECT__PROTO__'),
+
+    Fusebox = function Fusebox(instance) {
+      instance = createFusebox(instance);
+      return postProcess(instance);
+    },
+
+    Klass = function() { },
+
+    postProcess = IDENTITY,
+
+    postProcessIframe = function(instance) {
+      postProcess =
+      postProcessIframe = function(instance) {
+        var iframe = cache[cache.length - 1];
+        iframe.parentNode.removeChild(iframe);
+        return instance;
+      };
+
+      postProcessIframe(instance);
+
+      // Opera 9.5 - 10a throws a security error when calling Array#map or
+      // String#lastIndexOf on sandboxed natives created on the file:// protocol.
+      //
+      // Opera 9.5 - 9.64 will error by simply calling the methods.
+      // Opera 10 will error when first accessing the contentDocument of
+      // another iframe and then accessing the methods.
+      return (function() {
+        var div, errored, toString = instance.Object().toString;
+        if (toString.call(instance.Array().map) === '[object Function]') {
+          // trash can
+          div = doc.createElement('div');
+
+          // create and remove second iframe
+          postProcessIframe(createSandbox());
+
+          // test to see if Array#map is corrupted
+          try {
+            instance.Array().map(NOOP);
+          } catch (e) {
+            // remove second iframe
+            div.appendChild(cache.pop());
+            IS_MAP_CORRUPT = errored = true;
+          }
+          // remove first iframe
+          div.appendChild(cache.pop());
+          div.innerHTML = '';
+        }
+        return errored ? Fusebox(instance) : instance;
+      })();
+    },
+
+    getMode = function() {
+      return MODE;
+    },
+
+    setMode = function(mode) {
+      MODE = +mode;
+      postProcess = MODE === IFRAME_MODE ? postProcessIframe : IDENTITY;
+    },
+
+    createSandbox = function() {
+      var xdoc, iframe, name, parentNode, result;
+
+      switch (MODE) {
+        case PROTO_MODE: return global;
+
+        case ACTIVEX_MODE:
+          // IE requires the iframe/htmlfile remain in the cache or
+          // it will become corrupted
+          (xdoc = new ActiveXObject('htmlfile')).open();
+          xdoc.write('<script><\/script>');
+          xdoc.close();
+          cache.push(xdoc);
+
+          // prevents a memory leak in IE
+          // IE doesn't support bfcache so we don't have to worry about breaking it.
+          if (!CLEANED_ACTIVEX) {
+            CLEANED_ACTIVEX = true;
+            if (isHostType(global, 'attachEvent')) {
+              global.attachEvent('onunload', function() { cache.length = 0; });
+            }
+          }
+          return xdoc.parentWindow;
+
+        case IFRAME_MODE:
+          name = expando + counter++;
+          parentNode = doc.body || doc.documentElement;
 
           try {
             // set name attribute for IE6/7
             iframe = doc.createElement('<iframe name="' + name + '">');
-          } catch (e) {
+          } catch(e) {
             (iframe = doc.createElement('iframe')).name = name;
           }
-
           iframe.style.display = 'none';
           parentNode.insertBefore(iframe, parentNode.firstChild);
 
+          // IE / Opera 9.25 throw security errors when trying to write to an iframe
+          // after the document.domain is set. Also Opera < 9 doesn't support
+          // inserting an iframe into the document.documentElement.
           try {
-            (idoc = global.frames[name].document).open();
-            idoc.write('<script>parent.fuse.' + expando + ' = this;<\/script>');
-            idoc.close();
-          } catch (e) {
-            // Opera 9.25 throws security error when trying to write to an iframe
-            // after the document.domain is set. Also Opera < 9 doesn't support
-            // inserting an iframe into the document.documentElement.
-            throw new Error('Fusebox failed to create a sandbox by iframe.');
+            (xdoc = global.frames[name].document).open();
+            xdoc.write('<script>' +
+              'var chk,global=this;' +
+              'parent.fuse.' + expando + '=global;' +
+
+              // Firefox 3.5+ glitches when an iframe is inserted and removed,
+              // from a page containing other iframes, before dom load.
+              // When the page loads one of the other iframes on the page will have
+              // its content swapped with our iframe. Though the content is swapped,
+              // the iframe will persist its `src` property so we check if our
+              // iframe has a src property and load it if found.
+              '(chk=function(s){' +
+              'if(parent.document.readyState!="complete"){' +
+              '(s=global.frameElement.src)&&global.location.replace(s);' +
+              'setTimeout(chk,10)}})()' +
+              '<\/script>');
+            xdoc.close();
+          }
+          catch (e) {
+            if (HAS_ACTIVEX) {
+              setMode(ACTIVEX_MODE);
+              return createSandbox();
+            }
+            if (HAS_PROTO) {
+              setMode(PROTO_MODE);
+              return createSandbox();
+            }
+            throw new Error('fuse.Fusebox() failed to create a sandbox by iframe.');
           }
 
           result = global.fuse[expando];
@@ -95,237 +165,37 @@
 
           cache.push(iframe);
           return result;
-        };
       }
-      return function() {
-        throw new Error('Fusebox failed to create a sandbox.');
-      };
-    })(),
+      throw new Error('fuse.Fusebox() failed to create a sandbox.');
+    },
 
     createFusebox = function(instance) {
       // Most methods try to follow ES5 spec but may differ from
       // the documented method.length value or allow null callbacks.
       var Array, Boolean, Date, Function, Number, Object, RegExp, String, from,
-       sandbox        = createSandbox(),
-       __Array        = sandbox.Array,
-       __Boolean      = sandbox.Boolean,
-       __Date         = sandbox.Date,
-       __Function     = sandbox.Function,
-       __Number       = sandbox.Number,
-       __Object       = sandbox.Object,
-       __RegExp       = sandbox.RegExp,
-       __String       = sandbox.String,
-       filterCallback = function(value) { return value != null; },
-       glFunction     = global.Function,
-       reStrict       = /^\s*(['"])use strict\1/,
-       sbSlice        = __Array.prototype.slice;
-
-      instance || (instance = new Klass);
-
-      from = function(value) {
-        var classOf = toString.call(value);
-        switch (classOf) {
-          case '[object Array]':
-            if (value.constructor !== instance.Array) {
-              return instance.Array.fromArray(value);
-            }
-            break;
-
-          case '[object Boolean]':
-            if (value.constructor !== instance.Boolean) {
-              return instance.Boolean(value == true);
-            }
-            break;
-
-          case '[object Date]':
-            if (value.constructor !== instance.Date) {
-              return instance.Date(+value);
-            }
-            break;
-
-          case '[object RegExp]':
-            if (value.constructor !== instance.RegExp) {
-              return instance.RegExp(value.source,
-                (value.global     ? 'g' : '') +
-                (value.ignoreCase ? 'i' : '') +
-                (value.multiline  ? 'm' : ''));
-            }
-            break;
-
-          case '[object Number]' :
-          case '[object String]' :
-            classOf = classOf.slice(8,-1);
-            if (value.constructor !== instance[classOf]) {
-              return instance[classOf](value);
-            }
-        }
-        return value;
-      };
-
-      if (mode === OBJECT__PROTO__) {
-        Array = function Array(length) {
-          var result, args = arguments, argLen = args.length;
-          if (argLen) {
-            result = argLen === 1 && length > -1
-              ? new __Array(length)
-              : Array.fromArray(args);
-          } else result = new __Array();
-
-          result['__proto__'] = arrPlugin;
-          return result;
-        };
-
-        Boolean = function Boolean(value) {
-          var result = new __Boolean(value);
-          result['__proto__'] = boolPlugin;
-          return result;
-        };
-
-        Date = function Date(year, month, date, hours, minutes, seconds, ms) {
-          var result;
-          if (this.constructor === Date) {
-            result = arguments.length === 1
-              ? new __Date(year)
-              : new __Date(year, month, date || 1, hours || 0, minutes || 0, seconds || 0, ms || 0);
-            result['__proto__'] = datePlugin;
-          } else {
-            result = instance.String(new __Date);
-          }
-          return result;
-        };
-
-        Function = function Function(argN, body) {
-          var args = arguments,
-          result = args.length < 3
-            ? __Function(argN, body)
-            : __Function.apply(__Function, args);
-          result['__proto__'] = funcPlugin;
-          return result;
-        };
-
-        Number = function Number(value) {
-          var result = new __Number(value);
-          result['__proto__'] = numPlugin;
-          return result;
-        };
-
-        Object = function Object(value) {
-          if (value != null) {
-            return from(value);
-          }
-          var result = new __Object;
-          result['__proto__'] = objPlugin;
-          return result;
-        };
-
-        RegExp = function RegExp(pattern, flags) {
-          var result = new __RegExp(pattern, flags);
-          result['__proto__'] = regPlugin;
-          return result;
-        };
-
-        String = function String(value) {
-          var result = new __String(arguments.length ? value : '');
-          result['__proto__'] = strPlugin;
-          return result;
-        };
-
-        // make prototype values conform to ES5 spec and inherit from regular natives
-        Object.prototype['__proto__']                      = __Object.prototype;
-        (Array.prototype    = [ ])['__proto__']            = __Array.prototype;
-        (Boolean.prototype  = new __Boolean)['__proto__']  = __Boolean.prototype;
-        (Date.prototype     = new __Date)['__proto__']     = __Date.prototype;
-        (Function.prototype = new __Function)['__proto__'] = __Function.prototype;
-        (Number.prototype   = new __Number)['__proto__']   = __Number.prototype;
-        (RegExp.prototype   = new __RegExp)['__proto__']   = __RegExp.prototype;
-        (String.prototype   = new __String)['__proto__']   = __String.prototype;
-      }
-      else {
-        Array = function Array(length) {
-          var args = arguments, argLen = args.length;
-          if (argLen) {
-            return argLen === 1 && length > -1
-              ? new __Array(length)
-              : Array.fromArray(args);
-          }
-          return new __Array();
-        };
-
-        Boolean = function Boolean(value) {
-          return new __Boolean(value);
-        };
-
-        Date = function Date(year, month, date, hours, minutes, seconds, ms) {
-          if (this.constructor === Date) {
-           return arguments.length === 1
-             ? new __Date(year)
-             : new __Date(year, month, date || 1, hours || 0, minutes || 0, seconds || 0, ms || 0);
-          }
-          return instance.String(new __Date);
-        };
-
-        Function = function Function(argN, body) {
-          var fn, result, args = sbSlice.call(arguments, 0),
-           toString = function toString() { return originalBody; },
-           originalBody = body = args.pop();
-
-          // ensure we aren't in strict mode and map arguments.callee to the wrapper
-          if (body && body.search(reStrict) < 0) {
-            body = 'arguments.callee = arguments.callee.' + expando + '; ' + body;
-          }
-
-          // create function using global.Function constructor
-          fn = new glFunction(args.join(','), body);
-
-          // ensure `thisArg` isn't set to the sandboxed global
-          result = fn[expando] = new __Function('global, fn',
-            'var sandbox = this; return function() { return fn.apply(this == sandbox ? global : this, arguments) }')(global, fn);
-
-          // make toString() return the unmodified function body
-          result.toString = toString;
-
-          return result;
-        };
-
-        Number = function Number(value) {
-          return new __Number(value);
-        };
-
-        Object = function Object(value) {
-          return value != null
-            ? from(value)
-            : new __Object;
-        };
-
-        RegExp = function RegExp(pattern, flags) {
-          return new __RegExp(pattern, flags);
-        };
-
-        String = function String(value) {
-          return new __String(arguments.length ? value : '');
-        };
-
-        // map native wrappers prototype to those of the sandboxed natives
-        Array.prototype    = __Array.prototype;
-        Boolean.prototype  = __Boolean.prototype;
-        Date.prototype     = __Date.prototype;
-        Function.prototype = __Function.prototype;
-        Number.prototype   = __Number.prototype;
-        Object.prototype   = __Object.prototype;
-        RegExp.prototype   = __RegExp.prototype;
-        String.prototype   = __String.prototype;
-      }
-
-      /*----------------------------------------------------------------------*/
-
-      var arrPlugin         = Array.plugin    = Array.prototype,
-       boolPlugin           = Boolean.plugin  = Boolean.prototype,
-       datePlugin           = Date.plugin     = Date.prototype,
-       funcPlugin           = Function.plugin = Function.prototype,
-       objPlugin            = Object.plugin   = Object.prototype,
-       numPlugin            = Number.plugin   = Number.prototype,
-       regPlugin            = RegExp.plugin   = RegExp.prototype,
-       strPlugin            = String.plugin   = String.prototype,
+       filterCallback       = function(value) { return value != null; },
+       glFunction           = global.Function,
+       reStrict             = /^\s*(['"])use strict\1/,
+       sandbox              = createSandbox(),
+       isProtoMode          = MODE === PROTO_MODE,
+       isArrayChainable     = !isProtoMode && !(sandbox.Array().slice(0) instanceof global.Array),
+       isRegExpChainable    = !isProtoMode && !(sandbox.RegExp('') instanceof global.RegExp),
+       arrPlugin            = isProtoMode && new sandbox.Array    || sandbox.Array.prototype,
+       boolPlugin           = isProtoMode && new sandbox.Boolean  || sandbox.Boolean.prototype,
+       datePlugin           = isProtoMode && new sandbox.Date     || sandbox.Date.prototype,
+       funcPlugin           = isProtoMode && new sandbox.Function || sandbox.Function.prototype,
+       numPlugin            = isProtoMode && new sandbox.Number   || sandbox.Number.prototype,
+       regPlugin            = isProtoMode && new sandbox.RegExp   || sandbox.RegExp.prototype,
+       strPlugin            = isProtoMode && new sandbox.String   || sandbox.String.prototype,
+       objPlugin            = sandbox.Object.prototype,
+       __Array              = sandbox.Array,
+       __Boolean            = sandbox.Boolean,
+       __Date               = sandbox.Date,
+       __Function           = sandbox.Function,
+       __Number             = sandbox.Number,
+       __Object             = sandbox.Object,
+       __RegExp             = sandbox.RegExp,
+       __String             = sandbox.String;
        __concat             = arrPlugin.concat,
        __every              = arrPlugin.every,
        __filter             = arrPlugin.filter,
@@ -369,13 +239,11 @@
        __charCodeAt         = strPlugin.charCodeAt,
        __strConcat          = strPlugin.concat,
        __strIndexOf         = strPlugin.indexOf,
-       __strLastIndexOf     = strPlugin.lastIndexOf,
        __localeCompare      = strPlugin.localeCompare,
        __match              = strPlugin.match,
        __replace            = strPlugin.replace,
        __search             = strPlugin.search,
        __strSlice           = strPlugin.slice,
-       __split              = strPlugin.split,
        __substr             = strPlugin.substr,
        __substring          = strPlugin.substring,
        __toLowerCase        = strPlugin.toLowerCase,
@@ -384,7 +252,198 @@
        __toUpperCase        = strPlugin.toUpperCase,
        __trim               = strPlugin.trim,
        __trimLeft           = strPlugin.trimLeft,
-       __trimRight          = strPlugin.trimRight;
+       __trimRight          = strPlugin.trimRight,
+       __split              = ''.split,
+       __strLastIndexOf     = ''.lastIndexOf;
+
+      instance || (instance = new Klass);
+
+      from = function(value) {
+        var classOf = toString.call(value);
+        switch (classOf) {
+          case '[object Array]':
+            if (value.constructor !== instance.Array) {
+              return instance.Array.fromArray(value);
+            }
+            break;
+
+          case '[object Boolean]':
+            if (value.constructor !== instance.Boolean) {
+              return instance.Boolean(value == true);
+            }
+            break;
+
+          case '[object Date]':
+            if (value.constructor !== instance.Date) {
+              return instance.Date(+value);
+            }
+            break;
+
+          case '[object RegExp]':
+            if (value.constructor !== instance.RegExp) {
+              return instance.RegExp(value.source,
+                (value.global     ? 'g' : '') +
+                (value.ignoreCase ? 'i' : '') +
+                (value.multiline  ? 'm' : ''));
+            }
+            break;
+
+          case '[object Number]' :
+          case '[object String]' :
+            classOf = classOf.slice(8,-1);
+            if (value.constructor !== instance[classOf]) {
+              return instance[classOf](value);
+            }
+        }
+        return value;
+      };
+
+
+      /*------------------------ CREATE CONSTRUCTORS -------------------------*/
+
+      if (isProtoMode) {
+        Array = function Array(length) {
+          var result = [], argLen = arguments.length;
+          if (argLen) {
+            if (argLen === 1 && length === length >>> 0) {
+              result.length = length;
+            } else {
+              result.push.apply(result, arguments);
+            }
+          }
+          result.__proto__ = arrPlugin;
+          return result;
+        };
+
+        Boolean = function Boolean(value) {
+          var result = new __Boolean(value);
+          result['__proto__'] = boolPlugin;
+          return result;
+        };
+
+        Date = function Date(year, month, date, hours, minutes, seconds, ms) {
+          var result;
+          if (this.constructor === Date) {
+            result = arguments.length === 1
+              ? new __Date(year)
+              : new __Date(year, month, date || 1, hours || 0, minutes || 0, seconds || 0, ms || 0);
+            result['__proto__'] = datePlugin;
+          } else {
+            result = instance.String(new __Date);
+          }
+          return result;
+        };
+
+        Function = function Function(argN, body) {
+          var result = arguments.length < 3
+            ? __Function(argN, body)
+            : __Function.apply(__Function, arguments);
+          result['__proto__'] = funcPlugin;
+          return result;
+        };
+
+        Number = function Number(value) {
+          var result = new __Number(value);
+          result['__proto__'] = numPlugin;
+          return result;
+        };
+
+        Object = function Object(value) {
+          if (value != null) {
+            return from(value);
+          }
+          var result = new __Object;
+          result['__proto__'] = objPlugin;
+          return result;
+        };
+
+        RegExp = function RegExp(pattern, flags) {
+          var result = new __RegExp(pattern, flags);
+          result['__proto__'] = regPlugin;
+          return result;
+        };
+
+        String = function String(value) {
+          var result = new __String(arguments.length ? value : '');
+          result['__proto__'] = strPlugin;
+          return result;
+        };
+      }
+      else {
+        Array = function Array(length) {
+          var argLen = arguments.length;
+          if (argLen) {
+            return argLen === 1 && length === length >>> 0
+              ? new __Array(length)
+              : Array.fromArray(arguments);
+          }
+          return new __Array;
+        };
+
+        Boolean = function Boolean(value) {
+          return new __Boolean(value);
+        };
+
+        Date = function Date(year, month, date, hours, minutes, seconds, ms) {
+          if (this.constructor === Date) {
+           return arguments.length === 1
+             ? new __Date(year)
+             : new __Date(year, month, date || 1, hours || 0, minutes || 0, seconds || 0, ms || 0);
+          }
+          return instance.String(new __Date);
+        };
+
+        Function = function Function(argN, body) {
+          var fn, result, args = __slice.call(arguments, 0),
+           toString = function toString() { return originalBody; },
+           originalBody = body = args.pop();
+
+          // ensure we aren't in strict mode and map arguments.callee to the wrapper
+          if (body && body.search(reStrict) < 0) {
+            body = 'arguments.callee = arguments.callee.' + expando + '; ' + body;
+          }
+
+          // create function using global.Function constructor
+          fn = new glFunction(args.join(','), body);
+
+          // ensure `thisArg` isn't set to the sandboxed global
+          result = fn[expando] = new __Function('global, fn',
+            'var sandbox=this;' +
+            'return function(){' +
+            'return fn.apply(this==sandbox?global:this,arguments)' +
+            '}')(global, fn);
+
+          // make toString() return the unmodified function body
+          result.toString = toString;
+
+          return result;
+        };
+
+        Number = function Number(value) {
+          return new __Number(value);
+        };
+
+        Object = function Object(value) {
+          return value != null ? from(value) : new __Object;
+        };
+
+        RegExp = function RegExp(pattern, flags) {
+          return new __RegExp(pattern, flags);
+        };
+
+        String = function String(value) {
+          return new __String(arguments.length ? value : '');
+        };
+
+        if (isArrayChainable) {
+          Array  = __Array;
+        }
+        if (isRegExpChainable) {
+          RegExp = __RegExp;
+        }
+      }
+
+      /*---------------------------- ADD STATICS -----------------------------*/
 
       Function.FALSE           = function FALSE() { return false; };
 
@@ -422,46 +481,15 @@
         }
       };
 
-      Array.create = function create() {
-        return Array.fromArray(arguments);
-      };
-
       Array.fromArray = function fromArray(array) {
         var result = new __Array;
         result.push.apply(result, array);
         return result;
       };
 
-      if (mode === OBJECT__PROTO__) {
-        Array.fromArray = function fromArray(array) {
-          var result = sbSlice.call(array, 0);
-          result['__proto__'] = arrPlugin;
-          return result;
-        };
-      }
-      else if (SKIP_METHODS_RETURNING_ARRAYS) {
-        Array.fromArray = function fromArray(array) {
-          return sbSlice.call(array, 0);
-        };
-      }
-
-      // ES5 15.4.3.2
-      if (!isFunction(Array.isArray = __Array.isArray)) {
-        Array.isArray = function isArray(value) {
-          return toString.call(value) === '[object Array]';
-        };
-      }
-
       Date.now = function now() {
         return instance.Number(__Date.now());
       };
-
-      // ES5 15.9.4.4
-      if (!isFunction(__Date.now)) {
-        Date.now = function now() {
-          return instance.Number(+new __Date());
-        };
-      }
 
       // ES5 15.9.4.2
       Date.parse = function parse(dateString) {
@@ -479,6 +507,32 @@
           ? __String.fromCharCode.apply(__String, arguments)
           : __String.fromCharCode(charCode));
       };
+
+      // ES5 15.4.3.2
+      if (!isFunction(Array.isArray = __Array.isArray)) {
+        Array.isArray = function isArray(value) {
+          return toString.call(value) === '[object Array]';
+        };
+      }
+
+      // ES5 15.9.4.4
+      if (!isFunction(__Date.now)) {
+        Date.now = function now() {
+          return instance.Number(+new __Date());
+        };
+      }
+
+      if (isProtoMode) {
+        Array.fromArray = function fromArray(array) {
+          var result = __slice.call(array, 0);
+          result['__proto__'] = arrPlugin;
+          return result;
+        };
+      } else if (isArrayChainable) {
+        Array.fromArray = function fromArray(array) {
+          return __slice.call(array, 0);
+        };
+      }
 
       // versions of WebKit and IE have non-spec-conforming /\s/
       // so we standardize it (see: ES5 15.10.2.12)
@@ -509,19 +563,20 @@
 
           // map properties of old RegExp to the redefined one
           RegExp.SPECIAL_CHARS = RE.SPECIAL_CHARS;
-          regPlugin = RegExp.plugin = RegExp.prototype = RE.prototype;
+          regPlugin = RegExp.prototype = RE.prototype;
         }
 
         return RegExp;
       })(RegExp);
 
-      /*----------------------------------------------------------------------*/
+      /*-------------------------- ADD CHAINABILITY --------------------------*/
 
       if (isFunction(arrPlugin.every)) {
         (arrPlugin.every = function every(callback, thisArg) {
           return __every.call(this, callback || IDENTITY, thisArg);
         }).raw = __every;
       }
+
       if (isFunction(arrPlugin.filter)) {
         (arrPlugin.filter = function filter(callback, thisArg) {
           var result = __filter.call(this, callback || filterCallback, thisArg);
@@ -530,44 +585,75 @@
             : Array();
         }).raw = __filter;
       }
+
       if (isFunction(arrPlugin.indexOf)) {
         (arrPlugin.indexOf = function indexOf(item, fromIndex) {
           return instance.Number(__indexOf.call(this, item,
             fromIndex == null ? 0 : fromIndex));
         }).raw = __indexOf;
       }
+
       if (isFunction(arrPlugin.lastIndexOf)) {
         (arrPlugin.lastIndexOf = function lastIndexOf(item, fromIndex) {
           return instance.Number(__lastIndexOf.call(this, item,
             fromIndex == null ? this.length : fromIndex));
         }).raw = __lastIndexOf;
       }
+
       if (isFunction(arrPlugin.map)) {
-        if (SKIP_METHODS_RETURNING_ARRAYS) {
+        if (!IS_MAP_CORRUPT && isArrayChainable) {
           arrPlugin.map = function map(callback, thisArg) {
             return __map.call(this, callback || IDENTITY, thisArg);
           };
         } else {
+          if (IS_MAP_CORRUPT) __map = [].map;
           arrPlugin.map = function map(callback, thisArg) {
             var result = __map.call(this, callback || IDENTITY, thisArg);
-            return result.length
-              ? Array.fromArray(result)
-              : Array();
+            return result.length ? Array.fromArray(result) : Array();
           };
         }
         arrPlugin.map.raw = __map;
       }
+
       if (isFunction(arrPlugin.some)) {
         (arrPlugin.some = function some(callback, thisArg) {
           return __some.call(this, callback || IDENTITY, thisArg);
         }).raw = __some;
       }
 
-      if (!SKIP_METHODS_RETURNING_ARRAYS) {
+      if (isFunction(datePlugin.toISOString)) {
+        (datePlugin.toISOString = function toISOString() {
+          return instance.String(__toISOString.call(this));
+        }).raw = __toISOString;
+      }
+
+      if (isFunction(datePlugin.toJSON)) {
+        (datePlugin.toJSON = function toJSON() {
+          return instance.String(__toJSON.call(this));
+        }).raw = __toJSON;
+      }
+
+      if (isFunction(strPlugin.trim)) {
+        (strPlugin.trim = function trim() {
+          return String(__trim.call(this));
+        }).raw = __trim;
+      }
+      if (isFunction(strPlugin.trimLeft)) {
+        (strPlugin.trimLeft = function trimLeft() {
+          return String(__trimLeft.call(this));
+        }).raw = __trimLeft;
+      }
+
+      if (isFunction(strPlugin.trimRight)) {
+        (strPlugin.trimRight = function trimRight() {
+          return String(__trimRight.call(this));
+        }).raw = __trimRight;
+      }
+
+      if (!isArrayChainable) {
         arrPlugin.concat = function concat() {
-          var args = arguments;
-          return Array.fromArray(args.length
-            ? __concat.apply(this, args)
+          return Array.fromArray(arguments.length
+            ? __concat.apply(this, arguments)
             : __concat.call(this));
         };
 
@@ -598,40 +684,21 @@
         };
       }
 
-      arrPlugin.concat.raw  = __concat;
-      arrPlugin.reverse.raw = __reverse;
-      arrPlugin.slice.raw   = __slice;
-      arrPlugin.sort.raw    = __sort;
-      arrPlugin.splice.raw  = __splice;
-
       (arrPlugin.join = function join(separator) {
         return String(__join.call(this, separator));
       }).raw = __join;
 
       (arrPlugin.push = function push(item) {
-        var args = arguments;
-        return instance.Number(args.length > 1
-          ? __push.apply(this, args)
+        return instance.Number(arguments.length > 1
+          ? __push.apply(this, arguments)
           : __push.call(this, item));
       }).raw = __push;
 
       (arrPlugin.unshift = function unshift(item) {
-        var args = arguments;
-        return instance.Number(args.length > 1
-          ? __unshift.apply(this, args)
+        return instance.Number(arguments.length > 1
+          ? __unshift.apply(this, arguments)
           : __unshift.call(this, item));
       }).raw = __unshift;
-
-      if (isFunction(datePlugin.toISOString)) {
-        (datePlugin.toISOString = function toISOString() {
-          return instance.String(__toISOString.call(this));
-        }).raw = __toISOString;
-      }
-      if (isFunction(datePlugin.toJSON)) {
-        (datePlugin.toJSON = function toJSON() {
-          return instance.String(__toJSON.call(this));
-        }).raw = __toJSON;
-      }
 
       (datePlugin.getDate = function getDate() {
         return instance.Number(__getDate.call(this));
@@ -734,22 +801,6 @@
         return output && result;
       }).raw = __exec;
 
-      if (isFunction(strPlugin.trim)) {
-        (strPlugin.trim = function trim() {
-          return String(__trim.call(this));
-        }).raw = __trim;
-      }
-      if (isFunction(strPlugin.trimLeft)) {
-        (strPlugin.trimLeft = function trimLeft() {
-          return String(__trimLeft.call(this));
-        }).raw = __trimLeft;
-      }
-      if (isFunction(strPlugin.trimRight)) {
-        (strPlugin.trimRight = function trimRight() {
-          return String(__trimRight.call(this));
-        }).raw = __trimRight;
-      }
-
       (strPlugin.charAt = function charAt(pos) {
         return String(__charAt.call(this, pos));
       }).raw = __charAt;
@@ -759,9 +810,8 @@
       }).raw = __charCodeAt;
 
       (strPlugin.concat = function concat(item) {
-        var args = arguments;
-        return String(args.length > 1
-          ? __strConcat.apply(this, args)
+        return String(arguments.length > 1
+          ? __strConcat.apply(this, arguments)
           : __strConcat.call(this, item));
       }).raw = __strConcat;
 
@@ -837,15 +887,36 @@
         return String(__toUpperCase.call(this));
       }).raw = __toUpperCase;
 
-      // add [[Class]] property to eaches prototype as a fallback
-      // in case {}.toString.call(value) doesn't work on sandboxed natives
-      arrPlugin['[[Class]]']  = '[object Array]';
-      boolPlugin['[[Class]]'] = '[object Boolean]';
-      datePlugin['[[Class]]'] = '[object Date]';
-      funcPlugin['[[Class]]'] = '[object Function]';
-      numPlugin['[[Class]]']  = '[object Number]';
-      regPlugin['[[Class]]']  = '[object RegExp]';
-      strPlugin['[[Class]]']  = '[object String]';
+      arrPlugin.concat.raw  = __concat;
+      arrPlugin.reverse.raw = __reverse;
+      arrPlugin.slice.raw   = __slice;
+      arrPlugin.sort.raw    = __sort;
+      arrPlugin.splice.raw  = __splice;
+
+
+      /*------------------------- MODIFY PROTOTYPES --------------------------*/
+
+      if (isProtoMode) {
+        Object.prototype['__proto__'] = objPlugin;
+        arrPlugin['__proto__']  = __Array.prototype;
+        boolPlugin['__proto__'] = __Boolean.prototype;
+        datePlugin['__proto__'] = __Date.prototype;
+        funcPlugin['__proto__'] = __Function.prototype;
+        numPlugin['__proto__']  = __Number.prototype;
+        regPlugin['__proto__']  = __RegExp.prototype;
+        strPlugin['__proto__']  = __String.prototype;
+      } else{
+        Object.prototype = objPlugin;
+      }
+
+      Object.plugin    = Object.prototype;
+      Array.plugin     = Array.prototype    = arrPlugin;
+      Boolean.plugin   = Boolean.prototype  = boolPlugin;
+      Date.plugin      = Date.prototype     = datePlugin;
+      Function.plugin  = Function.prototype = funcPlugin;
+      Number.plugin    = Number.prototype   = numPlugin;
+      RegExp.plugin    = RegExp.prototype   = regPlugin;
+      String.plugin    = String.prototype   = strPlugin;
 
       // point constructor properties to the native wrappers
       arrPlugin.constructor  = Array;
@@ -857,123 +928,84 @@
       regPlugin.constructor  = RegExp;
       strPlugin.constructor  = String;
 
-      /*----------------------------------------------------------------------*/
+      // add [[Class]] property to eaches prototype as a fallback in case
+      // toString.call(value) doesn't work on sandboxed natives
+      arrPlugin['[[Class]]']  = '[object Array]';
+      boolPlugin['[[Class]]'] = '[object Boolean]';
+      datePlugin['[[Class]]'] = '[object Date]';
+      funcPlugin['[[Class]]'] = '[object Function]';
+      numPlugin['[[Class]]']  = '[object Number]';
+      regPlugin['[[Class]]']  = '[object RegExp]';
+      strPlugin['[[Class]]']  = '[object String]';
+
+
+      /*------------------------------ CLEANUP -------------------------------*/
 
       // prevent JScript bug with named function expressions
-      var FALSE = nil, TRUE = nil, UTC = nil, charAt = nil, charCodeAt = nil,
-       create = nil, concat = nil, every = nil, exec = nil, filter = nil,
-       fromArray = nil, fromCharCode = nil, getDate = nil, getDay = nil,
-       getFullYear = nil, getHours = nil, getMilliseconds = nil, getMinutes = nil,
-       getMonth = nil, getSeconds = nil, getTime = nil, getTimezoneOffset = nil,
-       getUTCDate = nil, getUTCDay = nil, getUTCFullYear = nil, getUTCHours = nil,
+      var charAt = nil, charCodeAt = nil, concat = nil, every = nil, exec = nil,
+       filter = nil, getDate = nil, getDay = nil, getFullYear = nil,
+       getHours = nil, getMilliseconds = nil, getMinutes = nil, getMonth = nil,
+       getSeconds = nil, getTime = nil, getTimezoneOffset = nil, getUTCDate = nil,
+       getUTCDay = nil, getUTCFullYear = nil, getUTCHours = nil,
        getUTCMilliseconds = nil, getUTCMinutes = nil, getUTCMonth = nil,
        getUTCSeconds = nil, getYear = nil, join = nil, indexOf = nil,
-       isArray = nil, lastIndexOf = nil, localeCompare = nil, match = nil,
-       map = nil, now = nil, parse = nil, push = nil, replace = nil,
-       reverse = nil, search = nil, slice = nil, some = nil, sort = nil,
-       split = nil, splice = nil, substr = nil, substring = nil,
+       lastIndexOf = nil, localeCompare = nil, match = nil, map = nil, push = nil,
+       replace = nil, reverse = nil, search = nil, slice = nil, some = nil,
+       sort = nil, split = nil, splice = nil, substr = nil, substring = nil,
        toExponential = nil, toFixed = nil, toISOString = nil, toJSON = nil,
        toLowerCase = nil, toLocaleLowerCase = nil, toLocaleUpperCase = nil,
        toPrecision = nil, toUpperCase = nil, trim = nil, trimLeft = nil,
        trimRight = nil, unshift = nil;
 
-      // assign native wrappers to Fusebox instance and return
-      instance.Array    = Array;
-      instance.Boolean  = Boolean;
-      instance.Date     = Date;
-      instance.Function = Function;
-      instance.Number   = Number;
-      instance.Object   = Object;
-      instance.RegExp   = RegExp;
-      instance.String   = String;
+      // assign native wrappers to instance object
+      (instance.Array    = Array).raw    = __Array;
+      (instance.Boolean  = Boolean).raw  = __Boolean;
+      (instance.Date     = Date).raw     = __Date;
+      (instance.Function = Function).raw = __Function;
+      (instance.Number   = Number).raw   = __Number;
+      (instance.Object   = Object).raw   = __Object;
+      (instance.RegExp   = RegExp).raw   = __RegExp;
+      (instance.String   = String).raw   = __String;
 
       return instance;
-    },
+    };
 
-    postProcess = NOOP,
-
-    Klass = function() { },
-
-    Fusebox = function Fusebox(instance) { return createFusebox(instance); };
 
     /*------------------------------------------------------------------------*/
 
-    // redefine Fusebox to remove the iframe from the document
-    if (mode === IFRAME) {
-      Fusebox = function Fusebox(instance) {
-        return postProcess(createFusebox(instance));
-      };
-
-      postProcess = function(instance) {
-        // remove iframe
-        var iframe = cache[cache.length -1];
-        iframe.parentNode.removeChild(iframe);
-        return instance;
-      };
+    // The htmlfile ActiveX object is supported by IE4+ and avoids https mixed
+    // content warnings in IE6. It is also used as a workaround for access denied errors
+    // thrown when using iframes to create sandboxes after the document.domain is
+    // set (Opera 9.25 is out of luck here).
+    if (HAS_ACTIVEX && !isHostType(global, 'XMLHttpRequest') &&
+          global.location && global.location.protocol === 'https:') {
+      setMode(ACTIVEX_MODE);
     }
-
-    if (mode != OBJECT__PROTO__) {
-      (function() {
-        var div,
-         sandbox = createSandbox(),
-         Array = sandbox.Array;
-
-        // IE and Opera's Array accessors return
-        // sandboxed arrays so we can skip wrapping them
-        SKIP_METHODS_RETURNING_ARRAYS =
-          !(Array().slice(0) instanceof global.Array);
-
-        if (mode === IFRAME) {
-          // remove iframe from document
-          postProcess();
-
-          // Opera 9.5 - 10a throws a security error when calling Array#map or String#lastIndexOf
-          // Opera 9.5 - 9.64 will error by simply calling the methods.
-          // Opera 10 will error when first accessing the contentDocument of
-          // another iframe and then accessing the methods.
-          if (Array.prototype.map) {
-            // create second iframe
-            createSandbox();
-            // remove second iframe from document
-            postProcess();
-            // test to see if Array#map is corrupted
-            try { Array().map(IDENTITY); }
-            catch (e) {
-              postProcess = (function(__postProcess) {
-                return function(instance) {
-                  instance.Array.prototype.map =
-                  instance.String.prototype.lastIndexOf = nil;
-                  return __postProcess(instance);
-                };
-              })(postProcess);
-            }
-          }
-
-          // pave cache
-          // avoid IE memory leak with nodes removed by removeChild()
-          div = global.document.createElement('div');
-          while (cache.length) {
-            div.appendChild(cache.pop());
-            div.innerHTML = '';
-          }
-        }
-
-        // cleanup
-        cache = [];
-        div = sandbox = nil;
-      })();
+    // Iframes are the fastest and prefered technique
+    else if (HAS_IFRAME) {
+      setMode(IFRAME_MODE);
+    }
+    // A fallback for non browser environments and should be supported by
+    // JavaScript engines such as Carakan, JaegerMonkey, JavaScriptCore, KJS,
+    // Nitro, Rhino, SpiderMonkey, SquirrelFish (Extreme), Tamarin, TraceMonkey,
+    // and V8.
+    else if (HAS_PROTO) {
+      setMode(PROTO_MODE);
     }
 
     // map Fusebox.prototype to Klass so Fusebox can be called without the `new` expression
     Klass.prototype = Fusebox.prototype;
 
-    /*--------------------------------------------------------------------------*/
+    // expose
+    Fusebox.getMode = getMode;
+    Fusebox.setMode = setMode;
+
+
+    /*------------------------- FUSE CUSTOMIZATIONS --------------------------*/
 
     // assign Fusebox natives to Fuse object
     (function() {
       var backup, key, i = -1,
-
-      __toString = {}.toString,
 
       SKIPPED_KEYS = { 'constructor': 1 },
 
@@ -1003,10 +1035,9 @@
 
       // break fuse.Object.prototype's relationship to other fuse natives
       // for consistency across sandbox variations.
-      if (mode !== OBJECT__PROTO__) {
+      if (MODE !== PROTO_MODE) {
         backup = {
-          'Array':    fuse.Array,
-          'Boolean':  fuse.Boolean,
+          'Array': fuse.Array, 'Boolean': fuse.Boolean,
           'Date':     fuse.Date,
           'Function': fuse.Function,
           'Number':   fuse.Number,
@@ -1026,8 +1057,8 @@
       }
 
       // redifine `toString` if there are no issues
-      if (__toString.call(fuse.Array()) === '[object Array]') {
-        toString = __toString;
+      if (fuse.Object().toString.call([]) === '[object Array]') {
+        toString = { }.toString;
       }
 
       // assign sandboxed natives to Fuse and add `updateGeneric` methods
