@@ -1,3 +1,5 @@
+* Fix IE8 bug with element.hasAttribute('selected') and other flagged attributes. [Diego Perini, jddalton]
+
 * Further simplify the Ruby build system. [Kit Goncharov]
 
 * Add all Scotch unit tests for `fuse.Array`. [Kit Goncharov]

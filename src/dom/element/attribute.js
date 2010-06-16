@@ -8,21 +8,17 @@
   };
 
   (function(plugin) {
-    var hasAttribute = function hasAttribute(name) {
-      return (this.raw || this).hasAttribute(name);
+
+    var CHECKED_INPUT_TYPES = { 'checkbox': 1, 'radio': 1 },
+
+    PROP_DEFAULTS = { 'selected': 'defaultSelected', 'value': 'defaultValue' },
+
+    TAG_PROPS_WITH_DEFAULTS = { 'OPTION': 'selected', 'TEXTAREA': 'value' };
+
+
+    plugin.hasAttribute = function hasAttribute(name) {
+      return (this.raw || this).hasAttribute(name);  
     };
-
-    if (!isHostType(fuse._docEl, 'hasAttribute')) {
-      hasAttribute = function hasAttribute(name) {
-        // IE6/7 fails to detect value attributes as well as colspan and rowspan
-        // attributes with a value of 1
-        var node = (this.raw || this)
-          .getAttributeNode(Element.Attribute.names[name] || name);
-        return !!node && node.specified;
-      };
-    }
-
-    plugin.hasAttribute = hasAttribute;
 
     plugin.getAttribute = function getAttribute(name) {
       var result, T = Element.Attribute,
@@ -39,13 +35,12 @@
     };
 
     plugin.removeAttribute = function removeAttribute(name) {
-      (this.raw || this)
-        .removeAttribute(Element.Attribute.contentNames[name] || name);
+      (this.raw || this).removeAttribute(Element.Attribute.contentNames[name] || name);
       return this;
     };
 
     plugin.setAttribute = function setAttribute(name, value) {
-      var contentName, node, remove,
+      var contentName, isRemoved, node,
        element = this.raw || this, attributes = { }, T = Element.Attribute;
 
       if (isHash(name)) {
@@ -60,14 +55,14 @@
         value = attributes[name];
         contentName = T.contentNames[name] || name;
         name = T.names[name] || name;
-        remove = value === false || value == null;
+        isRemoved = value === false || value == null;
 
         if (T.write[name]) {
-          if (T.write[name](element, value, remove) === false) {
+          if (T.write[name](element, value, isRemoved) === false) {
             element.removeAttribute(contentName);
           }
         }
-        else if (remove) {
+        else if (isRemoved) {
           element.removeAttribute(contentName);
         }
         else {
@@ -78,8 +73,37 @@
       return this;
     };
 
+    // For IE
+    if (!envTest('ELEMENT_HAS_ATTRIBUTE')) {
+      plugin.hasAttribute = function hasAttribute(name) {
+        var defaultProp, node = this.raw || this,
+         nodeName = getNodeName(node);
+
+        if (nodeName === 'INPUT') {
+          if (name == 'value') {
+            defaultProp = 'defaultValue';
+          } else if (name == 'checked' && CHECKED_INPUT_TYPES[node.type]) {
+            defaultProp = 'defaultChecked';
+          }
+        } else if (TAG_PROPS_WITH_DEFAULTS[nodeName] == name) {
+          defaultProp = PROP_DEFAULTS[name];
+        }
+
+        if (defaultProp) {
+          return !!node[defaultProp];
+        }
+        // IE6/7 fails to detect value attributes as well as colspan and rowspan
+        // attributes with a value of 1
+        node = node.getAttributeNode(Element.Attribute.names[name] || name);
+        return !!node && node.specified;
+      };
+    }
+
     // prevent JScript bug with named function expressions
-    var getAttribute = nil, setAttribute = nil, removeAttribute = nil;
+    var getAttribute = nil,
+     hasAttribute =    nil,
+     setAttribute =    nil,
+     removeAttribute = nil;
   })(Element.plugin);
 
   /*--------------------------------------------------------------------------*/
@@ -98,8 +122,8 @@
       };
     },
 
-    getEvent = function(element, contentName) {
-      var node = element.getAttributeNode(contentName);
+    getEvent = function(element, name) {
+      var node = element.getAttributeNode(name);
       return node && node.specified && node.value;
     },
 
@@ -142,12 +166,12 @@
       };
     },
 
-    setNode = function(contentName) {
+    setNode = function(name) {
       return function(element, value, remove) {
         if (remove) return false;
-        var attr = element.getAttributeNode(contentName);
+        var attr = element.getAttributeNode(name);
         if (!attr) {
-          attr = element.ownerDocument.createAttribute(contentName);
+          attr = element.ownerDocument.createAttribute(name);
           element.setAttributeNode(attr);
         }
         attr.value = String(value);
@@ -178,8 +202,8 @@
     T.write.selected = setDefault('Selected');
 
     // mandate flag attributes set and return their name
-    splitEach('checked disabled isMap multiple noHref noResize noShade ' +
-      'noWrap readOnly selected',
+    splitEach('disabled isMap multiple noHref noResize noShade ' +
+      'noWrap readOnly',
       function(contentName) {
         var lower = contentName.toLowerCase();
         T.read[lower]  = getFlag(contentName);

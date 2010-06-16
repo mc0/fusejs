@@ -136,13 +136,13 @@ new Test.Unit.Runner({
     this.assertEqual('hello world!',
       fuse.String('/*-secure- \r  \n ' + valid + ' \n  */').evalJSON().test);
 
-    var temp = fuse.jsonFilter;
-    fuse.jsonFilter = /^\/\*([\s\S]*)\*\/$/; // test custom delimiters.
+    var temp = fuse.Object.JSON_FILTER;
+    fuse.Object.JSON_FILTER = /^\/\*([\s\S]*)\*\/$/; // test custom delimiters.
 
     this.assertEqual('hello world!',
       fuse.String('/*' + valid + '*/').evalJSON().test);
 
-    fuse.jsonFilter = temp;
+    fuse.Object.JSON_FILTER = temp;
 
     this.assertMatch(123,      fuse.Array.last(huge.evalJSON(true)).test);
     this.assertEqual('',       fuse.String('""').evalJSON());
