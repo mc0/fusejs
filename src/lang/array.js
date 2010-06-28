@@ -20,20 +20,28 @@
     };
 
     List.from = function from(iterable) {
-      if (!iterable || iterable == '') return List();
+      var length, object, result;
+      if (!arguments.length) return List();
 
       // Safari 2.x will crash when accessing a non-existent property of a
       // node list, not in the document, that contains a text node unless we
       // use the `in` operator
-      var object = fuse.Object(iterable);
-      if ('toArray' in object) return object.toArray();
-      if ('item' in iterable)  return List.fromNodeList(iterable);
-
-      var length = iterable.length >>> 0, result = List(length);
-      while (length--) {
-        if (length in object) result[length] = iterable[length];
+      object = fuse.Object(iterable);
+      if ('toArray' in object) {
+        return object.toArray();
       }
-      return result;
+      if ('item' in object) {
+        return List.fromNodeList(iterable);
+      }
+      if ('length' in object) {
+        length = iterable.length >>> 0;
+        result = List(length);
+        while (length--) {
+          if (length in object) result[length] = iterable[length];
+        }
+        return result;
+      }
+      return List.fromArray([iterable]);
     };
 
     List.fromNodeList = function fromNodeList(nodeList) {

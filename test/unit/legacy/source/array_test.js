@@ -2,7 +2,12 @@ new Test.Unit.Runner({
 
   'test$A': function() {
     this.assertEnumEqual([], $A(),    'no value');
-    this.assertEnumEqual([], $A({ }), 'empty object');
+
+    var object = { }, regexp = /x/;
+    this.assertEnumEqual([false],  $A(false),  '`iterable` is a boolean');
+    this.assertEnumEqual([regexp], $A(regexp), '`iterable` is a regexp');
+    this.assertEnumEqual([object], $A(object), '`iterable` is an empty object');
+    this.assertEnumEqual([2], $A(2), '`iterable` is a number');
 
     this.assertEnumEqual(['a', 'b', 'c'], $A(['a', 'b', 'c']), 'simple array');
     this.assertEnumEqual(['a', 'b', 'c'], $A('abc'), 'string value');
@@ -62,7 +67,7 @@ new Test.Unit.Runner({
     this.assertEnumEqual([], fuse.Array().clear(),
       'clear empty list');
 
-    this.assertEnumEqual([], fuse.Array.create(1).clear(),
+    this.assertEnumEqual([], fuse.Array.from(1).clear(),
       'clear list with one undefined value');
 
     this.assertEnumEqual([], fuse.Array(1, 2).clear(),
@@ -75,7 +80,7 @@ new Test.Unit.Runner({
 
   'testClone': function() {
     this.assertEnumEqual([], fuse.Array().clone());
-    this.assertEnumEqual([1], fuse.Array.create(1).clone());
+    this.assertEnumEqual([1], fuse.Array.from(1).clone());
     this.assertEnumEqual([1, 2], fuse.Array(1, 2).clone());
     this.assertEnumEqual([0, 1, 2], fuse.Array(0, 1, 2).clone());
 
@@ -251,8 +256,8 @@ new Test.Unit.Runner({
 
   'testIndexOf': function() {
     this.assertEqual(-1, fuse.Array().indexOf(1));
-    this.assertEqual(-1, fuse.Array.create(0).indexOf(1));
-    this.assertEqual(0,  fuse.Array.create(1).indexOf(1));
+    this.assertEqual(-1, fuse.Array.from(0).indexOf(1));
+    this.assertEqual(0,  fuse.Array.from(1).indexOf(1));
     this.assertEqual(1,  fuse.Array(0, 1, 2).indexOf(1));
     this.assertEqual(0,  fuse.Array(1, 2, 1).indexOf(1));
     this.assertEqual(2,  fuse.Array(1, 2, 1).indexOf(1, -1));
@@ -374,7 +379,7 @@ new Test.Unit.Runner({
     this.assertUndefined(
       fuse.Array().last(function(item) { return item === 2 }));
 
-    this.assertEqual(1, fuse.Array.create(1).last());
+    this.assertEqual(1, fuse.Array.from(1).last());
     this.assertEqual(2, fuse.Array(1, 2).last());
 
     this.assertEqual(3, Fixtures.Basic.last());
@@ -400,8 +405,8 @@ new Test.Unit.Runner({
 
   'testLastIndexOf': function() {
     this.assertEqual(-1, fuse.Array().lastIndexOf(1));
-    this.assertEqual(-1, fuse.Array.create(0).lastIndexOf(1));
-    this.assertEqual(0,  fuse.Array.create(1).lastIndexOf(1));
+    this.assertEqual(-1, fuse.Array.from(0).lastIndexOf(1));
+    this.assertEqual(0,  fuse.Array.from(1).lastIndexOf(1));
     this.assertEqual(2,  fuse.Array(0, 2, 4, 6).lastIndexOf(4));
     this.assertEqual(3,  fuse.Array(4, 4, 2, 4, 6).lastIndexOf(4));
     this.assertEqual(3,  fuse.Array(0, 2, 4, 6).lastIndexOf(6, 3));
@@ -569,7 +574,7 @@ new Test.Unit.Runner({
 
   'testUnique': function() {
     this.assertEnumEqual([1], fuse.Array(1, 1, 1).unique());
-    this.assertEnumEqual([1], fuse.Array.create(1).unique());
+    this.assertEnumEqual([1], fuse.Array.from(1).unique());
     this.assertEnumEqual([],  fuse.Array().unique());
 
     this.assertEnumEqual([0, 1, 2, 3],
@@ -586,7 +591,7 @@ new Test.Unit.Runner({
 
   'testWithout': function() {
     this.assertEnumEqual([], fuse.Array().without(0));
-    this.assertEnumEqual([], fuse.Array.create(0).without(0));
+    this.assertEnumEqual([], fuse.Array.from(0).without(0));
     this.assertEnumEqual([1], fuse.Array(0, 1).without(0));
     this.assertEnumEqual([1, 2], fuse.Array(0, 1, 2).without(0));
     this.assertEnumEqual(['test1', 'test3'], fuse.Array('test1', 'test2', 'test3').without('test2'));
