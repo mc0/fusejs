@@ -1,3 +1,5 @@
+* Remove fuse.dom.Element.create() in favor of just calling fuse.dom.Element(). [jddalton]
+
 * Fix Fusebox reference to postProcess() when it's redefined. [jddalton]
 
 * Fix Fusebox memory leak associated with ActiveX technique. [jddalton, Sebastian Werner]

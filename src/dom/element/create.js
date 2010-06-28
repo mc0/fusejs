@@ -78,17 +78,18 @@
       this.initialize && this.initialize();
     },
 
-    create = function create(tagName, context) {
-      // support `<div>x</div>` and `<div>` format
+    Element = function Element(tagName, context) {
       var attrs, element, isCached, isDecorated, nodes, result;
-      if (tagName.charAt(0) == '<') {
-        result = fromHTML(tagName, context);
-        if (context && !CONTEXT_TYPES[context.nodeType]) {
-          attrs = context.attrs;
+
+      if (isString(tagName)) {
+        // support `<div>x</div>` and `<div>` format
+        if (tagName.charAt(0) == '<') {
+          result = fromHTML(tagName, context);
+          if (context && !CONTEXT_TYPES[context.nodeType]) attrs = context.attrs;
+          return attrs ? plugin.setAttribute.call(result, attrs) : result;
         }
-      }
-      // support simple tagNames
-      else {
+
+        // support simple tagNames
         if (context && !CONTEXT_TYPES[context.nodeType]) {
           attrs       = context.attrs;
           isCached    = context.cache;
@@ -104,14 +105,18 @@
 
         result = (nodes[tagName] ||
           (nodes[tagName] = context.createElement(tagName))).cloneNode(false);
+      }
+      else {
+        result = tagName;
+        tagName = getNodeName(result);
+      }
 
-        if (isDecorated !== false) {
-          element = result;
-          Decorator.prototype = getOrCreateTagClass(tagName).plugin;
-          result = new Decorator(element);
-          if (isCached !== false) {
-            domData[getFuseId(element)].decorator = result;
-          }
+      if (isDecorated !== false) {
+        element = result;
+        Decorator.prototype = getOrCreateTagClass(tagName).plugin;
+        result = new Decorator(element);
+        if (isCached !== false) {
+          domData[getFuseId(element)].decorator = result;
         }
       }
 
@@ -312,27 +317,8 @@
       return isDecorated === false
         ? object
         : Node(Window(object, isCached), isCached);
-    },
-
-    Element = function Element(tagName, context) {
-      return isString(tagName)
-        ? create(tagName, context)
-        : fromElement(tagName, context && !CONTEXT_TYPES[context.nodeType] && context.cache);
     };
-
-    // add class sugar to Element
-    __fuse.Class(Node, { 'constructor': Element });
-
-    // add class sugar to fuse
-    __fuse.Class({ 'constructor': fuse });
-
-    // copy old fuse properties to new global.fuse
-    eachKey(__fuse, function(value, key) {
-      if (hasKey(__fuse, key)) fuse[key] = value;
-    });
-
-    plugin = Element.plugin;
-
+ 
     /*------------------------------------------------------------------------*/
 
     // IE7 and below need to use the sTag of createElement to set the `name` attribute
@@ -343,10 +329,11 @@
 
     if (envTest('NAME_ATTRIBUTE_IS_READONLY') &&
         envTest('CREATE_ELEMENT_WITH_HTML')) {
-      var __create = create;
-      create = function create(tagName, context) {
+      var __Element = Element;
+      Element = function Element(tagName, context) {
         var attrs, element, id, isCached, isDecorated, name, nodes, type, result = null;
-        if (tagName.charAt(0) != '<' &&
+
+        if (isString(tagName) && tagName.charAt(0) != '<' &&
             context && !CONTEXT_TYPES[context.nodeType] &&
             ((name = context.name) || (type = context.type))) {
 
@@ -379,7 +366,7 @@
           delete attrs.name; delete attrs.type;
           return plugin.setAttribute.call(result, attrs);
         }
-        return __create(tagName, context);
+        return __Element(tagName, context);
       };
     }
 
@@ -415,8 +402,20 @@
       getFragmentFromHTML = getDocumentFragment;
     }
 
+    // add class sugar to Element
+    __fuse.Class(Node, { 'constructor': Element });
+
+    // add class sugar to fuse
+    __fuse.Class({ 'constructor': fuse });
+
+    // copy old fuse properties to new global.fuse
+    eachKey(__fuse, function(value, key) {
+      if (hasKey(__fuse, key)) fuse[key] = value;
+    });
+
+    plugin = Element.plugin;
+
     // expose
-    Element.create      = create;
     Element.extendByTag = extendByTag;
     Element.fromElement = fromElement;
     Element.fromHTML    = fromHTML;

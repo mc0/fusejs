@@ -1943,7 +1943,7 @@ new Test.Unit.Runner({
     input = $('write_attribute_input');
 
     $w('button input').each(function(tagName) {
-      var button = fuse.dom.Element.create(tagName, { 'attrs': { 'type': 'reset'} });
+      var button = fuse.dom.Element(tagName, { 'attrs': { 'type': 'reset'} });
       form.insert(button);
       input.setValue('something');
 
