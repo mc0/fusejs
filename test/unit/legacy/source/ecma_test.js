@@ -157,7 +157,7 @@ new Test.Unit.Runner({
 
     /*
     // crashes Safari 3.4 beta
-    var test = this;
+    var self = this;
     source.replace(/(b(?:o)(z))/, function(substring, group1, group2, offset, string) {
       test.assertIdentical(window, this);
       test.assertEqual(5, arguments.length);

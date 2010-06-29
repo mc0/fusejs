@@ -50,12 +50,18 @@ new Test.Unit.Runner({
     }
 
     function innerObserver(event) {
-      event.stop();
-      stopped = true;
+      theEvent = event;
+      returned = event.stop();
+      stopped  = true;
     }
 
-    var span = $('span'), outer = $('outer'), inner = $('inner');
-    var fired = false, stopped = false;
+    var theEvent,
+     returned = 'nothing',
+     fired    = false,
+     stopped  = false,
+     span     = $('span'),
+     outer    = $('outer'),
+     inner    = $('inner');
 
     inner.observe('test:somethingHappened', innerObserver);
     outer.observe('test:somethingHappened', outerObserver);
@@ -63,6 +69,8 @@ new Test.Unit.Runner({
 
     this.assert(stopped);
     this.assert(!fired);
+    this.assertEqual(theEvent, returned,
+      'event.stop() should return the event object');
 
     fired = stopped = false;
     inner.stopObserving('test:somethingHappened', innerObserver);

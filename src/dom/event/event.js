@@ -468,6 +468,7 @@
       this.isStopped = createGetter('isStopped', true);
       this.cancel();
       this.stopBubbling();
+      return this;
     };
 
     plugin.isCancelled = createGetter('isCancelled', false);
