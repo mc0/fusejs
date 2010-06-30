@@ -320,11 +320,12 @@
     plugin.cancel = function cancel() {
       var setCancelled = function(object) {
         object.isCancelled = createGetter('isCancelled', true);
+        return object;
       },
 
       cancel = function cancel() {
-        setCancelled(this);
         this.raw && this.raw.preventDefault();
+        return setCancelled(this);
       };
 
       // fired events have no raw
@@ -332,24 +333,25 @@
         // for IE
         if (typeof this.raw.preventDefault === 'undefined') {
           cancel = function cancel() {
-            setCancelled(this);
             if (this.raw) this.raw.returnValue = false;
+            return setCancelled(this);
           };
         }
         plugin.cancel = cancel;
-        this.cancel();
+        return this.cancel();
       }
-      setCancelled(this);
+      return setCancelled(this);
     };
 
     plugin.stopBubbling = function stopBubbling() {
       var setBubbling = function(object) {
         object.isBubbling = createGetter('isBubbling', false);
+        return object;
       },
 
       stopBubbling = function stopBubbling() {
-        setBubbling(this);
         this.raw && this.raw.stopPropagation();
+        return setBubbling(this);
       };
 
       // fired events have no raw
@@ -357,14 +359,14 @@
         // for IE
         if (typeof this.raw.stopPropagation === 'undefined') {
           stopBubbling = function stopBubbling() {
-            setBubbling(this);
             if (this.raw) this.raw.cancelBubble = true;
+            return setBubbling(this);;
           };
         }
         plugin.stopBubbling = stopBubbling;
-        this.stopBubbling();
+        return this.stopBubbling();
       }
-      setBubbling(this);
+      return setBubbling(this);
     };
 
     plugin.getTarget = function getTarget() {
@@ -468,6 +470,7 @@
       this.isStopped = createGetter('isStopped', true);
       this.cancel();
       this.stopBubbling();
+      return this;
     };
 
     plugin.isCancelled = createGetter('isCancelled', false);

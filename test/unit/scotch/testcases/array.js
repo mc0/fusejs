@@ -69,7 +69,13 @@
       
       //Empty arguments
       this.assertEquivalent([], $A(), "No `iterable` argument");
-      this.assertEquivalent([], $A({}), "`iterable` is an empty object");
+      
+      //Catch-alls
+      var object = { }, regexp = /x/;
+      this.assertEquivalent([false],  $A(false),  "`iterable` is a boolean");
+      this.assertEquivalent([regexp], $A(regexp), "`iterable` is a regexp");
+      this.assertEquivalent([object], $A(object), "`iterable` is an empty object");
+      this.assertEquivalent([2], $A(2), "`iterable` is a number");
       
       //Mixed arguments
       this.assertEquivalent(["a", "b", "c"], $A("abc"), "`iterable` is a string");
@@ -127,9 +133,9 @@
     "indexOf": function(){
       //`assertEqual` because `fuse.Array#indexOf` returns a `fuse.Number` instance
       this.assertEqual(-1, fuse.Array().indexOf(1));
-      this.assertEqual(-1, fuse.Array.create(0).indexOf(1));
+      this.assertEqual(-1, fuse.Array.from(0).indexOf(1));
       
-      this.assertEqual(0, fuse.Array.create(1).indexOf(1));
+      this.assertEqual(0, fuse.Array.from(1).indexOf(1));
       this.assertEqual(0, fuse.Array(1, 2, 1).indexOf(1));
       
       this.assertEqual(1, fuse.Array(0, 1, 2).indexOf(1));
@@ -144,10 +150,10 @@
     },
     "lastIndexOf": function(){
       this.assertEqual(-1, fuse.Array().lastIndexOf(1));
-      this.assertEqual(-1, fuse.Array.create(0).lastIndexOf(1));
+      this.assertEqual(-1, fuse.Array.from(0).lastIndexOf(1));
       this.assertEqual(-1, fuse.Array(0, 2, 4, 6).lastIndexOf(6, 2));
       
-      this.assertEqual(0, fuse.Array.create(1).lastIndexOf(1));
+      this.assertEqual(0, fuse.Array.from(1).lastIndexOf(1));
       this.assertEqual(0, fuse.Array(6, 2, 4, 6).lastIndexOf(6, 2));
       
       this.assertEqual(2, fuse.Array(0, 2, 4, 6).lastIndexOf(4));
@@ -388,7 +394,7 @@
       this.assert(typeof fuse.Array().last() === "undefined");
       this.assertEquivalent([], fuse.Array().last(3));
       
-      this.assertIdentical(1, fuse.Array.create(1).last());
+      this.assertIdentical(1, fuse.Array.from(1).last());
       this.assertIdentical(2, fuse.Array(1, 2).last());
       this.assertIdentical(3, FIXTURES.basic.last());
       this.assertEquivalent([2, 3], FIXTURES.basic.last(2));
@@ -481,7 +487,7 @@
   Methods.addTests({
     "clear": function(){
       this.assertEquivalent([], fuse.Array().clear(), "Empty list");
-      this.assertEquivalent([], fuse.Array.create(1).clear(), "List with one undefined value");
+      this.assertEquivalent([], fuse.Array.from(1).clear(), "List with one undefined value");
       this.assertEquivalent([], fuse.Array(1, 2).clear(), "List with basic values");
       
       //Used as a generic
@@ -493,7 +499,7 @@
     },
     "clone": function(){
       this.assertEquivalent([], fuse.Array().clone());
-      this.assertEquivalent([1], fuse.Array.create(1).clone());
+      this.assertEquivalent([1], fuse.Array.from(1).clone());
       this.assertEquivalent([1, 2], fuse.Array(1, 2).clone());
       this.assertEquivalent([0, 1, 2], fuse.Array(0, 1, 2).clone());
       
@@ -549,7 +555,7 @@
     },
     "unique": function(){
       this.assertEquivalent([1], fuse.Array(1, 1, 1).unique());
-      this.assertEquivalent([1], fuse.Array.create(1).unique());
+      this.assertEquivalent([1], fuse.Array.from(1).unique());
       this.assertEquivalent([], fuse.Array().unique());
       this.assertEquivalent([0, 1, 2, 3], fuse.Array(0, 1, 2, 2, 3, 0, 2).unique());
       
@@ -558,7 +564,7 @@
     },
     "without": function(){
       this.assertEquivalent([], fuse.Array().without(0));
-      this.assertEquivalent([], fuse.Array.create(0).without(0));
+      this.assertEquivalent([], fuse.Array.from(0).without(0));
       this.assertEquivalent([1], fuse.Array(0, 1).without(0));
       this.assertEquivalent([1, 2], fuse.Array(0, 1, 2).without(0));
       this.assertEquivalent(["test1", "test3"], fuse.Array("test1", "test2", "test3").without("test2"));

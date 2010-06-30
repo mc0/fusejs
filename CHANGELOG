@@ -1,3 +1,19 @@
+* Make Event#stop, Event#stopBubbling, and Event#cancel return the event wrapper to allow method chaining. [jdalton, Johan Arensman]
+
+* Remove fuse.Array.create() in favor of using fuse.Array.from(3) when creating an array with one numeric value. [jddalton]
+
+* Remove fuse.dom.Element.create() in favor of just calling fuse.dom.Element(). [jddalton]
+
+* Fix Fusebox reference to postProcess() when it's redefined. [jddalton]
+
+* Fix Fusebox memory leak associated with ActiveX technique. [jddalton, Sebastian Werner]
+
+* Add fuse.Fusebox.getMode() and fuse.Fusebox.setMode() methods. [jddalton]
+
+* Fix Firefox bug when adding and then removing iframes before dom load. [getify, jddalton]
+
+* Rewrite Fusebox to use iframes by default. [jddalton]
+
 * Fix IE8 bug with element.hasAttribute('selected') and other flagged attributes. [Diego Perini, jddalton]
 
 * Further simplify the Ruby build system. [Kit Goncharov]

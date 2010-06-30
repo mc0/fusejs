@@ -2,7 +2,7 @@ new Test.Unit.Runner({
 
   'testArrayInspect': function() {
     this.assertEqual('[]', fuse.Array().inspect());
-    this.assertEqual('[1]', fuse.Array.create(1).inspect());
+    this.assertEqual('[1]', fuse.Array.from(1).inspect());
     this.assertEqual('[\'a\']', fuse.Array('a').inspect());
     this.assertEqual('[\'a\', 1]', fuse.Array('a', 1).inspect());
 

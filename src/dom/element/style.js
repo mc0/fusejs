@@ -505,8 +505,8 @@
 
       getSum = function(decorator, name) {
         var styles = STYLE_SUMS[name];
-        return (parseFloat(decorator.getStyle(styles[0])) || 0) +
-          (parseFloat(decorator.getStyle(styles[1])) || 0);
+        return (parseFloat(plugin.getStyle.call(decorator, styles[0])) || 0) +
+          (parseFloat(plugin.getStyle.call(decorator, styles[1])) || 0);
       },
 
       getDimension = function getDimension(options) {

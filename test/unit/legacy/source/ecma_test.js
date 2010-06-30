@@ -19,7 +19,7 @@ new Test.Unit.Runner({
     // test falsy values
     var expected = [8, 9, 0, 'a', null, undef, false, 'd'];
     this.assertEnumEqual(expected,
-      fuse.Array.create(8).concat([9, 0], 'a', [null], undef, false, 'd'),
+      fuse.Array.from(8).concat([9, 0], 'a', [null], undef, false, 'd'),
       'failed to concat falsy values');
 
     // test undefined indexs
@@ -157,7 +157,7 @@ new Test.Unit.Runner({
 
     /*
     // crashes Safari 3.4 beta
-    var test = this;
+    var self = this;
     source.replace(/(b(?:o)(z))/, function(substring, group1, group2, offset, string) {
       test.assertIdentical(window, this);
       test.assertEqual(5, arguments.length);
