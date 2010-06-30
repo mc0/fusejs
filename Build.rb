@@ -89,13 +89,13 @@ module FuseJS
   class LegacyTestGenerator
     require "erb"
     #Path constants
-    ROOT_PATH = File.join(FuseJS::TEST_PATH, "unit", "legacy")
-    TEST_PATH = File.join(ROOT_PATH, "source")
+    ROOT_PATH = File.join(FuseJS::TEST_PATH, "unit")
+    TEST_PATH = File.join(ROOT_PATH, "src")
     FIXTURES_PATH = File.join(TEST_PATH, "fixtures")
     FINAL_PATH = File.join(ROOT_PATH, "build")
     def initialize(filename)
       @filename = filename
-      @template = File.join(ROOT_PATH, "resources", "template.erb")
+      @template = File.join(ROOT_PATH, "assets", "template.erb")
       @js_filename = File.basename(@filename)
       @basename = File.basename(@js_filename, "_test.js")
     end
@@ -104,8 +104,7 @@ module FuseJS
       @html_fixtures = begin
         content = ""
         file = File.join(FIXTURES_PATH, "#{@basename}.html")
-        File.open(file, "r") {|file| file.each{|line| content << line}} if File.file?(file)
-        content
+        content << IO.read(file) if File.file?(file)
       end
 
       @js_fixtures_filename = "#{@basename}.js" if File.file?(File.join(FIXTURES_PATH, "#{@basename}.js"))

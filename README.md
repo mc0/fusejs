@@ -35,7 +35,7 @@ To build FuseJS, you'll need [Ruby](http://www.ruby-lang.org) 1.8.2 or higher. F
 
 Once you fork FuseJS on GitHub and commit your changes, you may also [send a pull request](http://github.com/guides/pull-requests) if you'd like your feature or bug fix to be considered for the next release.
 
-Please make sure to update all unit tests in the `test/` directory as well: although the legacy `unittest.js`-based tests are still  available, we're currently in the process of porting our unit tests to the [Scotch](http://kitgoncharov.github.com/scotch) testing library.
+Please make sure to update all unit tests in the `test/` directory as well.
 
 ## Community
 
