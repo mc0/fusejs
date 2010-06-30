@@ -1,4 +1,4 @@
-* Make Event#stop return the event wrapper to support method chaining. [jdalton, Johan Arensman]
+* Make Event#stop, Event#stopBubbling, and Event#cancel return the event wrapper to allow method chaining. [jdalton, Johan Arensman]
 
 * Remove fuse.Array.create() in favor of using fuse.Array.from(3) when creating an array with one numeric value. [jddalton]
 

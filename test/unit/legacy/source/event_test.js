@@ -51,12 +51,16 @@ new Test.Unit.Runner({
 
     function innerObserver(event) {
       theEvent = event;
-      returned = event.stop();
       stopped  = true;
+      before.push(event.isStopped(), event.isBubbling(),   event.isCancelled());
+      returned.push(event.stop(),    event.stopBubbling(), event.cancel());
+      after.push(event.isStopped(),  event.isBubbling(),   event.isCancelled());
     }
 
     var theEvent,
-     returned = 'nothing',
+     before   = [],
+     returned = [],
+     after    = [],
      fired    = false,
      stopped  = false,
      span     = $('span'),
@@ -69,8 +73,15 @@ new Test.Unit.Runner({
 
     this.assert(stopped);
     this.assert(!fired);
-    this.assertEqual(theEvent, returned,
-      'event.stop() should return the event object');
+
+    this.assertEnumEqual([false, true, false], before,
+      'Before the event is stopped isStopped()/isCancelled() should return false and isBubbling() should return true.');
+
+    this.assertEnumEqual([theEvent, theEvent, theEvent], returned,
+      'The event object should be returned by stop(), stopBubbling(), and cancel().');
+
+    this.assertEnumEqual([true, false, true], after,
+      'After the event is stopped isStopped()/isCancelled() should return true and isBubbling() should return false.');
 
     fired = stopped = false;
     inner.stopObserving('test:somethingHappened', innerObserver);
