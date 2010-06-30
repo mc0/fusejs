@@ -17,7 +17,10 @@ module FuseJS
     puts "Building FuseJS..."
     builder = Builder.new(:root => ROOT_PATH, :search => [SOURCE_PATH], :files => ["fuse.js"], :constants => BUILD, :comments => true)
     FileUtils.mkdir_p DIST_PATH
-    builder.save! File.join(DIST_PATH, "fuse.js")
+    output = File.join(DIST_PATH, "fuse.js")
+    builder.save! output
+    #Experimental: create a distribution file (strip named function expressions and JScript NFE bug fixes).
+    File.open(File.join(DIST_PATH, "fuse.dist.js"), "wb") {|file| file << file << File.read(output).gsub(/\=[^\w]+function\s[^(]+\(/, "= function(").gsub(/^\s+\/\/\sprevent JScript bug[^}]+/, "")}
     puts "Done. Building legacy unit tests..."
     #Always start from scratch
     FileUtils.rm_rf LegacyTestGenerator::BUILD_PATH

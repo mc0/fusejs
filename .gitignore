@@ -4,5 +4,6 @@ Icon?
 Thumbs.db
 
 test/unit/build
+dist
 
 *.tmproj
