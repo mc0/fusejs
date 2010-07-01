@@ -130,23 +130,30 @@
           // after the document.domain is set. Also Opera < 9 doesn't support
           // inserting an iframe into the document.documentElement.
           try {
-            (xdoc = global.frames[name].document).open();
-            xdoc.write('<script>' +
-              'var chk,global=this;' +
-              'parent.fuse.' + expando + '=global;' +
-
+            result = global.frames[name];
+            (xdoc = result.document).open();
+            xdoc.write(
               // Firefox 3.5+ glitches when an iframe is inserted and removed,
               // from a page containing other iframes, before dom load.
               // When the page loads one of the other iframes on the page will have
               // its content swapped with our iframe. Though the content is swapped,
               // the iframe will persist its `src` property so we check if our
               // iframe has a src property and load it if found.
-              '(chk=function(s){' +
-              'if(parent.document.readyState!="complete"){' +
-              '(s=global.frameElement.src)&&global.location.replace(s);' +
-              'setTimeout(chk,10)}})()' +
-              '<\/script>');
+              '<script>var g=this,c=function(s){' +
+              'if(g.parent.document.readyState!="complete"){' +
+              '(s=g.frameElement.src)&&g.location.replace(s);' +
+              'g.setTimeout(c,10)}};' +
+              'c()<\/script>');
+
             xdoc.close();
+
+            // Safari does not support sandboxed natives from iframes :(
+            if (result.Array().constructor === Array) {
+              parentNode.removeChild(iframe);
+              throw new TypeError;
+            }
+            cache.push(iframe);
+            return result;
           }
           catch (e) {
             if (HAS_ACTIVEX) {
@@ -159,12 +166,6 @@
             }
             throw new Error('fuse.Fusebox() failed to create a sandbox by iframe.');
           }
-
-          result = global.fuse[expando];
-          delete global.fuse[expando];
-
-          cache.push(iframe);
-          return result;
       }
       throw new Error('fuse.Fusebox() failed to create a sandbox.');
     },
