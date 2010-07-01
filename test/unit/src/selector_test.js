@@ -74,8 +74,14 @@ new Test.Unit.Runner({
   },
 
   'testSelectorWithTagNameAndSpecificAttributeValue': function() {
+    // http://www.w3.org/TR/CSS21/syndata.html#value-def-identifier
+    // http://www.w3.org/TR/CSS2/selector.html#matching-attrs
+    // http://www.w3.org/TR/CSS21/syndata.html#strings
+    var errored = false;
+    try { $$('a[href=#]'); } catch(e) { errored = true; }
+
+    this.assert(errored, 'Should error when non class, id, or name attributes selectors are not quoted.');
     this.assertEnumEqual($('link_1', 'link_2', 'link_3'), $$('a[href="#"]'));
-    this.assertEnumEqual($('link_1', 'link_2', 'link_3'), $$('a[href=#]'));
   },
 
   'testSelectorWithTagNameAndWhitespaceTokenizedAttributeValue': function() {
