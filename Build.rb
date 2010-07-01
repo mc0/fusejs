@@ -17,10 +17,9 @@ module FuseJS
     puts "Building FuseJS..."
     builder = Builder.new(:root => ROOT_PATH, :search => [SOURCE_PATH], :files => ["fuse.js"], :constants => BUILD, :comments => true)
     FileUtils.mkdir_p DIST_PATH
-    output = File.join(DIST_PATH, "fuse.js")
-    builder.save! output
+    builder.save! File.join(DIST_PATH, "fuse.js"), File.join(DIST_PATH, "docs.md")
     #Experimental: create a distribution file (strip named function expressions and JScript NFE bug fixes).
-    File.open(File.join(DIST_PATH, "fuse.dist.js"), "wb") {|file| file << file << File.read(output).gsub(/\=[^\w]+function\s[^(]+\(/, "= function(").gsub(/^\s+\/\/\sprevent JScript bug[^}]+/, "")}
+    File.open(File.join(DIST_PATH, "fuse.dist.js"), "wb") {|file| file << File.read(File.join(DIST_PATH, "fuse.js")).gsub(/\=[^\w]+function\s[^(]+\(/, "= function(").gsub(/^\s+\/\/\sprevent JScript bug[^}]+/, "")}
     puts "Done. Building legacy unit tests..."
     #Always start from scratch
     FileUtils.rm_rf LegacyTestGenerator::BUILD_PATH
@@ -40,7 +39,7 @@ module FuseJS
     def initialize(options = {})
       @options = DEFAULT_OPTIONS.merge(options)
       #The final concatenation object
-      @concatenation = {:filenames => [], :mtimes => [], :lines => []}
+      @concatenation = {:filenames => [], :mtimes => [], :lines => [], :docs => []}
       #The load paths to search
       @options[:search] = @options[:search].map {|path| Dir[Builder.absolute?(path) ? path : File.expand_path(File.join(@options[:root], path))]}.flatten.compact.sort
       #Load all source files for concatenation
@@ -61,8 +60,8 @@ module FuseJS
       @concatenation[:filenames] << filename
       #The file's modification time, or current time if it's not defined
       @concatenation[:mtimes] << File.mtime(filename) || Time.now
-      #A flag specifying whether the preprocessor is reading a JSDoc comment
-      jsdoc_comment = false
+      #Collected documentation fragments
+      fragments = []
       #Iterate through the file's lines; easier and less verbose than `File.open(...) {|file| file.each {|line| ...}}`.
       IO.readlines(filename).each do |line|
         comment = line[/^\s*\/\/(.*)/, 1]
@@ -72,31 +71,51 @@ module FuseJS
           name = require[/^.(.*).$/, 1].chomp(".js") + ".js"
           #Quotes denote paths relative to the file, angle brackets denote files in the load path(s)
           path = require[0, 1] === '"' ? File.join(File.expand_path(File.dirname(filename)), name) : name
-          #Add the file to the concatenation. Note: `index + 1 === file.lineno`
+          #Add the file to the concatenation.
           raise "The file `#{path}` was not found (File: #{filename})." unless file = find(path)
           preprocess file
         end
         #Interpolate constants
         line = line.chomp.gsub(/<%=(.*?)%>/){@options[:constants][$1.strip] || $&}.gsub(/\s+$/, "")
-        #Strip JSDoc comments
-        if line =~ /^\s*\/\*\*(.*)/ || jsdoc_comment
-          #Flag the line as both a JSDoc and standard comment (both are stripped by default)
-          jsdoc_comment = comment = true
+        #Process inline documentation (based on work by Tobie Langel; PDoc <http://pdoc.org>)
+        if line =~ /^\s*\/\*\*(.*)/ || fragments.length > 0
+          #Flag the line as a comment (stripped by default) and add it to our temporary fragments array
+          comment = true
+          fragments << line
           if line =~ /^(.*)\*\/\s*/
-            #Reset the flag if the line ends the JSDoc comment
-            jsdoc_comment = false
+            #Generate the RegExp for stripping the documentation prefix from each line
+            match = fragments[1].match(/(^\s*\*)(\s*)/)
+            prefix = Regexp.new("^#{Regexp.escape(match[1])}(#{Regexp.escape(match[2])})?") if fragments.length > 2
+            fragments.each_with_index do |entry, index|
+              if index === 0
+                #Strip opening doc comment
+                @concatenation[:docs] << entry.sub(/\s*\/\*\*\s*/, "")
+              elsif index === fragments.length - 1
+                #Strip closing doc comment
+                @concatenation[:docs] << entry.sub(/\s*\*\/\s*/, "")
+              elsif entry =~ prefix
+                #Strip prefix
+                @concatenation[:docs] << entry.sub(prefix, "")
+              else
+                raise "Inconsistent documentation prefix (File: #{filename})."
+              end
+            end
+            #Clear the fragments array
+            fragments.clear
           end
         end
         #Add the line to the concatenation (skip comments and `require` directives)
         @concatenation[:lines] << line unless require || comment && !@options[:comments]
       end
     end
-    def save!(output)
-      #Use the latest source file's modification time for the concatenation
+    def save!(concatenation, docs)
+      #Get the latest source file's modification time
       timestamp = @concatenation[:mtimes].max
-      #Write the concatenation to a file, and set its access/modification times
-      File.open(output, "wb") {|file| file << @concatenation[:lines].join($/)}
-      File.utime(timestamp, timestamp, output)
+      #Write the concatenation and docs to their respective files
+      File.open(concatenation, "wb") {|file| file << @concatenation[:lines].join($/)}
+      File.open(docs, "wb") {|file| file << @concatenation[:docs].join($/)}
+      #Set the access/modification times of both files
+      [concatenation, docs].each {|file| File.utime(timestamp, timestamp, file)}
       true
     end
   end

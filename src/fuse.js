@@ -28,6 +28,11 @@
     return fuse;
   })();
 
+  /**
+  * ## fuse.version
+  *
+  * The version of [FuseJS](http://fusejs.com) that you're using (e.g., <%= Version %>).
+  */
   fuse.version = '<%= Version %>';
 
   /*--------------------------------------------------------------------------*/
