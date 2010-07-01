@@ -72,10 +72,10 @@
 
       // load selector engine and Fuse engine adapter
       fuse.String(engineItem.value).split('+').each(function(path) {
-        loadScriptFile('../../../../vendor/' + path);
+        loadScriptFile('../../../vendor/' + path);
       });
 
-      loadScriptFile('../../../../src/dom/selector/' + engineItem.text.toLowerCase() + '.js');
+      loadScriptFile('../../../src/dom/selector/' + engineItem.text.toLowerCase() + '.js');
 
       // attach event handlers to config controls
       debugEl.observe('change', refresh);
