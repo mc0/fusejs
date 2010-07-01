@@ -79,50 +79,29 @@
     },
 
     Element = function Element(tagName, context) {
-      var attrs, element, isCached, isDecorated, nodes, result;
-
+      var attrs, element, isCached, isDecorated, result;
+      if (context && !CONTEXT_TYPES[context.nodeType]) {
+        attrs       = context.attrs;
+        isCached    = context.cache;
+        isDecorated = context.decorate;
+        context     = context.context;
+      }
       if (isString(tagName)) {
-        // support `<div>x</div>` and `<div>` format
-        if (tagName.charAt(0) == '<') {
-          result = fromHTML(tagName, context);
-          if (context && !CONTEXT_TYPES[context.nodeType]) attrs = context.attrs;
-          return attrs ? plugin.setAttribute.call(result, attrs) : result;
-        }
-
-        // support simple tagNames
-        if (context && !CONTEXT_TYPES[context.nodeType]) {
-          attrs       = context.attrs;
-          isCached    = context.cache;
-          isDecorated = context.decorate;
-          context     = context.context;
-        }
-
-        // for a tidy cache stick to all upper or all lower case tagNames
-        context || (context = doc);
-
-        nodes = context === doc ? domData['2'].nodes :
-          domData[getFuseId(getDocument(context))].nodes;
-
-        result = (nodes[tagName] ||
-          (nodes[tagName] = context.createElement(tagName))).cloneNode(false);
+        result = (tagName.charAt(0) == '<' ? fromHTML : fromTagName)(tagName, context);
       }
       else {
         result = tagName;
-        tagName = getNodeName(result);
-      }
-
-      if (isDecorated !== false) {
-        element = result;
-        Decorator.prototype = getOrCreateTagClass(tagName).plugin;
-        result = new Decorator(element);
-        if (isCached !== false) {
-          domData[getFuseId(element)].decorator = result;
+        if (isDecorated !== false) {
+          element = result;
+          tagName = getNodeName(element);
+          Decorator.prototype = getOrCreateTagClass(tagName).plugin;
+          result = new Decorator(element);
+          if (isCached !== false) {
+            domData[getFuseId(element)].decorator = result;
+          }
         }
       }
-
-      return attrs
-        ? plugin.setAttribute.call(result, attrs)
-        : result;
+      return attrs ? plugin.setAttribute.call(result, attrs) : result;
     },
 
     extendByTag = function extendByTag(tagName, plugins, mixins, statics) {
@@ -162,55 +141,55 @@
     },
 
     fromHTML = function fromHTML(html, context) {
-      var element, fragment, isCached, isDecorated, length, match, result;
-      if (!(match = html.match(reSimpleTag))) {
-        if (context && !CONTEXT_TYPES[context.nodeType]) {
-          isCached    = context.cache;
-          isDecorated = context.decorate;
-          context     = context.context;
-        }
-
-        isCached    = isCached !== false;
-        isDecorated = isDecorated !== false;
-        fragment    = getFragmentFromHTML(html, context);
-        length      = fragment.childNodes.length;
-
-        // multiple elements return a NodeList
-        if (length > 1) {
-          result = NodeList();
-          if (isDecorated) {
-            while (length--) {
-              element = fragment.removeChild(fragment.lastChild);
-              Decorator.prototype = getOrCreateTagClass(element.nodeName).plugin;
-              if (isCached) {
-                result[length] = domData[getFuseId(element)].decorator = new Decorator(element);
-              } else {
-                result[length] = new Decorator(element);
-              }
-            }
-          } else {
-            while (length--) {
-              result[length] = fragment.removeChild(fragment.lastChild);
-            }
-          }
-        }
-        // single element return decorated element
-        else {
-          result = fragment.removeChild(fragment.firstChild);
-          if (isDecorated) {
-            element = result;
-            Decorator.prototype = getOrCreateTagClass(element.nodeName).plugin;
-            result = new Decorator(element);
-
-            if (isCached) {
-              domData[getFuseId(element)].decorator = result;
-            }
-          }
-        }
-        return result;
-      }
       // support `<div>` format
-      return create(match[1], context);
+      var element, fragment, isCached, isDecorated, length, match, result;
+      if (match = html.match(reSimpleTag)) {
+        return fromTagName(match[1], context);
+      }
+      if (context && !CONTEXT_TYPES[context.nodeType]) {
+        isCached    = context.cache;
+        isDecorated = context.decorate;
+        context     = context.context;
+      }
+
+      isCached    = isCached !== false;
+      isDecorated = isDecorated !== false;
+      fragment    = getFragmentFromHTML(html, context);
+      length      = fragment.childNodes.length;
+
+      // multiple elements return a NodeList
+      if (length > 1) {
+        result = NodeList();
+        if (isDecorated) {
+          while (length--) {
+            element = fragment.removeChild(fragment.lastChild);
+            Decorator.prototype = getOrCreateTagClass(element.nodeName).plugin;
+            if (isCached) {
+              result[length] = domData[getFuseId(element)].decorator = new Decorator(element);
+            } else {
+              result[length] = new Decorator(element);
+            }
+          }
+        } else {
+          while (length--) {
+            result[length] = fragment.removeChild(fragment.lastChild);
+          }
+        }
+      }
+      // single element return decorated element
+      else {
+        result = fragment.removeChild(fragment.firstChild);
+        if (isDecorated) {
+          element = result;
+          Decorator.prototype = getOrCreateTagClass(element.nodeName).plugin;
+          result = new Decorator(element);
+
+          if (isCached) {
+            domData[getFuseId(element)].decorator = result;
+          }
+        }
+      }
+      return result;
     },
 
     fromId = function fromId(id, context) {
@@ -224,6 +203,36 @@
       return isDecorated === false
         ? element
         : element && fromElement(element, isCached);
+    },
+
+    fromTagName = function fromTagName(tagName, context) {
+      // support simple tagNames
+      var attrs, element, isCached, isDecorated, nodes, result;
+      if (context && !CONTEXT_TYPES[context.nodeType]) {
+        attrs       = context.attrs;
+        isCached    = context.cache;
+        isDecorated = context.decorate;
+        context     = context.context;
+      }
+
+      // for a tidy cache stick to all upper or all lower case tagNames
+      context || (context = doc);
+
+      nodes = context === doc ? domData['2'].nodes :
+        domData[getFuseId(getDocument(context))].nodes;
+
+      result = (nodes[tagName] ||
+        (nodes[tagName] = context.createElement(tagName))).cloneNode(false);
+
+      if (isDecorated !== false) {
+        element = result;
+        Decorator.prototype = getOrCreateTagClass(tagName).plugin;
+        result = new Decorator(element);
+        if (isCached !== false) {
+          domData[getFuseId(element)].decorator = result;
+        }
+      }
+      return result;
     },
 
     getContextualFragment = function getContextualFragment(html, context) {
@@ -307,7 +316,7 @@
       var isCached, isDecorated;
       if (isString(object)) {
         return object.charAt(0) == '<'
-          ? create(object, context)
+          ? fromHTML(object, context)
           : fromId(object);
       }
       if (context && !CONTEXT_TYPES[context.nodeType]) {
@@ -420,6 +429,7 @@
     Element.fromElement = fromElement;
     Element.fromHTML    = fromHTML;
     Element.fromId      = fromId;
+    Element.fromTagName = fromTagName;
     Element.from        = from;
 
     global.fuse = fuse;
