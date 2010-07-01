@@ -8,13 +8,14 @@
         var member, name, i = -1,
          eventObserver = this, onElementEvent = this.onElementEvent;
 
+        element =
         this.element = fuse(element);
-        element = element.raw || element;
 
         this.onElementEvent = function(event) {
           onElementEvent.call(eventObserver, event);
         };
 
+        element = element.raw || element;
         if (getNodeName(element) === 'FORM') {
           return this.registerFormCallbacks();
         }

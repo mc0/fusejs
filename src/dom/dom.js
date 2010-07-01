@@ -29,8 +29,9 @@
       (element.nodeType === DOCUMENT_NODE ? element : fuse._doc);
   };
 
-  // HTML documents coerce nodeName to uppercase
-  getNodeName = fuse._div.nodeName === 'DIV'
+  // test if the nodeName is case sensitive and if it coerces
+  // potentially unknown element nodeNames to uppercase
+  getNodeName = fuse._doc.createElement('nav').nodeName === 'NAV'
     ? function(element) { return element.nodeName; }
     : function(element) { return element.nodeName.toUpperCase(); };
 

@@ -1,3 +1,5 @@
+* Make internal getNodeName() check for browsers that have case-sensitive nodeNames for unknown elements. [jddalton, Diego Perini]
+
 * Add fuse.dom.Element.fromTagName(). [jddalton]
 
 * Make Event#stop, Event#stopBubbling, and Event#cancel return the event wrapper to allow method chaining. [jdalton, Johan Arensman]
