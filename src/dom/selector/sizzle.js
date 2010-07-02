@@ -1,25 +1,31 @@
   /*---------------------------- SELECTOR: SIZZLE ----------------------------*/
 
-  (function(object, NodeList) {
+  fuse[expando] = global.Sizzle;
+
+  //= require "../../../vendor/sizzle/sizzle.js"
+
+  (function(engine, object, NodeList) {
     var match = function match(element, selectors) {
-      return Sizzle(String(selectors || ''), null, null,
+      return engine(String(selectors || ''), null, null,
         [element.raw || fuse(element).raw]).length === 1;
     },
 
-    query = function(selectors, context, callback, List) {
+    select = function select(selectors, context, callback) {
       var node, i = -1, result = Sizzle(String(selectors || ''),
-        context && fuse(context).raw || fuse._doc, List);
+        context && fuse(context).raw);
+
       if (callback) {
         while (node = result[++i]) callback(node);
       }
-      return result;
-    },
-
-    select = function select(selectors, context, callback) {
-      return query(selectors, context, callback, NodeList());
+      return NodeList.fromArray(result);
     };
 
-    object.match = match;
+    object.engine = engine;
+    object.match  = match;
     object.select = select;
 
-  })(fuse.dom.selector, fuse.dom.NodeList);
+  })(Sizzle, fuse.dom.selector, fuse.dom.NodeList);
+
+  // restore
+  if (fuse[expando]) global.Sizzle = fuse[expando];
+  delete fuse[expando];

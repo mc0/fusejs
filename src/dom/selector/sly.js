@@ -1,25 +1,31 @@
   /*----------------------------- SELECTOR: SLY ------------------------------*/
 
-  (function(object, NodeList) {
+  fuse[expando] = global.Sly;
+
+  //= require "../../../vendor/sly/Sly.js"
+
+  (function(engine, object, NodeList) {
     var match = function match(element, selectors) {
       return Sly(String(selectors || ''))
         .match(element.raw || fuse(element).raw);
     },
 
-    query = function(selectors, context, callback, toList) {
-      var node, i = -1, result = toList(Sly(String(selectors || ''),
-        context && fuse(context).raw || fuse._doc));
+    select = function select(selectors, context, callback) {
+      var node, i = -1, result = Sly(String(selectors || ''),
+        context && fuse(context).raw || fuse._doc);
+
       if (callback) {
         while (node = result[++i]) callback(node);
       }
-      return result;
-    },
-
-    select = function select(selectors, context, callback) {
-      return query(selectors, context, callback, NodeList.fromNodeList);
+      return NodeList.fromArray(result);
     };
 
-    object.match = match;
+    object.engine = engine;
+    object.match  = match;
     object.select = select;
 
-  })(fuse.dom.selector, fuse.dom.NodeList);
+  })(Sly, fuse.dom.selector, fuse.dom.NodeList);
+
+  // restore
+  if (fuse[expando]) global.Sky = fuse[expando];
+  delete fuse[expando];

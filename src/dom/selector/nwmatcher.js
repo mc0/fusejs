@@ -1,39 +1,45 @@
   /*--------------------------- SELECTOR: NWMATCHER --------------------------*/
 
-  (function(object, NodeList) {
-    var __match, __select,
+  fuse[expando] = global.NW;
+
+  //= require "../../../vendor/nwbox/nwmatcher/src/nwmatcher.js"
+
+  (function(engine, object, NodeList) {
+    var engMatch = engine.match, engSelect = engine.select,
 
     match = function match(element, selectors, context) {
-      function match(element, selectors, context) {
-        return __match(
-          element.raw || fuse(element).raw,
-          String(selectors || ''),
-          context && fuse(context).raw);
-      }
-
-      __match = NW.Dom.match;
-      return (object.match = match)(element, selectors, context);
+      return engMatch(
+        element.raw || fuse(element).raw,
+        String(selectors || ''),
+        context && fuse(context).raw);
     },
 
     select = function select(selectors, context, callback) {
-      function select(selectors, context, callback) {
-        var i = -1, result = NodeList();
-        __select(
-          String(selectors || ''),
-          context && fuse(context).raw,
-          function(node) {
-            result[++i] = node;
-            callback && callback(node);
-          });
+      var i = -1, result = NodeList();
+      engSelect(
+        String(selectors || ''),
+        context && fuse(context).raw,
+        function(node) {
+          result[++i] = node;
+          callback && callback(node);
+        });
 
-        return result;
-      }
-
-      __select = NW.Dom.select;
-      return (object.select = select)(selectors, context, callback);
+      return result;
     };
 
-    object.match = match;
+    // back compat negated attribute operator '!='
+    // comment this out for strict CSS3 compliance
+    engine.registerOperator('!=', 'n!="%m"');
+
+    // allow complex :not() selectors
+    engine.configure({ 'SIMPLENOT': false });
+
+    object.engine = engine;
+    object.match  = match;
     object.select = select;
 
-  })(fuse.dom.selector, fuse.dom.NodeList);
+  })(NW.Dom, fuse.dom.selector, fuse.dom.NodeList);
+
+  // restore
+  if (fuse[expando]) global.NW = fuse[expando];
+  delete fuse[expando];

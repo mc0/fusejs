@@ -1,10 +1,15 @@
   /*--------------------------- SELECTOR: DOMQUERY ---------------------------*/
 
-  (function(object, NodeList) {
+  fuse[expando] = global.Ext;
+
+  //= require "../../../vendor/domquery/DomQuery.js"
+
+  (function(engine, object, NodeList) {
     var match = function match(element, selectors) {
       element = element.raw || fuse(element).raw;
-      var node, i = -1, result = Ext.DomQuery.select(String(selectors || ''),
-        fuse.getDocument(element));
+
+      var node, i = -1, result = engine.select(String(selectors || ''),
+        fuse.dom.getDocument(element));
 
       while (node = result[++i]) {
         if (node === element) return true;
@@ -12,20 +17,22 @@
       return false;
     },
 
-    query = function(selectors, context, callback, toList) {
-      var node, i = -1, result = toList(Ext.DomQuery.select(String(selectors || ''),
-        context && fuse(context).raw || fuse._doc));
+    select = function select(selectors, context, callback) {
+      var node, i = -1, result = engine.select(String(selectors || ''),
+        context && fuse(context).raw);
+
       if (callback) {
         while (node = result[++i]) callback(node);
       }
-      return result;
-    },
-
-    select = function select(selectors, context, callback) {
-      return query(selectors, context, callback, NodeList.fromNodeList);
+      return NodeList.fromArray(result);
     };
 
-    object.match = match;
+    object.engine = engine;
+    object.match  = match;
     object.select = select;
 
-  })(fuse.dom.selector, fuse.dom.NodeList);
+  })(Ext.DomQuery, fuse.dom.selector, fuse.dom.NodeList);
+
+  // restore
+  if (fuse[expando]) global.Ext = fuse[expando];
+  delete fuse[expando];

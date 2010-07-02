@@ -1,25 +1,32 @@
   /*---------------------------- SELECTOR: SLICK -----------------------------*/
 
-  (function(object, NodeList) {
+  fuse[expando] = global.Slick;
+
+  //= require "../../../vendor/slick/Source/Slick.Parser.js"
+  //= require "../../../vendor/slick/Source/Slick.Finder.js"
+
+  (function(engine, object, NodeList) {
     var match = function match(element, selectors) {
-      return Slick.match(element.raw || fuse(element).raw,
+      return engine.match(element.raw || fuse(element).raw,
         String(selectors || ''));
     },
 
-    query = function(selectors, context, callback, List) {
-      var node, i = -1, result = Slick.search(context && fuse(context).raw || fuse._doc,
-        String(selectors || ''), List);
+    select = function select(selectors, context, callback) {
+      var node, i = -1, result = engine.search(context && fuse(context).raw || fuse._doc,
+        String(selectors || ''), NodeList());
+
       if (callback) {
         while (node = result[++i]) callback(node);
       }
       return result;
-    },
-
-    select = function select(selectors, context, callback) {
-      return query(selectors, context, callback, NodeList());
     };
 
-    object.match = match;
+    object.engine = engine;
+    object.match  = match;
     object.select = select;
 
-  })(fuse.dom.selector, fuse.dom.NodeList);
+  })(Slick, fuse.dom.selector, fuse.dom.NodeList);
+
+  // restore
+  if (fuse[expando]) global.Slick = fuse[expando];
+  delete fuse[expando];
