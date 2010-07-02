@@ -1,3 +1,5 @@
+* Add an adapter for DOMAssistant's CSS selector engine. [jddalton]
+
 * Update selector engine adapters to use the build system's //= require command. [Diego Perini, jddalton, Tobie Langel]
 
 * Make internal getNodeName() check for browsers that have case-sensitive nodeNames for unknown elements. [jddalton, Diego Perini]

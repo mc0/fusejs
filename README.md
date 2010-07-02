@@ -10,7 +10,7 @@ JavaScript frameworks share similar features and functionality, such as DOM mani
 
 FuseJS is the first framework to use cross-browser **[sandboxed natives][1]**. This allows the extension of `Array`, `String`, `Number`, `Date`, and `RegExp` core objects, without polluting the native objects of the host environment.
 
-FuseJS emphasizes browser capability testing, method forking, and lazy method definition for maintainability and performance. Modules and adapters are designed to allow customized builds, including one of seven supported CSS selector engines<sup><a name="fnref1" href="#fn1">1</a></sup>. FuseJS also follows ECMA 2.62 (*5th edition*) specifications, supports minification, and plans to add inline documentation.
+FuseJS emphasizes browser capability testing, method forking, and lazy method definition for maintainability and performance. Modules and adapters are designed to allow customized builds, including one of eight supported CSS selector engines<sup><a name="fnref1" href="#fn1">1</a></sup>. FuseJS also follows ECMA 2.62 *(5th edition)* specifications, supports minification, and plans to add inline documentation.
 
 Additionally, FuseJS will feature framework emulation<sup><a name="fnref2" href="#fn2">2</a></sup> by creating a shell of the target framework and mapping all API calls to the FuseJS core. As support for more frameworks is added, the code base will gain numerous bug fixes and features, which, in turn, will be shared among all emulated frameworks. Because the FuseJS core is highly optimized, each emulated framework should, holistically, perform better than its official counterpart. The implications are manifold: developers could simply replace a supported client-side framework with `FuseJS + Emulation Layer` and receive instant performance and stability gains, while continuing to use their familiar framework's API.
 
@@ -52,9 +52,9 @@ Please make sure to update all unit tests in the `test/` directory as well.
 
 ## Footnotes
 
-1. The following CSS selector engines are supported<a name="fn1" title="Jump back to footnote 1 in the text." href="#fnref1">&#8617;</a>: [NWMatcher][18] *(default)*, [Acme][19] *(Dojo)*, [DomQuery][20] *(ExtJS)*, [Sizzle][21] *(jQuery)*, [Peppy][22], [Slick][23] *(MooTools)*, and [Sly][24].
-  
-2. [Prototype][25] emulation will be supported in the beta version<a name="fn2" title="Jump back to footnote 2 in the text." href="#fnref2">&#8617;</a>.
+1. The following CSS selector engines are supported<a name="fn1" title="Jump back to footnote 1 in the text." href="#fnref1">&#8617;</a>: [NWMatcher][18] *(default)*, [Acme][19] *(Dojo)*, [DOMAssistant][20], [DomQuery][21] *(ExtJS)*, [Sizzle][22] *(jQuery)*, [Peppy][23], [Slick][24] *(MooTools)*, and [Sly][25].
+
+2. [Prototype][26] emulation will be supported in the beta version<a name="fn2" title="Jump back to footnote 2 in the text." href="#fnref2">&#8617;</a>.
 
 
   [1]: http://github.com/jdalton/fusebox#readme
@@ -76,9 +76,10 @@ Please make sure to update all unit tests in the `test/` directory as well.
   [17]: http://gist.github.com/251306
   [18]: http://github.com/dperini/nwmatcher
   [19]: http://svn.dojotoolkit.org/src/dojo/trunk/_base/query.js
-  [20]: http://www.extjs.com/deploy/ext/docs/source/DomQuery.html#cls-Ext.DomQuery
-  [21]: http://sizzlejs.com/
-  [22]: http://jamesdonaghue.com/static/peppy
-  [23]: http://github.com/subtleGradient/slick
-  [24]: http://github.com/digitarald/sly
-  [25]: http://prototypejs.org
+  [20]: http://www.domassistant.com/
+  [21]: http://www.extjs.com/deploy/ext/docs/source/DomQuery.html#cls-Ext.DomQuery
+  [22]: http://sizzlejs.com/
+  [23]: http://jamesdonaghue.com/static/peppy
+  [24]: http://github.com/subtleGradient/slick
+  [25]: http://github.com/digitarald/sly
+  [26]: http://prototypejs.org
