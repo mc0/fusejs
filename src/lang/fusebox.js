@@ -176,7 +176,7 @@
       var Array, Boolean, Date, Function, Number, Object, RegExp, String, from,
        filterCallback       = function(value) { return value != null; },
        glFunction           = global.Function,
-       reStrict             = /^\s*(['"])use strict\1/,
+       reStrict             = /^[\s\t\n]*(['"])use strict\1/,
        sandbox              = createSandbox(),
        isProtoMode          = MODE === PROTO_MODE,
        isArrayChainable     = !isProtoMode && !(sandbox.Array().slice(0) instanceof global.Array),
@@ -400,7 +400,7 @@
            originalBody = body = args.pop();
 
           // ensure we aren't in strict mode and map arguments.callee to the wrapper
-          if (body && body.search(reStrict) < 0) {
+          if (body && !reStrict.test(body)) {
             body = 'arguments.callee = arguments.callee.' + expando + '; ' + body;
           }
 
