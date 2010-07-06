@@ -1,15 +1,15 @@
 /* FuseJS JavaScript framework, version <%= Version %>
-* (c) 2008-2010 John-David Dalton
-*
-* Prototype JavaScript framework, version 1.6.1
-* (c) 2008-2010 Sam Stephenson
-*
-* FuseJS and Prototype are distributed under an MIT-style license.
-* For details, see the FuseJS website: <http://www.fusejs.com/license.txt>
-* or the Prototype website: <http://www.prototypejs.org>
-*
-* Built: <%= Built %>
-* ----------------------------------------------------------------------------*/
+ * (c) 2008-2010 John-David Dalton
+ *
+ * Prototype JavaScript framework, version 1.6.0.2
+ * (c) 2005-2010 Sam Stephenson
+ *
+ * FuseJS and Prototype are distributed under an MIT-style license.
+ * For details, see the FuseJS website: <http://www.fusejs.com/license.txt>
+ * or the Prototype website: <http://www.prototypejs.org>
+ *
+ * Built: <%= Built %>
+ * ----------------------------------------------------------------------------*/
 
 (function(global) {
 
@@ -257,10 +257,11 @@
   //= require "dom/event/delegate"
 
   //= require "lang/ecma"
+  //= require "lang/exec"
   //= require "lang/grep"
   //= require "lang/inspect"
-  //= require "lang/query"
   //= require "lang/json"
+  //= require "lang/query"
   //= require "lang/util"
 
   //= require "ajax/ajax"
@@ -295,3 +296,7 @@
 
 // update native generics and element methods
 fuse.updateGenerics(true);
+
+fuse.exec = function(code) {
+  return (window, eval)(code);
+}
