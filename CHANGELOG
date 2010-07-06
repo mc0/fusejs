@@ -1,3 +1,5 @@
+* Ensure `reStrict`, used in Fusebox, detects the strict mode directive correctly. [jddalton, kangax, Kit Goncharov]
+
 * Add supplemental checks for the Firefox iframe issue with sandboxed natives. [jddalton]
 
 * Add an adapter for DOMAssistant's CSS selector engine. [jddalton]

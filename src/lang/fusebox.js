@@ -182,10 +182,9 @@
     createFusebox = function(instance) {
       // Most methods try to follow ES5 spec but may differ from
       // the documented method.length value or allow null callbacks.
-      var Array, Boolean, Date, Function, Number, Object, RegExp, String, from,
+      var Array, Boolean, Date, Function, Number, Object, RegExp, String, from, reStrict,
        filterCallback       = function(value) { return value != null; },
        glFunction           = global.Function,
-       reStrict             = /^[\s\t\n]*(['"])use strict\1/,
        sandbox              = createSandbox(),
        isProtoMode          = MODE === PROTO_MODE,
        isArrayChainable     = !isProtoMode && !(sandbox.Array().slice(0) instanceof global.Array),
@@ -578,6 +577,9 @@
 
         return RegExp;
       })(RegExp);
+
+      // find the strict mode directive which may be preceded by comments or whitespace
+      reStrict = RegExp('^(?:/\\*+[\\w|\\W]*?\\*/|//.*?[\\n\\r\\u2028\\u2029]|\\s)*(["\'])use strict\\1');
 
       /*-------------------------- ADD CHAINABILITY --------------------------*/
 
