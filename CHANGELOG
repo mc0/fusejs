@@ -1,3 +1,5 @@
+* Add supplemental checks for the Firefox iframe issue with sandboxed natives. [jddalton]
+
 * Add an adapter for DOMAssistant's CSS selector engine. [jddalton]
 
 * Update selector engine adapters to use the build system's //= require command. [Diego Perini, jddalton, Tobie Langel]

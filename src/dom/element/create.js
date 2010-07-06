@@ -306,7 +306,7 @@
     getFragmentCache = function(ownerDoc) {
       var id = ownerDoc === doc ? '2' : getFuseId(ownerDoc),
        data = domData[id];
-      return data.fragmentCache || (data.fragmentCache = {
+      return data._fragmentCache || (data._fragmentCache = {
         'node':     ownerDoc.createElement('div'),
         'fragment': ownerDoc.createDocumentFragment()
       });
@@ -397,7 +397,7 @@
       getFragmentCache = function(ownerDoc) {
         var id = ownerDoc === doc ? '2' : getFuseId(ownerDoc),
          data = domData[id];
-        return data.fragmentCache || (data.fragmentCache = {
+        return data._fragmentCache || (data._fragmentCache = {
           'node':     ownerDoc.createElement('div'),
           'fragment': ownerDoc.createDocumentFragment(),
           'range':    ownerDoc.createRange()
