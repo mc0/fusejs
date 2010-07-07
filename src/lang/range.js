@@ -144,7 +144,7 @@
     })(fuse.Class.mixins.enumerable);
 
     // prevent JScript bug with named function expressions
-    var _each = nil, clone = nil, max = nil, min = nil, size = nil, toArray = nil;
+    var _each = null, clone = null, max = null, min = null, size = null, toArray = null;
   })(fuse.Range.plugin);
 
   /*--------------------------------------------------------------------------*/
@@ -161,5 +161,5 @@
     };
 
     // prevent JScript bug with named function expressions
-    var succ = nil;
+    var succ = null;
   })();

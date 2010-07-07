@@ -113,5 +113,5 @@
     };
 
     // prevent JScript bug with named function expressions
-    var getValue = nil;
+    var getValue = null;
   })(fuse.dom.FormElement, fuse.dom.InputElement);

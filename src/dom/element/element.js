@@ -89,5 +89,5 @@
     }
 
     // prevent JScript bug with named function expressions
-    var identify = nil, isDetached = nil, isEmpty = nil;
+    var identify = null, isDetached = null, isEmpty = null;
   })(Element.plugin);

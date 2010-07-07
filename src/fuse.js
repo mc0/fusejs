@@ -14,102 +14,93 @@
 (function(global) {
 
   // private vars
-  var DATA_ID_PROP, DOCUMENT_FRAGMENT_NODE, DOCUMENT_NODE, ELEMENT_NODE,
-   IDENTITY, NOOP, TEXT_NODE, Document, Element, Node, NodeList, Window,
-   addArrayMethods, addNodeListMethod, capitalize, concatList, createGetter,
-   domData, eachKey, envAddTest, envTest, escapeRegExpChars, expando,
-   fromElement, getDocument, getFuseId, getNodeName, getWindow,
-   getOrCreateTagClass, hasKey, isArray, isElement, isHash, isHostType,
-   isFunction, isNumber, isPrimitive, isRegExp, isString, nil, prependList,
-   returnOffset, setTimeout, slice, toInteger, toString, undef, userAgent;
+  var DATA_ID_PROP, Document, Element, Node, NodeList, Window,
+   domData, eachKey, envAddTest, envTest, fromElement, getDocument, getFuseId,
+   getNodeName, getWindow, getOrCreateTagClass, hasKey, isArray, isElement,
+   isHash, isNumber, isPrimitive, isRegExp, isString, returnOffset, undef,
 
-  global.fuse = (function() {
-    var fuse = function fuse() { };
-    return fuse;
-  })();
+  DOCUMENT_FRAGMENT_NODE = 11,
 
-  /**
-  * ## fuse.version
-  *
-  * The version of [FuseJS](http://fusejs.com) that you're using (e.g., <%= Version %>).
-  */
-  fuse.version = '<%= Version %>';
+  DOCUMENT_NODE = 9,
 
-  /*--------------------------------------------------------------------------*/
+  ELEMENT_NODE = 1,
 
-  IDENTITY = function IDENTITY(x) { return x; };
+  TEXT_NODE = 3,
 
-  NOOP =
-  addNodeListMethod = function NOOP() { };
+  IDENTITY = function IDENTITY(x) { return x; },
 
-  addArrayMethods = function(List) {
-    var callbacks = addArrayMethods.callbacks, i = -1;
-    while (callbacks[++i]) callbacks[i](List);
-  };
+  NOOP = function NOOP() { },
 
-  addArrayMethods.callbacks = [];
+  NON_HOST_TYPES = { 'boolean': 1, 'number': 1, 'string': 1, 'undefined': 1 },
+
+  slice = [].slice,
+
+  setTimeout = global.setTimeout,
+
+  uid = 'uid' + String(+new Date).slice(0, 12),
+
+  userAgent = global.navigator && navigator.userAgent || '',
+
+  addNodeListMethod = NOOP,
+
+  addArrayMethods = (function() {
+    var result = function(List) {
+      var callbacks = addArrayMethods.callbacks, i = -1;
+      while (callbacks[++i]) callbacks[i](List);
+    };
+    result.callbacks = [];
+    return result;
+  })(),
 
   capitalize = function(string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
-  };
+  },
 
   concatList = function(list, otherList) {
     var pad = list.length, length = otherList.length;
     while (length--) list[pad + length] = otherList[length];
     return list;
-  };
+  },
 
   createGetter = function(name, value) {
     return Function('v', 'function ' + name + '(){return v;} return ' + name)(value);
-  };
+  },
 
   escapeRegExpChars = (function() {
     var reSpecialChars = /([.*+?^=!:${}()|[\]\/\\])/g;
     return function(string) {
       return String(string).replace(reSpecialChars, '\\$1');
     };
-  })();
+  })(),
 
-  // Allow a pre-sugared array to be passed
+  isFunction = function isFunction(value) {
+    return toString.call(value) === '[object Function]';
+  },
+
+  // Host objects can return type values that are different from their actual
+  // data type. The objects we are concerned with usually return non-primitive
+  // types of object, function, or unknown.
+  isHostType = function isHostType(object, property) {
+    var type = typeof object[property];
+    return type === 'object' ? !!object[property] : !NON_HOST_TYPES[type];
+  },
+
   prependList = function(list, value, result) {
     (result || (result = []))[0] = value;
     var length = list.length;
     while (length--) result[1 + length] = list[length];
     return result;
-  };
-
-  isFunction = function isFunction(value) {
-    return toString.call(value) === '[object Function]';
-  };
-
-  // Host objects can return type values that are different from their actual
-  // data type. The objects we are concerned with usually return non-primitive
-  // types of object, function, or unknown.
-  //
-  // For example:
-  // typeof document.createElement('div').offsetParent -> unknown
-  // typeof document.createElement -> object
-  // typeof Image.create -> string
-  isHostType = (function() {
-    var NON_HOST_TYPES = { 'boolean': 1, 'number': 1, 'string': 1, 'undefined': 1 },
-
-    isHostType = function isHostType(object, property) {
-      var type = typeof object[property];
-      return type === 'object' ? !!object[property] : !NON_HOST_TYPES[type];
-    };
-    return isHostType;
-  })();
+  },
 
   // ES5 9.4 ToInteger implementation
   toInteger = function(object) {
-    // fast coerce to number
-    var number = +object;
     // avoid issues with numbers larger than
     // Math.pow(2, 31) against bitwise operators
-    return number == 0 || !isFinite(number)
+    var number = +object;
+    return number === 0 || !isFinite(number)
       ? number || 0
       : Math.abs(number) < 2147483648 ? number | 0 : number - (number % 1);
-  };
+  },
 
   // used to access an object's internal [[Class]] property
   // redefined later if there is no issues grabbing sandboxed natives [[Class]]
@@ -122,44 +113,21 @@
     })()
   };
 
-  // global.document.createDocumentFragment() nodeType
-  DOCUMENT_FRAGMENT_NODE = 11;
-
-  // global.document node type
-  DOCUMENT_NODE = 9;
-
-  // element node type
-  ELEMENT_NODE = 1;
-
-  // textNode type
-  TEXT_NODE = 3;
-
-  // a unqiue 15 char id used throughout fuse
-  expando = 'uid' + String(+new Date).slice(0, 12);
-
-  // helps minify nullifying the JScript function declarations
-  nil = null;
-
-  // a quick way to copy an array slice.call(array, 0)
-  slice = [].slice;
-
-  // shortcut
-  setTimeout = global.setTimeout;
-
-  // used for some required browser sniffing
-  userAgent = global.navigator && navigator.userAgent || '';
+  /**
+  * ## fuse.version
+  *
+  * The version of [FuseJS](http://fusejs.com) that you're using (e.g., <%= Version %>).
+  */
+  global.fuse = (function() {
+    var fuse = function fuse() { };
+    fuse.version = '<%= Version %>';
+    return fuse;
+  })();
 
   /*--------------------------------------------------------------------------*/
 
   (function() {
-    var getNS = function getNS(path) {
-      var key, i = -1, keys = path.split('.'), object = this;
-      while (key = keys[++i])
-        if (!(object = object[key])) return false;
-      return object;
-    },
-
-    addNS = function addNS(path) {
+    var addNS = function addNS(path) {
       var Klass, key, i = -1,
        object = this,
        keys   = path.split('.'),
@@ -177,12 +145,11 @@
       return object;
     },
 
-    updateSubClassGenerics = function(object) {
-      var subclass, subclasses = object.subclasses || [], i = -1;
-      while (subclass = subclasses[++i]) {
-        if (isFunction(subclass.updateGenerics)) subclass.updateGenerics();
-        updateSubClassGenerics(subclass);
-      }
+    getNS = function getNS(path) {
+      var key, i = -1, keys = path.split('.'), object = this;
+      while (key = keys[++i])
+        if (!(object = object[key])) return false;
+      return object;
     },
 
     updateGenerics = function updateGenerics(path, deep) {
@@ -197,6 +164,14 @@
           if (isFunction(object.updateGenerics)) object.updateGenerics();
           deep && updateSubClassGenerics(object);
         }
+      }
+    },
+
+    updateSubClassGenerics = function(object) {
+      var subclass, subclasses = object.subclasses || [], i = -1;
+      while (subclass = subclasses[++i]) {
+        if (isFunction(subclass.updateGenerics)) subclass.updateGenerics();
+        updateSubClassGenerics(subclass);
       }
     };
 
@@ -257,7 +232,6 @@
   //= require "dom/event/delegate"
 
   //= require "lang/ecma"
-  //= require "lang/exec"
   //= require "lang/grep"
   //= require "lang/inspect"
   //= require "lang/json"
@@ -270,6 +244,7 @@
   //= require "ajax/request"
   //= require "ajax/updater"
   //= require "ajax/timed-updater"
+  /*--------------------------------------------------------------------------*/
 
   addArrayMethods(fuse.Array);
 
@@ -296,7 +271,3 @@
 
 // update native generics and element methods
 fuse.updateGenerics(true);
-
-fuse.exec = function(code) {
-  return (window, eval)(code);
-}

@@ -71,5 +71,5 @@
     }
 
     // prevent JScript bug with named function expressions
-    var toQueryParams = nil, toQueryString = nil;
+    var toQueryParams = null, toQueryString = null;
   })();

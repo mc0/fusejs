@@ -130,7 +130,7 @@
       object.isMiddleClick = isMiddleClick;
       object.isRightClick  = isRightClick;
 
-      object = nil;
+      object = null;
       return this[arguments[0]]();
     },
 
@@ -194,7 +194,7 @@
       object.getPointerX = getPointerX;
       object.getPointerY = getPointerY;
 
-      currTarget = doc = object = nil;
+      currTarget = doc = object = null;
       return this[arguments[0]]();
     },
 
@@ -630,23 +630,23 @@
     Event._createGetter  = createGetter;
 
     // prevent JScript bug with named function expressions
-    var cancel =        nil,
-     fire =             nil,
-     findElement =      nil,
-     getPointer  =      nil,
-     getPointerX =      nil,
-     getPointerY =      nil,
-     getRelatedTarget = nil,
-     getTarget =        nil,
-     isBubbling =       nil,
-     isCancelled =      nil,
-     isLeftClick =      nil,
-     isLoaded =         nil,
-     isMiddleClick =    nil,
-     isRightClick =     nil,
-     isStopped =        nil,
-     observe =          nil,
-     preventDefault =   nil,
-     stop =             nil,
-     stopBubbling =     nil;
+    var cancel =        null,
+     fire =             null,
+     findElement =      null,
+     getPointer  =      null,
+     getPointerX =      null,
+     getPointerY =      null,
+     getRelatedTarget = null,
+     getTarget =        null,
+     isBubbling =       null,
+     isCancelled =      null,
+     isLeftClick =      null,
+     isLoaded =         null,
+     isMiddleClick =    null,
+     isRightClick =     null,
+     isStopped =        null,
+     observe =          null,
+     preventDefault =   null,
+     stop =             null,
+     stopBubbling =     null;
   })(fuse.dom.Event);

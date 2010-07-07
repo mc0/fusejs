@@ -28,8 +28,8 @@
 
     inspectPlugin = function(plugin) {
       var result, backup = plugin.inspect;
-      plugin.inspect = expando;
-      result = fuse.Object.inspect(plugin).replace(expando, String(backup));
+      plugin.inspect = uid;
+      result = fuse.Object.inspect(plugin).replace(uid, String(backup));
       plugin.inspect = backup;
       return result;
     };
@@ -113,7 +113,7 @@
       };
 
       // prevent JScript bug with named function expressions
-      var inspect = nil;
+      var inspect = null;
     });
 
     if (fuse.Class.mixins.enumerable) {
@@ -175,5 +175,5 @@
     }
 
     // prevent JScript bug with named function expressions
-    var inspect = nil;
+    var inspect = null;
   })();

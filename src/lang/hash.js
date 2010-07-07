@@ -22,7 +22,7 @@
        keys = isArray(key) ? key : arguments;
 
       while (key = keys[++i])  {
-        if ((expando + key) in data)
+        if ((uid + key) in data)
           unsetByIndex(this, indexOfKey(this, key));
       }
       return this;
@@ -38,10 +38,10 @@
 
     setValue = function(hash, key, value) {
       if (!key.length) return hash;
-      var data = hash._data, expandoKey = expando + key, keys = hash._keys;
+      var data = hash._data, uidKey = uid + key, keys = hash._keys;
 
       // avoid a method call to Hash#hasKey
-      if (expandoKey in data) {
+      if (uidKey in data) {
         unsetByIndex(hash, indexOfKey(hash, key));
       }
 
@@ -50,7 +50,7 @@
       hash._pairs.push(fuse.Array(key, value));
       hash._values.push(value);
 
-      hash._data[expandoKey] =
+      hash._data[uidKey] =
       hash._object[key] = value;
       return hash;
     },
@@ -70,7 +70,7 @@
 
     unsetByIndex = function(hash, index) {
       var keys = hash._keys;
-      delete hash._data[expando + keys[index]];
+      delete hash._data[uid + keys[index]];
       delete hash._object[keys[index]];
 
       keys.splice(index, 1);
@@ -140,7 +140,7 @@
     };
 
     // prevent JScript bug with named function expressions
-    var _each = nil, first = nil, last = nil;
+    var _each = null, first = null, last = null;
   })(fuse.Hash.plugin);
 
   /*--------------------------------------------------------------------------*/
@@ -192,11 +192,11 @@
     };
 
     plugin.get = function get(key) {
-      return this._data[expando + key];
+      return this._data[uid + key];
     };
 
     plugin.hasKey = (function() {
-      function hasKey(key) { return (expando + key) in this._data; }
+      function hasKey(key) { return (uid + key) in this._data; }
       return hasKey;
     })();
 
@@ -278,25 +278,25 @@
       length = hashes.length;
       while (pair = pairs[++i]) {
         j = -1; values = fuse.Array(); key = pair[0];
-        while (++j < length) values[j] = hashes[j]._data[expando + key];
+        while (++j < length) values[j] = hashes[j]._data[uid + key];
         result.set(key, callback(values, key, this));
       }
       return result;
     };
 
     // prevent JScript bug with named function expressions
-    var clear =  nil,
-     clone =     nil,
-     contains =  nil,
-     filter =    nil,
-     get =       nil,
-     keys =      nil,
-     keyOf =     nil,
-     map =       nil,
-     partition = nil,
-     size =      nil,
-     toArray =   nil,
-     toObject =  nil,
-     values =    nil,
-     zip =       nil;
+    var clear =  null,
+     clone =     null,
+     contains =  null,
+     filter =    null,
+     get =       null,
+     keys =      null,
+     keyOf =     null,
+     map =       null,
+     partition = null,
+     size =      null,
+     toArray =   null,
+     toObject =  null,
+     values =    null,
+     zip =       null;
   })(fuse.Hash.plugin, fuse.Hash);

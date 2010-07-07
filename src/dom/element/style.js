@@ -225,7 +225,7 @@
     }
 
     // prevent JScript bug with named function expressions
-    var getStyle = nil, setStyle = nil;
+    var getStyle = null, setStyle = null;
   })(Element.plugin);
 
   /*--------------------------------------------------------------------------*/
@@ -284,11 +284,11 @@
     };
 
     // prevent JScript bug with named function expressions
-    var addClassName = nil,
-     getClassNames =   nil,
-     hasClassName =    nil,
-     removeClassName = nil,
-     toggleClassName = nil;
+    var addClassName = null,
+     getClassNames =   null,
+     hasClassName =    null,
+     removeClassName = null,
+     toggleClassName = null;
   })(Element.plugin);
 
   /*--------------------------------------------------------------------------*/
@@ -462,11 +462,11 @@
     };
 
     // prevent JScript bug with named function expressions
-    var getDimensions = nil,
-     hide =             nil,
-     isVisible =        nil,
-     show =             nil,
-     toggle =           nil;
+    var getDimensions = null,
+     hide =             null,
+     isVisible =        null,
+     show =             null,
+     toggle =           null;
   })(Element.plugin);
 
   /*--------------------------------------------------------------------------*/

@@ -23,5 +23,5 @@
     };
 
     // prevent JScript bug with named function expressions
-    var match = nil, query = nil;
+    var match = null, query = null;
   })(Document.plugin, Element.plugin);

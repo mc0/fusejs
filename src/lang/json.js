@@ -95,7 +95,7 @@
     }
 
     // prevent JScript bug with named function expressions
-    var toJSON = nil;
+    var toJSON = null;
   })(fuse.Object);
 
   /*--------------------------------------------------------------------------*/

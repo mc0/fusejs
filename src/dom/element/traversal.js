@@ -241,18 +241,18 @@
     };
 
     // prevent JScript bug with named function expressions
-    var down =             nil,
-     first =               nil,
-     getAncestors =        nil,
-     getChildren =         nil,
-     getDescendants =      nil,
-     getNextSiblings =     nil,
-     getPreviousSiblings = nil,
-     getSiblings =         nil,
-     last =                nil,
-     next =                nil,
-     previous =            nil,
-     up =                  nil;
+    var down =             null,
+     first =               null,
+     getAncestors =        null,
+     getChildren =         null,
+     getDescendants =      null,
+     getNextSiblings =     null,
+     getPreviousSiblings = null,
+     getSiblings =         null,
+     last =                null,
+     next =                null,
+     previous =            null,
+     up =                  null;
   })(Element.plugin);
 
   /*--------------------------------------------------------------------------*/

@@ -309,12 +309,12 @@
     };
 
     // prevent JScript bug with named function expressions
-    var clone =   nil,
-     each =       nil,
-     extend =     nil,
-     getClassOf = nil,
-     isEmpty =    nil,
-     keys =       nil,
-     values =     nil,
-     toHTML =     nil;
+    var clone =   null,
+     each =       null,
+     extend =     null,
+     getClassOf = null,
+     isEmpty =    null,
+     keys =       null,
+     values =     null,
+     toHTML =     null;
   })(fuse.Object);

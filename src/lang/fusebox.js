@@ -119,7 +119,7 @@
 
         case IFRAME_MODE:
           key = '/* fuse_iframe_cache_fix: ' + fuse.version + ' */';
-          name = expando + counter++;
+          name = uid + counter++;
           parentNode = doc.body || doc.documentElement;
 
           try {
@@ -409,14 +409,14 @@
 
           // ensure we aren't in strict mode and map arguments.callee to the wrapper
           if (body && !reStrict.test(body)) {
-            body = 'arguments.callee = arguments.callee.' + expando + '; ' + body;
+            body = 'arguments.callee = arguments.callee.' + uid + '; ' + body;
           }
 
           // create function using global.Function constructor
           fn = new glFunction(args.join(','), body);
 
           // ensure `thisArg` isn't set to the sandboxed global
-          result = fn[expando] = new __Function('global, fn',
+          result = fn[uid] = new __Function('global, fn',
             'var sandbox=this;' +
             'return function(){' +
             'return fn.apply(this==sandbox?global:this,arguments)' +
@@ -954,20 +954,20 @@
       /*------------------------------ CLEANUP -------------------------------*/
 
       // prevent JScript bug with named function expressions
-      var charAt = nil, charCodeAt = nil, concat = nil, every = nil, exec = nil,
-       filter = nil, getDate = nil, getDay = nil, getFullYear = nil,
-       getHours = nil, getMilliseconds = nil, getMinutes = nil, getMonth = nil,
-       getSeconds = nil, getTime = nil, getTimezoneOffset = nil, getUTCDate = nil,
-       getUTCDay = nil, getUTCFullYear = nil, getUTCHours = nil,
-       getUTCMilliseconds = nil, getUTCMinutes = nil, getUTCMonth = nil,
-       getUTCSeconds = nil, getYear = nil, join = nil, indexOf = nil,
-       lastIndexOf = nil, localeCompare = nil, match = nil, map = nil, push = nil,
-       replace = nil, reverse = nil, search = nil, slice = nil, some = nil,
-       sort = nil, split = nil, splice = nil, substr = nil, substring = nil,
-       toExponential = nil, toFixed = nil, toISOString = nil, toJSON = nil,
-       toLowerCase = nil, toLocaleLowerCase = nil, toLocaleUpperCase = nil,
-       toPrecision = nil, toUpperCase = nil, trim = nil, trimLeft = nil,
-       trimRight = nil, unshift = nil;
+      var charAt = null, charCodeAt = null, concat = null, every = null, exec = null,
+       filter = null, getDate = null, getDay = null, getFullYear = null,
+       getHours = null, getMilliseconds = null, getMinutes = null, getMonth = null,
+       getSeconds = null, getTime = null, getTimezoneOffset = null, getUTCDate = null,
+       getUTCDay = null, getUTCFullYear = null, getUTCHours = null,
+       getUTCMilliseconds = null, getUTCMinutes = null, getUTCMonth = null,
+       getUTCSeconds = null, getYear = null, join = null, indexOf = null,
+       lastIndexOf = null, localeCompare = null, match = null, map = null, push = null,
+       replace = null, reverse = null, search = null, slice = null, some = null,
+       sort = null, split = null, splice = null, substr = null, substring = null,
+       toExponential = null, toFixed = null, toISOString = null, toJSON = null,
+       toLowerCase = null, toLocaleLowerCase = null, toLocaleUpperCase = null,
+       toPrecision = null, toUpperCase = null, trim = null, trimLeft = null,
+       trimRight = null, unshift = null;
 
       // assign native wrappers to instance object
       (instance.Array    = Array).raw    = __Array;

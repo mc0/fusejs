@@ -87,7 +87,7 @@
     };
 
     // prevent JScript bug with named function expressions
-    var updateDone = nil, start = nil, stop = nil;
+    var updateDone = null, start = null, stop = null;
   })(fuse.ajax.TimedUpdater.plugin);
 
   fuse.ajax.TimedUpdater.defaults = {

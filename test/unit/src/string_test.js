@@ -129,8 +129,7 @@ new Test.Unit.Runner({
 
 
   'testTruncate': function() {
-    var undef,
-     source = fuse.String('foo boo boz foo boo boz foo boo boz foo boo boz');
+    var source = fuse.String('foo boo boz foo boo boz foo boo boz foo boo boz');
 
     this.assertEqual(source, source.truncate(source.length),
       'truncate length equal to string length');

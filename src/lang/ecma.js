@@ -178,7 +178,7 @@
       wrapApplyAndCall(plugin);
 
       // prevent JScript bug with named function expressions
-      var concat = nil, slice = nil;
+      var concat = null, slice = null;
     });
 
     /*------------------------------------------------------------------------*/
@@ -525,14 +525,14 @@
     wrapApplyAndCall(strPlugin);
 
     // prevent JScript bug with named function expressions
-    var exec =     nil,
-     lastIndexOf = nil,
-     match =       nil,
-     replace =     nil,
-     search =      nil,
-     split =       nil,
-     test =        nil,
-     trim =        nil,
-     trimLeft =    nil,
-     trimRight =   nil;
+    var exec =     null,
+     lastIndexOf = null,
+     match =       null,
+     replace =     null,
+     search =      null,
+     split =       null,
+     test =        null,
+     trim =        null,
+     trimLeft =    null,
+     trimRight =   null;
   })(fuse.Function.plugin, fuse.RegExp.plugin, fuse.String.plugin);

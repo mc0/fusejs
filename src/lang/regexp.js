@@ -22,5 +22,5 @@
     plugin.match = plugin.test;
 
     // prevent JScript bug with named function expressions
-    var clone = nil, escape = nil;
+    var clone = null, escape = null;
   })(fuse.RegExp.plugin);

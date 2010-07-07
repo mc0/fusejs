@@ -236,7 +236,7 @@
         des.position = 'static';
         des.top = des.left = '';
 
-        var style = fuse._doc.defaultView.getComputedStyle(fuse._docEl, nil);
+        var style = fuse._doc.defaultView.getComputedStyle(fuse._docEl, null);
         result = (style && style.top === '0px' && style.left === '0px');
         des.cssText = backup;
         return result;
@@ -248,7 +248,7 @@
         // true for Opera 9.2x
         var docEl = fuse._docEl, des = docEl.style, backup = des.paddingBottom;
         des.paddingBottom = '1px';
-        var style = fuse._doc.defaultView.getComputedStyle(docEl, nil),
+        var style = fuse._doc.defaultView.getComputedStyle(docEl, null),
          result = style && (parseInt(style.height) || 0) ===  docEl.offsetHeight;
         des.paddingBottom = backup;
         return result;
@@ -262,7 +262,7 @@
         des.display = 'none';
 
         // In Safari 2 getComputedStyle() will return null for elements with style display:none
-        var style = fuse._doc.defaultView.getComputedStyle(fuse._docEl, nil),
+        var style = fuse._doc.defaultView.getComputedStyle(fuse._docEl, null),
          result = style && style.height === '0px';
 
         des.display = backup;
@@ -373,7 +373,7 @@
         var hasText, evalFailed,
          doc    = fuse._doc,
          docEl  = fuse._docEl,
-         code   = 'fuse.' + expando +' = true;',
+         code   = 'fuse.' + uid +' = true;',
          script = doc.createElement('SCRIPT');
 
         try {
@@ -384,13 +384,13 @@
         }
 
         docEl.insertBefore(script, docEl.firstChild);
-        evalFailed = !fuse[expando];
+        evalFailed = !fuse[uid];
 
         // clear text so Firefox 2.0.0.2 won't perform a delayed eval
         if (!hasText) script.firstChild.data = '';
 
         docEl.removeChild(script);
-        delete fuse[expando];
+        delete fuse[uid];
 
         envAddTest({
           'ELEMENT_SCRIPT_HAS_TEXT_PROPERTY': hasText });

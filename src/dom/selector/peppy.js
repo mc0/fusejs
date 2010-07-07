@@ -1,6 +1,6 @@
   /*---------------------------- SELECTOR: PEPPY -----------------------------*/
 
-  fuse[expando] = global.peppy;
+  fuse[uid] = global.peppy;
 
   //= require "../../../vendor/peppy/peppy.js"
 
@@ -34,5 +34,5 @@
   })(peppy, fuse.dom.selector, fuse.dom.NodeList);
 
   // restore
-  if (fuse[expando]) global.peppy = fuse[expando];
-  delete fuse[expando];
+  if (fuse[uid]) global.peppy = fuse[uid];
+  delete fuse[uid];

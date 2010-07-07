@@ -1,6 +1,6 @@
   /*--------------------------- SELECTOR: NWMATCHER --------------------------*/
 
-  fuse[expando] = global.NW;
+  fuse[uid] = global.NW;
 
   //= require "../../../vendor/nwbox/nwmatcher/src/nwmatcher.js"
 
@@ -41,5 +41,5 @@
   })(NW.Dom, fuse.dom.selector, fuse.dom.NodeList);
 
   // restore
-  if (fuse[expando]) global.NW = fuse[expando];
-  delete fuse[expando];
+  if (fuse[uid]) global.NW = fuse[uid];
+  delete fuse[uid];

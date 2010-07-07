@@ -32,7 +32,7 @@
           return objects;
         }
         if (isString(object)) {
-          object = doc.getElementById(object || expando);
+          object = doc.getElementById(object || uid);
           return object && fromElement(object);
         }
         // attempt window decorator first, and then node decorator
@@ -62,5 +62,5 @@
     }
 
     // prevent JScript bug with named function expressions
-    var $ = nil, $$ = nil, $w = nil, $A = nil, $F = nil, $H = nil, $R = nil;
+    var $ = null, $$ = null, $w = null, $A = null, $F = null, $H = null, $R = null;
   })(fuse.util);

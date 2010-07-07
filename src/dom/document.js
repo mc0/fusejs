@@ -105,5 +105,5 @@
     };
 
     // prevent JScript bug with named function expressions
-    var getDimensions = nil, getHeight = nil, getWidth = nil, getScrollOffsets = nil;
+    var getDimensions = null, getHeight = null, getWidth = null, getScrollOffsets = null;
   })(Document.plugin);

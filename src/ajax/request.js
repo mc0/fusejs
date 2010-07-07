@@ -65,7 +65,7 @@
     };
 
     plugin._useStatus   = true;
-    plugin._timerId     = nil;
+    plugin._timerId     = null;
     plugin.readyState   = fuse.Number(0);
     plugin.responseText = fuse.String('');
     plugin.status       = fuse.Number(0);
@@ -73,7 +73,7 @@
 
     plugin.headerJSON   =
     plugin.responseJSON =
-    plugin.responseXML  = nil;
+    plugin.responseXML  = null;
 
     plugin.isAborted    = createGetter('isAborted', false);
     plugin.isTimedout   = createGetter('isTimedout', false);
@@ -383,13 +383,13 @@
     };
 
     // prevent JScript bug with named function expressions
-    var abort =      nil,
-     fire =          nil,
-     getHeader =     nil,
-     getAllHeaders = nil,
-     isSuccess =     nil,
-     onStateChange = nil,
-     onTimeout =     nil,
-     request =       nil,
-     setReadyState = nil;
+    var abort =      null,
+     fire =          null,
+     getHeader =     null,
+     getAllHeaders = null,
+     isSuccess =     null,
+     onStateChange = null,
+     onTimeout =     null,
+     request =       null,
+     setReadyState = null;
   })(fuse.ajax.Request.plugin);

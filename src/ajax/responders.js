@@ -40,5 +40,5 @@
     });
 
     // prevent JScript bug with named function expressions
-    var register = nil, unregister = nil;
+    var register = null, unregister = null;
   })(fuse.ajax.responders);

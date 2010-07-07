@@ -553,14 +553,14 @@
     }
 
     // prevent JScript bug with named function expressions
-    var append =       nil,
-     cleanWhitespace = nil,
-     clone =           nil,
-     insert =          nil,
-     insertAfter =     nil,
-     insertBefore =    nil,
-     prepend =         nil,
-     remove =          nil,
-     replace =         nil,
-     wrap =            nil;
+    var append =       null,
+     cleanWhitespace = null,
+     clone =           null,
+     insert =          null,
+     insertAfter =     null,
+     insertBefore =    null,
+     prepend =         null,
+     remove =          null,
+     replace =         null,
+     wrap =            null;
   })(Element.plugin);

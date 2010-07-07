@@ -122,5 +122,5 @@
     }
 
     // prevent JScript bug with named function expressions
-    var get = nil, invoke = nil;
+    var get = null, invoke = null;
   })(NodeList.plugin);

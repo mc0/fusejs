@@ -10,17 +10,18 @@
   <script src="../../../dist/fuse.js" type="text/javascript"></script>
   <script src="../assets/unittest.js" type="text/javascript"></script>
   <script type="text/javascript">
-    var undef, nil = null,
-     $  = fuse.util.$,
-     $$ = fuse.util.$$,
-     $A = fuse.util.$A,
-     $F = fuse.util.$F,
-     $H = fuse.util.$H,
-     $R = fuse.util.$R,
-     $w = fuse.util.$w;
+    var undef,
+     uid = 'uid' + String(+new Date).slice(0, 12),
+     $   = fuse.util.$,
+     $$  = fuse.util.$$,
+     $A  = fuse.util.$A,
+     $F  = fuse.util.$F,
+     $H  = fuse.util.$H,
+     $R  = fuse.util.$R,
+     $w  = fuse.util.$w;
 
     fuse(document).observe('dom:loaded', function() {
-      var engineItem,
+      var debugEl, debugParam, engineEl, engineItem, engineItems, engineParam, i = -1,
 
       refresh = function() {
         var loc = window.location;
@@ -32,7 +33,7 @@
       getQueryParam = function(key, defaultValue) {
         var pattern = new RegExp('[?&]' + key + '=([^&]+)');
         return (window.location.href.match(pattern) || [0, defaultValue])[1];
-      }
+      },
 
       loadScriptFile = (function() {
         var head = fuse(document.getElementsByTagName('HEAD')[0]);
@@ -46,15 +47,17 @@
             }
           });
         };
-      })(),
+      })();
 
-      i           = -1,
-      expando     = '_fuse' + String(+new Date).slice(0, 10),
-      debugParam  = getQueryParam('debug', '0') == 1,
-      engineParam = getQueryParam('engine', 'NWMatcher'),
-      debugEl     = $('debug-switch'),
-      engineEl    = $('selector-engine'),
+      debugParam  = getQueryParam('debug', '0') == 1;
+      engineParam = getQueryParam('engine', 'NWMatcher');
+      debugEl     = $('debug-switch');
+      engineEl    = $('selector-engine');
       engineItems = engineEl.raw.options;
+
+      // attach event handlers to config controls
+      debugEl.observe('change', refresh);
+      engineEl.observe('change', refresh);
 
       // set active debug state in it's dropdown list
       debugEl.setValue(debugParam ? '1' : '0');
@@ -70,16 +73,13 @@
       // set debug flag
       fuse.debug = debugParam;
 
-      // load selector engine and Fuse engine adapter
+      // load selector engine
       fuse.String(engineItem.value).split('+').each(function(path) {
         loadScriptFile('../../../vendor/' + path);
       });
 
+      // load Fuse engine adapter
       loadScriptFile('../../../src/dom/selector/' + engineItem.text.toLowerCase() + '.js');
-
-      // attach event handlers to config controls
-      debugEl.observe('change', refresh);
-      engineEl.observe('change', refresh);
     });
   </script>
 

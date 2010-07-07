@@ -140,7 +140,7 @@
         // replaced like thier none-escaped duplicates
         else {
           temp = Math.floor(token.length / 2);
-          temp = token.slice(0, temp) + expando + token.slice(temp);
+          temp = token.slice(0, temp) + uid + token.slice(temp);
           template = template.replace(new RegExp(escaped[token], 'g'), temp);
           escaped[token] = new RegExp(escapeRegExpChars(temp), 'g');
         }
@@ -197,7 +197,7 @@
     };
 
     // prevent JScript bug with named function expressions
-    var clone = nil, preparse = nil, parse = nil;
+    var clone = null, preparse = null, parse = null;
   })(fuse.Template.plugin);
 
   /*--------------------------------------------------------------------------*/
@@ -258,5 +258,5 @@
     };
 
     // prevent JScript bug with named function expressions
-    var gsub = nil, interpolate = nil, scan = nil, sub = nil;
+    var gsub = null, interpolate = null, scan = null, sub = null;
   })(fuse.String.plugin);

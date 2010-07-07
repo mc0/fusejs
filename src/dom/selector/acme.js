@@ -1,6 +1,6 @@
   /*----------------------------- SELECTOR: ACME -----------------------------*/
 
-  fuse[expando] = global.acme;
+  fuse[uid] = global.acme;
 
   //= require "../../../vendor/acme/acme.js"
 
@@ -34,5 +34,5 @@
   })(acme, fuse.dom.selector, fuse.dom.NodeList);
 
   // restore
-  if (fuse[expando]) global.acme = fuse[expando];
-  delete fuse[expando];
+  if (fuse[uid]) global.acme = fuse[uid];
+  delete fuse[uid];

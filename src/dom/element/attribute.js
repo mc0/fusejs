@@ -100,10 +100,10 @@
     }
 
     // prevent JScript bug with named function expressions
-    var getAttribute = nil,
-     hasAttribute =    nil,
-     setAttribute =    nil,
-     removeAttribute = nil;
+    var getAttribute = null,
+     hasAttribute =    null,
+     setAttribute =    null,
+     removeAttribute = null;
   })(Element.plugin);
 
   /*--------------------------------------------------------------------------*/

@@ -1,6 +1,6 @@
   /*--------------------------- SELECTOR: DOMQUERY ---------------------------*/
 
-  fuse[expando] = global.Ext;
+  fuse[uid] = global.Ext;
 
   //= require "../../../vendor/domquery/DomQuery.js"
 
@@ -34,5 +34,5 @@
   })(Ext.DomQuery, fuse.dom.selector, fuse.dom.NodeList);
 
   // restore
-  if (fuse[expando]) global.Ext = fuse[expando];
-  delete fuse[expando];
+  if (fuse[uid]) global.Ext = fuse[uid];
+  delete fuse[uid];

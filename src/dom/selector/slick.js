@@ -1,6 +1,6 @@
   /*---------------------------- SELECTOR: SLICK -----------------------------*/
 
-  fuse[expando] = global.Slick;
+  fuse[uid] = global.Slick;
 
   //= require "../../../vendor/slick/Source/Slick.Parser.js"
   //= require "../../../vendor/slick/Source/Slick.Finder.js"
@@ -28,5 +28,5 @@
   })(Slick, fuse.dom.selector, fuse.dom.NodeList);
 
   // restore
-  if (fuse[expando]) global.Slick = fuse[expando];
-  delete fuse[expando];
+  if (fuse[uid]) global.Slick = fuse[uid];
+  delete fuse[uid];

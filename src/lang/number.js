@@ -52,12 +52,12 @@
     };
 
     // prevent JScript bug with named function expressions
-    var abs =         nil,
-     ceil =           nil,
-     clone =          nil,
-     floor =          nil,
-     round =          nil,
-     times =          nil,
-     toColorPart =    nil,
-     toPaddedString = nil;
+    var abs =         null,
+     ceil =           null,
+     clone =          null,
+     floor =          null,
+     round =          null,
+     times =          null,
+     toColorPart =    null,
+     toPaddedString = null;
   })(fuse.Number.plugin);

@@ -196,9 +196,9 @@
       }
       else if (isArray(value)) {
         // quick indexOf
-        value = expando + value.join(expando) + expando;
+        value = uid + value.join(uid) + uid;
         while (node = element.options[++i]) {
-          node.selected = value.indexOf(expando + getOptionValue.call(node) + expando) > -1;
+          node.selected = value.indexOf(uid + getOptionValue.call(node) + uid) > -1;
         }
       }
       else {
@@ -227,15 +227,15 @@
     }
 
     // prevent JScript bug with named function expressions
-    var initialize = nil,
-     activate =      nil,
-     clear =         nil,
-     disable =       nil,
-     enable =        nil,
-     focus =         nil,
-     getValue =      nil,
-     present =       nil,
-     select =        nil,
-     setValue =      nil,
-     serialize =     nil;
+    var initialize = null,
+     activate =      null,
+     clear =         null,
+     disable =       null,
+     enable =        null,
+     focus =         null,
+     getValue =      null,
+     present =       null,
+     select =        null,
+     setValue =      null,
+     serialize =     null;
   })();

@@ -6,9 +6,9 @@
 
     OFFSET_PARENT_EXIT_ON_NODES = { 'TABLE': 1, 'TD': 1, 'TH': 1 },
 
-    BODY_OFFSETS_INHERIT_ITS_MARGINS = nil,
+    BODY_OFFSETS_INHERIT_ITS_MARGINS = null,
 
-    ELEMENT_COORD_OFFSETS_DONT_INHERIT_ANCESTOR_BORDER_WIDTH = nil,
+    ELEMENT_COORD_OFFSETS_DONT_INHERIT_ANCESTOR_BORDER_WIDTH = null,
 
     getDimensions = plugin.getDimensions,
 
@@ -472,15 +472,15 @@
     };
 
     // prevent JScript bug with named function expressions
-    var makeAbsolute =           nil,
-     clonePosition =             nil,
-     getCumulativeScrollOffset = nil,
-     getOffsetParent =           nil,
-     getPositionedOffset =       nil,
-     makeClipping =              nil,
-     makePositioned =            nil,
-     scrollTo =                  nil,
-     undoAbsolute =              nil,
-     undoClipping =              nil,
-     undoPositioned =            nil;
+    var makeAbsolute =           null,
+     clonePosition =             null,
+     getCumulativeScrollOffset = null,
+     getOffsetParent =           null,
+     getPositionedOffset =       null,
+     makeClipping =              null,
+     makePositioned =            null,
+     scrollTo =                  null,
+     undoAbsolute =              null,
+     undoClipping =              null,
+     undoPositioned =            null;
   })(Element.plugin);

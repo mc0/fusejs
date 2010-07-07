@@ -168,25 +168,25 @@
     }
 
     // prevent JScript bug with named function expressions
-    var blank =        nil,
-      camelize =       nil,
-      capitalize =     nil,
-      clone =          nil,
-      contains =       nil,
-      endsWith =       nil,
-      evalScripts =    nil,
-      extractScripts = nil,
-      hyphenate =      nil,
-      isEmpty =        nil,
-      startsWith =     nil,
-      stripScripts =   nil,
-      toArray =        nil,
-      times =          nil,
-      trim =           nil,
-      trimLeft =       nil,
-      trimRight =      nil,
-      truncate =       nil,
-      underscore =     nil;
+    var blank =        null,
+      camelize =       null,
+      capitalize =     null,
+      clone =          null,
+      contains =       null,
+      endsWith =       null,
+      evalScripts =    null,
+      extractScripts = null,
+      hyphenate =      null,
+      isEmpty =        null,
+      startsWith =     null,
+      stripScripts =   null,
+      toArray =        null,
+      times =          null,
+      trim =           null,
+      trimLeft =       null,
+      trimRight =      null,
+      truncate =       null,
+      underscore =     null;
   })(fuse.String.plugin);
 
   /*--------------------------------------------------------------------------*/
@@ -306,5 +306,5 @@
     };
 
     // prevent JScript bug with named function expressions
-    var escapeHTML = nil, stripTags = nil, unescapeHTML = nil;
+    var escapeHTML = null, stripTags = null, unescapeHTML = null;
   })(fuse.String.plugin);

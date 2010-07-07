@@ -260,15 +260,15 @@
     };
 
     // prevent JScript bug with named function expressions
-    var initialize =     nil,
-     disable =           nil,
-     enable =            nil,
-     getFirstControl =   nil,
-     focusFirstControl = nil,
-     getControls =       nil,
-     getInputs =         nil,
-     request =           nil,
-     reset =             nil,
-     serializeElements = nil,
-     serialize =         nil;
+    var initialize =     null,
+     disable =           null,
+     enable =            null,
+     getFirstControl =   null,
+     focusFirstControl = null,
+     getControls =       null,
+     getInputs =         null,
+     request =           null,
+     reset =             null,
+     serializeElements = null,
+     serialize =         null;
   })(fuse.dom.FormElement.plugin);

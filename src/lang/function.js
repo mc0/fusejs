@@ -198,13 +198,11 @@
     };
 
     // prevent JScript bug with named function expressions
-    var FALSE =            nil,
-     TRUE =                nil,
-     bind =                nil,
-     bindAsEventListener = nil,
-     curry =               nil,
-     delay =               nil,
-     defer =               nil,
-     methodize =           nil,
-     wrap =                nil;
+    var bind =             null,
+     bindAsEventListener = null,
+     curry =               null,
+     delay =               null,
+     defer =               null,
+     methodize =           null,
+     wrap =                null;
   })(fuse.Function);

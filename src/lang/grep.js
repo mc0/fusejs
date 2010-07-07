@@ -24,7 +24,7 @@
     };
 
     // prevent JScript bug with named function expressions
-    var grep = nil;
+    var grep = null;
   });
 
   (function() {
@@ -65,5 +65,5 @@
     }
 
     // prevent JScript bug with named function expressions
-    var grep = nil;
+    var grep = null;
   })();

@@ -199,7 +199,7 @@
         isDecorated = context.decorate;
         context     = context.context;
       }
-      element = (context || doc).getElementById(id || expando);
+      element = (context || doc).getElementById(id || uid);
       return isDecorated === false
         ? element
         : element && fromElement(element, isCached);

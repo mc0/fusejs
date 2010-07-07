@@ -1,6 +1,6 @@
   /*---------------------------- SELECTOR: DOMASSISTANT ----------------------------*/
 
-  fuse[expando] = global.DOMAssistant;
+  fuse[uid] = global.DOMAssistant;
 
   //= require "../../../vendor/domassistant/DOMAssistant.js"
 
@@ -36,5 +36,5 @@
   })(DOMAssistant, fuse.dom.selector, fuse.dom.NodeList);
 
   // restore
-  if (fuse[expando]) global.DOMAssistant = fuse[expando];
-  delete fuse[expando];
+  if (fuse[uid]) global.DOMAssistant = fuse[uid];
+  delete fuse[uid];

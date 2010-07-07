@@ -282,5 +282,5 @@
     Event._addWatcher = addWatcher;
 
     // prevent JScript bug with named function expressions
-    var delegate = nil, stopDelegating = nil;
+    var delegate = null, stopDelegating = null;
   })(Element.plugin);
