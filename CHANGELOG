@@ -1,3 +1,6 @@
+* Remove fuse.RegExp#match alias of fuse.RegExp#test. [jddalton]
+  Note: Backwards compatibility warning.
+
 * Rename String methods and move HTML related String methods to html.js. [jddalton, Joe Gornick]
   - Rename fuse.String#times to fuse.String#repeat
   - Rename fuse.String#blank to fuse.String#isBlank

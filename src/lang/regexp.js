@@ -18,9 +18,6 @@
         (options.multiline  ? 'm' : ''));
     };
 
-    // alias
-    plugin.match = plugin.test;
-
     // prevent JScript bug with named function expressions
     var clone = null, escape = null;
   })(fuse.RegExp.plugin);
