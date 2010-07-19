@@ -1,3 +1,8 @@
+* Rename String methods and move HTML related String methods to html.js. [jddalton, Joe Gornick]
+  - Rename fuse.String#times to fuse.String#repeat
+  - Rename fuse.String#blank to fuse.String#isBlank
+  - Rename fuse.String#empty to fuse.String#isEmpty
+
 * Ensure `reStrict`, used in Fusebox, detects the strict mode directive correctly. [jddalton, kangax, Kit Goncharov]
 
 * Add supplemental checks for the Firefox iframe issue with sandboxed natives. [jddalton]

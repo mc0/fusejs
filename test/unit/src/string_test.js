@@ -14,49 +14,49 @@ new Test.Unit.Runner({
      - Looks for dashes, not underscores
      - CamelCases first word if there is a front dash
   */
-  'testCamelize': function() {
-    this.assertEqual('', fuse.String('').camelize(),
+  'testToCamelCase': function() {
+    this.assertEqual('', fuse.String('').toCamelCase(),
       'Empty string');
 
-    this.assertEqual('', fuse.String('-').camelize(),
+    this.assertEqual('', fuse.String('-').toCamelCase(),
       'Hyphen only');
 
-    this.assertEqual('foo', fuse.String('foo').camelize(),
+    this.assertEqual('foo', fuse.String('foo').toCamelCase(),
       'String with no hyphens');
 
-    this.assertEqual('foo_bar', fuse.String('foo_bar').camelize(),
+    this.assertEqual('foo_bar', fuse.String('foo_bar').toCamelCase(),
       'String with an underscore');
 
-    this.assertEqual('fooBar',  fuse.String('foo-bar').camelize(),
+    this.assertEqual('fooBar',  fuse.String('foo-bar').toCamelCase(),
       'String with one hyphen');
 
-    this.assertEqual('borderBottomWidth', fuse.String('border-bottom-width').camelize(),
+    this.assertEqual('borderBottomWidth', fuse.String('border-bottom-width').toCamelCase(),
       'String simulating style property');
 
-    this.assertEqual('classNameTest', fuse.String('class-name-test').camelize(),
+    this.assertEqual('classNameTest', fuse.String('class-name-test').toCamelCase(),
       'String simulating className (1)');
 
-    this.assertEqual('classNameTest', fuse.String('className-test').camelize(),
+    this.assertEqual('classNameTest', fuse.String('className-test').toCamelCase(),
       'String simulating className (2)');
 
-    this.assertEqual('classNameTest', fuse.String('class-nameTest').camelize(),
+    this.assertEqual('classNameTest', fuse.String('class-nameTest').toCamelCase(),
       'String simulating className (2)');
 
-    this.assertEqual('FooBar',  fuse.String('---foo-bar').camelize(),
+    this.assertEqual('FooBar',  fuse.String('---foo-bar').toCamelCase(),
       'String with multiple leading hyphens');
 
-    this.assertEqual('FooBar',  fuse.String('---foo---bar---').camelize(),
+    this.assertEqual('FooBar',  fuse.String('---foo---bar---').toCamelCase(),
       'String containing groups of hyphens');
 
-    this.assertEqual('FooBar',  fuse.String('FooBar').camelize(),
+    this.assertEqual('FooBar',  fuse.String('FooBar').toCamelCase(),
       'String pre-camelized');
 
-    this.assertEqual('toString', fuse.String('toString').camelize(),
+    this.assertEqual('toString', fuse.String('toString').toCamelCase(),
       'Built-in Object.prototype.* members should not interfere with internal cache');
 
     /*
     this.benchmark(function(){
-      'class-name-test'.camelize();
+      'class-name-test'.toCamelCase();
     }, 10000);
     */
   },
@@ -92,42 +92,6 @@ new Test.Unit.Runner({
       fuse.String('border_bottom_width').hyphenate());
   },
 
-  'testStripTags': function() {
-    this.assertEqual('hello world',
-      fuse.String('hello world').stripTags());
-
-    this.assertEqual('hello world',
-      fuse.String('hello <span>world</span>').stripTags());
-
-    this.assertEqual('hello world',
-      fuse.String('<a href="#" onclick="moo!">hello</a> world').stripTags());
-
-    this.assertEqual('hello world',
-      fuse.String('h<b><em>e</em></b>l<i>l</i>o w<span class="moo" id="x"><b>o</b></span>rld').stripTags());
-
-    this.assertEqual('hello world',
-      fuse.String('hello wor<input type="text" value="foo>bar">ld').stripTags());
-
-    this.assertEqual('1\n2',
-      fuse.String('1\n2').stripTags());
-
-    this.assertEqual('one < two blah baz', fuse.String(
-      'one < two <a href="# "\ntitle="foo > bar" >blah</a > <input disabled>baz').stripTags(),
-      'failed to ignore none tag related `<` or `>` characters');
-
-    this.assertEqual('1<invalid a="b&c"/>2<invalid a="b<c">3<invald a="b"c">4<invalid  a =  "bc">', fuse.String(
-      '<b>1</b><invalid a="b&c"/><img a="b>c" />2<invalid a="b<c"><b a="b&amp;c">3</b>' +
-      '<invald a="b"c"><b a="b&#38;c" >4</b><invalid  a =  "bc">').stripTags(),
-      'failed to ignore invalid tags');
-  },
-
-  'testStripScripts': function() {
-    this.assertEqual('foo bar', fuse.String('foo bar').stripScripts());
-    this.assertEqual('foo bar', fuse.String('foo <script>boo();<\/script>bar').stripScripts());
-    this.assertEqual('foo bar', fuse.String('foo <script type="text/javascript">boo();\nmoo();<\/script>bar').stripScripts());
-  },
-
-
   'testTruncate': function() {
     var source = fuse.String('foo boo boz foo boo boz foo boo boz foo boo boz');
 
@@ -156,123 +120,7 @@ new Test.Unit.Runner({
       'truncated result is not a string');
   },
 
-  'testExtractScripts': function() {
-    this.assertEnumEqual([],         fuse.String('foo bar').extractScripts());
-    this.assertEnumEqual(['boo();'], fuse.String('foo <script>boo();<\/script>bar').extractScripts());
-
-    this.assertEnumEqual(['boo();','boo();\nmoo();'],
-      fuse.String('foo <script>boo();<\/script><script type="text/javascript">boo();\nmoo();<\/script>bar').extractScripts());
-
-    this.assertEnumEqual(['boo();','boo();\nmoo();'],
-      fuse.String('foo <script>boo();<\/script>blub\nblub<script type="text/javascript">boo();\nmoo();<\/script>bar').extractScripts());
-
-    this.assertEnumEqual(['methodA();', 'methodB();','methodC();'],
-      fuse.String('blah<!--\n<script>removedA();<\/script>\n-->' +
-        '<script type="text/javascript">methodA();<\/script>' +
-        '<!--\n<script>removedB();<\/script>\n-->' +
-        '<script></script>blah<script>methodB();<\/script>blah' +
-        '<!--\n<script type="text/javascript">removedC();<\/script>\n-->' +
-        '<script>methodC();<\/script>').extractScripts());
-
-    this.assertEnumEqual(['\n      alert("Scripts work too");\n    '],
-      fuse.String('\u003Cdiv id=\"testhtml"\u003E\n  \u003Cdiv\u003E\n    ' +
-        'Content successfully replaced\n    \u003Cscript\u003E\n      ' +
-        'alert("Scripts work too");\n    \u003C/script\u003E\n  \u003C /div\u003E\n' +
-        '\u003C/div\u003E\n').extractScripts());
-
-    var russianChars = '//\u00c3\u00c2\u00ba\u00c3\u00c5\u00b8\u00c3\u00c5\u00c3' +
-       '\u00c2\u00b5\u00c3\u00c5\u00c3\u00c2\u00c3\u00c2\u00b0\u00c3\u00c2\u00c3' +
-       '\u00c5\u00be\u00c3\u00c2\u00b9\n';
-
-    var longComment = '//' + Array(7000).join('.') + '\n',
-     longScript = '\nvar foo = 1;\n' + russianChars + longComment,
-     longString = 'foo <script type="text/javascript">' + longScript + '<'+'/script> bar';
-
-    this.assertEnumEqual([longScript], fuse.String(longString).extractScripts());
-
-    /*
-    var str = 'foo <script>boo();<'+'/script>blub\nblub<script type="text/javascript">boo();\nmoo();<'+'/script>bar';
-    this.benchmark(function() { str.extractScripts() }, 1000);
-    */
-  },
-
-  'testEvalScripts': function() {
-    this.assertEqual(0, evalScriptsCounter,
-      'Sanity check. No scripts should be evaled yet.');
-
-    fuse.String('foo <script>evalScriptsCounter++<\/script>bar').evalScripts();
-    this.assertEqual(1, evalScriptsCounter);
-
-    var stringWithScripts = '';
-    fuse.Number(3).times(function(){ stringWithScripts += 'foo <script>evalScriptsCounter++<\/script>bar' });
-    fuse.String(stringWithScripts).evalScripts();
-    this.assertEqual(4, evalScriptsCounter);
-
-    this.assertEnumEqual([4, 'hello world!'],
-      fuse.String('<script>2 + 2</script><script>"hello world!"</script>').evalScripts(),
-      'Should return the evaled scripts.');
-  },
-
-  'testEscapeHTML': function() {
-    this.assertEqual('foo bar',    fuse.String('foo bar').escapeHTML());
-
-    var expected = 'foo \u00c3\u00178 bar';
-    this.assertEqual(expected, fuse.String(expected).escapeHTML());
-
-    this.assertEqual('foo &lt;span&gt;bar&lt;/span&gt;',
-      fuse.String('foo <span>bar</span>').escapeHTML());
-
-    expected = '\u00e3\u00a6\u00e3\u00a3\u00e3\u00a1\u00e3\u00b3\u00e3' +
-      '\u00ba2007\n\u00e3\u00af\u00e3\u00ab\u00e3\u00bc\u00e3\u00ba\u00e3' +
-      '\u00b3\u00e3\u00ac\u00e3\u00af\u00e3\u00b7\u00e3\u00a7\u00e3\u00b3';
-
-    this.assertEqual(expected,
-      fuse.String(expected).escapeHTML());
-
-    this.assertEqual('a&lt;a href="blah"&gt;blub&lt;/a&gt;b&lt;span&gt;&lt;div&gt;&lt;/div&gt;&lt;/span&gt;cdef&lt;strong&gt;!!!!&lt;/strong&gt;g',
-      fuse.String('a<a href="blah">blub</a>b<span><div></div></span>cdef<strong>!!!!</strong>g').escapeHTML());
-
-    this.assertEqual(largeTextEscaped, largeTextUnescaped.escapeHTML());
-
-    this.assertEqual('&amp;', fuse.String('&').escapeHTML());
-    this.assertEqual('1\n2',  fuse.String('1\n2').escapeHTML());
-
-    /* this.benchmark(function() { largeTextUnescaped.escapeHTML() }, 1000); */
-  },
-
-  'testUnescapeHTML': function() {
-    this.assertEqual('foo bar',
-      fuse.String('foo bar').unescapeHTML());
-
-    this.assertEqual('foo <span>bar</span>',
-      fuse.String('foo &lt;span&gt;bar&lt;/span&gt;').unescapeHTML());
-
-    this.assertEqual('foo ß bar',
-      fuse.String('foo ß bar').unescapeHTML());
-
-    this.assertEqual('a<a href="blah">blub</a>b<span><div></div></span>cdef<strong>!!!!</strong>g',
-      fuse.String('a&lt;a href="blah"&gt;blub&lt;/a&gt;b&lt;span&gt;&lt;div&gt;&lt;/div&gt;&lt;/span&gt;cdef&lt;strong&gt;!!!!&lt;/strong&gt;g').unescapeHTML());
-
-    this.assertEqual(largeTextUnescaped, largeTextEscaped.unescapeHTML());
-
-    this.assertEqual('test \xfa',
-      fuse.String('test &uacute;').unescapeHTML());
-
-    this.assertEqual('1\n2',
-      fuse.String('1\n2').unescapeHTML(),
-      'Failed with newlines');
-
-    this.assertEqual('<h1>Pride & Prejudice</h1>',
-      fuse.String('<h1>Pride &amp; Prejudice</h1>').unescapeHTML(),
-      'Failed on string containing unescaped tags');
-
-    var sameInSameOut = fuse.String('"&lt;" means "<" in HTML');
-    this.assertEqual(sameInSameOut, sameInSameOut.escapeHTML().unescapeHTML());
-
-    /* this.benchmark(function() { largeTextEscaped.unescapeHTML() }, 1000); */
-  },
-
-  'testInclude': function() {
+  'testContains': function() {
     this.assert(fuse.String('hello world').contains('h'));
     this.assert(fuse.String('hello world').contains('hello'));
     this.assert(fuse.String('hello world').contains('llo w'));
@@ -308,16 +156,16 @@ new Test.Unit.Runner({
       'failed to raise error when passed a non string pattern');
   },
 
-  'testBlank': function() {
-    this.assert(fuse.String('').blank());
-    this.assert(fuse.String(' ').blank());
-    this.assert(fuse.String('\t\r\n ').blank());
+  'testIsBlank': function() {
+    this.assert(fuse.String('').isBlank());
+    this.assert(fuse.String(' ').isBlank());
+    this.assert(fuse.String('\t\r\n ').isBlank());
 
-    this.assert(!fuse.String('a').blank());
-    this.assert(!fuse.String('\t y \n').blank());
+    this.assert(!fuse.String('a').isBlank());
+    this.assert(!fuse.String('\t y \n').isBlank());
   },
 
-  'testEmpty': function() {
+  'testIsEmpty': function() {
     this.assert(fuse.String('').isEmpty());
 
     this.assert(!fuse.String(' ').isEmpty());
@@ -335,17 +183,17 @@ new Test.Unit.Runner({
     this.assertEqual(':',    fuse.String('9').succ());
   },
 
-  'testTimes': function() {
-    this.assertEqual('',      fuse.String('').times(0));
-    this.assertEqual('',      fuse.String('').times(5));
-    this.assertEqual('',      fuse.String('a').times(-1));
-    this.assertEqual('',      fuse.String('a').times(0));
-    this.assertEqual('a',     fuse.String('a').times(1));
-    this.assertEqual('aa',    fuse.String('a').times(2));
-    this.assertEqual('aaaaa', fuse.String('a').times(5));
+  'testRepeat': function() {
+    this.assertEqual('',      fuse.String('').repeat(0));
+    this.assertEqual('',      fuse.String('').repeat(5));
+    this.assertEqual('',      fuse.String('a').repeat(-1));
+    this.assertEqual('',      fuse.String('a').repeat(0));
+    this.assertEqual('a',     fuse.String('a').repeat(1));
+    this.assertEqual('aa',    fuse.String('a').repeat(2));
+    this.assertEqual('aaaaa', fuse.String('a').repeat(5));
 
-    this.assertEqual('foofoofoofoofoo', fuse.String('foo').times(5));
-    this.assertEqual('', fuse.String('foo').times(-5));
+    this.assertEqual('foofoofoofoofoo', fuse.String('foo').repeat(5));
+    this.assertEqual('', fuse.String('foo').repeat(-5));
 
     /*
     window.String.prototype.oldTimes = function(count) {
@@ -355,7 +203,7 @@ new Test.Unit.Runner({
     };
 
     this.benchmark(function() {
-      'foo'.times(15);
+      'foo'.repeat(15);
     }, 1000, 'new: ');
 
     this.benchmark(function() {

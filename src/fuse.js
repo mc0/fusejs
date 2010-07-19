@@ -205,6 +205,7 @@
   //= require "lang/template"
   //= require "lang/timer"
 
+  //= require "lang/html"
   //= require "dom/dom"
   //= require "dom/features"
   //= require "dom/node"
