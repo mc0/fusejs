@@ -56,9 +56,9 @@
 
     stripScripts    = fuse.String.plugin.stripScripts,
 
-    evalScripts     = fuse.String.plugin.evalScripts,
+    runScripts      = fuse.String.plugin.runScripts,
 
-    isScriptable    = stripScripts && evalScripts,
+    isScriptable    = stripScripts && runScripts,
 
     reOpenScriptTag = /<script/i,
 
@@ -161,9 +161,9 @@
             getFragmentFromHTML(stripped, parentNode || element),
             parentNode);
         }
-        // only evalScripts if there are scripts
+        // only runScripts if there are scripts
         if (content != stripped) {
-          setTimeout(function() { evalScripts.call(content); }, 10);
+          setTimeout(function() { runScripts.call(content); }, 10);
         }
       }
       // process object
@@ -324,7 +324,7 @@
         html = content;
         content = getFragmentFromHTML(stripped, element.parentNode);
         if (html != stripped) {
-          setTimeout(function() { evalScripts.call(html); }, 10);
+          setTimeout(function() { runScripts.call(html); }, 10);
         }
       }
       // process object
@@ -359,7 +359,7 @@
           element.innerHTML =
           stripped = stripScripts.call(content);
           if (content != stripped) {
-            setTimeout(function() { evalScripts.call(content); }, 10);
+            setTimeout(function() { runScripts.call(content); }, 10);
           }
         } else {
           element.innerHTML = content;
@@ -471,7 +471,7 @@
           }
 
           if (content != stripped) {
-            setTimeout(function() { evalScripts.call(content); }, 10);
+            setTimeout(function() { runScripts.call(content); }, 10);
           }
         }
         // process object

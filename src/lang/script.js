@@ -1,19 +1,107 @@
-  /*------------------------------- LANG: RUN --------------------------------*/
+  /*------------------------------ LANG: SCRIPT ------------------------------*/
 
-  (function() {
+  (function(plugin) {
+
+    var counter         = 0,
+     indexOf            = ''.indexOf,
+     reHTMLComments     = /<!--[^\x00]*?-->/g,
+     reOpenHTMLComments = /<!--/g,
+     reOpenScriptTag    = /<script/i
+     reQuotes           = /(["'])(?:(?!\1)[^\\]|[^\\]|\\.)+?\1/g,
+     reRegexps          = /(\/)(?:(?!\1)[^\\]|[^\\]|\\.)+?\1/g, //"
+     reScripts          = /<script[^>]*>([^\x00]*?)<\/script>/gi,
+     reQuoteTokens      = /@fuseQuoteToken/g,
+     reRegexpTokens     = /@fuseRegexpToken/g,
+     reScriptTokens     = /@fuseScript\d+Token/g,
+     swappedQuotes      = [],
+     swappedRegExps     = [],
+     swappedScripts     = {},
+
+    runCallback = function(code, index, array) {
+      array[index] = fuse.run(code);
+    },
+
+    strReplace = function(pattern, replacement) {
+      return (strReplace = envTest('STRING_REPLACE_COERCE_FUNCTION_TO_STRING') ?
+        plugin.replace : plugin.replace.raw).call(this, pattern, replacement);
+    },
+
+    swapQuotesToTokens = function(quote) {
+      swappedQuotes.unshift(quote);
+      return '@fuseQuoteToken';
+    },
+
+    swapRegexpsToTokens = function(regexp) {
+      swappedRegExps.unshift(regexp);
+      return '@fuseRegexpToken';
+    },
+
+    swapScriptsToTokens = function(script) {
+      var token = '@fuseScript' + (counter++) + 'Token';
+      swappedScripts[token] = script;
+      return token;
+    },
+
+    swapTokensToQuotes = function() {
+      return swappedQuotes.pop();
+    },
+
+    swapTokensToRegexps = function() {
+      return swappedRegExps.pop();
+    },
+
+    swapTokensToScripts = function(token) {
+      return swappedScripts[token];
+    };
+
+    /*------------------------------------------------------------------------*/
+
+    plugin.runScripts = function runScripts() {
+      return plugin.extractScripts.call(this, runCallback);
+    };
+
+    plugin.extractScripts = function extractScripts(callback) {
+      var match, i = -1, string = String(this), result = fuse.Array();
+
+      if (!reOpenScriptTag.test(string)) {
+        return result;
+      }
+      if (indexOf.call(string, '<!--') > -1) {
+        string = strReplace
+          .call(string, reScripts, swapScriptsToTokens)
+          .replace(reHTMLComments, '')
+          .replace(reScriptTokens, swapTokensToScripts);
+
+        // cleanup
+        swappedScripts = { };
+      }
+      // clear lastIndex because exec() uses it as a starting point
+      reScripts.lastIndex = 0;
+
+      while (match = reScripts.exec(string)) {
+        if (match = match[1]) {
+          result[++i] = match;
+          callback && callback(match, i, result);
+        }
+      }
+      return result;
+    };
+
+    plugin.stripScripts = function stripScripts() {
+      return fuse.String(String(this).replace(reScripts, ''));
+    };
+
+    /*------------------------------------------------------------------------*/
 
     fuse.run = function run(code, context) {
-      var backup     = global.fuse,
-      indexOf        = ''.indexOf,
-      qCounter       = 0,
-      rCounter       = 0,
-      quotes         = [],
-      regexps        = [],
-      reHTMLComments = /<!--/g,
-      reQuotes       = /(["'])(?:(?!\1)[^\\]|[^\\]|\\.)+?\1/g,
-      reRegexps      = /(\/)(?:(?!\1)[^\\]|[^\\]|\\.)+?\1/g, //"
-      reQuoteTokens  = /@fuseQuoteToken/g,
-      reRegexpTokens = /@fuseRegexpToken/g,
+      var backup = global.fuse,
+
+      makeExecuter = function(context) {
+        return context.Function('window',
+          'return function (' + uid + '){' +
+          'var arguments=window.arguments;' +
+          'return ("", eval)(String(' + uid + '))}')(context);
+      },
 
       run = function run(code, context) {
         context || (context = global);
@@ -27,53 +115,13 @@
         return (data._evaluator || (data._evaluator = makeExecuter(context)))(code);
       },
 
-      makeExecuter = function(context) {
-        return context.Function('window',
-          'return function (' + uid + '){' +
-          'var arguments=window.arguments;' +
-          'return ("", eval)(String(' + uid + '))}')(context);
-      },
-
-      removeHTMLComments = function(code) {
-        quotes.length = regexps.length = qCounter = rCounter = 0;
-        return strReplace.call(code, reQuotes, swapQuotesToTokens)
-          .replace(reRegexps, swapRegexpsToTokens)
-          .replace(reHTMLComments, '')
-          .replace(reQuoteTokens, swapTokensToQuotes)
-          .replace(reRegexpTokens, swapTokensToRegexps);
-      },
-
       setScriptText = function(element, text) {
         (element.firstChild ||
          element.appendChild(element.ownerDocument.createTextNode('')))
          .data = text || '';
       },
 
-      strReplace = function(pattern, replacement) {
-        return (strReplace = envTest('STRING_REPLACE_COERCE_FUNCTION_TO_STRING') ?
-          plugin.replace : plugin.replace.raw).call(this, pattern, replacement);
-      },
-
-      swapQuotesToTokens = function(quote) {
-        quotes.push(quote);
-        return '@fuseQuoteToken';
-      },
-
-      swapRegexpsToTokens = function(regexp) {
-        regexps.push(regexp);
-        return '@fuseRegexpToken';
-      },
-
-      swapTokensToQuotes = function() {
-        return quotes[qCounter++];
-      },
-
-      swapTokensToRegexps = function() {
-        return regexps[rCounter++];
-      },
-
       execute = makeExecuter(global);
-
 
       try {
         // Opera 9.25 can't indirectly call eval()
@@ -156,8 +204,15 @@
         catch (e) {
           var __execute = execute;
           execute = function(code, context) {
-            return __execute(indexOf.call(code, '<!--') > -1 ?
-              removeHTMLComments(code) : code, context);
+            if (indexOf.call(code, '<!--') > -1) {
+              code = strReplace
+                .call(code, reQuotes,    swapQuotesToTokens)
+                .replace(reRegexps,      swapRegexpsToTokens)
+                .replace(reHTMLComments, '//<!--')
+                .replace(reQuoteTokens,  swapTokensToQuotes)
+                .replace(reRegexpTokens, swapTokensToRegexps);
+            }
+            return __execute(code, context);
           };
         }
       }
@@ -177,5 +232,5 @@
     };
 
     // prevent JScript bug with named function expressions
-    var run = null;
-  })();
+    var extractScripts = null, run = null, runScripts = null, stripScripts = null;
+  })(fuse.String.plugin);

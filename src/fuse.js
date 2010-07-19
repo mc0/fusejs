@@ -202,6 +202,7 @@
   //= require "lang/console"
   //= require "lang/hash"
   //= require "lang/range"
+  //= require "lang/script"
   //= require "lang/template"
   //= require "lang/timer"
 

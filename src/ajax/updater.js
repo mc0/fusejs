@@ -55,7 +55,7 @@
        receiver = this.container[this.isSuccess() ? 'success' : 'failure'];
 
       if (receiver) {
-        if (!options.evalScripts) {
+        if (!options.runScripts) {
           responseText = responseText.stripScripts();
         }
         if (options.insertion) {

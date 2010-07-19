@@ -1,0 +1,1 @@
+var runScriptsCounter = 0;

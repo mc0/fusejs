@@ -1,53 +1,6 @@
   /*------------------------------- LANG: HTML -------------------------------*/
 
   (function(plugin) {
-    var reOpenScriptTag = /<script/i,
-     reScripts = /<script[^>]*>([^\x00]*?)<\/script>/gi,
-
-    plugin.evalScripts = function evalScripts() {
-      result = fuse.Array();
-      fuse.String(this).extractScripts(function(script) {
-        result.push(global.eval(String(script)));
-      });
-      return result;
-    };
-
-    plugin.extractScripts = function extractScripts(callback) {
-      var match, script, striptTags,
-       string = String(this), result = fuse.Array();
-
-      if (!reOpenScriptTag.test(string)) return result;
-
-      scriptTags = string.replace(reHTMLComments, '');
-      // clear lastIndex because exec() uses it as a starting point
-      reScripts.lastIndex = 0;
-
-      if (callback) {
-        while (match = reScripts.exec(scriptTags)) {
-          if (script = match[1]) {
-            callback(script);
-            result.push(script);
-          }
-        }
-      } else {
-        while (match = reScripts.exec(scriptTags)) {
-          if (script = match[1]) result.push(script);
-        }
-      }
-      return result;
-    };
-
-    plugin.stripScripts = function stripScripts() {
-      return fuse.String(String(this).replace(reScripts, ''));
-    };
-
-    // prevent JScript bug with named function expressions
-    var evalScripts = null, extractScripts = null, stripScripts = null;
-  })(fuse.String.plugin);
-
-  /*--------------------------------------------------------------------------*/
-
-  (function(plugin) {
     // tag parsing instructions:
     // http://www.w3.org/TR/REC-xml-names/#ns-using
     var reTags = (function() {
@@ -65,49 +18,43 @@
     })(),
 
     define = function() {
-      var tags   = [],
-       count     = 0,
-       div       = fuse._div,
-       container = fuse._doc.createElement('pre'),
-       textNode  = container.appendChild(fuse._doc.createTextNode('')),
-       reTagEnds = />/g,
-       reTokens  = /@fusetoken/g,
+      var div     = fuse._div,
+       container  = fuse._doc.createElement('pre'),
+       textNode   = container.appendChild(fuse._doc.createTextNode('')),
+       rawReplace = plugin.replace.raw,
+       reTagEnds  = />/g,
+       reTokens   = /@fuseTagToken/g,
+       swapTags   = [],
 
-       escapeHTML = function escapeHTML() {
-         textNode.data = String(this);
-         return fuse.String(container.innerHTML);
-       },
+      escapeHTML = function escapeHTML() {
+        textNode.data = String(this);
+        return fuse.String(container.innerHTML);
+      },
 
-       getText = function() {
-         return div.textContent;
-       },
+      getText = function() {
+        return div.textContent;
+      },
 
-       swapTagsToTokens = function(tag) {
-         tags.push(tag);
-         return '@fusetoken';
-       },
+      swapTagsToTokens = function(tag) {
+        swapTags.unshift(tag);
+        return '@fuseTagToken';
+      },
 
-       swapTokensToTags = function() {
-         return tags[count++];
-       },
+      swapTokensToTags = function() {
+        return swapTags.pop();
+      },
 
-       unescapeHTML = function unescapeHTML() {
-         var result, tokenized, string = String(this);
-
-         // tokenize tags before setting innerHTML then swap them after
-         if (tokenized = string.indexOf('<') > -1) {
-           tags.length = count = 0;
-           string = plugin.replace.call(string, reTags, swapTagsToTokens);
-         }
-
-         div.innerHTML = '<pre>' + string + '<\/pre>';
-         result = getText();
-
-         return fuse.String(tokenized
-           ? plugin.replace.call(result, reTokens, swapTokensToTags)
-           : result);
-       };
-
+      unescapeHTML = function unescapeHTML() {
+        // tokenize tags before setting innerHTML then swap them after
+        var tokenized, string = this;
+        if (tokenized = string.indexOf('<') > -1) {
+          string = plugin.replace.call(string, reTags, swapTagsToTokens);
+        }
+        div.innerHTML = '<pre>' + string + '<\/pre>';
+        return fuse.String(tokenized
+          ? plugin.replace.call(getText(), reTokens, swapTokensToTags)
+          : getText());
+      };
 
       // Safari 2.x has issues with escaping html inside a `pre`
       // element so we use the deprecated `xmp` element instead.
@@ -125,7 +72,7 @@
         };
       }
       if (!envTest('ELEMENT_TEXT_CONTENT')) {
-        div.innerHTML = '<pre>&lt;p&gt;x&lt;/p&gt;<\/pre>';
+        div.innerHTML = '<pre>&lt;p&gt;x&lt;\/p&gt;<\/pre>';
 
         if (envTest('ELEMENT_INNER_TEXT') && div.firstChild.innerText === '<p>x<\/p>') {
           getText = function() { return div.firstChild.innerText.replace(/\r/g, ''); };
@@ -135,19 +82,20 @@
         }
         else {
           getText = function() {
-            var node, nodes = div.firstChild.childNodes, parts = [], i = 0;
-            while (node = nodes[i++]) parts.push(node.nodeValue);
+            var node, nodes = div.firstChild.childNodes, parts = [], i = -1;
+            while (node = nodes[++i]) parts[i] = node.data;
             return parts.join('');
           };
         }
       }
-
       // lazy define methods
       plugin.escapeHTML   = escapeHTML;
       plugin.unescapeHTML = unescapeHTML;
 
       return plugin[arguments[0]];
     };
+
+    /*------------------------------------------------------------------------*/
 
     plugin.escapeHTML = function escapeHTML() {
       return define('escapeHTML').call(this);
@@ -158,7 +106,7 @@
     };
 
     plugin.stripTags = function stripTags() {
-      return fuse.String(String(this).replace(reTags, ''));
+      return fuse.String(rawReplace.call(this, reTags, ''));
     };
 
     // prevent JScript bug with named function expressions

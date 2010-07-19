@@ -7,13 +7,6 @@ new Test.Unit.Runner({
     this.assertEnumEqual(['f','o','o'], fuse.String('foo').toArray());
   },
 
-  /*
-    Note that camelize() differs from its Rails counterpart,
-    as it is optimized for dealing with JavaScript object
-    properties in conjunction with CSS property names:
-     - Looks for dashes, not underscores
-     - CamelCases first word if there is a front dash
-  */
   'testToCamelCase': function() {
     this.assertEqual('', fuse.String('').toCamelCase(),
       'Empty string');

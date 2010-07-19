@@ -348,7 +348,7 @@
               isSameOrigin(url) &&
               contentType.match(/^\s*(text|application)\/(x-)?(java|ecma)script(;|\s|$)/i))) {
             try {
-              global.eval(String(fuse.String.unfilterJSON(responseText)));
+              fuse.run(fuse.String.unfilterJSON(responseText));
             } catch (e) {
               fireException(this, e);
             }
