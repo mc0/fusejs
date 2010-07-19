@@ -131,7 +131,7 @@
       // ES5 15.4.4.4
       if (ARRAY_CONCAT_ARGUMENTS_BUGGY) {
         plugin.concat = function concat() {
-          var item, j, i = -1,
+          var item, itemLen, j, i = -1,
            length = arguments.length,
            object = Object(this),
            result = isArray(object) ? List.fromArray(object) : List(object),
