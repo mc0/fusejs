@@ -116,9 +116,9 @@ new Test.Unit.Runner({
 
     // use smaller huge string size for KHTML
     var size    = fuse.String(navigator.userAgent).contains('KHTML') ? 20 : 100,
-     longString = '"' + fuse.String('123456789\\"').times(size * 10) + '"',
+     longString = '"' + fuse.String('123456789\\"').repeat(size * 10) + '"',
      object     = '{' + longString + ': ' + longString + '},',
-     huge       = fuse.String('[' + fuse.String(object).times(size) + '{"test": 123}]');
+     huge       = fuse.String('[' + fuse.String(object).repeat(size) + '{"test": 123}]');
 
     this.assertEqual('hello world!', valid.evalJSON().test);
     this.assertEqual('hello world!', valid.evalJSON(true).test);

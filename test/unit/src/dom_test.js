@@ -956,7 +956,7 @@ new Test.Unit.Runner({
       'ul', 'li', 'ul#navigation_test', 'div#nav_tests_isolator', 'body', 'html');
 
     var dummy = fuse('<div>');
-    dummy.raw.innerHTML = fuse.String.times('<div></div>', 3);
+    dummy.raw.innerHTML = fuse.String.repeat('<div></div>', 3);
 
     this.assertRespondsTo('show', dummy.down().getAncestors()[0]);
   },
@@ -969,7 +969,7 @@ new Test.Unit.Runner({
     this.assertElementsMatch($('navigation_test_f').getDescendants(), 'em');
 
     var dummy = fuse('<div>');
-    dummy.raw.innerHTML = fuse.String.times('<div></div>', 3);
+    dummy.raw.innerHTML = fuse.String.repeat('<div></div>', 3);
     this.assertRespondsTo('show', dummy.getDescendants()[0]);
 
     var input = fuse('<input type="text">');
@@ -988,7 +988,7 @@ new Test.Unit.Runner({
       $('navigation_test_next_sibling').getChildren());
 
     var dummy = fuse('<div>');
-    dummy.raw.innerHTML = fuse.String.times('<div></div>', 3);
+    dummy.raw.innerHTML = fuse.String.repeat('<div></div>', 3);
     this.assertRespondsTo('show', dummy.getChildren()[0]);
   },
 
@@ -999,7 +999,7 @@ new Test.Unit.Runner({
     this.assertElementsMatch($('navigation_test_f').getPreviousSiblings(), 'li');
 
     var dummy = fuse('<div>');
-    dummy.raw.innerHTML = fuse.String.times('<div></div>', 3);
+    dummy.raw.innerHTML = fuse.String.repeat('<div></div>', 3);
     this.assertRespondsTo('show', dummy.down(2)[1].getPreviousSiblings()[0]);
   },
 
@@ -1010,7 +1010,7 @@ new Test.Unit.Runner({
     this.assertElementsMatch($('navigation_test_f').getNextSiblings());
 
     var dummy = fuse('<div>');
-    dummy.raw.innerHTML = fuse.String.times('<div></div>', 3);
+    dummy.raw.innerHTML = fuse.String.repeat('<div></div>', 3);
     this.assertRespondsTo('show', dummy.down().getNextSiblings()[0]);
   },
 
@@ -1020,7 +1020,7 @@ new Test.Unit.Runner({
       'span#nav_test_prev_sibling', 'div#navigation_test_next_sibling', 'p');
 
     var dummy = fuse('<div>');
-    dummy.raw.innerHTML = fuse.String.times('<div></div>', 3);
+    dummy.raw.innerHTML = fuse.String.repeat('<div></div>', 3);
     this.assertRespondsTo('show', dummy.down().getSiblings()[0]);
   },
 
@@ -1086,7 +1086,7 @@ new Test.Unit.Runner({
       'Callback argument failed');
 
     var dummy = fuse('<div>');
-    dummy.raw.innerHTML = fuse.String.times('<div><\div>', 3);
+    dummy.raw.innerHTML = fuse.String.repeat('<div><\div>', 3);
     this.assertRespondsTo('show', dummy.down().up());
   },
 
@@ -1107,7 +1107,7 @@ new Test.Unit.Runner({
       'Callback argument failed');
 
     var dummy = fuse('<div>');
-    dummy.raw.innerHTML = fuse.String.times('<div></div>', 3);
+    dummy.raw.innerHTML = fuse.String.repeat('<div></div>', 3);
     this.assertRespondsTo('show', dummy.down());
 
     // Test INPUT elements because Element#down calls Element#select
@@ -1133,7 +1133,7 @@ new Test.Unit.Runner({
       'Callback argument failed');
 
     var dummy = fuse('<div>');
-    dummy.raw.innerHTML = fuse.String.times('<div></div>', 3);
+    dummy.raw.innerHTML = fuse.String.repeat('<div></div>', 3);
     this.assertRespondsTo('show', dummy.down(2)[1].previous());
   },
 
@@ -1155,7 +1155,7 @@ new Test.Unit.Runner({
       'Callback argument failed');
 
     var dummy = fuse('<div>');
-    dummy.raw.innerHTML = fuse.String.times('<div></div>', 3);
+    dummy.raw.innerHTML = fuse.String.repeat('<div></div>', 3);
     this.assertRespondsTo('show', dummy.down().next());
   },
 
@@ -2328,11 +2328,11 @@ new Test.Unit.Runner({
     // regular expression is using a pipe-based approach for
     // matching any character
     fuse.Array('\r', '\n', ' ').each(function(character){
-      element.update('<script>' + fuse.String.times(character, 10000) + '<\/script>');
+      element.update('<script>' + fuse.String.repeat(character, 10000) + '<\/script>');
       this.assertEqual('', element.raw.innerHTML);
     }, this);
 
-    element.update('<script>var blah="' + fuse.String.times('\\', 10000) + '"<\/script>');
+    element.update('<script>var blah="' + fuse.String.repeat('\\', 10000) + '"<\/script>');
     this.assertEqual('', element.raw.innerHTML);
   },
 
