@@ -10,23 +10,28 @@
      reTrimLeft     = /^\s\s*/,
      reTrimRight    = /\s\s*$/,
 
-    repeat = function(string, count) {
+    rawReplace = plugin.replace.raw,
+
+    repeater = function(string, count) {
       // Based on work by Yaffle and Dr. J.R.Stockton.
       // Uses the `Exponentiation by squaring` algorithm.
       // http://www.merlyn.demon.co.uk/js-misc0.htm#MLS
       if (count < 1) return '';
-      if (count % 2) return repeat(string, count - 1) + string;
-      var half = repeat(string, count / 2);
+      if (count % 2) return repeater(string, count - 1) + string;
+      var half = repeater(string, count / 2);
       return half + half;
     },
 
-    replace = envTest('STRING_REPLACE_COERCE_FUNCTION_TO_STRING') ?
-      plugin.replace : plugin.replace.raw,
+    strReplace = function(pattern, replacement) {
+      return (strReplace = envTest('STRING_REPLACE_COERCE_FUNCTION_TO_STRING') ?
+        plugin.replace : plugin.replace.raw).call(this, pattern, replacement);
+    },
 
     toUpperCase = function(match, character) {
       return character ? character.toUpperCase() : '';
     };
 
+    /*------------------------------------------------------------------------*/
 
     plugin.capitalize = function capitalize() {
       var string = String(this);
@@ -58,11 +63,11 @@
     };
 
     plugin.hyphenate = function hyphenate() {
-      return fuse.String(String(this).replace(reUnderscores, '-'));
+      return fuse.String(rawReplace.call(this, reUnderscores, '-'));
     };
 
     plugin.repeat = function repeat(count) {
-      return fuse.String(repeat(String(this), toInteger(count)));
+      return fuse.String(repeater(String(this), toInteger(count)));
     };
 
     plugin.startsWith = function startsWith(pattern) {
@@ -76,14 +81,16 @@
     };
 
     plugin.toCamelCase = function camelCase() {
-      return fuse.String(replace.call(this, reHyphenated, toUpperCase));
+      return fuse.String(strReplace.call(this, reHyphenated, toUpperCase));
     };
 
     plugin.truncate = function truncate(length, truncation) {
       var endIndex, string = String(this);
       length = +length;
 
-      if (isNaN(length)) length = 30;
+      if (isNaN(length)) {
+        length = 30;
+      }
       if (length < string.length) {
         truncation = truncation == null ? '...' : String(truncation);
         endIndex = length - truncation.length;
@@ -93,17 +100,17 @@
     };
 
     plugin.underscore = function underscore() {
-      return fuse.String(String(this)
-        .replace(reDoubleColons, '/')
-        .replace(reCapped,       '$1_$2')
-        .replace(reCamelCases,   '$1_$2')
-        .replace(reHyphens,      '_').toLowerCase());
+      return fuse.String(rawReplace
+        .call(this, reDoubleColons, '/')
+        .replace(reCapped,     '$1_$2')
+        .replace(reCamelCases, '$1_$2')
+        .replace(reHyphens,    '_').toLowerCase());
     };
 
     // ES5 15.5.4.20
     if (!isFunction(plugin.trim)) {
       plugin.trim = function trim() {
-        return String(this).replace(reTrimLeft, '').replace(reTrimRight, '');
+        return rawReplace.call(this, reTrimLeft, '').replace(reTrimRight, '');
       };
 
       plugin.trim.raw = plugin.trim;
@@ -111,7 +118,7 @@
     // non-standard
     if (!isFunction(plugin.trimLeft)) {
       plugin.trimLeft = function trimLeft() {
-        return String(this).replace(reTrimLeft, '');
+        return rawReplace.call(this, reTrimLeft, '');
       };
 
       plugin.trimLeft.raw = plugin.trimLeft;
@@ -119,7 +126,7 @@
     // non-standard
     if (!isFunction(plugin.trimRight)) {
       plugin.trimRight = function trimRight() {
-        return String(this).replace(reTrimRight, '');
+        return rawReplace.call(this, reTrimRight, '');
       };
 
       plugin.trimRight.raw = plugin.trimRight;

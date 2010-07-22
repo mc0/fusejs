@@ -2,7 +2,7 @@
 
   (function(plugin) {
     var pad    = '000000',
-     __toFixed = (0).toFixed,
+     __toFixed = 0..toFixed,
      __abs     = Math.abs,
      __ceil    = Math.ceil,
      __floor   = Math.floor,
