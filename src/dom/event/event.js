@@ -1,6 +1,7 @@
   /*---------------------------------- EVENT ---------------------------------*/
 
   fuse.dom.Event = (function() {
+
     var Decorator = function(event, currTarget) {
       var getCurrentTarget =
       this.getCurrentTarget = function getCurrentTarget() {
@@ -432,19 +433,22 @@
     };
 
     plugin.findElement = function findElement(selectors, untilElement) {
-      var match = fuse.dom.selector.match,
+      var decorator, match = fuse.dom.selector.match,
        element = this.getTarget === plugin.getTarget ? getEventTarget(this) : this.getTarget();
 
-      element = element.raw || element;
-      if (element !== untilElement) {
-        if (selectors == null || selectors == '' || !element || match(element, selectors)) {
-          return element;
+      if (element.raw) {
+        decorator = element;
+        element = element.raw;
+      }
+      if (element != untilElement) {
+        if (!selectors || selectors == '' || match(element, selectors)) {
+          return decorator || fromElement(element);
         }
-        if (element = (element.raw || element).parentNode) {
+        if (element = element.parentNode) {
           do {
-            if (element === untilElement)
+            if (element == untilElement)
               break;
-            if (element.nodeType === ELEMENT_NODE && match(element, selectors))
+            if (element.nodeType == ELEMENT_NODE && match(element, selectors))
               return fromElement(element);
           } while (element = element.parentNode);
         }
