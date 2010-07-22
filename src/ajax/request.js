@@ -1,6 +1,7 @@
   /*---------------------------- AJAX: REQUEST -------------------------------*/
 
   fuse.ajax.Request = (function() {
+
     var Klass = function() { },
 
     Request = function Request(url, options) {
@@ -11,7 +12,7 @@
       __instance = null;
       instance.raw = fuse.ajax.create();
 
-      instance.onTimeout = 
+      instance.onTimeout =
         function() { onTimeout.call(instance); };
 
       instance.onStateChange =
@@ -23,7 +24,7 @@
 
     __instance,
     __apply = Request.apply,
-    __call = Request.call;
+    __call  = Request.call;
 
     Request.call = function(thisArg) {
       __instance = thisArg;
@@ -38,23 +39,21 @@
     fuse.Class(fuse.ajax.Base, { 'constructor': Request });
     Klass.prototype = Request.plugin;
 
-    Request.addMixins(fuse.Class.mixins.event);
     Request.READY_STATES = fuse.Array('unsent', 'opened', 'headersReceived', 'loading', 'done');
+    Request.addMixins(fuse.Class.mixins.event);
     return Request;
   })();
 
   /*--------------------------------------------------------------------------*/
 
   (function(plugin) {
-    var EVENT_TYPES = ['abort', 'exception', 'failure', 'success', 'timeout'],
-    
-    isSameOrigin = fuse.Object.isSameOrigin,
 
-    reHTTP = /^https?:/,
-
-    responders = fuse.ajax.responders,
-
-    fireEvent = fuse.Class.mixins.event.fire,
+    var EVENT_TYPES  = ['abort', 'exception', 'failure', 'success', 'timeout'],
+     isSameOrigin    = fuse.Object.isSameOrigin,
+     reContentTypeJS = /^\s*(text|application)\/(x-)?(java|ecma)script(;|\s|$)/i,
+     reHTTP          = /^https?:/,
+     responders      = fuse.ajax.responders,
+     fireEvent       = fuse.Class.mixins.event.fire,
 
     fireException = function(request, exception) {
       fireEvent.call(request, 'exception', request, exception);
@@ -63,6 +62,8 @@
       var handlers = request._events.exception;
       if (!handlers || !handlers.length) throw exception;
     };
+
+    /*------------------------------------------------------------------------*/
 
     plugin._useStatus   = true;
     plugin._timerId     = null;
@@ -93,13 +94,8 @@
     };
 
     plugin.fire = function fire(eventType) {
-      var useCall = arguments.length < 2;
       try {
-        if (useCall) {
-          fireEvent.call(this, eventType);
-        } else {
-          fireEvent.apply(this, arguments);
-        }
+        fireEvent.apply(this, arguments);
       } catch (e) {
         fireException(this, e);
       }
@@ -136,21 +132,25 @@
       // ensure all states are fired and only fired once per change
       var endState = this.raw.readyState, readyState = this.readyState;
       if (readyState < 4) {
-        if (forceState != null) readyState = forceState - 1;
-        while (readyState < endState)
+        if (forceState != null) {
+          readyState = forceState - 1;
+        }
+        while (readyState < endState) {
           this.setReadyState(++readyState);
+        }
       }
     };
 
     plugin.request = function request(url, options) {
+      var async, eventType, handler, headers, key, timeout, i = -1, j = i,
+       body = this.body, url = String(this.url), xhr = this.raw;
+
       // treat request() as the constructor and call Base as $super
       // if first call or new options are passed
       if (!this.options || options) {
         fuse.ajax.Base.call(this, url, options);
-
         options = this.options;
-        
-        var eventType, handler, i = -1, j = i;
+
         while (eventType = fuse.ajax.Request.READY_STATES[++i]) {
           if (handler = options['on' + capitalize(eventType)]) {
             this.observe(eventType, handler);
@@ -165,13 +165,9 @@
         options = this.options;
       }
 
-      var key,
-       async   = options.asynchronous,
-       body    = this.body,
-       headers = options.headers,
-       timeout = options.timeout,
-       url     = String(this.url),
-       xhr     = this.raw;
+      async   = options.asynchronous;
+      headers = options.headers;
+      timeout = options.timeout;
 
       // reset flags
       this.isAborted  = createGetter('isAborted', false);
@@ -204,11 +200,11 @@
       try {
         // attach onreadystatechange event after open() to avoid some browsers
         // firing duplicate readyState events
-        xhr.open(this.method.toUpperCase(), url, async,
-          options.username, options.password);
+        xhr.open(this.method.toUpperCase(), url, async, options.username, options.password);
         xhr.onreadystatechange = this.onStateChange;
 
         // set headers
+        // use regular for...in because we aren't worried about shadowed properties
         for (key in headers) {
           xhr.setRequestHeader(key, headers[key]);
         }
@@ -225,21 +221,24 @@
     };
 
     plugin.setReadyState = function setReadyState(readyState) {
-      var contentType, evalJS, eventType, heandlers, json, responseText,
+      var contentType, e, evalJS, eventType, hasText, heandlers, json, responseText,
        responseXML, status, statusText, successOrFailure, timerId, i = -1,
-       events     = this._events,
-       eventTypes = [],
-       skipped    = { },
-       options    = this.options,
-       url        = this.url,
-       xhr        = this.raw,
-       isAborted  = this.isAborted(),
-       isTimedout = this.isTimedout(),
-       evalJSON   = options.evalJSON;
+       events       = this._events,
+       eventTypes   = [],
+       skipped      = { },
+       options      = this.options,
+       url          = this.url,
+       xhr          = this.raw,
+       isAborted    = this.isAborted(),
+       isTimedout   = this.isTimedout(),
+       evalJSON     = options.evalJSON,
+       sanitizeJSON = options.sanitizeJSON || !isSameOrigin(url);
 
       // exit if no headers and wait for state 3 to fire states 2 and 3
       if (readyState == 2 && this.getAllHeaders() == '' &&
-        xhr.readyState === 2) return;
+        xhr.readyState === 2) {
+        return;
+      }
 
       this.readyState = fuse.Number(readyState);
 
@@ -277,15 +276,16 @@
         if (readyState > 2) {
           // IE will throw an error when accessing responseText in state 3
           try {
-            if (responseText = xhr.responseText)
+            if (responseText = xhr.responseText) {
               this.responseText = fuse.String(responseText);
+            }
           } catch (e) { }
         }
         else if (readyState == 2 && evalJSON &&
             (json = this.getHeader('X-JSON')) && json != '') {
           // set headerJSON
           try {
-            this.headerJSON = json.evalJSON(options.sanitizeJSON || !isSameOrigin(url));
+            this.headerJSON = json.evalJSON(sanitizeJSON);
           } catch (e) {
             fireException(this, e);
           }
@@ -297,6 +297,7 @@
         evalJS       = options.evalJS,
         timerId      = this._timerId;
         responseText = this.responseText;
+        hasText      = !responseText.isBlank();
 
         // clear timeout timer
         if (timerId != null) {
@@ -330,26 +331,28 @@
 
           // set responseXML
           responseXML = xhr.responseXML;
-          if (responseXML) this.responseXML = responseXML;
+          if (responseXML) {
+            this.responseXML = responseXML;
+          }
 
           // set responseJSON
-          if (evalJSON == 'force' || (evalJSON && !responseText.blank() &&
-              contentType.indexOf('application/json') > -1)) {
+          if (evalJSON == 'force' || evalJSON && hasText &&
+              contentType.indexOf('application/json') > -1) {
             try {
-              this.responseJSON = responseText.evalJSON(options.sanitizeJSON ||
-                !isSameOrigin(url));
+              this.responseJSON = responseText.evalJSON(sanitizeJSON);
             } catch (e) {
               fireException(this, e);
             }
           }
 
           // eval javascript
-          if (responseText && (evalJS == 'force' || evalJS &&
-              isSameOrigin(url) &&
-              contentType.match(/^\s*(text|application)\/(x-)?(java|ecma)script(;|\s|$)/i))) {
-            try {
-              fuse.run(fuse.String.unfilterJSON(responseText));
-            } catch (e) {
+          if (hasText && (evalJS == 'force' || evalJS && isSameOrigin(url) &&
+              contentType.match(reContentTypeJS))) {
+
+            fuse.run('try{' + responseText.unfilterJSON() + '}catch(e){fuse.'  + uid + '_error=e}');
+
+            if (e = fuse[uid + '_error']) {
+              delete fuse[uid + '_error'];
               fireException(this, e);
             }
           }
@@ -363,7 +366,7 @@
         // temporarily remove handlers so only responders are called
         if (skipped[eventType]) {
           handlers = events[eventType];
-          events[eventType] = null;
+          delete events[eventType];
           this.fire(eventType, this, this.headerJSON);
           events[eventType] = handlers;
         }
