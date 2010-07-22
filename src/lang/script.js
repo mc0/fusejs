@@ -94,7 +94,7 @@
     /*------------------------------------------------------------------------*/
 
     fuse.run = function run(code, context) {
-      var backup = global.fuse,
+      var backup = window.fuse,
 
       makeExecuter = function(context) {
         return context.Function('window',
@@ -104,11 +104,11 @@
       },
 
       run = function run(code, context) {
-        context || (context = global);
-        if (context == global) return execute(code);
+        context || (context = window);
+        if (context == window) return execute(code);
 
         context = getWindow(context.raw || context);
-        if (context == global) return execute(code);
+        if (context == window) return execute(code);
 
         // cache executer for other contexts
         var id = getFuseId(context), data = domData[id];
@@ -121,16 +121,16 @@
          .data = text || '';
       },
 
-      execute = makeExecuter(global);
+      execute = makeExecuter(window);
 
       try {
         // Opera 9.25 can't indirectly call eval()
-        global.fuse = undef;
+        window.fuse = undef;
         execute('var fuse="x"');
-        if (global.fuse !== 'x') throw new EvalError;
+        if (window.fuse !== 'x') throw new EvalError;
       }
       catch (e) {
-        // fallback on global.eval()
+        // fallback on window.eval()
         makeExecuter = function(context) {
           return context.Function('window',
             'return function (' + uid + '){' +
@@ -138,17 +138,17 @@
             'return window.eval(String(' + uid + '))}')(context);
         };
 
-        global.fuse = undef;
-        execute = makeExecuter(global);
+        window.fuse = undef;
+        execute = makeExecuter(window);
         execute('var fuse="x"');
       }
 
-      if (global.fuse !== 'x') {
+      if (window.fuse !== 'x') {
         // fallback on script injection
-        if (isHostType(global, 'document')) {
+        if (isHostType(window, 'document')) {
           run = function run(code, context) {
-            context || (context = global);
-            return execute(code, context == global ?
+            context || (context = window);
+            return execute(code, context == window ?
               context : getWindow(context.raw || context));
           };
 
@@ -156,7 +156,7 @@
             var parentNode, result, script,
              text = 'fuse.' + uid + '.returned = eval(';
 
-            if (context == global) {
+            if (context == window) {
               context = fuse._doc;
             } else {
               context = getDocument(context);
@@ -199,7 +199,7 @@
       // IE's eval will error if code contains <!--
       if (execute) {
         try {
-          execute('<!--\n//-->', global);
+          execute('<!--\n//-->', window);
         }
         catch (e) {
           var __execute = execute;
@@ -227,7 +227,7 @@
         };
       }
 
-      (global.fuse = backup).run = run;
+      (window.fuse = backup).run = run;
       return run(code, context);
     };
 

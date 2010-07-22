@@ -112,7 +112,7 @@
           doc.readyState = 'interactive';
         }
 
-        event = Event(event || global.event, doc);
+        event = Event(event || window.event, doc);
         event.type = 'dom:loaded';
 
         decorated.isLoaded = createGetter('isLoaded', true);
@@ -123,7 +123,7 @@
     },
 
     winLoadWrapper = function(event) {
-      event || (event = global.event);
+      event || (event = window.event);
       var doc = fuse._doc;
 
       // make dom:loaded dispatch if it hasn't
@@ -140,12 +140,12 @@
       }
 
       // prepare event wrapper
-      event = Event(event, global);
+      event = Event(event, window);
       event.type = 'load';
       winLoadDispatcher(event);
 
       // clear event cache
-      fuse(global).stopObserving('load');
+      fuse(window).stopObserving('load');
     };
 
     // fixed for Firefox < 3.6
@@ -159,5 +159,5 @@
 
     // Perform feature tests and define pseudo private
     // body/root properties when the dom is loaded
-    addDispatcher(global, 'load', winLoadWrapper);
+    addDispatcher(window, 'load', winLoadWrapper);
   })(fuse.dom.Event);

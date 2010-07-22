@@ -28,7 +28,7 @@
           };
         } catch (e) { }
       }
-    } else if (isHostType(global, 'XMLHttpRequest')) {
+    } else if (isHostType(window, 'XMLHttpRequest')) {
       create = function create() {
         return new XMLHttpRequest();
       };

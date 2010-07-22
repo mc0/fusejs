@@ -184,7 +184,7 @@
       // return true if request url is http(s) or, if relative, the pages url is http(s)
       this._useStatus = reHTTP.test(url) ||
         (url.slice(0, 6).indexOf(':') < 0 ?
-          reHTTP.test(global.location.protocol) : false);
+          reHTTP.test(window.location.protocol) : false);
 
       // start timeout timer if provided
       if (timeout != null) {
@@ -301,7 +301,7 @@
 
         // clear timeout timer
         if (timerId != null) {
-          global.clearTimeout(timerId);
+          window.clearTimeout(timerId);
           this._timerId = null;
         }
 

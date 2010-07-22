@@ -79,7 +79,7 @@
     // for IE
     onBeforeActivate = function() {
       var id, data, form, type,
-       target = global.event.srcElement,
+       target = window.event.srcElement,
        nodeName = target && getNodeName(target);
 
       // ensure we patch the elements event data only once

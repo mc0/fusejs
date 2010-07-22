@@ -1,6 +1,6 @@
   /*---------------------------- SELECTOR: SIZZLE ----------------------------*/
 
-  fuse[uid] = global.Sizzle;
+  fuse[uid] = window.Sizzle;
 
   //= require "../../../vendor/sizzle/sizzle.js"
 
@@ -27,5 +27,5 @@
   })(Sizzle, fuse.dom.selector, fuse.dom.NodeList);
 
   // restore
-  if (fuse[uid]) global.Sizzle = fuse[uid];
+  if (fuse[uid]) window.Sizzle = fuse[uid];
   delete fuse[uid];

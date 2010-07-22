@@ -31,9 +31,9 @@
     };
 
     // weak fallback
-    if (!isWindow(global)) {
+    if (!isWindow(window)) {
       isWindow = function(object) {
-        return typeof object.window !== 'undefined' && object.window == object;
+        return typeof object.window != 'undefined' && object.window == object;
       };
     }
 

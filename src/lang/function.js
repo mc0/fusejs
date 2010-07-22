@@ -99,7 +99,7 @@
     };
 
     Func.defer = function defer(fn) {
-      return Func.delay.apply(global,
+      return Func.delay.apply(window,
         concatList([fn, 0.01], slice.call(arguments, 1)));
     };
 
@@ -115,8 +115,8 @@
       return fn._methodized || (fn._methodized = function() {
         var fn = f || context[name];
         return arguments.length
-          ? fn.apply(global, prependList(arguments, this))
-          : fn.call(global, this);
+          ? fn.apply(window, prependList(arguments, this))
+          : fn.call(window, this);
       });
     };
 

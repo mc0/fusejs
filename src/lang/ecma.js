@@ -195,7 +195,7 @@
           exec  = function exec(string) {
             var backup, result, pattern = this, source = pattern.source;
             if (result = __exec.call(pattern, string)) {
-              // convert to non-global regexp
+              // convert to non-window regexp
               if (pattern.global) {
                 if (cache.source != source) {
                   cache = new RegExp(source,
@@ -322,7 +322,7 @@
           // pattern.lastIndex tampering
           lastIndex = index + match[0].length;
           match.push(index, source);
-          result += replacement.apply(global, match);
+          result += replacement.apply(window, match);
           pattern.lastIndex = lastIndex;
 
           if (nonGlobal) {
@@ -356,7 +356,7 @@
             args = regExec.call(pattern, match);
             pattern.lastIndex = backup;
             args.push(arguments[length - 2], arguments[length - 1]);
-            return __replacement.apply(global, args);
+            return __replacement.apply(window, args);
           };
         }
         return __replace2.call(this, pattern, replacement);
@@ -371,7 +371,7 @@
           var __replacement = replacement;
           replacement = function() {
             // ensure string `null` and `undefined` are returned
-            var result = __replacement.apply(global, arguments);
+            var result = __replacement.apply(window, arguments);
             return result || String(result);
           };
         }

@@ -9,7 +9,7 @@
   domData['1'] = { };
   domData['2'] = { 'nodes': { } };
 
-  fuse._doc   = global.document;
+  fuse._doc   = window.document;
   fuse._div   = fuse._doc.createElement('DiV');
   fuse._docEl = fuse._doc.documentElement;
   fuse._info  = { };
@@ -37,14 +37,14 @@
 
   // based on work by Diego Perini
   getWindow = function getWindow(element) {
-    var frame, i = -1, doc = getDocument(element), frames = global.frames;
+    var frame, i = -1, doc = getDocument(element), frames = window.frames;
     if (fuse._doc !== doc) {
       while (frame = frames[++i]) {
         if (frame.document === doc)
           return frame;
       }
     }
-    return global;
+    return window;
   };
 
   returnOffset = function(left, top) {
@@ -54,8 +54,8 @@
     return result;
   };
 
-  // Safari 2.0.x returns `Abstract View` instead of `global`
-  if (isHostType(fuse._doc, 'defaultView') && fuse._doc.defaultView === global) {
+  // Safari 2.0.x returns `Abstract View` instead of `window`
+  if (isHostType(fuse._doc, 'defaultView') && fuse._doc.defaultView === window) {
     getWindow = function getWindow(element) {
       return getDocument(element).defaultView;
     };

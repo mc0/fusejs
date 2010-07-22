@@ -467,7 +467,7 @@
 
     plugin.scrollTo = function scrollTo() {
       var pos = plugin.getCumulativeOffset.call(this);
-      global.scrollTo(pos[0], pos[1]);
+      window.scrollTo(pos[0], pos[1]);
       return this;
     };
 

@@ -264,14 +264,14 @@
     };
 
     Poller.prototype.clear = function() {
-      this.id != null && (this.id = global.clearTimeout(this.id));
+      this.id != null && (this.id = window.clearTimeout(this.id));
     };
 
     /*------------------------------------------------------------------------*/
 
     if (doc.readyState === 'complete') {
       // fire dom:loaded and window load events if window is already loaded
-      return fuse(global).fire('load');
+      return fuse(window).fire('load');
     }
 
     if (envTest('ELEMENT_ADD_EVENT_LISTENER')) {
@@ -279,10 +279,10 @@
     }
     // Weak inference used as IE 6/7 have the operation aborted error
     else if (envTest('ELEMENT_DO_SCROLL') && !envTest('JSON')) {
-      // Avoid a potential browser hang when checking global.top (thanks Rich Dougherty)
+      // Avoid a potential browser hang when checking window.top (thanks Rich Dougherty)
       // The value of frameElement can be null or an object.
-      // Checking global.frameElement could throw if not accessible.
-      try { isFramed = global.frameElement != null; } catch(e) { }
+      // Checking window.frameElement could throw if not accessible.
+      try { isFramed = window.frameElement != null; } catch(e) { }
 
       // doScroll will not throw an error when in an iframe
       // so we rely on the event system to fire the dom:loaded event

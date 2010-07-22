@@ -80,7 +80,7 @@
     };
 
     plugin.stop = function stop() {
-      global.clearTimeout(this.timer);
+      window.clearTimeout(this.timer);
       this.lastText = null;
       this.updater.abort();
       this.onStop && this.onStop.apply(this, arguments);

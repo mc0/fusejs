@@ -71,7 +71,7 @@
     plugin.stop = function stop() {
       var id = this._timerId;
       if (id === null) return;
-      global.clearTimeout(id);
+      window.clearTimeout(id);
       this._timerId = null;
       return this;
     };

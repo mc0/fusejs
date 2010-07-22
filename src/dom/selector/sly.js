@@ -1,6 +1,6 @@
   /*----------------------------- SELECTOR: SLY ------------------------------*/
 
-  fuse[uid] = global.Sly;
+  fuse[uid] = window.Sly;
 
   //= require "../../../vendor/sly/Sly.js"
 
@@ -27,5 +27,5 @@
   })(Sly, fuse.dom.selector, fuse.dom.NodeList);
 
   // restore
-  if (fuse[uid]) global.Sky = fuse[uid];
+  if (fuse[uid]) window.Sly = fuse[uid];
   delete fuse[uid];

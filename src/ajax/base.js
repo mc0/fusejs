@@ -6,7 +6,7 @@
 
     Base = function Base(url, options) {
       var customHeaders, queryString, body = null,
-       location = global.location,
+       location = window.location,
        defaults = Base.defaults,
        defaultHeaders = defaults.headers;
 

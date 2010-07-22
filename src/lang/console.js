@@ -42,29 +42,29 @@
     },
 
     hasGlobalConsole = (
-      isHostType(global, 'console') &&
-      isHostType(global.console, 'info') &&
-      isHostType(global.console, 'error')),
+      isHostType(window, 'console') &&
+      isHostType(window.console, 'info') &&
+      isHostType(window.console, 'error')),
 
     hasOperaConsole = (
-      isHostType(global, 'opera') &&
-      isHostType(global.opera, 'postError')),
+      isHostType(window, 'opera') &&
+      isHostType(window.opera, 'postError')),
 
     hasJaxerConsole = (
-      isHostType(global, 'Jaxer') &&
-      isHostType(global.Jaxer, 'Log') &&
-      isHostType(global.Jaxer.Log, 'info') &&
-      isHostType(global.Jaxer.Log, 'error'));
+      isHostType(window, 'Jaxer') &&
+      isHostType(window.Jaxer, 'Log') &&
+      isHostType(window.Jaxer.Log, 'info') &&
+      isHostType(window.Jaxer.Log, 'error'));
 
     if (hasOperaConsole) {
-      object = global.opera;
+      object = window.opera;
       info   = function info(message) { object.postError('Info: ' + message); };
       error  = function error(message, exception) {
         object.postError(['Error: ' + message + '\n', exception]);
       };
     }
     else if (hasGlobalConsole || hasJaxerConsole) {
-      object = hasGlobalConsole ? global.console : global.Jaxer.Log;
+      object = hasGlobalConsole ? window.console : window.Jaxer.Log;
       info   = function info(message) { object.info(message); };
       error  = function error(message, exception) {
         object.error(message, exception);

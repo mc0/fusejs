@@ -240,7 +240,7 @@
   /*--------------------------------------------------------------------------*/
 
   // replace placeholder objects with inheritable namespaces
-  global.fuse = fuse.Class({ 'constructor': fuse });
+  window.fuse = fuse.Class({ 'constructor': fuse });
 
   (function(__env) {
     delete fuse.env;

@@ -131,7 +131,7 @@
       var __hasKey = hasKey;
       hasKey = function hasKey(object, property) {
         if (object == null) throw new TypeError;
-        if(object == global) {
+        if(object == window) {
           return property in object &&
             object[property] !== objectProto[property];
         }
@@ -254,7 +254,7 @@
     // https://developer.mozilla.org/En/Same_origin_policy_for_JavaScript
     // http://www.iana.org/assignments/port-numbers
     Obj.isSameOrigin = (function() {
-      var loc      = global.location,
+      var loc      = window.location,
        protocol    = loc.protocol,
        port        = loc.port,
        reUrlParts  = /([^:]+:)\/\/(?:[^:]+(?:\:[^@]+)?@)?([^\/:$]+)(?:\:(\d+))?/,

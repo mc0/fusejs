@@ -11,7 +11,7 @@
  * Built: <%= Built %>
  * ----------------------------------------------------------------------------*/
 
-(function(global) {
+(function(window) {
 
   // private vars
   var DATA_ID_PROP, Document, Element, Node, NodeList, Window,
@@ -35,11 +35,11 @@
 
   slice = [].slice,
 
-  setTimeout = global.setTimeout,
+  setTimeout = window.setTimeout,
 
   uid = 'uid' + String(+new Date).slice(0, 12),
 
-  userAgent = global.navigator && navigator.userAgent || '',
+  userAgent = window.navigator && navigator.userAgent || '',
 
   addNodeListMethod = NOOP,
 
@@ -118,7 +118,7 @@
   *
   * The version of [FuseJS](http://fusejs.com) that you're using (e.g., <%= Version %>).
   */
-  global.fuse = (function() {
+  window.fuse = (function() {
     var fuse = function fuse() { };
     fuse.version = '<%= Version %>';
     return fuse;
@@ -266,7 +266,7 @@
 
 })(this);
 
-(function(global) {
+(function(window) {
   //= require "dom/event/dispatcher.js"
   //= require "dom/event/dom-loaded.js"
 })(this);

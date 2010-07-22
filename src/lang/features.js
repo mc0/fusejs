@@ -39,12 +39,12 @@
   envAddTest({
     'ACTIVE_X_OBJECT': function() {
       // true for IE
-      return isHostType(global, 'ActiveXObject');
+      return isHostType(window, 'ActiveXObject');
     },
 
     'JSON': function() {
       // true for IE8 and newer browsers
-      return typeof global.JSON === 'object' &&
+      return typeof window.JSON === 'object' &&
         typeof JSON.parse === 'function' &&
         typeof JSON.stringify === 'function' &&
         typeof JSON.stringify(NOOP) === 'undefined' &&

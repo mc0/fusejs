@@ -72,7 +72,7 @@
         return returnOffset(win.pageXOffset, win.pageYOffset);
       };
 
-      if (typeof global.pageXOffset !== 'number') {
+      if (typeof window.pageXOffset !== 'number') {
         getScrollOffsets = function getScrollOffsets() {
           return returnOffset(scrollEl.scrollLeft, scrollEl.scrollTop);
         };

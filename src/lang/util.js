@@ -23,7 +23,7 @@
       util.$R = fuse.Range;
     }
     if (fuse.dom) {
-      var doc = global.document;
+      var doc = window.document;
       util.$ = function $(object) {
         var objects, length = arguments.length;
         if (length > 1) {

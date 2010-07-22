@@ -87,7 +87,7 @@
         // the same window may not strict equal each other.
         win = getWindow(node);
         if (node == win) {
-          id = node == global ? '1' : getFuseId(node.frameElement) + '-1';
+          id = node == window ? '1' : getFuseId(node.frameElement) + '-1';
         }
         else if (node.nodeType === DOCUMENT_NODE) {
           // quick return for common case OR

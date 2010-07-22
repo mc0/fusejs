@@ -8,7 +8,7 @@
 
     counter = 1,
 
-    doc = global.document,
+    doc = window.document,
 
     ACTIVEX_MODE = 1,
 
@@ -26,7 +26,7 @@
     })(),
 
     HAS_IFRAME = doc && isHostType(doc, 'createElement') &&
-      isHostType(global, 'frames') && 'src' in doc.createElement('iframe'),
+      isHostType(window, 'frames') && 'src' in doc.createElement('iframe'),
 
     HAS_PROTO = envTest('OBJECT__PROTO__'),
 
@@ -97,7 +97,7 @@
       var iframe, key, name, parentNode, result, xdoc;
 
       switch (MODE) {
-        case PROTO_MODE: return global;
+        case PROTO_MODE: return window;
 
         case ACTIVEX_MODE:
           // IE requires the iframe/htmlfile remain in the cache or
@@ -111,8 +111,8 @@
           // IE doesn't support bfcache so we don't have to worry about breaking it.
           if (!CLEANED_ACTIVEX) {
             CLEANED_ACTIVEX = true;
-            if (isHostType(global, 'attachEvent')) {
-              global.attachEvent('onunload', function() { cache.length = 0; });
+            if (isHostType(window, 'attachEvent')) {
+              window.attachEvent('onunload', function() { cache.length = 0; });
             }
           }
           return xdoc.parentWindow;
@@ -134,9 +134,9 @@
             // A side effect is that Firefox will use the __proto__ technique
             // when served from the file:// protocol as well
             if ('MozOpacity' in doc.documentElement.style &&
-                isHostType(global, 'sessionStorage') &&
-                !global.sessionStorage[key]) {
-              global.sessionStorage[key] = 1;
+                isHostType(window, 'sessionStorage') &&
+                !window.sessionStorage[key]) {
+              window.sessionStorage[key] = 1;
               throw new Error;
             }
 
@@ -146,7 +146,7 @@
             iframe.style.display = 'none';
             parentNode.insertBefore(iframe, parentNode.firstChild);
 
-            result = global.frames[name];
+            result = window.frames[name];
             (xdoc = result.document).open();
             xdoc.write(
               // Firefox 3.5+ glitches when an iframe is inserted and removed,
@@ -184,11 +184,11 @@
       // the documented method.length value or allow null callbacks.
       var Array, Boolean, Date, Function, Number, Object, RegExp, String, from, reStrict,
        filterCallback       = function(value) { return value != null; },
-       glFunction           = global.Function,
+       glFunction           = window.Function,
        sandbox              = createSandbox(),
        isProtoMode          = MODE === PROTO_MODE,
-       isArrayChainable     = !isProtoMode && !(sandbox.Array().slice(0) instanceof global.Array),
-       isRegExpChainable    = !isProtoMode && !(sandbox.RegExp('') instanceof global.RegExp),
+       isArrayChainable     = !isProtoMode && !(sandbox.Array().slice(0) instanceof window.Array),
+       isRegExpChainable    = !isProtoMode && !(sandbox.RegExp('') instanceof window.RegExp),
        arrPlugin            = isProtoMode && new sandbox.Array    || sandbox.Array.prototype,
        boolPlugin           = isProtoMode && new sandbox.Boolean  || sandbox.Boolean.prototype,
        datePlugin           = isProtoMode && new sandbox.Date     || sandbox.Date.prototype,
@@ -412,15 +412,15 @@
             body = 'arguments.callee = arguments.callee.' + uid + '; ' + body;
           }
 
-          // create function using global.Function constructor
+          // create function using window.Function constructor
           fn = new glFunction(args.join(','), body);
 
           // ensure `thisArg` isn't set to the sandboxed global
-          result = fn[uid] = new __Function('global, fn',
+          result = fn[uid] = new __Function('window, fn',
             'var sandbox=this;' +
             'return function(){' +
-            'return fn.apply(this==sandbox?global:this,arguments)' +
-            '}')(global, fn);
+            'return fn.apply(this==sandbox?window:this,arguments)' +
+            '}')(window, fn);
 
           // make toString() return the unmodified function body
           result.toString = toString;
@@ -989,8 +989,8 @@
     // content warnings in IE6. It is also used as a workaround for access denied errors
     // thrown when using iframes to create sandboxes after the document.domain is
     // set (Opera 9.25 is out of luck here).
-    if (HAS_ACTIVEX && !isHostType(global, 'XMLHttpRequest') &&
-          global.location && global.location.protocol === 'https:') {
+    if (HAS_ACTIVEX && !isHostType(window, 'XMLHttpRequest') &&
+          window.location && window.location.protocol === 'https:') {
       setMode(ACTIVEX_MODE);
     }
     // Iframes are the fastest and prefered technique

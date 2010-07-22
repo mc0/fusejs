@@ -47,7 +47,7 @@
     strInspect =
     strPlugin.inspect = function inspect(useDoubleQuotes) {
       // called Obj.inspect(fuse.String.plugin) or Obj.inspect(fuse.Array)
-      if (this === strPlugin || global == this || this == null) {
+      if (this === strPlugin || window == this || this == null) {
         return inspectPlugin(strPlugin);
       }
       // called normally fuse.String(...).inspect()
@@ -90,7 +90,7 @@
         return fuse.String(value);
       } catch (e) {
         // probably caused by having the `toString` of an object call inspect()
-        if (e.constructor === global.RangeError) {
+        if (e.constructor === window.RangeError) {
           return fuse.String('...');
         }
         throw e;
@@ -101,7 +101,7 @@
       var plugin = List.plugin;
       plugin.inspect = function inspect() {
         // called Obj.inspect(fuse.Array.plugin) or Obj.inspect(fuse.Array)
-        if (this === plugin || global == this || this == null) {
+        if (this === plugin || window == this || this == null) {
           return inspectPlugin(plugin);
         }
         // called normally fuse.Array(...).inspect()
@@ -129,7 +129,7 @@
       var hashPlugin = fuse.Hash.plugin;
       hashPlugin.inspect = function inspect() {
         // called Obj.inspect(fuse.Hash.plugin) or generic if added later
-        if (this === hashPlugin || global == this || this == null) {
+        if (this === hashPlugin || window == this || this == null) {
           return inspectPlugin(hashPlugin);
         }
         // called normally fuse.Hash(...).inspect()
@@ -145,7 +145,7 @@
       var elemPlugin = fuse.dom.Element.plugin;
       elemPlugin.inspect = function inspect() {
         // called Obj.inspect(Element.plugin) or Obj.inspect(Element)
-        if (this === elemPlugin || global == this || this == null) {
+        if (this === elemPlugin || window == this || this == null) {
           return inspectPlugin(this);
         }
         // called normally Element.inspect(element)
