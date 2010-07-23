@@ -118,7 +118,7 @@
           return xdoc.parentWindow;
 
         case IFRAME_MODE:
-          key = '/* fuse_iframe_cache_fix: ' + fuse.version + ' */';
+          key = '/* fuse_iframe_cache_fix */';
           name = uid + counter++;
           parentNode = doc.body || doc.documentElement;
 
@@ -183,20 +183,20 @@
       // Most methods try to follow ES5 spec but may differ from
       // the documented method.length value or allow null callbacks.
       var Array, Boolean, Date, Function, Number, Object, RegExp, String, from, reStrict,
+       sandbox              = createSandbox(),
        filterCallback       = function(value) { return value != null; },
        glFunction           = window.Function,
-       sandbox              = createSandbox(),
        isProtoMode          = MODE == PROTO_MODE,
-       isArrayChainable     = !isProtoMode && !(sandbox.Array().slice(0) instanceof window.Array),
-       isRegExpChainable    = !isProtoMode && !(sandbox.RegExp('') instanceof window.RegExp),
+       isArrayChainable     = sandbox.Array().constructor !== window.Array,
+       isRegExpChainable    = sandbox.RegExp('').constructor !== window.RegExp,
        arrPlugin            = isProtoMode && new sandbox.Array    || sandbox.Array.prototype,
        boolPlugin           = isProtoMode && new sandbox.Boolean  || sandbox.Boolean.prototype,
        datePlugin           = isProtoMode && new sandbox.Date     || sandbox.Date.prototype,
        funcPlugin           = isProtoMode && new sandbox.Function || sandbox.Function.prototype,
        numPlugin            = isProtoMode && new sandbox.Number   || sandbox.Number.prototype,
+       objPlugin            = isProtoMode && new sandbox.Object   || sandbox.Object.prototype,
        regPlugin            = isProtoMode && new sandbox.RegExp   || sandbox.RegExp.prototype,
        strPlugin            = isProtoMode && new sandbox.String   || sandbox.String.prototype,
-       objPlugin            = sandbox.Object.prototype,
        __Array              = sandbox.Array,
        __Boolean            = sandbox.Boolean,
        __Date               = sandbox.Date,
@@ -204,66 +204,72 @@
        __Number             = sandbox.Number,
        __Object             = sandbox.Object,
        __RegExp             = sandbox.RegExp,
-       __String             = sandbox.String;
-       __concat             = arrPlugin.concat,
-       __every              = arrPlugin.every,
-       __filter             = arrPlugin.filter,
-       __join               = arrPlugin.join,
-       __indexOf            = arrPlugin.indexOf,
-       __lastIndexOf        = arrPlugin.lastIndexOf,
-       __map                = arrPlugin.map,
-       __push               = arrPlugin.push,
-       __reverse            = arrPlugin.reverse,
-       __slice              = arrPlugin.slice,
-       __splice             = arrPlugin.splice,
-       __some               = arrPlugin.some,
-       __sort               = arrPlugin.sort,
-       __unshift            = arrPlugin.unshift,
-       __getDate            = datePlugin.getDate,
-       __getDay             = datePlugin.getDay,
-       __getFullYear        = datePlugin.getFullYear,
-       __getHours           = datePlugin.getHours,
-       __getMilliseconds    = datePlugin.getMilliseconds,
-       __getMinutes         = datePlugin.getMinutes,
-       __getMonth           = datePlugin.getMonth,
-       __getSeconds         = datePlugin.getSeconds,
-       __getTime            = datePlugin.getTime,
-       __getTimezoneOffset  = datePlugin.getTimezoneOffset,
-       __getUTCDate         = datePlugin.getUTCDate,
-       __getUTCDay          = datePlugin.getUTCDay,
-       __getUTCFullYear     = datePlugin.getUTCFullYear,
-       __getUTCHours        = datePlugin.getUTCHours,
-       __getUTCMilliseconds = datePlugin.getUTCMilliseconds,
-       __getUTCMinutes      = datePlugin.getUTCMinutes,
-       __getUTCMonth        = datePlugin.getUTCMonth,
-       __getUTCSeconds      = datePlugin.getUTCSeconds,
-       __getYear            = datePlugin.getYear,
-       __toISOString        = datePlugin.toISOString,
-       __toJSON             = datePlugin.toJSON,
-       __toExponential      = numPlugin.toExponential,
-       __toFixed            = numPlugin.toFixed,
-       __toPrecision        = numPlugin.toPrecision,
-       __exec               = regPlugin.exec,
-       __charAt             = strPlugin.charAt,
-       __charCodeAt         = strPlugin.charCodeAt,
-       __strConcat          = strPlugin.concat,
-       __strIndexOf         = strPlugin.indexOf,
-       __localeCompare      = strPlugin.localeCompare,
-       __match              = strPlugin.match,
-       __replace            = strPlugin.replace,
-       __search             = strPlugin.search,
-       __strSlice           = strPlugin.slice,
-       __substr             = strPlugin.substr,
-       __substring          = strPlugin.substring,
-       __toLowerCase        = strPlugin.toLowerCase,
-       __toLocaleLowerCase  = strPlugin.toLocaleLowerCase,
-       __toLocaleUpperCase  = strPlugin.toLocaleUpperCase,
-       __toUpperCase        = strPlugin.toUpperCase,
-       __trim               = strPlugin.trim,
-       __trimLeft           = strPlugin.trimLeft,
-       __trimRight          = strPlugin.trimRight,
-       __split              = ''.split,
-       __strLastIndexOf     = ''.lastIndexOf;
+       __String             = sandbox.String,
+       __concat             = arrPlugin.concat = arrPlugin.concat,
+       __every              = arrPlugin.every = arrPlugin.every,
+       __filter             = arrPlugin.filter = arrPlugin.filter,
+       __join               = arrPlugin.join = arrPlugin.join,
+       __indexOf            = arrPlugin.indexOf = arrPlugin.indexOf,
+       __lastIndexOf        = arrPlugin.lastIndexOf = arrPlugin.lastIndexOf,
+       __map                = arrPlugin.map = arrPlugin.map,
+       __push               = arrPlugin.push = arrPlugin.push,
+       __reverse            = arrPlugin.reverse = arrPlugin.reverse,
+       __slice              = arrPlugin.slice = arrPlugin.slice,
+       __splice             = arrPlugin.splice = arrPlugin.splice,
+       __some               = arrPlugin.some = arrPlugin.some,
+       __sort               = arrPlugin.sort = arrPlugin.sort,
+       __unshift            = arrPlugin.unshift = arrPlugin.unshift,
+       __getDate            = datePlugin.getDate = datePlugin.getDate,
+       __getDay             = datePlugin.getDay = datePlugin.getDay,
+       __getFullYear        = datePlugin.getFullYear = datePlugin.getFullYear,
+       __getHours           = datePlugin.getHours = datePlugin.getHours,
+       __getMilliseconds    = datePlugin.getMilliseconds = datePlugin.getMilliseconds,
+       __getMinutes         = datePlugin.getMinutes = datePlugin.getMinutes,
+       __getMonth           = datePlugin.getMonth = datePlugin.getMonth,
+       __getSeconds         = datePlugin.getSeconds = datePlugin.getSeconds,
+       __getTime            = datePlugin.getTime = datePlugin.getTime,
+       __getTimezoneOffset  = datePlugin.getTimezoneOffset = datePlugin.getTimezoneOffset,
+       __getUTCDate         = datePlugin.getUTCDate = datePlugin.getUTCDate,
+       __getUTCDay          = datePlugin.getUTCDay = datePlugin.getUTCDay,
+       __getUTCFullYear     = datePlugin.getUTCFullYear = datePlugin.getUTCFullYear,
+       __getUTCHours        = datePlugin.getUTCHours = datePlugin.getUTCHours,
+       __getUTCMilliseconds = datePlugin.getUTCMilliseconds = datePlugin.getUTCMilliseconds,
+       __getUTCMinutes      = datePlugin.getUTCMinutes = datePlugin.getUTCMinutes,
+       __getUTCMonth        = datePlugin.getUTCMonth = datePlugin.getUTCMonth,
+       __getUTCSeconds      = datePlugin.getUTCSeconds = datePlugin.getUTCSeconds,
+       __getYear            = datePlugin.getYear = datePlugin.getYear,
+       __toISOString        = datePlugin.toISOString = datePlugin.toISOString,
+       __toJSON             = datePlugin.toJSON = datePlugin.toJSON,
+       __toExponential      = numPlugin.toExponential = numPlugin.toExponential,
+       __toFixed            = numPlugin.toFixed = numPlugin.toFixed,
+       __toPrecision        = numPlugin.toPrecision = numPlugin.toPrecision,
+       __exec               = regPlugin.exec = regPlugin.exec,
+       __charAt             = strPlugin.charAt = strPlugin.charAt,
+       __charCodeAt         = strPlugin.charCodeAt = strPlugin.charCodeAt,
+       __strConcat          = strPlugin.concat = strPlugin.concat,
+       __strIndexOf         = strPlugin.indexOf = strPlugin.indexOf,
+       __localeCompare      = strPlugin.localeCompare = strPlugin.localeCompare,
+       __match              = strPlugin.match = strPlugin.match,
+       __replace            = strPlugin.replace = strPlugin.replace,
+       __search             = strPlugin.search = strPlugin.search,
+       __strSlice           = strPlugin.slice = strPlugin.slice,
+       __substr             = strPlugin.substr = strPlugin.substr,
+       __substring          = strPlugin.substring = strPlugin.substring,
+       __toLowerCase        = strPlugin.toLowerCase = strPlugin.toLowerCase,
+       __toLocaleLowerCase  = strPlugin.toLocaleLowerCase = strPlugin.toLocaleLowerCase,
+       __toLocaleUpperCase  = strPlugin.toLocaleUpperCase = strPlugin.toLocaleUpperCase,
+       __toUpperCase        = strPlugin.toUpperCase = strPlugin.toUpperCase,
+       __trim               = strPlugin.trim = strPlugin.trim,
+       __trimLeft           = strPlugin.trimLeft = strPlugin.trimLeft,
+       __trimRight          = strPlugin.trimRight = strPlugin.trimRight,
+       __split              = strPlugin.split = ''.split,
+       __strLastIndexOf     = strPlugin.lastIndexOf = ''.lastIndexOf;
+
+
+      // define as own methods of arrPlugin
+      arrPlugin.push  = arrPlugin.push;
+      arrPlugin.shift = arrPlugin.shift;
+      arrPlugin.sort  = arrPlugin.sort;
 
       instance || (instance = new Klass);
 
@@ -282,12 +288,6 @@
             }
             break;
 
-          case '[object Date]':
-            if (value.constructor != instance.Date) {
-              return instance.Date(+value);
-            }
-            break;
-
           case '[object RegExp]':
             if (value.constructor != instance.RegExp) {
               return instance.RegExp(value.source,
@@ -297,6 +297,7 @@
             }
             break;
 
+          case '[object Date]'   :
           case '[object Number]' :
           case '[object String]' :
             classOf = classOf.slice(8,-1);
@@ -314,7 +315,7 @@
         Array = function Array(length) {
           var result = [], argLen = arguments.length;
           if (argLen) {
-            if (argLen == 1 && length == length >>> 0) {
+            if (argLen == 1 && typeof length == 'number') {
               result.length = length;
             } else {
               result.push.apply(result, arguments);
@@ -382,7 +383,7 @@
         Array = function Array(length) {
           var argLen = arguments.length;
           if (argLen) {
-            return argLen == 1 && length == length >>> 0
+            return argLen == 1 && typeof length == 'number'
               ? new __Array(length)
               : Array.fromArray(arguments);
           }
@@ -417,9 +418,9 @@
 
           // ensure `thisArg` isn't set to the sandboxed global
           result = fn[uid] = new __Function('window, fn',
-            'var sandbox=this;' +
+            'var sb=this;' +
             'return function(){' +
-            'return fn.apply(this==sandbox?window:this,arguments)' +
+            'return fn.apply(this==sb?window:this,arguments)' +
             '}')(window, fn);
 
           // make toString() return the unmodified function body
@@ -452,6 +453,7 @@
         }
       }
 
+
       /*---------------------------- ADD STATICS -----------------------------*/
 
       Function.FALSE           = function FALSE() { return false; };
@@ -468,9 +470,9 @@
 
       Number.NaN               = +'x';
 
-      Number.NEGATIVE_INFINITY = __Number.NEGATIVE_INFINITY;
+      Number.NEGATIVE_INFINITY = -Infinity;
 
-      Number.POSITIVE_INFINITY = __Number.POSITIVE_INFINITY;
+      Number.POSITIVE_INFINITY = Infinity;
 
       RegExp.SPECIAL_CHARS = {
         's': {
@@ -581,6 +583,7 @@
       // find the strict mode directive which may be preceded by comments or whitespace
       reStrict = RegExp('^(?:/\\*+[\\w|\\W]*?\\*/|//.*?[\\n\\r\\u2028\\u2029]|\\s)*(["\'])use strict\\1');
 
+
       /*-------------------------- ADD CHAINABILITY --------------------------*/
 
       if (isFunction(arrPlugin.every)) {
@@ -679,12 +682,6 @@
           var result = __slice.call(this, start, end == null ? this.length : end);
           return result.length
             ? Array.fromArray(result)
-            : Array();
-        };
-
-        arrPlugin.sort = function sort(compareFn) {
-          return this.length > 0
-            ? Array.fromArray(compareFn ? __sort.call(this, compareFn) : __sort.call(this))
             : Array();
         };
 
@@ -902,33 +899,19 @@
       arrPlugin.concat.raw  = __concat;
       arrPlugin.reverse.raw = __reverse;
       arrPlugin.slice.raw   = __slice;
-      arrPlugin.sort.raw    = __sort;
       arrPlugin.splice.raw  = __splice;
 
 
       /*------------------------- MODIFY PROTOTYPES --------------------------*/
 
-      if (isProtoMode) {
-        Object.prototype['__proto__'] = objPlugin;
-        arrPlugin['__proto__']  = __Array.prototype;
-        boolPlugin['__proto__'] = __Boolean.prototype;
-        datePlugin['__proto__'] = __Date.prototype;
-        funcPlugin['__proto__'] = __Function.prototype;
-        numPlugin['__proto__']  = __Number.prototype;
-        regPlugin['__proto__']  = __RegExp.prototype;
-        strPlugin['__proto__']  = __String.prototype;
-      } else{
-        Object.prototype = objPlugin;
-      }
-
-      Object.plugin    = Object.prototype;
-      Array.plugin     = Array.prototype    = arrPlugin;
-      Boolean.plugin   = Boolean.prototype  = boolPlugin;
-      Date.plugin      = Date.prototype     = datePlugin;
-      Function.plugin  = Function.prototype = funcPlugin;
-      Number.plugin    = Number.prototype   = numPlugin;
-      RegExp.plugin    = RegExp.prototype   = regPlugin;
-      String.plugin    = String.prototype   = strPlugin;
+      Array.prototype    = Array.plugin    = arrPlugin;
+      Boolean.prototype  = Boolean.plugin  = boolPlugin;
+      Date.prototype     = Date.plugin     = datePlugin;
+      Function.prototype = Function.plugin = funcPlugin;
+      Object.prototype   = Object.plugin   = objPlugin;
+      Number.prototype   = Number.plugin   = numPlugin;
+      RegExp.prototype   = RegExp.plugin   = regPlugin;
+      String.prototype   = String.plugin   = strPlugin;
 
       // point constructor properties to the native wrappers
       arrPlugin.constructor  = Array;

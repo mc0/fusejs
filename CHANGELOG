@@ -1,3 +1,11 @@
+* Simplify the private from() function in Fusebox. [jddalton]
+
+* Reduce the prototype chain method lookup by one for the __proto__ fork of Fusebox. [jddalton]
+
+* Allow fuse.Array constructor to throw errors if its passed an invalid length. [jddalton, kangax]
+
+* Remove method wrapping for fuse.Array#sort in the __proto__ fork of Fusebox. [jddalton]
+
 * Reduce the use of strict === in favor of loose ==. [Dmitry Baranovskiy, jddalton]
 
 * Rename private `global` variable to `window` so selector engine adapters can be used outside of the primary closure. [jddalton]
