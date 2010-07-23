@@ -31,7 +31,7 @@
        zoom       = elemStyle.zoom;
 
       if (decorator.getStyle('position') == 'static' &&
-          !(zoom && zoom !== 'normal' || currStyle && currStyle.hasLayout)) {
+          !(zoom && zoom != 'normal' || currStyle && currStyle.hasLayout)) {
         elemStyle.zoom = 1;
       }
       return element;
@@ -272,14 +272,14 @@
        original   = element,
        nodeName   = getNodeName(element);
 
-      if (nodeName === 'AREA') {
+      if (nodeName == 'AREA') {
         return fromElement(element.parentNode);
       }
 
       // IE throws an error if the element is not in the document.
       // Many browsers report offsetParent as null if the element's
       // style is display:none.
-      if (isDetached.call(this) || element.nodeType === DOCUMENT_NODE ||
+      if (isDetached.call(this) || element.nodeType == DOCUMENT_NODE ||
           OFFSET_PARENT_EXIT_BEFORE_NODES[nodeName] ||
           !element.offsetParent && getStyle.call(this, 'display') != 'none') {
         return null;
@@ -345,9 +345,9 @@
             valueT += parseFloat(getStyle.call(offsetParent, 'borderTopWidth'))  || 0;
             valueL += parseFloat(getStyle.call(offsetParent, 'borderLeftWidth')) || 0;
           }
-          if (position == 'fixed' || offsetParent && (offsetParent === ancestor ||
+          if (position == 'fixed' || offsetParent && (offsetParent == ancestor ||
              (BODY_OFFSETS_INHERIT_ITS_MARGINS && position == 'absolute' &&
-              getNodeName(offsetParent) === 'BODY'))) {
+              getNodeName(offsetParent) == 'BODY'))) {
             break;
           }
         } while (element = offsetParent);
@@ -391,24 +391,24 @@
        info     = fuse._info,
        doc      = getDocument(element),
        scrollEl = doc[info.scrollEl.property],
-       skipEl   = doc[info[info.scrollEl.nodeName === 'HTML' ? 'body' : 'docEl'].property],
+       skipEl   = doc[info[info.scrollEl.nodeName == 'HTML' ? 'body' : 'docEl'].property],
        valueT   = 0,
        valueL   = 0;
 
        do {
-        if (element !== skipEl) {
+        if (element != skipEl) {
           valueT += element.scrollTop  || 0;
           valueL += element.scrollLeft || 0;
 
-          if (element === scrollEl || getStyle.call(element, 'position') == 'fixed') {
+          if (element == scrollEl || getStyle.call(element, 'position') == 'fixed') {
             break;
           }
         }
         element = element.parentNode;
-      } while (element && element.nodeType === ELEMENT_NODE);
+      } while (element && element.nodeType == ELEMENT_NODE);
 
       if (onlyAncestors || ((nodeName = getNodeName(original)) &&
-          nodeName === 'TEXTAREA' || nodeName === 'INPUT')) {
+          nodeName == 'TEXTAREA' || nodeName == 'INPUT')) {
         valueT -= original.scrollTop  || 0;
         valueL -= original.scrollLeft || 0;
       }
@@ -424,7 +424,7 @@
         valueT += element.offsetTop  || 0;
         valueL += element.offsetLeft || 0;
         element = fromElement(element).getOffsetParent();
-      } while (element && getNodeName(element.raw) !== 'BODY' &&
+      } while (element && getNodeName(element.raw) != 'BODY' &&
           element.getStyle('position') == 'static');
 
       return returnOffset(valueL, valueT);

@@ -74,7 +74,7 @@
   })(),
 
   isFunction = function isFunction(value) {
-    return toString.call(value) === '[object Function]';
+    return toString.call(value) == '[object Function]';
   },
 
   // Host objects can return type values that are different from their actual
@@ -82,7 +82,7 @@
   // types of object, function, or unknown.
   isHostType = function isHostType(object, property) {
     var type = typeof object[property];
-    return type === 'object' ? !!object[property] : !NON_HOST_TYPES[type];
+    return type == 'object' ? !!object[property] : !NON_HOST_TYPES[type];
   },
 
   prependList = function(list, value, result) {

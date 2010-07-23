@@ -88,7 +88,7 @@
         data = domData[id];
         if (!data._isPatchedForDelegation) {
           // form controls
-          if (nodeName !== 'FORM') {
+          if (nodeName != 'FORM') {
             if (CHANGEABLE_ELEMENTS[nodeName] && !BUTTON_TYPES[target.type]) {
               addBubbler(target, id, 'change');
             }
@@ -98,7 +98,7 @@
           }
           // form element
           if (form = target.form || target) {
-            if (form !== target) {
+            if (form != target) {
               id   = getFuseId(form);
               data = domData[id];
             }
@@ -154,8 +154,7 @@
     }
 
     plugin.delegate          =
-    Document.plugin.delegate =
-    Window.plugin.delegate   = function delegate(type, selector, delegatee) {
+    Document.plugin.delegate = function delegate(type, selector, delegatee) {
       var docId, ec, handler, handlers, i = -1,
        element = this.raw || this,
        id      = getFuseId(this),
@@ -163,7 +162,7 @@
        events  = data.events;
 
       // juggle arguments
-      if (typeof selector === 'function') {
+      if (typeof selector == 'function') {
         delegatee = selector;
         selector = null;
       }
@@ -175,7 +174,7 @@
       if (events && (ec = events[type])) {
         handlers = ec.handlers;
         while (handler = handlers[++i]) {
-          if (handler._delegatee === delegatee && handler._selector === selector) {
+          if (handler._delegatee == delegatee && handler._selector == selector) {
             return this;
           }
         }
@@ -198,8 +197,7 @@
     };
 
     plugin.stopDelegating          =
-    Document.plugin.stopDelegating =
-    Window.plugin.stopDelegating   = function stopDelegating(type, selector, delegatee) {
+    Document.plugin.stopDelegating = function stopDelegating(type, selector, delegatee) {
       var ec, handler, handlers, i = -1,
        element = this.raw || this,
        isEmpty = true,
@@ -232,7 +230,7 @@
           // if nothing is omitted
           if (delegatee) {
             while (handler = handlers[++i]) {
-              if (handler._delegatee === delegatee && handler._selector === selector) {
+              if (handler._delegatee == delegatee && handler._selector == selector) {
                 plugin.stopObserving.call(this, type, handler);
                 break;
               }
@@ -242,7 +240,7 @@
           // all delegatees of that type and selector
           else {
             while (handler = handlers[++i]) {
-              if (handler._selector === selector) {
+              if (handler._selector == selector) {
                 delete handler._delegatee;
                 stopDelegating.call(this, type, selector, i);
               }

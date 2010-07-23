@@ -32,7 +32,7 @@
 
     plugin.times = function times(callback, thisArg) {
       var i = -1, length = toInteger(this);
-      if (arguments.length === 1) {
+      if (arguments.length == 1) {
         while (++i < length) callback(i, i);
       } else {
         while (++i < length) callback.call(thisArg, i, i);

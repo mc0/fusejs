@@ -59,7 +59,7 @@
       // when searching for a pattern at the end of a long string
       // indexOf(pattern, fromIndex) is faster than lastIndexOf(pattern)
       var string = String(this), d = string.length - pattern.length;
-      return d >= 0 && string.indexOf(pattern, d) === d;
+      return d >= 0 && string.indexOf(pattern, d) == d;
     };
 
     plugin.hyphenate = function hyphenate() {

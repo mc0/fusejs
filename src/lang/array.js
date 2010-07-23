@@ -73,7 +73,7 @@
         while (++i < length) result[i] = fuse.Object.clone(object[i], deep);
       }
       else if (isArray(object)) {
-        result = object.constructor !== List
+        result = object.constructor != List
           ? List.fromArray(object)
           : object.slice(0);
       } else {
@@ -214,7 +214,7 @@
           if (i in object) return object[i];
         }
       }
-      else if (typeof callback === 'function') {
+      else if (typeof callback == 'function') {
         while (++i < length) {
           if (callback.call(thisArg, object[i], i))
             return object[i];
@@ -302,7 +302,7 @@
       if (callback == null) {
         return object[length && length - 1];
       }
-      if (typeof callback === 'function') {
+      if (typeof callback == 'function') {
         while (length--) {
           if (callback.call(thisArg, object[length], length, object))
             return object[length];
@@ -423,7 +423,7 @@
        length   = object.length >>> 0;
 
       // if last argument is a function it is the callback
-      if (typeof args[args.length - 1] === 'function') {
+      if (typeof args[args.length - 1] == 'function') {
         callback = args.pop();
       }
 
@@ -448,7 +448,7 @@
     if (!isFunction(plugin.every)) {
       plugin.every = function every(callback, thisArg) {
         callback || (callback = IDENTITY);
-        if (typeof callback !== 'function') throw new TypeError;
+        if (typeof callback != 'function') throw new TypeError;
 
         var i = -1, object = Object(this), length = object.length >>> 0;
         while (++i < length) {
@@ -465,7 +465,7 @@
     if (!isFunction(plugin.filter)) {
       plugin.filter = function filter(callback, thisArg) {
         callback || (callback = filterCallback);
-        if (typeof callback !== 'function') throw new TypeError;
+        if (typeof callback != 'function') throw new TypeError;
 
         var i = -1, j = i, result = List(),
          object = Object(this),
@@ -545,7 +545,7 @@
     if (!isFunction(plugin.map)) {
       plugin.map = function map(callback, thisArg) {
         if (!callback) return plugin.clone.call(this);
-        if (typeof callback !== 'function') throw new TypeError;
+        if (typeof callback != 'function') throw new TypeError;
 
         var i = -1, result = List(), object = Object(this),
          length = object.length >>> 0;
@@ -569,7 +569,7 @@
     if (!isFunction(plugin.some)) {
       plugin.some = function some(callback, thisArg) {
         callback || (callback = IDENTITY);
-        if (typeof callback !== 'function') throw new TypeError;
+        if (typeof callback != 'function') throw new TypeError;
 
         var i = -1, object = Object(this), length = object.length >>> 0;
         while (++i < length) {
@@ -590,7 +590,7 @@
       };
 
       eachKey(fuse.Class.mixins.enumerable, function(value, key, object) {
-        if (hasKey(object, key) && typeof plugin[key] !== 'function') {
+        if (hasKey(object, key) && typeof plugin[key] != 'function') {
           plugin[key] = value;
         }
       });

@@ -1,3 +1,5 @@
+* Reduce the use of strict === in favor of loose ==. [Dmitry Baranovskiy, jddalton]
+
 * Rename private `global` variable to `window` so selector engine adapters can be used outside of the primary closure. [jddalton]
 
 * Avoid an extra fromElement() call in the fast lane of fuse.Event#findElement. [jddalton]

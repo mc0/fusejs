@@ -127,7 +127,7 @@
         // Opera 9.25 can't indirectly call eval()
         window.fuse = undef;
         execute('var fuse="x"');
-        if (window.fuse !== 'x') throw new EvalError;
+        if (window.fuse != 'x') throw new EvalError;
       }
       catch (e) {
         // fallback on window.eval()
@@ -143,7 +143,7 @@
         execute('var fuse="x"');
       }
 
-      if (window.fuse !== 'x') {
+      if (window.fuse != 'x') {
         // fallback on script injection
         if (isHostType(window, 'document')) {
           run = function run(code, context) {

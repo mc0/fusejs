@@ -48,7 +48,7 @@
               callback = function(v, k, o) { return __callback(v, k, o); };
             }
             for (key in object) {
-              if (!(skipProto && key === 'prototype') &&
+              if (!(skipProto && key == 'prototype') &&
                   !hasKey(keys, key) && (keys[key] = 1) &&
                   callback(object[key], key, object) === false) {
                 break;
@@ -69,7 +69,7 @@
               callback = function(v, k, o) { return __callback(v, k, o); };
             }
             for (key in object) {
-              if (!(skipProto && key === 'prototype') &&
+              if (!(skipProto && key == 'prototype') &&
                   callback(object[key], key, object) === false) {
                 break;
               }
@@ -91,7 +91,7 @@
     var objectProto = Object.prototype,
      hasOwnProperty = objectProto.hasOwnProperty;
 
-    if (typeof hasOwnProperty !== 'function') {
+    if (typeof hasOwnProperty != 'function') {
       if (envTest('OBJECT__PROTO__')) {
         // Safari 2
         hasKey = function hasKey(object, property) {
@@ -127,7 +127,7 @@
     }
 
     // Garrett Smith found an Opera bug that occurs with the window object and not the global
-    if (typeof window !== 'undefined' && window.Object && !hasKey(window, 'Object')) {
+    if (typeof window != 'undefined' && window.Object && !hasKey(window, 'Object')) {
       var __hasKey = hasKey;
       hasKey = function hasKey(object, property) {
         if (object == null) throw new TypeError;
@@ -153,35 +153,35 @@
 
   isElement =
   fuse.Object.isElement = function isElement(value) {
-    return !!value && value.nodeType === ELEMENT_NODE;
+    return !!value && value.nodeType == ELEMENT_NODE;
   };
 
   isHash =
   fuse.Object.isHash = function isHash(value) {
     var Hash = fuse.Hash;
-    return !!value && value.constructor === Hash && value !== Hash.prototype;
+    return !!value && value.constructor == Hash && value != Hash.prototype;
   };
 
   isNumber =
   fuse.Object.isNumber = function isNumber(value) {
-    return toString.call(value) === '[object Number]' && isFinite(value);
+    return toString.call(value) == '[object Number]' && isFinite(value);
   };
 
   // ES5 4.3.2
   isPrimitive =
   fuse.Object.isPrimitive = function isPrimitive(value) {
     var type = typeof value;
-    return value == null || type === 'boolean' || type === 'number' || type === 'string';
+    return value == null || type == 'boolean' || type == 'number' || type == 'string';
   };
 
   isRegExp =
   fuse.Object.isRegExp = function isRegExp(value) {
-    return toString.call(value) === '[object RegExp]';
+    return toString.call(value) == '[object RegExp]';
   };
 
   isString =
   fuse.Object.isString = function isString(value) {
-    return toString.call(value) === '[object String]';
+    return toString.call(value) == '[object String]';
   };
 
   /*--------------------------------------------------------------------------*/
@@ -193,7 +193,7 @@
         if (isFunction(object.clone)) {
           return object.clone(deep);
         }
-        if (typeof object === 'object') {
+        if (typeof object == 'object') {
           var length, result, constructor = object.constructor, i = -1;
           switch (toString.call(object)) {
             case '[object Array]'  :
@@ -258,7 +258,7 @@
        protocol    = loc.protocol,
        port        = loc.port,
        reUrlParts  = /([^:]+:)\/\/(?:[^:]+(?:\:[^@]+)?@)?([^\/:$]+)(?:\:(\d+))?/,
-       defaultPort = protocol === 'ftp:' ? 21 : protocol === 'https:' ? 443 : 80,
+       defaultPort = protocol == 'ftp:' ? 21 : protocol == 'https:' ? 443 : 80,
 
       isSameOrigin = function isSameOrigin(url) {
         var domainIndex, urlDomain,
@@ -269,9 +269,9 @@
         if (parts[0]) {
           urlDomain = parts[2];
           domainIndex = urlDomain.indexOf(docDomain);
-          result = parts[1] === protocol &&
+          result = parts[1] == protocol &&
             (!domainIndex || urlDomain.charAt(domainIndex -1) == '.') &&
-              (parts[3] || defaultPort) === (port || defaultPort);
+              (parts[3] || defaultPort) == (port || defaultPort);
         }
         return result;
       };
@@ -303,7 +303,7 @@
     };
 
     Obj.toHTML = function toHTML(object) {
-      return object && typeof object.toHTML === 'function'
+      return object && typeof object.toHTML == 'function'
         ? fuse.String(object.toHTML())
         : fuse.String(object == null ? '' : object);
     };

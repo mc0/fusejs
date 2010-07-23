@@ -28,7 +28,7 @@
       // resolve superclass
       if (isString(first)) {
         Superclass = createNamedClass(args.shift());
-      } else if (typeof first === 'function' && first.subclasses) {
+      } else if (typeof first == 'function' && first.subclasses) {
         Superclass = args.shift();
       } else {
         Superclass = null;
@@ -38,14 +38,14 @@
       mixins  = args[1];
 
       // auto execute plugins if they are closures and convert to array if not already
-      if (typeof plugins === 'function') plugins = plugins();
+      if (typeof plugins == 'function') plugins = plugins();
       if (!isArray(plugins)) plugins = [plugins];
 
       // search properties for a custom `constructor` method
       while ((plugin = plugins[i++])) {
         if (hasKey(plugin, 'constructor')) {
           // power usage
-          if (typeof plugin.constructor === 'function') {
+          if (typeof plugin.constructor == 'function') {
             Klass = plugin.constructor;
             isAutoUnlinking = false;
           }
@@ -80,7 +80,7 @@
       // automatically unlinked in the constructor
       if (isAutoUnlinking) {
         eachKey(Klass.plugin, function(value, key, object) {
-          if (hasKey(object, key) && value && typeof value === 'object') {
+          if (hasKey(object, key) && value && typeof value == 'object') {
             LINKED_KEYS[key] = 1;
           }
         });
@@ -131,7 +131,7 @@
       while (++i < imax) {
         arg = args[i];
         // auto execute arg if it's a closures
-        if (typeof arg === 'function') arg = arg();
+        if (typeof arg == 'function') arg = arg();
         // force to array, if not one, to support passing arrays
         if (!isArray(arg)) arg = [arg];
 
@@ -144,7 +144,7 @@
                 if (!value.$super) {
                   value._isMixin = true;
                 }
-              } else if (value && typeof value === 'object') {
+              } else if (value && typeof value == 'object') {
                 value = fuse.Object.clone(value);
               }
               prototype[key] = value;
@@ -166,7 +166,7 @@
 
       while (++i < imax) {
         arg = args[i];
-        if (typeof arg === 'function') arg = arg();
+        if (typeof arg == 'function') arg = arg();
         if (!isArray(arg)) arg = [arg];
 
         j = -1; jmax = arg.length;
@@ -176,7 +176,7 @@
               var protoMethod = prototype[key],
                superMethod = superProto && superProto[key];
   
-              // avoid typeof === `function` because Safari 3.1+ mistakes
+              // avoid typeof == `function` because Safari 3.1+ mistakes
               // regexp instances as typeof `function`
               if (isFunction(value)) {
                 // flag as $super if not used as a mixin
@@ -191,7 +191,7 @@
                       otherMethod.$super = value;
                   }
                 }
-              } else if (value && typeof value === 'object') {
+              } else if (value && typeof value == 'object') {
                 value = fuse.Object.clone(value);
               }
               prototype[key] = value;
@@ -208,7 +208,7 @@
 
       while (++i < imax) {
         arg = args[i];
-        if (typeof arg === 'function') arg = arg();
+        if (typeof arg == 'function') arg = arg();
         if (!isArray(arg)) arg = [arg];
 
         j = -1; jmax = arg.length;

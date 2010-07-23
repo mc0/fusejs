@@ -62,7 +62,7 @@
       if (!c || thisArg.start != c.start || thisArg.end != c.end) {
         result = true;
       }
-      else if (thisArg.exclusive !== c.exclusive) {
+      else if (thisArg.exclusive != c.exclusive) {
         c.exclusive = thisArg.exclusive;
         if (c.exclusive) {
           c.pop();
@@ -136,7 +136,7 @@
         __max = mixin.max;
         __min = mixin.min;
         eachKey(mixin, function(value, key, object) {
-          if (hasKey(object, key) && typeof plugin[key] !== 'function') {
+          if (hasKey(object, key) && typeof plugin[key] != 'function') {
             plugin[key] = value;
           }
         });

@@ -48,7 +48,7 @@
       var i = 0, link, links = doc.getElementsByTagName('LINK'),
        result = fuse.Array.fromNodeList(doc.getElementsByTagName('STYLE'));
       while (link = links[i++]) {
-        if (link.rel.toLowerCase() === 'stylesheet')
+        if (link.rel.toLowerCase() == 'stylesheet')
           result.push(link);
       }
       return result;
@@ -74,7 +74,7 @@
       }
       // Safari hits `loaded` while others may hit `interactive` or `complete`
       // and should be able to interact with the dom at that time.
-      else if ((event && event.type === 'DOMContentLoaded') ||
+      else if ((event && event.type == 'DOMContentLoaded') ||
           (FINAL_DOCUMENT_READY_STATES[doc.readyState] && isModifiable())) {
         readyStatePoller.clear();
         decoratedDoc.stopObserving('readystatechange', checkDomLoadedState);
@@ -243,7 +243,7 @@
               doc.body.appendChild(c.div);
 
               // when loaded clear cache entry
-              if (getStyle(c.div, 'marginTop') === '-1234px') {
+              if (getStyle(c.div, 'marginTop') == '-1234px') {
                 cache.splice(length, 1);
               }
 
@@ -269,7 +269,7 @@
 
     /*------------------------------------------------------------------------*/
 
-    if (doc.readyState === 'complete') {
+    if (doc.readyState == 'complete') {
       // fire dom:loaded and window load events if window is already loaded
       return fuse(window).fire('load');
     }

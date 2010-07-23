@@ -59,13 +59,13 @@
       // Safari 2.x has issues with escaping html inside a `pre`
       // element so we use the deprecated `xmp` element instead.
       textNode.data = '&';
-      if (container.innerHTML !== '&amp;') {
+      if (container.innerHTML != '&amp;') {
         textNode = (container = fuse._doc.createElement('xmp'))
           .appendChild(fuse._doc.createTextNode(''));
       }
       // Safari 3.x has issues with escaping the ">" character
       textNode.data = '>';
-      if (container.innerHTML !== '&gt;') {
+      if (container.innerHTML != '&gt;') {
         escapeHTML = function escapeHTML() {
           textNode.data = String(this);
           return fuse.String(container.innerHTML.replace(reTagEnds, '&gt;'));
@@ -74,10 +74,10 @@
       if (!envTest('ELEMENT_TEXT_CONTENT')) {
         div.innerHTML = '<pre>&lt;p&gt;x&lt;\/p&gt;<\/pre>';
 
-        if (envTest('ELEMENT_INNER_TEXT') && div.firstChild.innerText === '<p>x<\/p>') {
+        if (envTest('ELEMENT_INNER_TEXT') && div.firstChild.innerText == '<p>x<\/p>') {
           getText = function() { return div.firstChild.innerText.replace(/\r/g, ''); };
         }
-        else if (div.firstChild.innerHTML === '<p>x<\/p>') {
+        else if (div.firstChild.innerHTML == '<p>x<\/p>') {
           getText = function() { return div.firstChild.innerHTML; };
         }
         else {

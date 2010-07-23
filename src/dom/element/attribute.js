@@ -48,7 +48,7 @@
       } else if (!isString(name)) {
         attributes = name;
       } else {
-        attributes[name] = (typeof value === 'undefined') ? true : value;
+        attributes[name] = (typeof value == 'undefined') ? true : value;
       }
 
       for (name in attributes) {
@@ -79,7 +79,7 @@
         var defaultProp, node = this.raw || this,
          nodeName = getNodeName(node);
 
-        if (nodeName === 'INPUT') {
+        if (nodeName == 'INPUT') {
           if (name == 'value') {
             defaultProp = 'defaultValue';
           } else if (name == 'checked' && CHECKED_INPUT_TYPES[node.type]) {
@@ -252,14 +252,14 @@
       form.setAttribute('enctype', 'multipart/form-data');
 
       // translate content name `htmlFor`
-      if (label.getAttribute('htmlFor') === 'x') {
+      if (label.getAttribute('htmlFor') == 'x') {
         T.contentNames['for'] = 'htmlFor';
       } else {
         T.contentNames.htmlFor = 'for';
       }
 
       // translate content name `className`
-      if (label.getAttribute('className') === 'x') {
+      if (label.getAttribute('className') == 'x') {
         T.contentNames['class'] = 'className';
       } else {
         T.contentNames.className = 'class';
@@ -267,13 +267,13 @@
 
       // set `encType`
       if ((node = form.getAttributeNode('enctype')) &&
-          node.value !== 'multipart/form-data') {
+          node.value != 'multipart/form-data') {
         T.write.enctype = setNode('encType');
       }
 
       // getter/setter for `style` attribute
       value = (node = label.getAttributeNode('style')) && node.value;
-      if (typeof value !== 'string' || value.lastIndexOf('display:block', 0)) {
+      if (typeof value != 'string' || value.lastIndexOf('display:block', 0)) {
         T.read.style  = getStyle;
         T.write.style = setStyle;
       }

@@ -7,7 +7,7 @@
   (function(engine, object, NodeList) {
     var match = function match(element, selectors) {
       return engine(String(selectors || ''), null, null,
-        [element.raw || fuse(element).raw]).length === 1;
+        [element.raw || fuse(element).raw]).length == 1;
     },
 
     select = function select(selectors, context, callback) {

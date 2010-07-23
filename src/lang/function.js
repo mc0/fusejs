@@ -12,7 +12,7 @@
         f = fn;
       }
       // follow spec and throw if fn is not callable
-      if (typeof (f || context[name]) !== 'function') {
+      if (typeof (f || context[name]) != 'function') {
         throw new TypeError;
       }
       // bind with curry

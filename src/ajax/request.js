@@ -236,7 +236,7 @@
 
       // exit if no headers and wait for state 3 to fire states 2 and 3
       if (readyState == 2 && this.getAllHeaders() == '' &&
-        xhr.readyState === 2) {
+        xhr.readyState == 2) {
         return;
       }
 

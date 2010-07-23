@@ -80,7 +80,7 @@
 
   (function(Event) {
 
-    var fixReadyState = typeof fuse._doc.readyState !== 'string',
+    var fixReadyState = typeof fuse._doc.readyState != 'string',
 
     addDispatcher     = Event._addDispatcher,
 

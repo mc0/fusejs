@@ -13,7 +13,7 @@
       if (!node || node.raw) {
         return node;
       }
-      if (node.nodeType !== TEXT_NODE) {
+      if (node.nodeType != TEXT_NODE) {
         // return cached if available
         if (isCached !== false) {
           data = domData[Node.getFuseId(node)];
@@ -89,10 +89,10 @@
         if (node == win) {
           id = node == window ? '1' : getFuseId(node.frameElement) + '-1';
         }
-        else if (node.nodeType === DOCUMENT_NODE) {
+        else if (node.nodeType == DOCUMENT_NODE) {
           // quick return for common case OR
           // calculate id for foreign document objects
-          id = node === fuse._doc ? '2' : getFuseId(win.frameElement) + '-2';
+          id = node == fuse._doc ? '2' : getFuseId(win.frameElement) + '-2';
           skipDataInit || (skipDataInit = domData[id]);
           if (!skipDataInit) {
             skipDataInit =

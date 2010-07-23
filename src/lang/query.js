@@ -6,7 +6,7 @@
       fuse.String.plugin.split : fuse.String.plugin.split.raw,
 
     toQueryPair = function(key, value) {
-      return fuse.String(typeof value === 'undefined' ? key :
+      return fuse.String(typeof value == 'undefined' ? key :
         key + '=' + encodeURIComponent(value == null ? '' : value));
     };
 
@@ -19,7 +19,7 @@
             var i = result.length, j = 0, length = i + value.length;
             while (i < length) result[i++] = toQueryPair(key, value[j++]);
           }
-          else if (!value || toString.call(value) !== '[object Object]') {
+          else if (!value || toString.call(value) != '[object Object]') {
             result.push(toQueryPair(key, value));
           }
         }

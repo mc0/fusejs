@@ -8,7 +8,7 @@
     CHECK_POSITION_IS_NULL =
       envTest('ELEMENT_COMPUTED_STYLE_DEFAULTS_TO_ZERO'),
 
-    FLOAT_TRANSLATIONS = typeof fuse._docEl.style.styleFloat !== 'undefined'
+    FLOAT_TRANSLATIONS = typeof fuse._docEl.style.styleFloat != 'undefined'
       ? { 'float': 'styleFloat', 'cssFloat': 'styleFloat' }
       : { 'float': 'cssFloat' },
 
@@ -53,16 +53,16 @@
       if (name == 'opacity') {
         return value == '1' ? '1.0' : parseFloat(value) || '0';
       }
-      return value === 'auto' || value === '' ? null : value;
+      return value == 'auto' || value === '' ? null : value;
     },
 
     isNull = function(element, name) {
       var result = false;
       if (CHECK_POSITION_IS_NULL && POSITION_NAMES[name]) {
-        result = getComputedStyle(element, 'position') === 'static';
+        result = getComputedStyle(element, 'position') == 'static';
       }
       else if (CHECK_DIMENSION_IS_NULL && DIMENSION_NAMES[name]) {
-        result = getComputedStyle(element, 'display') === 'none';
+        result = getComputedStyle(element, 'display') == 'none';
       }
       return result;
     };
@@ -177,8 +177,8 @@
         result    = currStyle[name];
 
         // handle auto values
-        if (result === 'auto') {
-          if (DIMENSION_NAMES[name] && currStyle.display !== 'none') {
+        if (result == 'auto') {
+          if (DIMENSION_NAMES[name] && currStyle.display != 'none') {
             result = plugin['get' +
               (name == 'width' ? 'Width' : 'Height')].call(this, 'content') + 'px';
           } else {
@@ -192,7 +192,7 @@
         else if (!NON_PX_NAMES[name] && reNonPxUnit.test(result)) {
           if (name == 'fontSize') {
             unit = result.match(reUnit)[0];
-            if (unit === '%') {
+            if (unit == '%') {
               size = element.appendChild(span).offsetHeight;
               element.removeChild(span);
               return fuse.String(Math.round(size) + 'px');
@@ -214,7 +214,7 @@
           elemStyle[pos] = result;
 
           // pixelLeft/pixelTop are not affected by runtimeStyle
-          result = elemStyle['pixel' + (pos === 'top' ? 'Top' : 'Left')] + 'px';
+          result = elemStyle['pixel' + (pos == 'top' ? 'Top' : 'Left')] + 'px';
 
           // revert changes
           elemStyle[pos] = stylePos;
@@ -298,10 +298,10 @@
     var TABLE_ELEMENTS = { 'THEAD': 1, 'TBODY': 1, 'TR': 1 },
 
     OPACITY_PROP = (function(s) {
-      return typeof s.opactiy  !== 'undefined' ? 'opacity'       :
-        typeof s.MozOpacity    !== 'undefined' ? 'MozOpacity'    :
-        typeof s.WebkitOpacity !== 'undefined' ? 'WebKitOpacity' :
-        typeof s.KhtmlOpacity  !== 'undefined' ? 'KhtmlOpacity'  : false;
+      return typeof s.opactiy  != 'undefined' ? 'opacity'       :
+        typeof s.MozOpacity    != 'undefined' ? 'MozOpacity'    :
+        typeof s.WebkitOpacity != 'undefined' ? 'WebKitOpacity' :
+        typeof s.KhtmlOpacity  != 'undefined' ? 'KhtmlOpacity'  : false;
     })(fuse._div.style);
 
 
@@ -317,7 +317,7 @@
        elemStyle = element.style,
        display = elemStyle.display;
 
-      if (display && display !== 'none') {
+      if (display && display != 'none') {
         domData[getFuseId(element)].madeHidden = display;
       }
       elemStyle.display = 'none';
@@ -329,7 +329,7 @@
        elemStyle = element.style,
        display = elemStyle.display;
 
-      if (display === 'none') {
+      if (display == 'none') {
         data = domData[getFuseId(element)],
         elemStyle.display = data.madeHidden || '';
         delete data.madeHidden;
@@ -410,7 +410,7 @@
             }
           } else {
             // force layout for filters to work
-            if (!(currStyle && currStyle.hasLayout || zoom && zoom !== 'normal')) {
+            if (!(currStyle && currStyle.hasLayout || zoom && zoom != 'normal')) {
               elemStyle.zoom = 1;
             }
             elemStyle.filter = filter + 'alpha(opacity=' + (value * 100) + ')';
@@ -431,7 +431,7 @@
       var isVisible = function isVisible() {
         // handles IE and the fallback solution
         var element = this.raw || this, currStyle = element.currentStyle;
-        return currStyle !== null && (currStyle || element.style).display !== 'none' &&
+        return currStyle !== null && (currStyle || element.style).display != 'none' &&
           !!(element.offsetHeight || element.offsetWidth);
       };
 

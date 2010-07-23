@@ -80,7 +80,7 @@
        firstNode = null, minTabIndex = Infinity;
 
       eachElement(this, function(node) {
-        if (node.type !== 'hidden' && !node.disabled) {
+        if (node.type != 'hidden' && !node.disabled) {
           if (!firstNode) {
             firstNode = node;
           }
@@ -130,13 +130,13 @@
       }
       else if (typeName && !name) {
         while (input = inputs[++i]) {
-          if (typeName === input.type)
+          if (typeName == input.type)
             result[++j] = fromElement(input);
         }
       }
       else {
         while (input = inputs[++i]) {
-          if ((!typeName || typeName === input.type) && (!name || name === input.name))
+          if ((!typeName || typeName == input.type) && (!name || name == input.name))
             result[++j] = fromElement(input);
         }
       }
@@ -170,9 +170,9 @@
     };
 
     plugin.serializeElements = function serializeElements(elements, options) {
-      if (typeof options !== 'object') {
+      if (typeof options != 'object') {
         options = { 'hash': !!options };
-      } else if (typeof options.hash === 'undefined') {
+      } else if (typeof options.hash == 'undefined') {
         options.hash = true;
       }
 
@@ -211,15 +211,15 @@
 
           key            = element.name;
           type           = element.type;
-          isImageType    = type === 'image';
-          isSubmitButton = type === 'submit' || isImageType;
+          isImageType    = type == 'image';
+          isSubmitButton = type == 'submit' || isImageType;
 
           if (element.disabled ||                                         // skip disabled
               SKIPPED_INPUT_TYPES[type] ||                                // skip file/reset controls
               CHECKED_INPUT_TYPES[type] && !element.checked ||            // skip unchecked
               nodeName === 'SELECT' && element.selectedIndex === -1 ||    // skip unselected
               (isSubmitButton && (submit === false || submitSerialized || // skip non-active submit buttons
-                (submit && !(key === submit || element === submit))))) {
+                (submit && !(key == submit || element == submit))))) {
             continue;
           }
 

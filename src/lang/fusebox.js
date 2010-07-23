@@ -54,7 +54,7 @@
          toString = instance.Object().toString;
 
         // Safari does not support sandboxed natives from iframes :(
-        if (instance.Array().constructor === Array) {
+        if (instance.Array().constructor == Array) {
           // move first iframe to trash
           errored = !!div.appendChild(cache.pop());
         }
@@ -64,7 +64,7 @@
         // Opera 9.5 - 9.64 will error by simply calling the methods.
         // Opera 10 will error when first accessing the contentDocument of
         // another iframe and then accessing the methods.
-        else if (toString.call(instance.Array().map) === '[object Function]') {
+        else if (toString.call(instance.Array().map) == '[object Function]') {
           // create and remove second iframe
           postProcessIframe(createSandbox());
 
@@ -90,7 +90,7 @@
 
     setMode = function(mode) {
       MODE = +mode;
-      postProcess = MODE === IFRAME_MODE ? postProcessIframe : IDENTITY;
+      postProcess = MODE == IFRAME_MODE ? postProcessIframe : IDENTITY;
     },
 
     createSandbox = function() {
@@ -186,7 +186,7 @@
        filterCallback       = function(value) { return value != null; },
        glFunction           = window.Function,
        sandbox              = createSandbox(),
-       isProtoMode          = MODE === PROTO_MODE,
+       isProtoMode          = MODE == PROTO_MODE,
        isArrayChainable     = !isProtoMode && !(sandbox.Array().slice(0) instanceof window.Array),
        isRegExpChainable    = !isProtoMode && !(sandbox.RegExp('') instanceof window.RegExp),
        arrPlugin            = isProtoMode && new sandbox.Array    || sandbox.Array.prototype,
@@ -271,25 +271,25 @@
         var classOf = toString.call(value);
         switch (classOf) {
           case '[object Array]':
-            if (value.constructor !== instance.Array) {
+            if (value.constructor != instance.Array) {
               return instance.Array.fromArray(value);
             }
             break;
 
           case '[object Boolean]':
-            if (value.constructor !== instance.Boolean) {
+            if (value.constructor != instance.Boolean) {
               return instance.Boolean(value == true);
             }
             break;
 
           case '[object Date]':
-            if (value.constructor !== instance.Date) {
+            if (value.constructor != instance.Date) {
               return instance.Date(+value);
             }
             break;
 
           case '[object RegExp]':
-            if (value.constructor !== instance.RegExp) {
+            if (value.constructor != instance.RegExp) {
               return instance.RegExp(value.source,
                 (value.global     ? 'g' : '') +
                 (value.ignoreCase ? 'i' : '') +
@@ -300,7 +300,7 @@
           case '[object Number]' :
           case '[object String]' :
             classOf = classOf.slice(8,-1);
-            if (value.constructor !== instance[classOf]) {
+            if (value.constructor != instance[classOf]) {
               return instance[classOf](value);
             }
         }
@@ -314,7 +314,7 @@
         Array = function Array(length) {
           var result = [], argLen = arguments.length;
           if (argLen) {
-            if (argLen === 1 && length === length >>> 0) {
+            if (argLen == 1 && length == length >>> 0) {
               result.length = length;
             } else {
               result.push.apply(result, arguments);
@@ -332,8 +332,8 @@
 
         Date = function Date(year, month, date, hours, minutes, seconds, ms) {
           var result;
-          if (this.constructor === Date) {
-            result = arguments.length === 1
+          if (this.constructor == Date) {
+            result = arguments.length == 1
               ? new __Date(year)
               : new __Date(year, month, date || 1, hours || 0, minutes || 0, seconds || 0, ms || 0);
             result['__proto__'] = datePlugin;
@@ -382,7 +382,7 @@
         Array = function Array(length) {
           var argLen = arguments.length;
           if (argLen) {
-            return argLen === 1 && length === length >>> 0
+            return argLen == 1 && length == length >>> 0
               ? new __Array(length)
               : Array.fromArray(arguments);
           }
@@ -394,8 +394,8 @@
         };
 
         Date = function Date(year, month, date, hours, minutes, seconds, ms) {
-          if (this.constructor === Date) {
-           return arguments.length === 1
+          if (this.constructor == Date) {
+           return arguments.length == 1
              ? new __Date(year)
              : new __Date(year, month, date || 1, hours || 0, minutes || 0, seconds || 0, ms || 0);
           }
@@ -520,7 +520,7 @@
       // ES5 15.4.3.2
       if (!isFunction(Array.isArray = __Array.isArray)) {
         Array.isArray = function isArray(value) {
-          return toString.call(value) === '[object Array]';
+          return toString.call(value) == '[object Array]';
         };
       }
 
@@ -565,7 +565,7 @@
 
           // redefine RegExp to auto-fix \s issues
           RegExp = function RegExp(pattern, flags) {
-            return new RE((toString.call(pattern) === '[object RegExp]' ?
+            return new RE((toString.call(pattern) == '[object RegExp]' ?
               pattern.source : String(pattern))
                 .replace(reCharClass, newCharClass), flags);
           };
@@ -990,7 +990,7 @@
     // thrown when using iframes to create sandboxes after the document.domain is
     // set (Opera 9.25 is out of luck here).
     if (HAS_ACTIVEX && !isHostType(window, 'XMLHttpRequest') &&
-          window.location && window.location.protocol === 'https:') {
+          window.location && window.location.protocol == 'https:') {
       setMode(ACTIVEX_MODE);
     }
     // Iframes are the fastest and prefered technique
@@ -1047,7 +1047,7 @@
 
       // break fuse.Object.prototype's relationship to other fuse natives
       // for consistency across sandbox variations.
-      if (MODE !== PROTO_MODE) {
+      if (MODE != PROTO_MODE) {
         backup = {
           'Array': fuse.Array, 'Boolean': fuse.Boolean,
           'Date':     fuse.Date,
@@ -1069,7 +1069,7 @@
       }
 
       // redifine `toString` if there are no issues
-      if (fuse.Object().toString.call([]) === '[object Array]') {
+      if (fuse.Object().toString.call([]) == '[object Array]') {
         toString = { }.toString;
       }
 

@@ -101,7 +101,7 @@
       if (callback == null) {
         if (pairs.length) return _returnPair(pairs[0]);
       }
-      else if (typeof callback === 'function') {
+      else if (typeof callback == 'function') {
         while (pair = pairs[++i]) {
           if (callback.call(thisArg, pair[1], pair[0], this))
             return _returnPair(pair);
@@ -121,7 +121,7 @@
       if (callback == null) {
         if (length) return _returnPair(this._pairs.last());
       }
-      else if (typeof callback === 'function') {
+      else if (typeof callback == 'function') {
         while (length--) {
           pair = pairs[length];
           if (callback.call(thisArg, pair[1], pair[2], this))
@@ -266,7 +266,7 @@
        result   = $H();
 
       // if last argument is a function it is the callback
-      if (typeof args[args.length - 1] === 'function') {
+      if (typeof args[args.length - 1] == 'function') {
         callback = args.pop();
       }
 

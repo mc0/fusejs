@@ -18,7 +18,7 @@
       var isSingle, match, result = null, i = 0;
       if (!element) return result;
 
-      if (toString.call(count) !== '[object Number]') {
+      if (toString.call(count) != '[object Number]') {
         selectors = count;
         count = null;
       }
@@ -29,18 +29,18 @@
 
       // handle when a callback and optional thisArg is passed
       // callback = selectors;
-      if (typeof selectors === 'function') {
+      if (typeof selectors == 'function') {
         // handle returning first match
         if (isSingle) {
           do {
-            if (element.nodeType === ELEMENT_NODE && selectors.call(thisArg, element))
+            if (element.nodeType == ELEMENT_NODE && selectors.call(thisArg, element))
               return fromElement(element);
           } while (element = element[property]);
         }
         // handle returning a number of matches
         else {
           do {
-            if (i < count && element.nodeType === ELEMENT_NODE && selectors.call(count, element))
+            if (i < count && element.nodeType == ELEMENT_NODE && selectors.call(count, element))
               result[i++] = fromElement(element);
           } while (element = element[property]);
         }
@@ -51,14 +51,14 @@
           // handle returning first match
           if (isSingle) {
             do {
-              if (element.nodeType === ELEMENT_NODE)
+              if (element.nodeType == ELEMENT_NODE)
                 return fromElement(element);
             } while (element = element[property]);
           }
           // handle returning a number of matches
           else {
             do {
-              if (i < count && element.nodeType === ELEMENT_NODE)
+              if (i < count && element.nodeType == ELEMENT_NODE)
                 result[i++] = fromElement(element);
             } while (element = element[property]);
           }
@@ -69,14 +69,14 @@
           match = fuse.dom.selector.match;
           if (isSingle) {
             do {
-              if (element.nodeType === ELEMENT_NODE && match(element, selectors))
+              if (element.nodeType == ELEMENT_NODE && match(element, selectors))
                 return fromElement(element);
             } while (element = element[property]);
           }
           // handle returning a number of matches
           else {
             do {
-              if (i < count && element.nodeType === ELEMENT_NODE &&
+              if (i < count && element.nodeType == ELEMENT_NODE &&
                   match(element, selectors))
                 result[i++] = fromElement(element);
             } while (element = element[property]);
@@ -98,7 +98,7 @@
 
     plugin.getChildren = function getChildren(selectors) {
       var element = (this.raw || this)[firstNode];
-      while (element && element.nodeType !== ELEMENT_NODE) {
+      while (element && element.nodeType != ELEMENT_NODE) {
         element = element[nextNode];
       }
       if (!element) {
@@ -121,13 +121,13 @@
         if (selectors && selectors.length) {
           match = fuse.dom.selector.match;
           do {
-            if (element.nodeType === ELEMENT_NODE &&
+            if (element.nodeType == ELEMENT_NODE &&
                 element !== original && match(element, selectors))
               result[i++] = fromElement(element);
           } while (element = element[nextNode]);
         } else {
           do {
-            if (element.nodeType === ELEMENT_NODE && element !== original)
+            if (element.nodeType == ELEMENT_NODE && element != original)
               result[i++] = fromElement(element);
           } while (element = element[nextNode]);
         }
@@ -139,7 +139,7 @@
       var isSingle, match, node, nodes, result = null, i = 0, j = 0,
        element = this.raw || this;
 
-      if (toString.call(count) !== '[object Number]') {
+      if (toString.call(count) != '[object Number]') {
         selectors = count;
         count = null;
       }
@@ -153,18 +153,18 @@
 
       // handle when a callback and optional thisArg is passed
       // callback = selectors;
-      if (typeof selectors === 'function') {
+      if (typeof selectors == 'function') {
         // handle returning first match
         if (isSingle) {
           while (node = nodes[i++]) {
-            if (node.nodeType === ELEMENT_NODE && selectors.call(thisArg, node))
+            if (node.nodeType == ELEMENT_NODE && selectors.call(thisArg, node))
               return fromElement(node);
           }
         }
         // handle returning a number of matches
         else {
           while (node = nodes[i++]) {
-            if (j < count && node.nodeType === ELEMENT_NODE && selectors.call(count, node))
+            if (j < count && node.nodeType == ELEMENT_NODE && selectors.call(count, node))
               result[j++] = fromElement(node);
           }
         }
@@ -178,7 +178,7 @@
           }
           // handle returning a number of matches
           while (node = nodes[i++]) {
-            if (j < count && node.nodeType === ELEMENT_NODE)
+            if (j < count && node.nodeType == ELEMENT_NODE)
               result[j++] = fromElement(node);
           }
         }
@@ -188,14 +188,14 @@
           match = fuse.dom.selector.match;
           if (isSingle) {
             while (node = nodes[i++]) {
-              if (node.nodeType === ELEMENT_NODE && match(node, selectors))
+              if (node.nodeType == ELEMENT_NODE && match(node, selectors))
                 return fromElement(node);
             }
           }
           // handle returning a number of matches
           else {
             while (node = nodes[i++]) {
-              if (j < count && node.nodeType === ELEMENT_NODE && match(node, selectors))
+              if (j < count && node.nodeType == ELEMENT_NODE && match(node, selectors))
                 result[j++] = fromElement(node);
             }
           }
@@ -263,7 +263,7 @@
         var element = this.raw || this;
         descendant = descendant.raw || descendant;
         while (descendant = descendant.parentNode)
-          if (descendant === element) return true;
+          if (descendant == element) return true;
       }
       return false;
     };
@@ -274,7 +274,7 @@
         if (descendant = fuse(descendant)) {
           var element = this.raw || this;
           return ((descendant.raw || descendant)
-            .compareDocumentPosition(element) & 8) === 8;
+            .compareDocumentPosition(element) & 8) == 8;
         }
         return false;
       };
@@ -282,14 +282,14 @@
     else if (envTest('ELEMENT_CONTAINS')) {
       var __contains = contains;
       contains = function contains(descendant) {
-        if (this.nodeType !== ELEMENT_NODE)
+        if (this.nodeType != ELEMENT_NODE)
           return __contains.call(this, descendant);
 
         descendant = fuse(descendant);
         var descendantElem = descendant.raw || descendant,
          element = this.raw || this;
 
-        return element !== descendantElem && element.contains(descendantElem);
+        return element != descendantElem && element.contains(descendantElem);
       };
     }
     return contains;

@@ -4,7 +4,7 @@
     'CREATE_ELEMENT_WITH_HTML': function() {
       try { // true for IE
         var div = fuse._doc.createElement('<div id="x">');
-        return div.id === 'x';
+        return div.id == 'x';
       } catch(e) {
         return false;
       }
@@ -102,8 +102,8 @@
       var div = fuse._div, result = false;
       try {
         div.setAttribute('align', 'center'); div.setAttribute('aLiGn', 'left');
-        result = (div.getAttribute('aLiGn') === 'center' &&
-          div.getAttribute('aLiGn', 1) === 'left');
+        result = (div.getAttribute('aLiGn') == 'center' &&
+          div.getAttribute('aLiGn', 1) == 'left');
         div.removeAttribute('align'); div.removeAttribute('aLiGn');
       } catch(e) { }
       return result;
@@ -122,7 +122,7 @@
     'ELEMENT_INNER_TEXT': function() {
       // true for IE
       return !envTest('ELEMENT_TEXT_CONTENT') &&
-        typeof fuse._div.innerText === 'string';
+        typeof fuse._div.innerText == 'string';
     },
 
     'ELEMENT_MERGE_ATTRIBUTES': function() {
@@ -132,7 +132,7 @@
         element = fuse._doc.createElement('div');
         div.id = 'x';
         element.mergeAttributes(div);
-        result = element.id === 'x';
+        result = element.id == 'x';
         div.id = null;
       }
       return result;
@@ -142,8 +142,8 @@
       // true for IE
       var docEl = fuse._docEl, elemStyle = docEl.style;
       return isHostType(docEl, 'filters') &&
-        typeof elemStyle.filter === 'string' &&
-        typeof elemStyle.opacity !== 'string';
+        typeof elemStyle.filter == 'string' &&
+        typeof elemStyle.opacity != 'string';
     },
 
     'ELEMENT_REMOVE_NODE': function() {
@@ -153,18 +153,18 @@
 
     'ELEMENT_SOURCE_INDEX': function() {
       // true for IE and Opera
-      return typeof fuse._docEl.sourceIndex === 'number';
+      return typeof fuse._docEl.sourceIndex == 'number';
     },
 
     'ELEMENT_TEXT_CONTENT': function() {
       // true for all but IE and Safari 2
-      return typeof fuse._div.textContent === 'string';
+      return typeof fuse._div.textContent == 'string';
     },
 
     'ELEMENT_UNIQUE_NUMBER': function() {
       // true for IE
-      return typeof fuse._div.uniqueNumber === 'number' &&
-        typeof fuse._docEl.uniqueNumber === 'number' &&
+      return typeof fuse._div.uniqueNumber == 'number' &&
+        typeof fuse._docEl.uniqueNumber == 'number' &&
         fuse._div.uniqueNumber != fuse._docEl.uniqueNumber;
     }
   });
@@ -200,7 +200,7 @@
       // check scroll coords
       var scrollTop = docEl.scrollTop;
       envAddTest('BODY_SCROLL_COORDS_ON_DOCUMENT_ELEMENT',
-        ++docEl.scrollTop && docEl.scrollTop === scrollTop + 1);
+        ++docEl.scrollTop && docEl.scrollTop == scrollTop + 1);
       docEl.scrollTop = scrollTop;
 
       // cleanup
@@ -216,7 +216,7 @@
       // true for Safari
       var body = fuse._body, bs = body.style, backup = bs.cssText;
       bs.cssText += ';position:absolute;top:0;margin:1px 0 0 0;';
-      var result = body.offsetTop === 1;
+      var result = body.offsetTop == 1;
       bs.cssText = backup;
       return result;
     },
@@ -226,7 +226,7 @@
       var node, doc = fuse._doc, button = doc.createElement('button');
       button.appendChild(doc.createTextNode('y'));
       button.setAttribute('value', 'x');
-      return ((node = button.getAttributeNode('value')) && node.value) !== 'x';
+      return ((node = button.getAttributeNode('value')) && node.value) != 'x';
     },
 
     'ELEMENT_COMPUTED_STYLE_DEFAULTS_TO_ZERO': function() {
@@ -237,7 +237,7 @@
         des.top = des.left = '';
 
         var style = fuse._doc.defaultView.getComputedStyle(fuse._docEl, null);
-        result = (style && style.top === '0px' && style.left === '0px');
+        result = (style && style.top == '0px' && style.left == '0px');
         des.cssText = backup;
         return result;
       }
@@ -249,7 +249,7 @@
         var docEl = fuse._docEl, des = docEl.style, backup = des.paddingBottom;
         des.paddingBottom = '1px';
         var style = fuse._doc.defaultView.getComputedStyle(docEl, null),
-         result = style && (parseInt(style.height) || 0) ===  docEl.offsetHeight;
+         result = style && (parseInt(style.height) || 0) ==  docEl.offsetHeight;
         des.paddingBottom = backup;
         return result;
       }
@@ -263,7 +263,7 @@
 
         // In Safari 2 getComputedStyle() will return null for elements with style display:none
         var style = fuse._doc.defaultView.getComputedStyle(fuse._docEl, null),
-         result = style && style.height === '0px';
+         result = style && style.height == '0px';
 
         des.display = backup;
         return result;
@@ -276,7 +276,7 @@
       body.appendChild(div);
       var value = div.offsetLeft;
       bs.cssText += ';border: 1px solid transparent;';
-      var result = (value === div.offsetLeft);
+      var result = (value == div.offsetLeft);
       bs.cssText = backup;
       body.removeChild(div);
       return result;
@@ -286,7 +286,7 @@
       // true for IE and Firefox 3
       var div = fuse._div;
       div.innerHTML = '<table><tr><td><\/td><\/tr><\/table>';
-      var result = getNodeName(div.firstChild.firstChild) === 'TBODY';
+      var result = getNodeName(div.firstChild.firstChild) == 'TBODY';
       div.innerHTML = '';
       return result;
     },
@@ -295,7 +295,7 @@
       // true for IE
       var div = fuse._div;
       div.innerHTML = '<p>x<\/p><!--y-->';
-      var result = div.getElementsByTagName('*').length === 2;
+      var result = div.getElementsByTagName('*').length == 2;
       div.innerHTML = '';
       return result;
     },
@@ -305,7 +305,7 @@
       var input = fuse._doc.createElement('input');
       input.setAttribute('value', 'x');
       input.value = 'y';
-      return input.cloneNode(false).getAttribute('value') === 'y';
+      return input.cloneNode(false).getAttribute('value') == 'y';
     },
 
     'NAME_ATTRIBUTE_IS_READONLY': function() {
@@ -338,7 +338,7 @@
         if (targetNode) element = element.getElementsByTagName(targetNode)[0];
         try {
           result = (element.innerHTML = innerHTML) &&
-            element.innerHTML.toLowerCase() !== innerHTML;
+            element.innerHTML.toLowerCase() != innerHTML;
         } catch(e) { }
         div.innerHTML = '';
         return result;

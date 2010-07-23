@@ -16,7 +16,7 @@
         };
 
         element = element.raw || element;
-        if (getNodeName(element) === 'FORM') {
+        if (getNodeName(element) == 'FORM') {
           return this.registerFormCallbacks();
         }
 
@@ -81,7 +81,7 @@
 
     Field.EventObserver.plugin.getValue = function getValue() {
       var element, member, value, i = -1;
-      if (this.group.length === 1) {
+      if (this.group.length == 1) {
         return this.element.getValue();
       }
       while (member = this.group[++i]) {

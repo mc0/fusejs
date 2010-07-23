@@ -12,7 +12,7 @@
         fuse.dom.getDocument(element));
 
       while (node = result[++i]) {
-        if (node === element) return true;
+        if (node == element) return true;
       }
       return false;
     },

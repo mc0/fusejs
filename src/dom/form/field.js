@@ -131,7 +131,7 @@
     selectPlugin.serialize = function serialize() {
       var value, pair, name, nodeName, element = this.raw || this;
       if (element.disabled || !(name = element.name) ||
-          element.selectedIndex === -1) {
+          element.selectedIndex == -1) {
         return fuse.String('');
       }
       value = selectPlugin.getValue.call(this);
@@ -173,7 +173,7 @@
 
     selectPlugin.getValue = function getValue() {
       var i, node, result, element = this.raw || this;
-      if (element.type === 'select-one') {
+      if (element.type == 'select-one') {
         var index = element.selectedIndex;
         if (index > -1) result = getOptionValue.call(element.options[index]);
       }

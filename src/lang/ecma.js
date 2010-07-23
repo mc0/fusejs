@@ -50,18 +50,18 @@
     ARRAY_CONCAT_ARGUMENTS_BUGGY = (function() {
       // true for Opera
       var array = [];
-      return array.concat && array.concat(arguments).length === 2; 
+      return array.concat && array.concat(arguments).length == 2; 
     })(1, 2),
 
     ARRAY_SLICE_EXLUDES_TRAILING_UNDEFINED_INDEXES = (function() {
       // true for Opera 9.25
       var array = [1]; array[2] = 1;
-      return array.slice && array.slice(0, 2).length === 1;
+      return array.slice && array.slice(0, 2).length == 1;
     })(),
 
     // true for IE; String#match is affected too
     REGEXP_EXEC_RETURNS_UNDEFINED_VALUES_AS_STRINGS =
-      typeof /x(y)?/.exec('x')[1] === 'string',
+      typeof /x(y)?/.exec('x')[1] == 'string',
 
     REGEXP_INCREMENTS_LAST_INDEX_AFTER_ZERO_LENGTH_MATCHES = (function() {
       // true for IE
@@ -74,7 +74,7 @@
 
     // true for Chrome 1-2 and Opera 9.25
     STRING_LAST_INDEX_OF_BUGGY_WITH_NEGATIVE_OR_NAN_POSITION =
-      'xox'.lastIndexOf('x', -1) !== 0 ||  'xox'.lastIndexOf('x', +'x') !== 2,
+      'xox'.lastIndexOf('x', -1) != 0 ||  'xox'.lastIndexOf('x', +'x') != 2,
 
     STRING_METHODS_WRONGLY_SET_REGEXP_LAST_INDEX = (function() {
       // true for IE
@@ -91,22 +91,22 @@
     STRING_REPLACE_BUGGY_WITH_GLOBAL_FLAG_AND_EMPTY_PATTERN = (function() {
       // true for Chrome 1
       var string = 'xy', replacement = function() { return 'o'; };
-      return !(string.replace(/()/g, 'o') === 'oxoyo' &&
-        string.replace(new RegExp('', 'g'), replacement) === 'oxoyo' &&
-        string.replace(/(y|)/g, replacement) === 'oxoo');
+      return !(string.replace(/()/g, 'o') == 'oxoyo' &&
+        string.replace(new RegExp('', 'g'), replacement) == 'oxoyo' &&
+        string.replace(/(y|)/g, replacement) == 'oxoo');
     })(),
 
     STRING_REPLACE_PASSES_UNDEFINED_VALUES_AS_STRINGS = (function() {
       // true for Firefox
       var result;
-      'x'.replace(/x(y)?/, function(x, y) { result = typeof y === 'string'; });
+      'x'.replace(/x(y)?/, function(x, y) { result = typeof y == 'string'; });
       return result; 
     })(),
 
     STRING_SPLIT_RETURNS_UNDEFINED_VALUES_AS_STRINGS = (function() {
       // true for Firefox
       var result = 'oxo'.split(/x(y)?/);
-      return result.length === 3 && typeof result[1] === 'string'; 
+      return result.length == 3 && typeof result[1] == 'string'; 
     })(),
 
     STRING_SPLIT_ZERO_LENGTH_MATCH_RETURNS_NON_EMPTY_ARRAY =
@@ -116,7 +116,7 @@
       // true for Firefox
       var key, whitespace = '';
       for (key in sMap) whitespace += key;
-      return typeof whitespace.trim !== 'function' || !!whitespace.trim();
+      return typeof whitespace.trim != 'function' || !!whitespace.trim();
     })();
 
     /*------------------------------------------------------------------------*/
@@ -158,7 +158,7 @@
           var endIndex, result, object = Object(this),
            length = object.length >>> 0;
 
-          end = typeof end === 'undefined' ? length : toInteger(end);
+          end = typeof end == 'undefined' ? length : toInteger(end);
           endIndex = end - 1;
 
           if (end > length || endIndex in object) {
@@ -298,7 +298,7 @@
         STRING_REPLACE_BUGGY_WITH_GLOBAL_FLAG_AND_EMPTY_PATTERN) {
       strReplace =
       strPlugin.replace = function replace(pattern, replacement) {
-        if (typeof replacement !== 'function') {
+        if (typeof replacement != 'function') {
           return __replace.call(this, pattern, replacement);
         }
         if (!isRegExp(pattern)) {
@@ -329,8 +329,8 @@
             break;
           }
           // handle empty pattern matches like /()/g
-          if (lastIndex === index) {
-            if (lastIndex === srcLength) break;
+          if (lastIndex == index) {
+            if (lastIndex == srcLength) break;
             pattern.lastIndex = lastIndex++;
             result += source.charAt(lastIndex);
           }
@@ -347,7 +347,7 @@
     if (STRING_REPLACE_PASSES_UNDEFINED_VALUES_AS_STRINGS) {
       var __replace2 = strPlugin.replace;
       strPlugin.replace = function replace(pattern, replacement) {
-        if (typeof replacement === 'function' && isRegExp(pattern) &&
+        if (typeof replacement == 'function' && isRegExp(pattern) &&
             reOptCapture.test(pattern.source)) {
           var __replacement = replacement;
           replacement = function(match) {
@@ -367,7 +367,7 @@
     if (STRING_METHODS_WRONGLY_SET_REGEXP_LAST_INDEX) {
       var __replace3 = strPlugin.replace;
       strPlugin.replace = function replace(pattern, replacement) {
-        if (typeof replacement === 'function') {
+        if (typeof replacement == 'function') {
           var __replacement = replacement;
           replacement = function() {
             // ensure string `null` and `undefined` are returned
@@ -400,7 +400,7 @@
         STRING_SPLIT_RETURNS_UNDEFINED_VALUES_AS_STRINGS) {
       strPlugin.split = function split(separator, limit) {
         // max limit Math.pow(2, 32) - 1
-        limit = typeof limit === 'undefined' ? 4294967295 : limit >>> 0;
+        limit = typeof limit == 'undefined' ? 4294967295 : limit >>> 0;
         if (!limit || !isRegExp(separator)) {
           return __split.call(this, separator, limit);
         }
@@ -433,25 +433,25 @@
           // empty substring at the beginning or end of the input string
           if (lastIndex > lastLastIndex && index < strLength) {
             result[++i] = string.slice(lastLastIndex, index);
-            if (result.length === limit) return result;
+            if (result.length == limit) return result;
 
             // add capture groups
             j = 0;
             while (++j < length) {
               result[++i] = match[j] == null ? match[j] : fuse.String(match[j]);
-              if (result.length === limit) break;
+              if (result.length == limit) break;
             }
             lastLastIndex = lastIndex;
           }
           // avoid infinite loop
-          if (lastIndex === index) {
+          if (lastIndex == index) {
             separator.lastIndex++;
           }
         }
 
         // don't match empty substring at end if the input string is empty
         separator.lastIndex = 0;
-        if (!(strLength === 0 && separator.test(''))) {
+        if (!(strLength == 0 && separator.test(''))) {
           result[++i] = string.slice(lastLastIndex);
         }
         if (backup != null) {
@@ -488,7 +488,7 @@
 
         if (!end) return fuse.String(string);
         while (sMap[string.charAt(++start)]) { };
-        if (start === end) return fuse.String('');
+        if (start == end) return fuse.String('');
 
         while (sMap[string.charAt(--end)]) { }
         return fuse.String(string.slice(start, end + 1));

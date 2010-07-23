@@ -26,12 +26,12 @@
 
   getDocument = function getDocument(element) {
     return element.ownerDocument || element.document ||
-      (element.nodeType === DOCUMENT_NODE ? element : fuse._doc);
+      (element.nodeType == DOCUMENT_NODE ? element : fuse._doc);
   };
 
   // test if the nodeName is case sensitive and if it coerces
   // potentially unknown element nodeNames to uppercase
-  getNodeName = fuse._doc.createElement('nav').nodeName === 'NAV'
+  getNodeName = fuse._doc.createElement('nav').nodeName == 'NAV'
     ? function(element) { return element.nodeName; }
     : function(element) { return element.nodeName.toUpperCase(); };
 

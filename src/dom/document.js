@@ -8,7 +8,7 @@
     Document = function Document(node, isCached) {
       // quick return if empty, decorated, or not a document node
       var data, decorated, pluginViewport, viewport;
-      if (!node || node.raw || node.nodeType !== DOCUMENT_NODE) {
+      if (!node || node.raw || node.nodeType != DOCUMENT_NODE) {
         return node;
       }
       if (isCached === false) {
@@ -72,7 +72,7 @@
         return returnOffset(win.pageXOffset, win.pageYOffset);
       };
 
-      if (typeof window.pageXOffset !== 'number') {
+      if (typeof window.pageXOffset != 'number') {
         getScrollOffsets = function getScrollOffsets() {
           return returnOffset(scrollEl.scrollLeft, scrollEl.scrollTop);
         };

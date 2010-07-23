@@ -11,7 +11,7 @@
       if (!pattern.global) {
         pattern = fuse.RegExp.clone(pattern, { 'global': true });
       }
-      if (pattern.constructor !== fuse.RegExp) {
+      if (pattern.constructor != fuse.RegExp) {
         pattern = fuse.Object(pattern);
       }
 
@@ -104,7 +104,7 @@
             // convert bracket notation to dot notation then split and add
             if (prop.indexOf('[') > -1) {
               prop = strReplace.call(prop, reBrackets, escapeDots);
-              if (prop.charAt(0) === '.') prop = prop.slice(1);
+              if (prop.charAt(0) == '.') prop = prop.slice(1);
               chain.push.apply(chain, strSplit.call(prop, reSplitByDot));
             }
             // simply add
@@ -153,7 +153,7 @@
 
     plugin.parse = function parse(object) {
       // check if cache has expired
-      if (this.template !== this._lastTemplate) {
+      if (this.template != this._lastTemplate) {
         this.preparse();
       }
 
@@ -165,9 +165,9 @@
       if (object) {
         if (isHash(object)) {
           object = object._object;
-        } else if (typeof object.toTemplateReplacements === 'function') {
+        } else if (typeof object.toTemplateReplacements == 'function') {
           object = object.toTemplateReplacements();
-        } else if (typeof object.toObject === 'function') {
+        } else if (typeof object.toObject == 'function') {
           object = object.toObject();
         }
       }
@@ -182,7 +182,7 @@
         while (++i < length) {
           if (!hasKey(o, prop = chain[i])) break;
           o = o[prop];
-          found = i === lastIndex;
+          found = i == lastIndex;
         }
         // replace token with property value if found and != null
         result = result.replace(c.reToken, found && o != null ? o : '');
@@ -208,7 +208,7 @@
     },
 
     prepareReplacement = function(replacement) {
-      if (typeof replacement === 'function') {
+      if (typeof replacement == 'function') {
         return function() { return replacement(slice.call(arguments, 0, -2)); };
       }
       var template = fuse.Template(replacement);
@@ -246,7 +246,7 @@
         return strReplace.call(this, pattern, prepareReplacement(replacement));
       }
 
-      if (typeof replacement !== 'function') {
+      if (typeof replacement != 'function') {
         var template = fuse.Template(replacement);
         replacement = function(match) { return template.parse(match); };
       }

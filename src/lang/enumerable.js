@@ -26,7 +26,7 @@
             throw $break;
         });
       } catch (e) {
-        if (e !== $break) throw e;
+        if (e != $break) throw e;
       }
       return this;
     };
@@ -73,7 +73,7 @@
     };
 
     mixin.inGroupsOf = function inGroupsOf(size, filler) {
-      filler = typeof filler === 'undefined' ? null : filler;
+      filler = typeof filler == 'undefined' ? null : filler;
       return this.eachSlice(size, function(slice) {
         while (slice.length < size) slice.push(filler);
         return slice;
@@ -191,7 +191,7 @@
        args = slice.call(arguments, 0);
 
       // if last argument is a function it is the callback
-      if (typeof args[args.length-1] === 'function') {
+      if (typeof args[args.length-1] == 'function') {
         callback = args.pop();
       }
 

@@ -59,7 +59,7 @@
       }
 
       // add in user defined array/hash/object headers over the default
-      if (typeof customHeaders === 'object') {
+      if (typeof customHeaders == 'object') {
         if (isArray(customHeaders)) {
           for (var i = 0, length = customHeaders.length; i < length; i += 2)
             headers[customHeaders[i]] = customHeaders[i + 1];
