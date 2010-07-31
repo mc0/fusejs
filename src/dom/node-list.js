@@ -42,7 +42,7 @@
     }
 
     return function(value, key, object) {
-      if (!SKIPPED_KEYS[key] && isFunction(value) && hasKey(object, key)) {
+      if (!SKIPPED_KEYS[key] && hasKey(object, key) && isFunction(value)) {
         if (reGetter.test(key)) {
           // getters return the value of the first element
           plugin[key] = Function('c,gc',

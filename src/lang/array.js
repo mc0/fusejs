@@ -590,7 +590,7 @@
       };
 
       eachKey(fuse.Class.mixins.enumerable, function(value, key, object) {
-        if (hasKey(object, key) && typeof plugin[key] != 'function') {
+        if (hasKey(object, key) && !isFunction(plugin[key])) {
           plugin[key] = value;
         }
       });

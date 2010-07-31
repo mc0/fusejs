@@ -116,7 +116,7 @@
       // true for Firefox
       var key, whitespace = '';
       for (key in sMap) whitespace += key;
-      return typeof whitespace.trim != 'function' || !!whitespace.trim();
+      return !isFunction(whitespace.trim) || !!whitespace.trim();
     })();
 
     /*------------------------------------------------------------------------*/

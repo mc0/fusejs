@@ -69,7 +69,7 @@
         fuse.updateGenerics(Klass, deep);
       } else {
         fuse.Object.each(Klass.prototype, function(value, key, proto) {
-          if (!SKIPPED_KEYS[key] && isFunction(proto[key]) && hasKey(proto, key))
+          if (!SKIPPED_KEYS[key] && hasKey(proto, key) && isFunction(proto[key]))
             Klass[key] = createGeneric(proto, key);
         });
       }

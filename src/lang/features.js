@@ -18,9 +18,12 @@
     test = function test(name) {
       var i = 0;
       while (name = arguments[i++]) {
-        if (typeof cache[name] == 'function')
+        if (typeof cache[name] == 'function') {
           cache[name] = cache[name]();
-        if (cache[name] != true) return false;
+        }
+        if (cache[name] != true) {
+          return false;
+        }
       }
       return true;
     };

@@ -91,7 +91,7 @@
     var objectProto = Object.prototype,
      hasOwnProperty = objectProto.hasOwnProperty;
 
-    if (typeof hasOwnProperty != 'function') {
+    if (!isFunction(hasOwnProperty)) {
       if (envTest('OBJECT__PROTO__')) {
         // Safari 2
         hasKey = function hasKey(object, property) {

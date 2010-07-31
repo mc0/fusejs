@@ -468,7 +468,7 @@
 
       Number.MIN_VALUE         = 5e-324;
 
-      Number.NaN               = +'x';
+      Number.NaN               = NaN;
 
       Number.NEGATIVE_INFINITY = -Infinity;
 
