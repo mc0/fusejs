@@ -12,7 +12,7 @@
 
 * Avoid an extra fromElement() call in the fast lane of fuse.Event#findElement. [jddalton]
 
-* Add fuse.run() global eval solution, rename fuse.String#evalScripts to fuse.String#runScripts, and make runScripts() callback arguments mimic ES5 callbacks. [jddalton]
+* Add fuse.run() global eval solution, rename fuse.String#evalScripts to fuse.String#runScripts, and make runScripts() callback arguments mimic ES5 callbacks. [FuseJS LH #59] [jddalton]
 
 * Remove fuse.RegExp#match alias of fuse.RegExp#test. [jddalton]
   Note: Backwards compatibility warning.
