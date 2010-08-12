@@ -2,6 +2,7 @@
 
   // add/pave statics
   (function() {
+
     var isMixin = false,
 
     addToNodeList = function() {
@@ -11,7 +12,7 @@
 
       while (++i < imax) {
         arg = args[i];
-        if (typeof arg === 'function') arg = arg();
+        if (typeof arg == 'function') arg = arg();
         if (!isArray(arg)) arg = [arg];
 
         j = -1; jmax = arg.length;
@@ -65,7 +66,7 @@
     };
 
     plugin.isEmpty = function isEmpty() {
-      return fuse.String((this.raw || this).innerHTML).blank();
+      return (this.raw || this).innerHTML == false;
     };
 
     plugin.isDetached = function isDetached() {
@@ -77,14 +78,14 @@
     if (envTest('ELEMENT_SOURCE_INDEX', 'DOCUMENT_ALL_COLLECTION')) {
       plugin.isDetached = function isDetached() {
         var element = this.raw || this;
-        return element.ownerDocument.all[element.sourceIndex] !== element;
+        return element.ownerDocument.all[element.sourceIndex] != element;
       };
     }
     else if (envTest('ELEMENT_COMPARE_DOCUMENT_POSITION')) {
       plugin.isDetached = function isDetached() {
         /* DOCUMENT_POSITION_DISCONNECTED = 0x01 */
         var element = this.raw || this;
-        return (element.ownerDocument.compareDocumentPosition(element) & 1) === 1;
+        return (element.ownerDocument.compareDocumentPosition(element) & 1) == 1;
       };
     }
 

@@ -47,7 +47,7 @@
     plugin.toPaddedString = function toPaddedString(length, radix) {
       var string = toInteger(this).toString(radix || 10);
       if (length <= string.length) return fuse.String(string);
-      if (length > pad.length) pad = new Array(length + 1).join('0');
+      if (length > pad.length) pad = Array(length + 1).join('0');
       return fuse.String((pad + string).slice(-length));
     };
 
