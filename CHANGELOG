@@ -1,3 +1,5 @@
+* Fix fuse.Fusebox regression with Firefox 1.5 and Safari and cleanup. [jddalton]
+
 * Simplify the private from() function in Fusebox. [jddalton]
 
 * Reduce the prototype chain method lookup by one for the __proto__ fork of Fusebox. [jddalton]
