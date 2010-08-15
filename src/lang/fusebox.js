@@ -902,7 +902,7 @@
       (arrPlugin.concat = arrPlugin.concat).raw = __concat;
       (arrPlugin.reverse = arrPlugin.reverse).raw = __reverse;
       (arrPlugin.slice = arrPlugin.slice).raw = __slice;
-      (arrPlugin.splice.raw = arrPlugin.splice.raw) = __splice;
+      (arrPlugin.splice.raw = arrPlugin.splice).raw = __splice;
 
 
       /*------------------------- MODIFY PROTOTYPES --------------------------*/
