@@ -298,10 +298,10 @@
     var TABLE_ELEMENTS = { 'THEAD': 1, 'TBODY': 1, 'TR': 1 },
 
     OPACITY_PROP = (function(s) {
-      return typeof s.opactiy  != 'undefined' ? 'opacity'       :
-        typeof s.MozOpacity    != 'undefined' ? 'MozOpacity'    :
-        typeof s.WebkitOpacity != 'undefined' ? 'WebKitOpacity' :
-        typeof s.KhtmlOpacity  != 'undefined' ? 'KhtmlOpacity'  : false;
+      return 'opacity'  in s ? 'opacity'       :
+        'MozOpacity'    in s ? 'MozOpacity'    :
+        'WebkitOpacity' in s ? 'WebKitOpacity' :
+        'KhtmlOpacity'  in s ? 'KhtmlOpacity'  : false;
     })(fuse._div.style);
 
 
@@ -363,9 +363,7 @@
         getOpacity = function getOpacity() {
           var element = this.raw || this,
            style = element.ownerDocument.defaultView.getComputedStyle(element, null);
-          return fuse.Number(parseFloat(style
-            ? style.opacity
-            : element.style[OPACITY_PROP]));
+          return fuse.Number(parseFloat(element.style[OPACITY_PROP] || style && style[OPACITY_PROP] || 1.0));
         };
       }
 
