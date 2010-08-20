@@ -1,6 +1,6 @@
   /*--------------------------- SELECTOR: DOMQUERY ---------------------------*/
 
-  fuse[uid] = window.Ext;
+  fuse._engine = window.Ext;
 
   //= require "../../../vendor/domquery/DomQuery.js"
 
@@ -34,5 +34,5 @@
   })(Ext.DomQuery, fuse.dom.selector, fuse.dom.NodeList);
 
   // restore
-  if (fuse[uid]) window.Ext = fuse[uid];
-  delete fuse[uid];
+  if (fuse._engine) window.Ext = fuse._engine;
+  delete fuse._engine;

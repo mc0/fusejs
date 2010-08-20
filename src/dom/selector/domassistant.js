@@ -1,6 +1,6 @@
   /*---------------------------- SELECTOR: DOMASSISTANT ----------------------------*/
 
-  fuse[uid] = window.DOMAssistant;
+  fuse._engine = window.DOMAssistant;
 
   //= require "../../../vendor/domassistant/DOMAssistant.js"
 
@@ -36,5 +36,5 @@
   })(DOMAssistant, fuse.dom.selector, fuse.dom.NodeList);
 
   // restore
-  if (fuse[uid]) window.DOMAssistant = fuse[uid];
-  delete fuse[uid];
+  if (fuse._engine) window.DOMAssistant = fuse._engine;
+  delete fuse._engine;
