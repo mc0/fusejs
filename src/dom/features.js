@@ -1,15 +1,6 @@
   /*----------------------------- DOM: FEATURES ------------------------------*/
 
   envAddTest({
-    'CREATE_ELEMENT_WITH_HTML': function() {
-      try { // true for IE
-        var div = fuse._doc.createElement('<div id="x">');
-        return div.id == 'x';
-      } catch(e) {
-        return false;
-      }
-    },
-
     'DOCUMENT_ALL_COLLECTION': function() {
       // true for all but Firefox
       isHostType(fuse._doc, 'all');
@@ -123,19 +114,6 @@
       // true for IE
       return !envTest('ELEMENT_TEXT_CONTENT') &&
         typeof fuse._div.innerText == 'string';
-    },
-
-    'ELEMENT_MERGE_ATTRIBUTES': function() {
-      // true for IE
-      var result, element, div = fuse._div;
-      if (isHostType(div, 'mergeAttributes')) {
-        element = fuse._doc.createElement('div');
-        div.id = 'x';
-        element.mergeAttributes(div);
-        result = element.id == 'x';
-        div.id = null;
-      }
-      return result;
     },
 
     'ELEMENT_MS_CSS_FILTERS': function() {
@@ -314,7 +292,7 @@
        node = div.appendChild(fuse._doc.createElement('input'));
 
       node.name = 'x';
-      result = !!div.getElementsByTagName('*')['x'];
+      result = !div.getElementsByTagName('*')['x'];
       div.innerHTML = '';
       return result;
     },
@@ -337,8 +315,8 @@
         element = div.firstChild;
         if (targetNode) element = element.getElementsByTagName(targetNode)[0];
         try {
-          result = (element.innerHTML = innerHTML) &&
-            element.innerHTML.toLowerCase() != innerHTML;
+          element.innerHTML = innerHTML;
+          result = element.innerHTML.toLowerCase() != innerHTML;
         } catch(e) { }
         div.innerHTML = '';
         return result;
@@ -360,6 +338,10 @@
         '<select><option><\/option><\/select>', '<option>x<\/option>'
       ),
 
+      'ELEMENT_INNERHTML_IGNORES_SCRIPTS': createInnerHTMLTest(
+        '<div><\/div>', '<script><\/script>'
+      ),
+
       'ELEMENT_TABLE_INNERHTML_BUGGY': createInnerHTMLTest(
         // left out tbody to test if it's auto inserted
         '<table><tr><td><\/td><\/tr><\/table>', '<tr><td><p>x<\/p><\/td><\/tr>'
@@ -370,26 +352,26 @@
   (function() {
     function createScriptTest(testType) {
       return function() {
-        var hasText, evalFailed,
+        var evalFailed, hasText,
+         div    = fuse._div,
          doc    = fuse._doc,
          docEl  = fuse._docEl,
-         code   = 'fuse.' + uid +' = true;',
-         script = doc.createElement('SCRIPT');
+         code   = 'fuse.' + uid +'=1',
+         script = doc.createElement('script');
 
-        try {
-          script.appendChild(doc.createTextNode(code));
-        } catch (e) {
-          hasText = 'text' in script;
-          script.text = code;
+        try { script.appendChild(doc.createTextNode(code)) } catch (e) { }
+
+        if ('text' in script) {
+          script.text = code + '+1';
         }
 
         docEl.insertBefore(script, docEl.firstChild);
+
+        hasText = fuse[uid] == 2;
         evalFailed = !fuse[uid];
 
-        // clear text so Firefox 2.0.0.2 won't perform a delayed eval
-        if (!hasText) script.firstChild.data = '';
-
-        docEl.removeChild(script);
+        div.appendChild(script);
+        div.innerHTML = '';
         delete fuse[uid];
 
         envAddTest({

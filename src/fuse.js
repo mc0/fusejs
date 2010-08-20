@@ -14,7 +14,7 @@
 (function(window) {
 
   // private vars
-  var DATA_ID_PROP, Document, Element, Node, NodeList, Window,
+  var DATA_ID_PROP, PARENT_NODE, Document, Element, Node, NodeList, Window,
    domData, eachKey, envAddTest, envTest, fromElement, getDocument, getFuseId,
    getNodeName, getWindow, getOrCreateTagClass, hasKey, isArray, isElement,
    isHash, isNumber, isPrimitive, isRegExp, isString, returnOffset, undef,
@@ -207,8 +207,8 @@
   //= require "lang/timer"
 
   //= require "lang/html"
-  //= require "dom/dom"
   //= require "dom/features"
+  //= require "dom/dom"
   //= require "dom/node"
   //= require "dom/document"
   //= require "dom/window"

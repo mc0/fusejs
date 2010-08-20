@@ -4,6 +4,9 @@
 
     var getFragmentFromHTML, plugin,
 
+    ELEMENT_INNERHTML_IGNORES_SCRIPTS =
+      envTest('ELEMENT_INNERHTML_IGNORES_SCRIPTS'),
+
     ELEMENT_TABLE_INNERHTML_INSERTS_TBODY =
       envTest('ELEMENT_TABLE_INNERHTML_INSERTS_TBODY'),
 
@@ -53,7 +56,7 @@
       return T;
     })(),
 
-    __fuse = global.fuse,
+    __fuse = window.fuse,
 
     Node   = __fuse.dom.Node,
 
@@ -64,6 +67,10 @@
     getFuseId = Node.getFuseId,
 
     reSimpleTag = /^<([A-Za-z0-9]+)\/?>$/,
+
+    reTagStart = /^\s*</,
+
+    reTBody = /<tbody /i,
 
     reExtractTagName = /^<([^> ]+)/,
 
@@ -79,29 +86,25 @@
     },
 
     Element = function Element(tagName, context) {
-      var attrs, element, isCached, isDecorated, result;
-      if (context && !CONTEXT_TYPES[context.nodeType]) {
-        attrs       = context.attrs;
-        isCached    = context.cache;
-        isDecorated = context.decorate;
-        context     = context.context;
-      }
+      var attrs, element, result,
+        options = !CONTEXT_TYPES[context && context.nodeType] && context || { };
+
       if (isString(tagName)) {
         result = (tagName.charAt(0) == '<' ? fromHTML : fromTagName)(tagName, context);
       }
       else {
         result = tagName;
-        if (isDecorated !== false) {
+        if (options.decorate !== false) {
           element = result;
           tagName = getNodeName(element);
           Decorator.prototype = getOrCreateTagClass(tagName).plugin;
           result = new Decorator(element);
-          if (isCached !== false) {
+          if (options.cache !== false) {
             domData[getFuseId(element)].decorator = result;
           }
         }
       }
-      return attrs ? plugin.setAttribute.call(result, attrs) : result;
+      return (attrs = options.attrs) ? plugin.setAttribute.call(result, attrs) : result;
     },
 
     extendByTag = function extendByTag(tagName, plugins, mixins, statics) {
@@ -116,7 +119,7 @@
     },
 
     from = function from(element, context) {
-      return global.fuse(element, context);
+      return window.fuse(element, context);
     },
 
     fromElement = function fromElement(element, options) {
@@ -209,7 +212,6 @@
       // support simple tagNames
       var attrs, element, isCached, isDecorated, nodes, result;
       if (context && !CONTEXT_TYPES[context.nodeType]) {
-        attrs       = context.attrs;
         isCached    = context.cache;
         isDecorated = context.decorate;
         context     = context.context;
@@ -263,32 +265,43 @@
       context || (context = doc);
       cache   || (cache = getFragmentCache(context.ownerDocument || context));
 
-      var match, nodeName, times, wrapping, node = cache.node;
+      var match, nodeName, tbody, times, wrapping, node = cache.node;
       if (html == '') {
         return cache.fragment;
       }
-
-      if (match = html.match(reExtractTagName)) {
-        nodeName = match[1].toUpperCase();
+      if (context.nodeType == DOCUMENT_NODE && (match = html.match(reExtractTagName))) {
+        nodeName = FROM_STRING_CHILDREN_PARENTS[match[1].toUpperCase()];
       }
-      if (context.nodeType === DOCUMENT_NODE) {
-        nodeName = FROM_STRING_CHILDREN_PARENTS[nodeName] || nodeName;
-      } else {
+      if (!nodeName) {
         nodeName = getNodeName(context);
       }
+      // skip auto-inserted tbody
+      if (nodeName == 'TABLE' && ELEMENT_TABLE_INNERHTML_INSERTS_TBODY &&
+          reStartsWithTableRow.test(html)) {
+        nodeName = 'TBODY';
+      }
 
-      if (wrapping = FROM_STRING_PARENT_WRAPPERS[nodeName]) {
+      wrapping = FROM_STRING_PARENT_WRAPPERS[nodeName];
+
+      // Fix IE rendering issue with innerHTML and script
+      // and link elements by prefixing the html with text
+      if (!wrapping && ELEMENT_INNERHTML_IGNORES_SCRIPTS && reTagStart.test(html)) {
+        node.innerHTML = 'x' + html;
+        node.removeChild(node.firstChild);
+      }
+      else if (wrapping) {
         times = wrapping[2];
         node.innerHTML= wrapping[0] + html + wrapping[1];
         while (times--) node = node.firstChild;
-      } else {
+      }
+      else {
         node.innerHTML = html;
       }
 
-      // skip auto-inserted tbody
-      if (ELEMENT_TABLE_INNERHTML_INSERTS_TBODY &&
-          nodeName === 'TABLE' && reStartsWithTableRow.test(html)) {
-        node = node.firstChild;
+      // remove auto-inserted tbody
+      if (nodeName == 'TABLE' && ELEMENT_TABLE_INNERHTML_INSERTS_TBODY &&
+          !reTBody.test(html) && (tbody = node.getElementsByTagName('tbody')[0])) {
+        tbody.parentNode.removeChild(tbody);
       }
       return getFragmentFromChildNodes(node, cache);
     },
@@ -316,8 +329,8 @@
       var isCached, isDecorated;
       if (isString(object)) {
         return object.charAt(0) == '<'
-          ? fromHTML(object, context)
-          : fromId(object);
+          ? Element(object, context)
+          : fromId(object, context);
       }
       if (context && !CONTEXT_TYPES[context.nodeType]) {
         isCached    = context.cache;
@@ -327,7 +340,7 @@
         ? object
         : Node(Window(object, isCached), isCached);
     };
- 
+
     /*------------------------------------------------------------------------*/
 
     // IE7 and below need to use the sTag of createElement to set the `name` attribute
@@ -335,45 +348,21 @@
     //
     // IE fails to set the BUTTON element's `type` attribute without using the sTag
     // http://dev.rubyonrails.org/ticket/10548
-
-    if (envTest('NAME_ATTRIBUTE_IS_READONLY') &&
-        envTest('CREATE_ELEMENT_WITH_HTML')) {
+    if (envTest('NAME_ATTRIBUTE_IS_READONLY')) {
       var __Element = Element;
       Element = function Element(tagName, context) {
-        var attrs, element, id, isCached, isDecorated, name, nodes, type, result = null;
+        var attrs, name, type;
+        if (isString(tagName) && context &&
+            !CONTEXT_TYPES[context.nodeType] && (attrs = context.attrs) &&
+            ((name = attrs.name) || (type = attrs.type)) &&
+            (tagName.charAt(0) != '<' || (match = tagName.match(reSimpleTag)))) {
 
-        if (isString(tagName) && tagName.charAt(0) != '<' &&
-            context && !CONTEXT_TYPES[context.nodeType] &&
-            ((name = context.name) || (type = context.type))) {
-
-          attrs       = context.attrs;
-          isCached    = context.cache;
-          isDecorated = context.decorate;
-          context     = context.context || doc;
-
-          id = context === doc ? '2' : getFuseId(getDocument(context));
-          nodes = domData[id].nodes;
-
-          tagName = '<' + tagName +
+          tagName = '<' + match[1] +
             (name ? ' name="' + name + '"' : '') +
             (type ? ' type="' + type + '"' : '') + '>';
 
-          result =
-            (nodes[tagName] ||
-            (nodes[tagName] = context.createElement(tagName)))
-            .cloneNode(false);
-
-          if (isDecorated !== false) {
-            element = result;
-            Decorator.prototype = getOrCreateTagClass(element.nodeName).plugin;
-            result = new Decorator(element);
-
-            if (isCached !== false) {
-              domData[getFuseId(element)].decorator = result;
-            }
-          }
           delete attrs.name; delete attrs.type;
-          return plugin.setAttribute.call(result, attrs);
+          return plugin.setAttribute.call(fromHTML(tagName, context), attrs);
         }
         return __Element(tagName, context);
       };
@@ -417,7 +406,7 @@
     // add class sugar to fuse
     __fuse.Class({ 'constructor': fuse });
 
-    // copy old fuse properties to new global.fuse
+    // copy old fuse properties to new window.fuse
     eachKey(__fuse, function(value, key) {
       if (hasKey(__fuse, key)) fuse[key] = value;
     });
@@ -432,7 +421,7 @@
     Element.fromTagName = fromTagName;
     Element.from        = from;
 
-    global.fuse = fuse;
+    window.fuse = fuse;
     fuse.dom.Element = Element;
     fuse.dom.getFragmentFromHTML = getFragmentFromHTML;
   })();

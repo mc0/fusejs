@@ -1,7 +1,5 @@
   /*------------------------------- DOM: NODE --------------------------------*/
 
-  DATA_ID_PROP = envTest('ELEMENT_UNIQUE_NUMBER') ? 'uniqueNumber' : '_fuseId';
-
   Node =
   fuse.dom.Node = (function() {
 

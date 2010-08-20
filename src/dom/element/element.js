@@ -71,7 +71,7 @@
 
     plugin.isDetached = function isDetached() {
       var element = this.raw || this;
-      return !(element.parentNode &&
+      return !(element[PARENT_NODE] &&
         plugin.contains.call(element.ownerDocument, element));
     };
 

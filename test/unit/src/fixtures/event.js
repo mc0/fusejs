@@ -15,14 +15,14 @@ $(document).observe('dom:loaded', function(event) {
     'currentTarget': event.getCurrentTarget()
   };
 
-  body.insert('<img id="img_load_test">');
+  body.appendChild('<img id="img_load_test">');
 
   $('img_load_test').observe('load', function(e) {
     if (e.getTarget() !== this)
       eventResults.currentTarget.imageOnLoadBug = true;
   }).setAttribute('src', '../src/fixtures/logo.gif');
 
-  body.insert('<img id="img_error_test">');
+  body.appendChild('<img id="img_error_test">');
 
   $('img_error_test').observe('error', function(e) {
     if (e.getTarget() !== this)

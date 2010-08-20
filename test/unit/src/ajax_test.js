@@ -194,7 +194,7 @@ new Test.Unit.Runner({
     fuse.ajax.Updater('content', '../src/fixtures/content.html', {
       'method':   'get',
       'insertion': function(element, content) {
-        $(element).insert({ 'top': content });
+        $(element).prependChild(content);
       }
     });
 

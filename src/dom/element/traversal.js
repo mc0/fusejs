@@ -213,7 +213,7 @@
     };
 
     plugin.up = function up(count, selectors, thisArg) {
-      return getSome((this.raw || this).parentNode, 'parentNode', count, selectors, thisArg);
+      return getSome((this.raw || this)[PARENT_NODE], PARENT_NODE, count, selectors, thisArg);
     };
 
     plugin.first = function first(count, selectors, thisArg) {
@@ -225,7 +225,7 @@
     };
 
     plugin.getAncestors = function getAncestors(selectors, thisArg) {
-      return getSome((this.raw || this).parentNode, 'parentNode', Infinity, selectors, thisArg) || NodeList();
+      return getSome((this.raw || this)[PARENT_NODE], PARENT_NODE, Infinity, selectors, thisArg) || NodeList();
     };
 
     plugin.getDescendants = function getDescendants(selectors, thisArg) {

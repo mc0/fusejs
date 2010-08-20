@@ -74,7 +74,7 @@
     },
 
     'log': function(type, message) {
-      this.element.insert(
+      this.element.appendChild(
         '<tr class="' + type + '"><td>' +
         fuse.String(message).escapeHTML() + '<\/td><\/tr>');
       this.form.scrollTo();

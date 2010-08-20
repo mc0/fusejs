@@ -107,7 +107,7 @@
         element.removeClassName('active');
         var child = children[index];
         if (!child)
-          this.element.insert(element);
+          this.element.appendChild(element);
         else if (!element.raw.parentNode)
           this.element.raw.insertBefore(element, child.raw);
       }, this);
@@ -186,7 +186,7 @@
 
       var list = fuse('<ul>');
       this.listElement = list;
-      element.insert(title).insert(list);
+      element.appendChild(title).appendChild(list);
     },
 
     'populate': function() {
@@ -195,7 +195,7 @@
         li.innerHTML = fuse.String(property).escapeHTML();
         li.onclick   = fuse.Function.bind(this.select, this, li);
         li._property = property;
-        this.listElement.insert(li);
+        this.listElement.appendChild(li);
       }, this);
     },
 

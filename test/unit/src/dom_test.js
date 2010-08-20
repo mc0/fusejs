@@ -165,22 +165,22 @@ new Test.Unit.Runner({
       main = getElement('insertions-main', context);
       container = getElement('insertions-container', context);
 
-      main.insert({ 'before': '<p><em>before</em> text</p><p>more testing</p>' });
+      main.prependSibling('<p><em>before</em> text</p><p>more testing</p>');
       this.assert(
         getInnerHTML(container).startsWith('<p><em>before</em> text</p><p>more testing</p>'),
         'Insert "before". ' + msg);
 
-      main.insert({ 'after': '<p><em>after</em> text</p><p>more testing</p>' });
+      main.appendSibling('<p><em>after</em> text</p><p>more testing</p>');
       this.assert(
         getInnerHTML(container).endsWith('<p><em>after</em> text</p><p>more testing</p>'),
         'Insert "after". ' + msg);
 
-      main.insert({ 'top': '<p><em>top</em> text.</p><p>more testing</p>' });
+      main.prependChild('<p><em>top</em> text.</p><p>more testing</p>');
       this.assert(
         getInnerHTML(main).startsWith('<p><em>top</em> text.</p><p>more testing</p>'),
         'Insert "top". ' + msg);
 
-      main.insert({ 'bottom': '<p><em>bottom</em> text.</p><p>more testing</p>' });
+      main.appendChild('<p><em>bottom</em> text.</p><p>more testing</p>');
       this.assert(
         getInnerHTML(main).endsWith('<p><em>bottom</em> text.</p><p>more testing</p>'),
         'Insert "bottom". ' + msg);
@@ -198,67 +198,29 @@ new Test.Unit.Runner({
       main = getElement('insertions-node-main', context);
       container = getElement('insertions-node-container', context);
 
-      main.insert({ 'before': createParagraph('node before', context) });
+      main.prependSibling(createParagraph('node before', context));
       this.assert(
         getInnerHTML(container).startsWith('<p>node before</p>'),
         'Insert "before". ' + msg);
 
-      main.insert({ 'after': createParagraph('node after', context) });
+      main.appendSibling(createParagraph('node after', context));
       this.assert(
         getInnerHTML(container).endsWith('<p>node after</p>'),
         'Insert "after". ' + msg);
 
-      main.insert({ 'top': createParagraph('node top', context) });
+      main.prependChild(createParagraph('node top', context));
 
       this.assert(
         getInnerHTML(main).startsWith('<p>node top</p>'),
         'Insert "top". ' + msg);
 
-      main.insert({ 'bottom': createParagraph('node bottom', context) });
+      main.appendChild(createParagraph('node bottom', context));
       this.assert(
         getInnerHTML(main).endsWith('<p>node bottom</p>'),
         'Insert "bottom". ' + msg);
 
-      this.assertEqual(main, main.insert(context.createElement('p')),
+      this.assertEqual(main, main.appendChild(context.createElement('p')),
         'Insert returns correct element. ' +  msg);
-    }, this);
-  },
-
-  'testElementInsertWithToElementMethod': function() {
-    var main, msg, documents = fuse.Array(document, getIframeDocument());
-    if (!isIframeAccessible()) documents.pop();
-
-    documents.each(function(context) {
-      msg = isIframeDocument(context) ? 'On iframe' : 'On document';
-      main = getElement('insertions-node-main', context);
-
-      main.insert({ 'toElement': createParagraph.curry('toElement', context) });
-      this.assert(getInnerHTML(main).endsWith('<p>toelement</p>'),
-        'Insert with toElement() and no position specified. ' + msg);
-
-      main.insert({ bottom: { 'toElement': createParagraph.curry('bottom toElement', context) } });
-      this.assert(getInnerHTML(main).endsWith('<p>bottom toelement</p>'),
-        'Insert with toElement() and position "bottom" specified. ' + msg);
-    }, this);
-  },
-
-  'testElementInsertWithToHTMLMethod': function() {
-    var main, msg, documents = fuse.Array(document, getIframeDocument());
-    if (!isIframeAccessible()) documents.pop();
-
-    documents.each(function(context) {
-      msg = isIframeDocument(context) ? 'On iframe' : 'On document';
-      main = getElement('insertions-node-main', context);
-
-      main.insert({ 'toHTML': function() { return '<p>toHTML</p>'} });
-      this.assert(
-        getInnerHTML(main).endsWith('<p>tohtml</p>'),
-        'Insert with toHTML() and no position specified. ' + msg);
-
-      main.insert({ 'bottom': { toHTML: function() { return '<p>bottom toHTML</p>'} } });
-      this.assert(
-        getInnerHTML(main).endsWith('<p>bottom tohtml</p>'),
-        'Insert with toHTML() and position "bottom" specified. ' + msg);
     }, this);
   },
 
@@ -270,7 +232,7 @@ new Test.Unit.Runner({
       msg = isIframeDocument(context) ? 'On iframe' : 'On document';
       main = getElement('insertions-main', context);
 
-      main.insert({ 'bottom': 3 });
+      main.appendChild(3);
       this.assert(getInnerHTML(main).endsWith('3'), msg);
     }, this);
   },
@@ -287,27 +249,27 @@ new Test.Unit.Runner({
       cell  = getElement('a_cell', context);
 
       element = getElement('third_row', context);
-      element.insert({ after:'<tr id="forth_row"><td>Forth Row</td></tr>' });
+      element.appendSibling('<tr id="forth_row"><td>Forth Row</td></tr>');
       this.assert(table.contains(element), msg);
 
-      cell.insert({ 'top': 'hello world' });
+      cell.prependChild('hello world');
       this.assert(getInnerHTML(cell).startsWith('hello world'), msg);
 
-      cell.insert({ 'after': '<td>hi planet</td>' });
+      cell.appendSibling('<td>hi planet</td>');
       this.assertEqual('hi planet', cell.next().raw.innerHTML, msg);
 
       element = getElement('table_for_insertions', context);
-      element.insert('<tr><td>a cell!</td></tr>');
+      element.appendChild('<tr><td>a cell!</td></tr>');
       this.assert(
         getInnerHTML(element).contains('<tr><td>a cell!</td></tr>'), msg);
 
-      getElement('row_1', context).insert({ 'after': '<tr></tr><tr></tr><tr><td>last</td></tr>' });
+      getElement('row_1', context).appendSibling('<tr></tr><tr></tr><tr><td>last</td></tr>');
       this.assertEqual('last', $A(getElement('table_for_row_insertions').raw
         .getElementsByTagName('tr')).last().lastChild.innerHTML, msg);
 
       // test colgroup elements
       element = table.down('colgroup');
-      element.insert('<col style="background-color:green;" />');
+      element.appendChild('<col style="background-color:green;">');
       this.assertEqual(2, element.getChildren().length, msg);
     }, this);
   },
@@ -316,27 +278,24 @@ new Test.Unit.Runner({
     var selectTop = $('select_for_insert_top'),
      selectBottom = $('select_for_insert_bottom');
 
-    selectBottom.insert('<option value="3">option 3</option><option selected="selected">option 4</option>');
+    selectBottom.appendChild('<option value="3">option 3</option><option selected="selected">option 4</option>');
     this.assertEqual('option 4', selectBottom.getValue());
 
     // TODO: fix selected options for optgroups
     selectBottom.raw.selectedIndex = -1;
-    selectBottom.down('optgroup')
-      .insert('<option value="C">option C</option><option value="D" selected="selected">option D</option>');
+    selectBottom.down('optgroup').appendChild('<option value="C">option C</option><option value="D" selected="selected">option D</option>');
 
     this.assertEqual('D', selectBottom.getValue());
 
-    selectTop.insert({ 'top':
-      '<option value="1">option 1</option><option value="2" selected="selected">option 2</option>' });
+    selectTop.prependChild('<option value="1">option 1</option><option value="2" selected="selected">option 2</option>');
     this.assertEqual(6, selectTop.options.length);
 
-    selectTop.down('optgroup').insert({ 'top':
-      '<option value="A">option A</option><option value="B" selected="selected">option B</option>' });
+    selectTop.down('optgroup').prependChild('<option value="A">option A</option><option value="B" selected="selected">option B</option>');
     this.assertEqual(8, selectTop.options.length);
   },
 
   'testElementMethodInsert': function() {
-    $('element-insertions-main').insert({ 'before':'some text before' });
+    $('element-insertions-main').prependSibling('some text before');
     this.assert(
       getInnerHTML('element-insertions-container').startsWith('some text before'),
       'before');
@@ -345,39 +304,26 @@ new Test.Unit.Runner({
     $('element-insertions-container').raw
       .removeChild($('element-insertions-container').raw.firstChild);
 
-    $('element-insertions-main').insert($H({ 'before':'some more text before' }));
-    this.assert(
-      getInnerHTML('element-insertions-container').startsWith('some more text before'),
-      'before with hash object');
-
-    $('element-insertions-main').insert({ 'after': 'some text after'});
+    $('element-insertions-main').appendSibling('some text after');
     this.assert(
       getInnerHTML('element-insertions-container').endsWith('some text after'),
       'after');
 
-    $('element-insertions-main').insert({ 'top': 'some text top'});
+    $('element-insertions-main').prependChild('some text top');
     this.assert(
       getInnerHTML('element-insertions-main').startsWith('some text top'),
       'top');
 
-    $('element-insertions-main').insert({ 'bottom': 'some text bottom'});
+    $('element-insertions-main').appendChild('some text bottom');
     this.assert(
       getInnerHTML('element-insertions-main').endsWith('some text bottom'),
       'bottom');
 
-    $('element-insertions-main').insert('some more text at the bottom');
-    this.assert(
-      getInnerHTML('element-insertions-main').endsWith('some more text at the bottom'),
-      'more inserted at bottom');
-
-    $('element-insertions-main').insert({ 'TOP': 'some text uppercase top' });
-    this.assert(
-      getInnerHTML('element-insertions-main').startsWith('some text uppercase top'),
-      'TOP (uppercase position)');
-
-    $('element-insertions-multiple-main').insert({
-      'top': '1', 'bottom': 2, 'before': fuse('<p>').update('3'), 'after': '4'
-    });
+    $('element-insertions-multiple-main')
+      .prependChild('1')
+      .appendChild(2)
+      .prependSibling(fuse('<p>').update('3'))
+      .appendSibling('4');
 
     this.assert(getInnerHTML('element-insertions-multiple-main').startsWith('1'));
     this.assert(getInnerHTML('element-insertions-multiple-main').endsWith('2'));
@@ -385,20 +331,25 @@ new Test.Unit.Runner({
     this.assert(getInnerHTML('element-insertions-multiple-container').endsWith('4'));
 
     $('element-insertions-main').update('test');
-    $('element-insertions-main').insert(null);
-    $('element-insertions-main').insert({ 'bottom': null });
+    $('element-insertions-main').appendChild(null);
     this.assertEqual('test', getInnerHTML('element-insertions-main'));
 
-    $('element-insertions-main').insert(1337);
+    $('element-insertions-main').appendChild(1337);
     this.assertEqual('test1337', getInnerHTML('element-insertions-main'));
   },
 
   'testElementInsertScriptElement': function() {
-    var head = document.getElementsByTagName('HEAD')[0],
+    var code = 'window.__testInsertScriptElement = true;',
+     head = document.getElementsByTagName('HEAD')[0],
      script = fuse('<script type="text/javascript">');
 
-    script.raw.text = 'window.__testInsertScriptElement = true;';
-    $(head).insert({ 'top': script });
+    try {
+      script.raw.appendChild(document.createTextNode(code));
+    } catch (e) {
+      script.raw.text = code;
+    }
+
+    $(head).prependChild(script.raw);
 
     this.assert(window.__testInsertScriptElement,
       'Failed to eval SCRIPT element text property');
@@ -409,18 +360,18 @@ new Test.Unit.Runner({
   'testNewElementInsert': function() {
     var container = fuse('<div>'),
      element = fuse('<div>');
-    container.insert(element);
+    container.appendChild(element);
 
-    element.insert({ 'before': '<p>a paragraph</p>' });
+    element.prependSibling('<p>a paragraph</p>');
     this.assertEqual('<p>a paragraph</p><div></div>', getInnerHTML(container));
 
-    element.insert({ 'after': 'some text' });
+    element.appendSibling('some text');
     this.assertEqual('<p>a paragraph</p><div></div>some text', getInnerHTML(container));
 
-    element.insert({ 'top': '<p>a paragraph</p>' });
+    element.prependChild('<p>a paragraph</p>');
     this.assertEqual('<p>a paragraph</p>', getInnerHTML(element));
 
-    element.insert('some text');
+    element.appendChild('some text');
     this.assertEqual('<p>a paragraph</p>some text', getInnerHTML(element));
   },
 
@@ -468,7 +419,7 @@ new Test.Unit.Runner({
     this.assert(clone.isDetached(),
       'New cloned elements should be detached.');
 
-    div.insert(clone);
+    div.appendChild(clone);
     this.assert(clone.isDetached(),
       'Child elements of detached elements should be detached.');
 
@@ -523,7 +474,7 @@ new Test.Unit.Runner({
     $('dimensions-table').show();
 
     // IE6 will make the min-height 16px instead of 0px
-    this.assertEqual(!!$('test-hidden-by-size').offsetHeight,
+    this.assertEqual(!!$('test-hidden-by-size').raw.offsetHeight,
       $('test-hidden-by-size').isVisible(),
       $('test-hidden-by-size').inspect());
   },
@@ -634,7 +585,7 @@ new Test.Unit.Runner({
     var head = document.getElementsByTagName('head')[0],
      script = fuse('<script type="text/javascript">');
 
-    $(head).insert(script);
+    $(head).appendChild(script);
 
     this.assertNothingRaised(function() {
       script.update('window.__testUpdateScriptElement = true;');
@@ -647,32 +598,28 @@ new Test.Unit.Runner({
   'testElementUpdateWithScript': function() {
     $('testdiv').update('hello from div!<script>\ntestVar="hello!";\n<\/script>');
 
-    this.assertEqual('hello from div!', $('testdiv').raw.innerHTML);
+    // note: Some browsers normalize whitespace (like line breaks) to single spaces, thus the match test
+    this.assertMatch(
+      /^(hello from div!\s*<script>\s*testVar\s*=\s*"hello!";\s*<\/script>)$/i,
+      $('testdiv').raw.innerHTML);
 
-    this.wait(100, function() {
-      this.assertEqual('hello!',testVar);
+    this.assertEqual('hello!', testVar);
 
-      $('testdiv').update('another hello from div!\n<script>testVar="another hello!"<\/script>\nhere it goes');
+    $('testdiv').update('another hello from div!<script>testVar="another hello!";<\/script>here it goes');
 
-      // note: IE normalizes whitespace (like line breaks) to single spaces, thus the match test
-      this.assertMatch(/^another hello from div!\s+here it goes$/,
-        $('testdiv').raw.innerHTML);
+    this.assertMatch(
+      /^(another hello from div!\s*<script>\s*testVar\s*=\s*"another hello!";\s*<\/script>\s*here it goes)$/i,
+      $('testdiv').raw.innerHTML); //"
 
-      this.wait(100, function() {
-        this.assertEqual('another hello!',testVar);
+    this.assertEqual('another hello!', testVar);
 
-        $('testdiv').update('a\n<script>testVar="a"\ntestVar="b"<\/script>');
+    $('testdiv').update('a<script>testVar="a"\ntestVar="b";<\/script>');
 
-        this.wait(100,function(){
-          this.assertEqual('b', testVar);
+    this.assertEqual('b', testVar);
 
-          $('testdiv').update('x<script>testVar2="a"<\/script>\nblah\n'+
-            'x<script>testVar2="b"<\/script>');
+    $('testdiv').update('x<script>testVar2="a"<\/script>blahx<script>testVar2="b"<\/script>');
 
-          this.wait(100, function(){ this.assertEqual('b', testVar2) });
-        });
-      });
-    });
+    this.assertEqual('b', testVar2);
   },
 
   'testElementUpdateInTableRow': function() {
@@ -682,20 +629,11 @@ new Test.Unit.Runner({
       getInnerHTML('i_am_a_td'),
       'Failed simple update in table row.');
 
-    $('third_row').update('<td id="i_am_a_td">another <span>test<\/span></td>');
+    $('third_row').update('<td id="i_am_a_td">another <span>test</span></td>');
 
     this.assertEqual('another <span>test</span>',
       getInnerHTML('i_am_a_td'),
       'Failed complex in table row.');
-
-    // test passing object with "toElement" method
-    var newTD = fuse('<td id="i_am_another_td">');
-    newTD.insert(document.createTextNode('more tests'));
-    $('third_row').update({ 'toElement': function() { return newTD.raw; } });
-
-    this.assertEqual('more tests',
-      getInnerHTML('i_am_another_td'),
-      'Failed to update table row via `toElement`.');
   },
 
   'testElementUpdateInTableCell': function() {
@@ -704,17 +642,6 @@ new Test.Unit.Runner({
     this.assertEqual('another <span>test</span>',
       getInnerHTML('a_cell'),
       'Failed complex update in table cell.');
-
-    // test passing object with "toElement" method
-    var newFrag = document.createDocumentFragment();
-    newFrag.appendChild(document.createTextNode('something else '));
-    newFrag.appendChild(document.createElement('span')).appendChild(document.createTextNode('blah'));
-
-    $('a_cell').update({ 'toElement': function() { return newFrag } });
-
-    this.assertEqual('something else <span>blah</span>',
-      getInnerHTML('a_cell'),
-      'Failed to update table cell via `toElement`.');
   },
 
   'testElementUpdateInTableColGroup': function() {
@@ -725,13 +652,6 @@ new Test.Unit.Runner({
     this.assertEnumEqual(['foo', 'bar'],
       [children[0].raw.className, children[1].raw.className],
       'Failed to update colgroup.');
-
-    // test passing object with "toElement" method
-    var newCol = fuse('<col class="baz">');
-    colgroup.update({ 'toElement': function() { return newCol.raw; } });
-
-    this.assertEqual(newCol, colgroup.down(),
-      'Failed to update colgroup via `toElement`.');
   },
 
   'testElementUpdateInTable': function() {
@@ -740,16 +660,6 @@ new Test.Unit.Runner({
     this.assertMatch(/^<tr>\s*<td>boo!<\/td>\s*<\/tr>$/,
       getInnerHTML('table'),
       'Failed to update table element.');
-
-    // test passing object with "toElement" method
-    var newTR = fuse('<tr>'), newTD = fuse('<td>');
-    newTR.insert(newTD.insert(document.createTextNode('something else')));
-
-    $('table').update({ 'toElement': function() { return newTR.raw; } });
-
-    this.assertEqual('<tr><td>something else</td></tr>',
-      getInnerHTML('table'),
-      'Failed to update table element via `toElement`.');
   },
 
   'testElementUpdateInSelectOptGroup': function() {
@@ -760,14 +670,6 @@ new Test.Unit.Runner({
     this.assertEqual('C',
       select.getValue(),
       'Failed to update opt-group element');
-
-    // test passing object with "toElement" method
-    var newOption = fuse('<option value="E" selected>option E</option>');
-    select.down('optgroup').update({ 'toElement': function() { return newOption; } });
-
-    this.assertEqual('E',
-      select.getValue(),
-      'Failed to update opt-group element via `toElement`.');
   },
 
   'testElementUpdateInSelect': function() {
@@ -777,57 +679,11 @@ new Test.Unit.Runner({
     this.assertEqual('option 4',
       select.getValue(),
       'Failed to update select element.');
-
-    // test passing object with "toElement" method
-    var newOption = fuse('<option value="2" selected>option 2</option>');
-    select.update({ 'toElement': function() { return newOption.raw; } });
-
-    this.assertEqual('2',
-      select.getValue(),
-      'Failed to update select element via `toElement`.');
   },
 
   'testElementUpdateWithDOMNode': function() {
-    $('testdiv').update(fuse('<div>').insert('bla'));
+    $('testdiv').update(fuse('<div>').appendChild('bla'));
     this.assertEqual('<div>bla</div>', getInnerHTML('testdiv'));
-  },
-
-  'testElementUpdateWithToElementMethod': function() {
-  	var div = $('testdiv');
-    div.update({ 'toElement': createParagraph.curry('foo') });
-
-    this.assertEqual('<p>foo</p>',
-      getInnerHTML(div),
-      'Failed to update via `toElement`.');
-
-    // test comment node
-    var comment = document.createComment('test');
-    div.update({ 'toElement': function() { return comment; } });
-
-    this.assert(div.raw.firstChild && div.raw.firstChild.nodeType === 8,
-      'Failed to update via `toElement` with a comment node.');
-
-    // test document fragment
-    var fragment = document.createDocumentFragment();
-    fragment.appendChild(document.createElement('span'));
-    div.update({ 'toElement': function() { return fragment; } });
-
-    this.assertEqual('<span></span>',
-      getInnerHTML(div),
-      'Failed to update via `toElement` with a document fragment.');
-
-    // test text node
-    var textNode = document.createTextNode('test');
-    div.update({ 'toElement': function() { return textNode; } });
-
-    this.assertEqual('test',
-      getInnerHTML(div),
-      'Failed to update via `toElement` with a text node.');
-  },
-
-  'testElementUpdateWithToHTMLMethod': function() {
-    $('testdiv').update({ 'toHTML': function() { return 'hello world'; }});
-    this.assertEqual('hello world', getInnerHTML('testdiv'));
   },
 
   'testElementReplace': function() {
@@ -891,43 +747,26 @@ new Test.Unit.Runner({
   },
 
   'testElementReplaceWithScript': function() {
-    $('testdiv-replace-4').replace('hello from div!<script>testVarReplace="hello!"<\/script>');
+    $('testdiv-replace-4').replace('hello from div!<script>testVarReplace="hello!";<\/script>');
 
-    this.assertEqual('hello from div!',
+    // note: Some browsers normalize whitespace (like line breaks) to single spaces, thus the match test
+    this.assertMatch(/^(hello from div!\s*<script>\s*testVarReplace\s*=\s*"hello!";\s*<\/script>)$/i,
       $('testdiv-replace-container-4').raw.innerHTML);
 
-    this.wait(100, function() {
-      this.assertEqual('hello!', testVarReplace);
+    this.assertEqual('hello!', testVarReplace);
 
-      $('testdiv-replace-5')
-        .replace('another hello from div!\n<script>testVarReplace="another hello!"<\/script>\nhere it goes');
+    $('testdiv-replace-5').replace('another hello from div!<script>testVarReplace="another hello!";<\/script>here it goes');
 
-      // note: IE normalizes whitespace (like line breaks) to single spaces, thus the match test
-      this.assertMatch(/^another hello from div!\s+here it goes$/,
-        $('testdiv-replace-container-5').raw.innerHTML);
+    this.assertMatch(/^(another hello from div!\s*<script>\s*testVarReplace\s*=\s*"another hello!";\s*<\/script>\s*here it goes)$/i,
+      $('testdiv-replace-container-5').raw.innerHTML); //"
 
-      this.wait(100, function() {
-        this.assertEqual('another hello!', testVarReplace);
-      });
-    });
+    this.assertEqual('another hello!', testVarReplace);
   },
 
   'testElementReplaceWithDOMNode': function() {
     $('testdiv-replace-element').replace(createParagraph('hello'));
     this.assertEqual('<p>hello</p>',
       getInnerHTML('testdiv-replace-container-element'));
-  },
-
-  'testElementReplaceWithToElementMethod': function() {
-    $('testdiv-replace-toelement').replace({ 'toElement': createParagraph.curry('hello') });
-    this.assertEqual('<p>hello</p>',
-      getInnerHTML('testdiv-replace-container-toelement'));
-  },
-
-  'testElementReplaceWithToHTMLMethod': function() {
-    $('testdiv-replace-tohtml').replace({ 'toHTML': function() { return 'hello' } });
-    this.assertEqual('hello',
-      getInnerHTML('testdiv-replace-container-tohtml'));
   },
 
   'testElementQueryMethod': function() {
@@ -1269,10 +1108,10 @@ new Test.Unit.Runner({
     this.assert(!$('great-grand-child').contains(document.body));
 
     // dynamically-created elements
-    $('ancestor').insert(fuse('<div id="weird-uncle">'));
+    $('ancestor').appendChild(fuse('<div id="weird-uncle">'));
     this.assert($('ancestor').contains('weird-uncle'));
 
-    $(document.body).insert(fuse('<div id="impostor">'));
+    $(document.body).appendChild(fuse('<div id="impostor">'));
     this.assert(!$('ancestor').contains('impostor'));
 
     this.assert($(document.documentElement).contains(document.body));
@@ -1309,7 +1148,7 @@ new Test.Unit.Runner({
 
     // test setting a falsy value (in IE)
     this.assertNothingRaised(function() {
-      $('style_test_3').setStyle({ 'bottom': +'x' }); }, 
+      $('style_test_3').setStyle({ 'bottom': +'x' }); },
       'Should not throw error when passing a falsy style value.');
 
     this.assertEqual(1, $('style_test_3').getStyle('opacity'));
@@ -1615,7 +1454,7 @@ new Test.Unit.Runner({
 
     // test cloned elements
     $('cloned_element_attributes_issue').getAttribute('foo'); // <- required
-    var clone = $($('cloned_element_attributes_issue').raw.cloneNode(true));
+    var clone = $('cloned_element_attributes_issue').clone(true);
     clone.setAttribute('foo', 'cloned');
 
     this.assertEqual('cloned',
@@ -1944,7 +1783,7 @@ new Test.Unit.Runner({
 
     $w('button input').each(function(tagName) {
       var button = fuse.dom.Element(tagName, { 'attrs': { 'type': 'reset'} });
-      form.insert(button);
+      form.appendChild(button);
       input.setValue('something');
 
       try {
@@ -2321,21 +2160,6 @@ new Test.Unit.Runner({
     this.assert(typeof Element.waffles     === 'undefined');
   },
 
-  'testScriptFragment': function() {
-    var element = fuse('<div>');
-
-    // tests an issue with Safari 2.0 crashing when the ScriptFragment
-    // regular expression is using a pipe-based approach for
-    // matching any character
-    fuse.Array('\r', '\n', ' ').each(function(character){
-      element.update('<script>' + fuse.String.repeat(character, 10000) + '<\/script>');
-      this.assertEqual('', element.raw.innerHTML);
-    }, this);
-
-    element.update('<script>var blah="' + fuse.String.repeat('\\', 10000) + '"<\/script>');
-    this.assertEqual('', element.raw.innerHTML);
-  },
-
   'testGetPositionedOffset': function() {
     this.assertEnumEqual([10,10],
       $('body_absolute').getPositionedOffset());
@@ -2514,7 +2338,7 @@ new Test.Unit.Runner({
 
     // Ensure no errors are raised on document fragments
     var offsetParent, div = fuse('<div>'), fragment = document.createDocumentFragment();
-    div.insert(div.raw.cloneNode(false));
+    div.appendChild(div.raw.cloneNode(false));
     div.down().getOffsetParent();
 
     this.assertNothingRaised(

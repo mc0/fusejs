@@ -93,6 +93,5 @@ new Test.Unit.Runner({
     this.assertEqual('foo bar', fuse.String('foo bar').stripScripts());
     this.assertEqual('foo bar', fuse.String('foo <script>boo();<\/script>bar').stripScripts());
     this.assertEqual('foo bar', fuse.String('foo <script type="text/javascript">boo();\nmoo();<\/script>bar').stripScripts());
-  },
-
+  }
 });

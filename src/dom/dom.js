@@ -22,6 +22,10 @@
   fuse._info.scrollEl =
     { 'nodeName': 'BODY', 'property': 'body' };
 
+  DATA_ID_PROP = envTest('ELEMENT_UNIQUE_NUMBER') ? 'uniqueNumber' : '_fuseId';
+
+  PARENT_NODE = isHostType(fuse._docEl, 'parentElement') ? 'parentElement' : 'parentNode';
+
   /*--------------------------------------------------------------------------*/
 
   getDocument = function getDocument(element) {

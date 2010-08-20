@@ -623,7 +623,7 @@ new Test.Unit.Runner({
     });
 
     element.setAttribute('id', 'scratch_element');
-    $$('body')[0].insert(element);
+    $$('body')[0].appendChild(element);
 
     var results = $$('#scratch_element div');
     this.assert(typeof results[0].show == 'function');

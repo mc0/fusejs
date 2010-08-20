@@ -1,3 +1,17 @@
+* Make script injection via fuse.dom.Element modification methods execute synchronously. [jddalton]
+
+* Add fuse.dom.Element methods. [jddalton]
+  - Add appendChildTo
+  - Add prependChildTo
+  - Add appendSiblingTo
+  - Add prependSiblingTo
+
+* Rename fuse.dom.Element methods. [FuseJS LH #73] [jddalton]
+  - Rename append to appendChild
+  - Rename prepend to prependChild
+  - Rename insertAfter to appendSibling
+  - Rename insertBefore to prependSibling
+
 * Fix fuse.Fusebox regression with Firefox 1.5 and Safari and cleanup. [jddalton]
 
 * Simplify the private from() function in Fusebox. [jddalton]
