@@ -1,9 +1,11 @@
   /*------------------------------- LANG: HTML -------------------------------*/
 
   (function(plugin) {
+    var rawReplace = plugin.replace.raw,
+
     // tag parsing instructions:
     // http://www.w3.org/TR/REC-xml-names/#ns-using
-    var reTags = (function() {
+    reTags = (function() {
       var name   = '[-\\w]+',
        space     = '[\\x20\\t\\n\\r]',
        eq        = space + '?=' + space + '?',
@@ -21,7 +23,6 @@
       var div     = fuse._div,
        container  = fuse._doc.createElement('pre'),
        textNode   = container.appendChild(fuse._doc.createTextNode('')),
-       rawReplace = plugin.replace.raw,
        reTagEnds  = />/g,
        reTokens   = /@fuseTagToken/g,
        swapTags   = [],

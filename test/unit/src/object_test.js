@@ -191,8 +191,11 @@ new Test.Unit.Runner({
     this.assertRaise('TypeError', function() { fuse.Object.hasKey(undef, '') });
 
     // test window object
-    this.assert(fuse.Object.hasKey(window, 'fuse'));
-    this.assert(!fuse.Object.hasKey(window, 'abc123xyz'));
+    this.assert(fuse.Object.hasKey(window, 'fuse',
+      'window.fuse should exist.'));
+
+    this.assert(!fuse.Object.hasKey(window, 'abc123xyz'),
+      'window.abc123xyz should not exist.');
   },
 
   'testObjectIsArray': function() {

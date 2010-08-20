@@ -167,9 +167,9 @@
         if (!sanitize || plugin.isJSON.call(json)) {
           return eval('(' + json + ')');
         }
-      } catch (e) {
-        throw new SyntaxError('Badly formed JSON string: ' + plugin.inspect.call(json));
-      }
+      } catch (e) { }
+
+      throw new SyntaxError('Badly formed JSON string: ' + plugin.inspect.call(json));
     };
 
     if (envTest('JSON')) {

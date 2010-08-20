@@ -47,8 +47,7 @@
 
   Test.Unit.Logger = fuse.Class({
     'initialize': function(id) {
-      if (typeof id === 'string')
-        id = document.getElementById(id);
+      if (typeof id == 'string') id = document.getElementById(id);
       this.element = id;
       if (this.element) this._createLogTable();
       this.tbody = this.element.getElementsByTagName('tbody')[0];
@@ -228,7 +227,7 @@
 
     'parse': function(params) {
       return this.parts.map(function(part) {
-        return part === '?' ? Test.Unit.inspect(params.shift()) : part.replace(/\\\?/, '?');
+        return part == '?' ? Test.Unit.inspect(params.shift()) : part.replace(/\\\?/, '?');
       }).join('');
     }
   });
@@ -237,14 +236,16 @@
     var MessageTemplate = Test.Unit.MessageTemplate;
 
     function _assertPairEqual(pair) {
-      if (pair.every(isArray))
+      if (pair[0] && pair.every(isArray)) {
         return zip.call(pair[0], pair[1]).every(_assertPairEqual);
+      }
       return _isEqual(pair[0], pair[1]);
     }
 
     function _isEqual(expected, actual) {
-      if (expected && actual && isFunction(expected.valueOf) && isFunction(actual.valueOf))
+      if (expected && actual && isFunction(expected.valueOf) && isFunction(actual.valueOf)) {
         return expected.valueOf() == actual.valueOf();
+      }
       return expected == actual;
     }
 
@@ -288,7 +289,7 @@
       message = buildMessage(message || 'assertEnumEqual', 'expected: <?>, actual: <?>', expected, actual);
 
       this.assertBlock(message, function() {
-        return expected.length === actual.length &&
+        return expected.length == actual.length &&
           zip.call(expected, actual).every(_assertPairEqual);
       });
     }
@@ -299,7 +300,7 @@
       message  = buildMessage(message || 'assertEnumNotEqual', '<?> was the same as <?>', expected, actual);
 
       this.assertBlock(message, function() {
-        return !(expected.length === actual.length &&
+        return !(expected.length == actual.length &&
           zip.call(expected, actual).every(_assertPairEqual));
       });
     }
@@ -307,7 +308,7 @@
     function assertHashEqual(expected, actual, message) {
       // from now we recursively zip & compare nested arrays
       function block() {
-        return expected_array.length === actual_array.length &&
+        return expected_array.length == actual_array.length &&
           expected_array.zip(actual_array).every(_assertPairEqual);
       }
 
@@ -322,7 +323,7 @@
     function assertHashNotEqual(expected, actual, message) {
       // from now we recursively zip & compare nested arrays
       function block() {
-        return !(expected_array.length === actual_array.length &&
+        return !(expected_array.length == actual_array.length &&
           expected_array.zip(actual_array).every(_assertPairEqual));
       }
 
@@ -356,7 +357,7 @@
 
     function assertUndefined(obj, message) {
       message = buildMessage(message || 'assertUndefined', 'got <?>', obj);
-      this.assertBlock(message, function() { return typeof obj === 'undefined' });
+      this.assertBlock(message, function() { return typeof obj == 'undefined' });
     }
 
     function assertNotUndefined(obj, message) {
@@ -386,7 +387,7 @@
 
     function assertHidden(element, message) {
       message = buildMessage(message || 'assertHidden', '? isn\'t hidden.', element);
-      this.assertBlock(message, function() { return element.style.display === 'none' });
+      this.assertBlock(message, function() { return element.style.display == 'none' });
     }
 
     function assertInstanceOf(expected, actual, message) {
@@ -401,7 +402,7 @@
 
     function assertRespondsTo(method, obj, message) {
       message = buildMessage(message || 'assertRespondsTo', 'object doesn\'t respond to <?>', method);
-      this.assertBlock(message, function() { return (method in obj && typeof obj[method] === 'function') });
+      this.assertBlock(message, function() { return (method in obj && typeof obj[method] == 'function') });
     }
 
     function assertRaise(exceptionName, method, message) {

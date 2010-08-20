@@ -37,5 +37,5 @@ var Fixtures = {
     'd': 'D#'
   },
 
-  'mixed_dont_enum': { 'a':'A', 'b':'B', 'toString':'bar', 'valueOf':'' },
+  'mixed_dont_enum': { 'a':'A', 'b':'B', 'toString':'bar', 'valueOf':'' }
 };

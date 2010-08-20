@@ -40,8 +40,7 @@ function isIframeAccessible() {
 }
 
 function getElement(element, context) {
-  if (!fuse.Object.isString(element)) return element;
-  return $((context || document).getElementById(element));
+  return fuse(element, context);
 }
 
 function preservingBrowserDimensions(callback) {

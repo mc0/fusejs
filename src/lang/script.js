@@ -6,7 +6,7 @@
      indexOf            = ''.indexOf,
      reHTMLComments     = /<!--[^\x00]*?-->/g,
      reOpenHTMLComments = /<!--/g,
-     reOpenScriptTag    = /<script/i
+     reOpenScriptTag    = /<script/i,
      reQuotes           = /(["'])(?:(?!\1)[^\\]|[^\\]|\\.)+?\1/g,
      reRegexps          = /(\/)(?:(?!\1)[^\\]|[^\\]|\\.)+?\1/g, //"
      reScripts          = /<script[^>]*>([^\x00]*?)<\/script>/gi,

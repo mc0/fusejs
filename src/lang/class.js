@@ -22,7 +22,7 @@
        LINKED_KEYS     = { },
        args            = slice.call(arguments, 0),
        defaults        = Class.defaults,
-       first           = args[0];
+       first           = args[0],
        isAutoUnlinking = true;
 
       // resolve superclass

@@ -23,7 +23,7 @@ new Test.Unit.Runner({
       'one < two <a href="# "\ntitle="foo > bar" >blah<\/a > <input disabled>baz').stripTags(),
       'failed to ignore none tag related `<` or `>` characters');
 
-    this.assertEqual('1<invalid a="b&c">2<invalid a="b<c">3<invald a="b"c">4<invalid  a =  "bc">', fuse.String(
+    this.assertEqual('1<invalid a="b&c"\/>2<invalid a="b<c">3<invald a="b"c">4<invalid  a =  "bc">', fuse.String(
       '<b>1<\/b><invalid a="b&c"\/><img a="b>c" \/>2<invalid a="b<c"><b a="b&amp;c">3<\/b>' +
       '<invald a="b"c"><b a="b&#38;c" >4<\/b><invalid  a =  "bc">').stripTags(),
       'failed to ignore invalid tags');

@@ -63,7 +63,7 @@ fuse.Object.extend(Fixtures, {
         this.callSuper(arguments);
         this.weight = weight;
         this.sex    = sex;
-      },
+      }
     },
     /* mixins */
     Fixtures.Reproduceable),

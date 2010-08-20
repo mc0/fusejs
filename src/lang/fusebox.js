@@ -568,13 +568,12 @@
           // redefine RegExp to auto-fix \s issues
           RegExp = function RegExp(pattern, flags) {
             return new RE((toString.call(pattern) == '[object RegExp]' ?
-              pattern.source : String(pattern))
+              pattern.source : window.String(pattern))
                 .replace(reCharClass, newCharClass), flags);
           };
 
           // map properties of old RegExp to the redefined one
           RegExp.SPECIAL_CHARS = RE.SPECIAL_CHARS;
-          regPlugin = RegExp.prototype = RE.prototype;
         }
 
         return RegExp;
@@ -921,7 +920,6 @@
       boolPlugin.constructor = Boolean;
       datePlugin.constructor = Date;
       funcPlugin.constructor = Function;
-      objPlugin.constructor  = Object;
       numPlugin.constructor  = Number;
       regPlugin.constructor  = RegExp;
       strPlugin.constructor  = String;

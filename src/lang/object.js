@@ -127,7 +127,7 @@
     }
 
     // Garrett Smith found an Opera bug that occurs with the window object and not the global
-    if (typeof window != 'undefined' && window.Object && !hasKey(window, 'Object')) {
+    if (window.window == window && !hasKey(window.window, 'Object')) {
       var __hasKey = hasKey;
       hasKey = function hasKey(object, property) {
         if (object == null) throw new TypeError;

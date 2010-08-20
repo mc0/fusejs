@@ -142,8 +142,8 @@
     };
 
     plugin.request = function request(url, options) {
-      var async, eventType, handler, headers, key, timeout, i = -1, j = i,
-       body = this.body, url = String(this.url), xhr = this.raw;
+      var async, body, eventType, handler, headers, key, timeout, url,
+       i = -1, j = i, xhr = this.raw;
 
       // treat request() as the constructor and call Base as $super
       // if first call or new options are passed
@@ -168,6 +168,8 @@
       async   = options.asynchronous;
       headers = options.headers;
       timeout = options.timeout;
+      body    = this.body;
+      url     = this.url;
 
       // reset flags
       this.isAborted  = createGetter('isAborted', false);

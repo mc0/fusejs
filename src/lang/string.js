@@ -143,7 +143,7 @@
       repeat =       null,
       startsWith =   null,
       toArray =      null,
-      toCamelCase =  null
+      toCamelCase =  null,
       trim =         null,
       trimLeft =     null,
       trimRight =    null,
