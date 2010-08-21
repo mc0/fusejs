@@ -10,7 +10,7 @@ new Test.Unit.Runner({
 
   'testConsoleError': function() {
     var message = 'testing error output';
-    fuse.Console.error(message, new SyntaxError);
+    fuse.console.error(message, new SyntaxError);
 
     this.assert(
       confirm('Do you see the error message "' + message + '" in your environment\'s console ?'),
@@ -19,7 +19,7 @@ new Test.Unit.Runner({
 
   'testConsoleInfo': function() {
     var message = 'testing info output';
-    fuse.Console.info(message);
+    fuse.console.info(message);
 
     this.assert(
       confirm('Do you see the info message "' + message + '" in your environment\'s console ?'),

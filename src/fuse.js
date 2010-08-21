@@ -199,14 +199,12 @@
   //= require "lang/regexp"
   //= require "lang/string"
 
-  //= require "lang/console"
   //= require "lang/hash"
   //= require "lang/range"
   //= require "lang/script"
   //= require "lang/template"
   //= require "lang/timer"
 
-  //= require "lang/html"
   //= require "dom/features"
   //= require "dom/dom"
   //= require "dom/node"
@@ -233,8 +231,10 @@
   //= require "dom/event/event"
   //= require "dom/event/delegate"
 
+  //= require "lang/console"
   //= require "lang/ecma"
   //= require "lang/grep"
+  //= require "lang/html"
   //= require "lang/inspect"
   //= require "lang/json"
   //= require "lang/query"

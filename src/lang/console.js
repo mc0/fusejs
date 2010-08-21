@@ -29,16 +29,19 @@
     info = error,
 
     consoleWrite = function(type, message) {
-      fuse._div.innerHTML = '<div id="fusejs-console"><pre>x</pre></div>';
+      fuse._div.innerHTML = '<div id="fusejs-console"><pre>x<\/pre><\/div>';
       var consoleElement = fuse._body.appendChild(fuse._div.firstChild),
        textNode = consoleElement.firstChild.firstChild;
+
       textNode.data = '';
 
-      return (consoleWrite = function(type, message) {
+      consoleWrite = function(type, message) {
         // append text and scroll to bottom of console
+        var top = textNode.data ? consoleElement.scrollHeight : 0;
         textNode.data += type + ': ' + message + '\r\n\r\n';
-        consoleElement.scrollTop = consoleElement.scrollHeight;
-      })(type, message);
+        consoleElement.scrollTop = top;
+      };
+      return consoleWrite(type, message);
     },
 
     hasGlobalConsole = (
