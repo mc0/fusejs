@@ -88,9 +88,9 @@
 
     createDispatcher  = Event._createDispatcher,
 
-    domLoadDispatcher = createDispatcher(2, 'dom:loaded'),
+    domLoadDispatcher = createDispatcher(1, 'dom:loaded'),
 
-    winLoadDispatcher = createDispatcher(1, 'load'),
+    winLoadDispatcher = createDispatcher(0, 'load'),
 
     domLoadWrapper = function(event) {
       var doc = fuse._doc, docEl = fuse._docEl, decorated = fuse(doc);
@@ -118,7 +118,7 @@
         decorated.isLoaded = createGetter('isLoaded', true);
         domLoadDispatcher(event);
         decorated.stopObserving('DOMContentLoaded').stopObserving('dom:loaded');
-        delete fuse.dom.data[2].events['dom:loaded'];
+        delete fuse.dom.data[1].events['dom:loaded'];
       }
     },
 
@@ -131,7 +131,7 @@
         domLoadWrapper(event);
       }
       // try again later if dom:loaded is still executing handlers
-      else if (fuse.dom.data[2].events['dom:loaded']) {
+      else if (fuse.dom.data[1].events['dom:loaded']) {
         return setTimeout(function() { winLoadWrapper(event); }, 10);
       }
       // fixed for Firefox < 3.6

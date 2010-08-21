@@ -49,7 +49,7 @@
 
     var SKIPPED_KEYS = { 'constructor': 1, 'callSuper': 1, 'getFuseId': 1 },
 
-    fuseId = 3,
+    fuseId = 2,
 
     createGeneric = function(proto, methodName) {
       return Function('o,s',
@@ -85,12 +85,12 @@
         // the same window may not strict equal each other.
         win = getWindow(node);
         if (node == win) {
-          id = node == window ? '1' : getFuseId(node.frameElement) + '-1';
+          id = node == window ? '0' : getFuseId(node.frameElement) + '-0';
         }
         else if (node.nodeType == DOCUMENT_NODE) {
           // quick return for common case OR
           // calculate id for foreign document objects
-          id = node == fuse._doc ? '2' : getFuseId(win.frameElement) + '-2';
+          id = node == fuse._doc ? '1' : getFuseId(win.frameElement) + '-1';
           skipDataInit || (skipDataInit = domData[id]);
           if (!skipDataInit) {
             skipDataInit =

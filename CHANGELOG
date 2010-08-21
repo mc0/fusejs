@@ -1,3 +1,5 @@
+* Avoid a conflict with the document's data id by initializing IE's unqiueNumber property on a dummy element. [jddalton]
+
 * Change fuse.ajax.Updater `insertion` option to `updateBy`. [jddalton]
   Note: Backwards compatibility warning.
 

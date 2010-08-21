@@ -6,8 +6,8 @@
   domData = 
   fuse.addNS('dom.data');
 
-  domData['1'] = { };
-  domData['2'] = { 'nodes': { } };
+  domData[0] = { };
+  domData[1] = { 'nodes': { } };
 
   fuse._doc   = window.document;
   fuse._div   = fuse._doc.createElement('DiV');
@@ -25,6 +25,11 @@
   DATA_ID_PROP = envTest('ELEMENT_UNIQUE_NUMBER') ? 'uniqueNumber' : '_fuseId';
 
   PARENT_NODE = isHostType(fuse._docEl, 'parentElement') ? 'parentElement' : 'parentNode';
+
+  // IE's uniqueNumber property starts at 1 when the browser session begins.
+  // To avoid a conflict with the document's data id of 1 we initialize
+  // uniqueNumber on a dummy element.
+  fuse._div[DATA_ID_PROP];
 
   /*--------------------------------------------------------------------------*/
 

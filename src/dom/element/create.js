@@ -74,7 +74,7 @@
 
     reExtractTagName = /^<([^> ]+)/,
 
-    reStartsWithTableRow = /^<tr/i,
+    reStartsWithTR = /^<tr/i,
 
     Decorator = function(element) {
       this.raw = element;
@@ -220,7 +220,7 @@
       // for a tidy cache stick to all upper or all lower case tagNames
       context || (context = doc);
 
-      nodes = context === doc ? domData['2'].nodes :
+      nodes = context === doc ? domData['1'].nodes :
         domData[getFuseId(getDocument(context))].nodes;
 
       result = (nodes[tagName] ||
@@ -277,7 +277,7 @@
       }
       // skip auto-inserted tbody
       if (nodeName == 'TABLE' && ELEMENT_TABLE_INNERHTML_INSERTS_TBODY &&
-          reStartsWithTableRow.test(html)) {
+          reStartsWithTR.test(html)) {
         nodeName = 'TBODY';
       }
 
@@ -317,7 +317,7 @@
     },
 
     getFragmentCache = function(ownerDoc) {
-      var id = ownerDoc === doc ? '2' : getFuseId(ownerDoc),
+      var id = ownerDoc === doc ? '1' : getFuseId(ownerDoc),
        data = domData[id];
       return data._fragmentCache || (data._fragmentCache = {
         'node':     ownerDoc.createElement('div'),
@@ -384,7 +384,7 @@
       };
 
       getFragmentCache = function(ownerDoc) {
-        var id = ownerDoc === doc ? '2' : getFuseId(ownerDoc),
+        var id = ownerDoc === doc ? '1' : getFuseId(ownerDoc),
          data = domData[id];
         return data._fragmentCache || (data._fragmentCache = {
           'node':     ownerDoc.createElement('div'),
