@@ -190,10 +190,10 @@ new Test.Unit.Runner({
     });
   },
 
-  'testUpdaterWithInsertion': function() {
+  'testUpdaterWithUpdateBy': function() {
     fuse.ajax.Updater('content', '../src/fixtures/content.html', {
-      'method':   'get',
-      'insertion': function(element, content) {
+      'method': 'get',
+      'updateBy': function(element, content) {
         $(element).prependChild(content);
       }
     });
@@ -203,14 +203,14 @@ new Test.Unit.Runner({
 
       $('content').update();
       fuse.ajax.Updater('content','../src/fixtures/content.html',
-        { 'method': 'get', 'insertion': 'bottom' });
+        { 'method': 'get', 'updateBy': 'appendChild' });
 
       this.wait(1000, function() {
         this.assertEqual(sentence, getInnerHTML('content'));
 
         $('content').update();
         fuse.ajax.Updater('content', '../src/fixtures/content.html',
-          { 'method': 'get', 'insertion': 'after' });
+          { 'method': 'get', 'updateBy': 'appendSibling' });
 
         this.wait(1000, function() {
           this.assertEqual('five dozen', getInnerHTML($('content').next()));

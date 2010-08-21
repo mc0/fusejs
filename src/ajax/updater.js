@@ -50,24 +50,18 @@
 
   fuse.ajax.Updater.plugin.updateContent = (function() {
     var updateContent = function updateContent(responseText) {
-      var insertion,
-       options = this.options,
+      var options = this.options,
+       updateBy = optiona.updateBy || 'appendChild',
        receiver = this.container[this.isSuccess() ? 'success' : 'failure'];
 
       if (receiver) {
         if (!options.runScripts) {
           responseText = responseText.stripScripts();
         }
-        if (options.insertion) {
-          if (isString(options.insertion)) {
-            insertion = { };
-            insertion[options.insertion] = responseText;
-            receiver.insert(insertion);
-          } else {
-            options.insertion(receiver, responseText);
-          }
+        if (isString(updateBy)) {
+          receiver[updateBy](responseText);
         } else {
-          receiver.update(responseText);
+          updateBy(receiver, responseText);
         }
       }
     };

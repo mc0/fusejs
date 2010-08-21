@@ -1,3 +1,6 @@
+* Change fuse.ajax.Updater `insertion` option to `updateBy`. [jddalton]
+  Note: Backwards compatibility warning.
+
 * Make script injection via fuse.dom.Element modification methods execute synchronously. [jddalton]
 
 * Add fuse.dom.Element methods. [jddalton]
