@@ -40,9 +40,9 @@
         // handle returning a number of matches
         else {
           do {
-            if (i < count && element.nodeType == ELEMENT_NODE && selectors.call(count, element))
+            if (element.nodeType == ELEMENT_NODE && selectors.call(count, element))
               result[i++] = fromElement(element);
-          } while (element = element[property]);
+          } while (i < count && (element = element[property]));
         }
       }
       else {
@@ -58,9 +58,9 @@
           // handle returning a number of matches
           else {
             do {
-              if (i < count && element.nodeType == ELEMENT_NODE)
+              if (element.nodeType == ELEMENT_NODE)
                 result[i++] = fromElement(element);
-            } while (element = element[property]);
+            } while (i < count && (element = element[property]));
           }
         }
         // handle when selectors are passed
@@ -76,10 +76,10 @@
           // handle returning a number of matches
           else {
             do {
-              if (i < count && element.nodeType == ELEMENT_NODE &&
+              if (element.nodeType == ELEMENT_NODE &&
                   match(element, selectors))
                 result[i++] = fromElement(element);
-            } while (element = element[property]);
+            } while (i < count && (element = element[property]));
           }
         }
       }
@@ -116,7 +116,7 @@
       var match, element = this.raw || this, i = 0,
        original = element, result = NodeList();
 
-      if (element = element.parentNode) {
+      if (element = element[PARENT_NODE]) {
         element = element[firstNode];
         if (selectors && selectors.length) {
           match = fuse.dom.selector.match;
@@ -163,8 +163,8 @@
         }
         // handle returning a number of matches
         else {
-          while (node = nodes[i++]) {
-            if (j < count && node.nodeType == ELEMENT_NODE && selectors.call(count, node))
+          while (j < count && (node = nodes[i++])) {
+            if (node.nodeType == ELEMENT_NODE && selectors.call(count, node))
               result[j++] = fromElement(node);
           }
         }
@@ -177,8 +177,8 @@
             return plugin.first.call(this);
           }
           // handle returning a number of matches
-          while (node = nodes[i++]) {
-            if (j < count && node.nodeType == ELEMENT_NODE)
+          while (j < count && (node = nodes[i++])) {
+            if (node.nodeType == ELEMENT_NODE)
               result[j++] = fromElement(node);
           }
         }
@@ -194,8 +194,8 @@
           }
           // handle returning a number of matches
           else {
-            while (node = nodes[i++]) {
-              if (j < count && node.nodeType == ELEMENT_NODE && match(node, selectors))
+            while (j < count && (node = nodes[i++])) {
+              if (node.nodeType == ELEMENT_NODE && match(node, selectors))
                 result[j++] = fromElement(node);
             }
           }
@@ -262,7 +262,7 @@
       if (descendant = fuse(descendant)) {
         var element = this.raw || this;
         descendant = descendant.raw || descendant;
-        while (descendant = descendant.parentNode)
+        while (descendant = descendant[PARENT_NODE])
           if (descendant == element) return true;
       }
       return false;
