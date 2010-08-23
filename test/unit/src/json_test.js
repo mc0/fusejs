@@ -3,13 +3,13 @@ new Test.Unit.Runner({
   'testDateToJSON': function() {
     this.assertMatch(
       /^1970-01-01T00:00:00(\.000)?Z$/,
-      new fuse.Date(fuse.Date.UTC(1970, 0, 1)).toJSON());
+      (new fuse.Date(fuse.Date.UTC(1970, 0, 1))).toJSON());
   },
 
   'testDateToISOString': function() {
     this.assertMatch(
       /^1970-01-01T00:00:00(\.000)?Z$/,
-      new fuse.Date(fuse.Date.UTC(1970, 0, 1)).toISOString());
+      (new fuse.Date(fuse.Date.UTC(1970, 0, 1))).toISOString());
   },
 
   'testHashToJSON': function() {
