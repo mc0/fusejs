@@ -44,7 +44,7 @@
         events = domData[id].events;
       }
       // flag event system to manually bubble after all the
-      // element's handlers for the event type have been executed 
+      // element's handlers for the event type have been executed
       events[type]._isBubblingForDelegation = true;
     },
 

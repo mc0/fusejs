@@ -1,3 +1,5 @@
+* Ensure decorators are created when fuse.dom.Element#observe is called with a raw element as its `this`. [jddalton, Joe Gornick]
+
 * Avoid a conflict with the document's data id by initializing IE's unqiueNumber property on a dummy element. [jddalton]
 
 * Change fuse.ajax.Updater `insertion` option to `updateBy`. [jddalton]

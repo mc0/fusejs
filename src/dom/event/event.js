@@ -199,22 +199,27 @@
       return this[arguments[0]]();
     },
 
-    addCache = function(id, type, handler) {
-      // bail if handler is already exists
+    addCache = function(element, type, handler, id) {
+      id || (id = getFuseId(element));
       var ec = getOrCreateCache(id, type);
-      if (arrIndexOf.call(ec.handlers, handler) > -1) {
-        return false;
+
+      if (arrIndexOf.call(ec.handlers, handler) == -1) {
+        ec.handlers.unshift(handler);
+        if (!ec.dispatcher) {
+          domData[id].decorator || fuse(element);
+          ec.dispatcher = Event._createDispatcher(id, type);
+          return ec.dispatcher;
+        }
       }
-      ec.handlers.unshift(handler);
-      return !ec.dispatcher && (ec.dispatcher = Event._createDispatcher(id, type));
+      return false;
     },
 
     addDispatcher = function(element, type, dispatcher, id) {
       id || (id = getFuseId(element));
-      domData[id].decorator || fuse(element);
       var ec = getOrCreateCache(id, type);
 
       if (!ec.dispatcher) {
+        domData[id].decorator || fuse(element);
         addObserver(element, type,
           (ec.dispatcher = dispatcher || Event._createDispatcher(id, type)));
         return true;
@@ -297,12 +302,12 @@
       // DOM Level 0
       else {
         addObserver = function(element, type, handler) {
-          var attrName = 'on' + type,
-           id = getFuseId(element), oldHandler = element[attrName];
+          var attrName = 'on' + type, id = getFuseId(element),
+           oldHandler = element[attrName];
 
           if (oldHandler) {
             if (oldHandler._isDispatcher) return false;
-            addCache(id, type, element[attrName]);
+            addCache(element, type, element[attrName], id);
           }
           element[attrName] = domData[id].events[type].dispatcher;
         };
@@ -564,7 +569,7 @@
     Element.plugin.observe  =
     Window.plugin.observe   = function observe(type, handler) {
       var element = this.raw || this,
-       dispatcher = addCache(getFuseId(element), type, handler);
+       dispatcher = addCache(element, type, handler);
 
       if (!dispatcher) return this;
       addObserver(element, type, dispatcher);
