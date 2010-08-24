@@ -100,7 +100,7 @@
         return context.Function('window',
           'return function (' + uid + '){' +
           'var arguments=window.arguments;' +
-          'return ("", eval)(String(' + uid + '))}')(context);
+          'return window.eval(String(' + uid + '))}')(context);
       },
 
       run = function run(code, context) {
@@ -115,119 +115,42 @@
         return (data._evaluator || (data._evaluator = makeExecuter(context)))(code);
       },
 
-      setScriptText = function(element, text) {
-        (element.firstChild ||
-         element.appendChild(element.ownerDocument.createTextNode('')))
-         .data = text || '';
-      },
-
       execute = makeExecuter(window);
 
-      try {
-        // Opera 9.25 can't indirectly call eval()
-        window.fuse = undef;
-        execute('var fuse="x"');
-        if (window.fuse != 'x') throw new EvalError;
-      }
-      catch (e) {
-        // fallback on window.eval()
-        makeExecuter = function(context) {
-          return context.Function('window',
-            'return function (' + uid + '){' +
-            'var arguments=window.arguments;' +
-            'return window.eval(String(' + uid + '))}')(context);
-        };
+      run('var fuse="x"');
 
-        window.fuse = undef;
-        execute = makeExecuter(window);
-        execute('var fuse="x"');
-      }
-
-      if (window.fuse != 'x') {
-        // fallback on script injection
-        if (isHostType(window, 'document')) {
-          run = function run(code, context) {
-            context || (context = window);
-            return execute(code, context == window ?
-              context : getWindow(context.raw || context));
-          };
-
-          execute = function(code, context) {
-            var parentNode, result, script,
-             text = 'fuse.' + uid + '.returned = eval(';
-
-            if (context == window) {
-              context = fuse._doc;
-            } else {
-              context = getDocument(context);
-              text = 'parent.' + text + 'parent.';
-            }
-
-            if (parentNode = context.getElementsByTagName('script')[0]) {
-              parentNode = parentNode.parentNode;
-            } else {
-              parentNode = context.getElementsByTagName('head')[0] || context.documentElement;
-            }
-
-            text += 'fuse.' + uid + '.code);';
-
-            // keep consistent behavior of `arguments`
-            // uses an unresolvable reference so it can be deleted without
-            // errors in JScript
-            text = 'if("arguments" in this){' + text +
-                   '}else{arguments=void 0;'  + text +
-                   'delete arguments}';
-
-            fuse[uid] = { 'code': String(code), 'returned': '' };
-            script = Element.fromTagName('script', { 'context': context, 'decorate': false });
-            setScriptText(script, text);
-
-            // TODO: clear memory of removed script element for IE
-            parentNode.insertBefore(script, parentNode.firstChild);
-            parentNode.removeChild(script);
-
-            result = fuse[uid].returned;
-            delete fuse[uid];
-            return result;
-          };
+      if (window.fuse != 'x' && isHostType(window, 'document')) {
+        window.fuse = backup;
+        if (runScriptText('typeof this.fuse=="function"')) {
+          run = runScriptText;
+        } else {
+          // for Safari 2.0.0 and Firefox 2.0.0.2
+          fuse.dom.runScriptText = runScriptText = run;
         }
-        else {
-          execute = false;
-        }
+      } else {
+        window.fuse = backup;
       }
 
       // IE's eval will error if code contains <!--
-      if (execute) {
-        try {
-          execute('<!--\n//-->', window);
-        }
-        catch (e) {
-          var __execute = execute;
-          execute = function(code, context) {
-            if (indexOf.call(code, '<!--') > -1) {
-              code = strReplace
-                .call(code, reQuotes,    swapQuotesToTokens)
-                .replace(reRegexps,      swapRegexpsToTokens)
-                .replace(reHTMLComments, '//<!--')
-                .replace(reQuoteTokens,  swapTokensToQuotes)
-                .replace(reRegexpTokens, swapTokensToRegexps);
-            }
-            return __execute(code, context);
-          };
-        }
+      try {
+        eval('<!--\n//-->');
       }
-      // global eval is not supported :(
-      else {
-        execute = function(code, context) { throw new EvalError; };
-      }
-
-      if (envTest('ELEMENT_SCRIPT_HAS_TEXT_PROPERTY')) {
-        setScriptText = function(element, text) {
-          element.text = text || '';
+      catch (e) {
+        var __run = run;
+        run = function(code, context) {
+          if (indexOf.call(code, '<!--') > -1) {
+            code = strReplace
+              .call(code, reQuotes,    swapQuotesToTokens)
+              .replace(reRegexps,      swapRegexpsToTokens)
+              .replace(reHTMLComments, '//<!--')
+              .replace(reQuoteTokens,  swapTokensToQuotes)
+              .replace(reRegexpTokens, swapTokensToRegexps);
+          }
+          return __run(code, context);
         };
       }
 
-      (window.fuse = backup).run = run;
+      fuse.run = run;
       return run(code, context);
     };
 

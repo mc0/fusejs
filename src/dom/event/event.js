@@ -201,30 +201,27 @@
 
     addCache = function(element, type, handler, id) {
       id || (id = getFuseId(element));
-      var ec = getOrCreateCache(id, type);
+      var result = false, ec = getOrCreateCache(id, type);
 
-      if (arrIndexOf.call(ec.handlers, handler) == -1) {
-        ec.handlers.unshift(handler);
-        if (!ec.dispatcher) {
-          domData[id].decorator || fuse(element);
-          ec.dispatcher = Event._createDispatcher(id, type);
-          return ec.dispatcher;
-        }
+      ec.handlers.push(handler);
+      if (!ec.dispatcher) {
+        domData[id].decorator || fuse(element);
+        ec.dispatcher = Event._createDispatcher(id, type);
+        result = ec.dispatcher;
       }
-      return false;
+      return result;
     },
 
     addDispatcher = function(element, type, dispatcher, id) {
       id || (id = getFuseId(element));
-      var ec = getOrCreateCache(id, type);
+      var result, ec = getOrCreateCache(id, type);
 
-      if (!ec.dispatcher) {
+      if (result = !ec.dispatcher) {
         domData[id].decorator || fuse(element);
         addObserver(element, type,
           (ec.dispatcher = dispatcher || Event._createDispatcher(id, type)));
-        return true;
       }
-      return false;
+      return result;
     },
 
     addObserver = function(element, type, handler) {

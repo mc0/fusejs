@@ -26,7 +26,7 @@
         var loc = window.location;
         loc.replace(loc.protocol + '//' + loc.hostname + loc.pathname +
           '?engine=' + engineEl.raw.options[engineEl.raw.selectedIndex].text +
-          '&debug='  + $F(debugEl));
+          '&fusejs_debug='  + $F(debugEl));
       },
 
       getQueryParam = function(key, defaultValue) {
@@ -48,7 +48,7 @@
         };
       })();
 
-      debugParam  = getQueryParam('debug', '0') == 1;
+      debugParam  = getQueryParam('fusejs_debug', '0') == 1;
       engineParam = getQueryParam('engine', 'NWMatcher');
       debugEl     = $('debug-switch');
       engineEl    = $('selector-engine');
@@ -68,9 +68,6 @@
           break;
         }
       }
-
-      // set debug flag
-      fuse.debug = debugParam;
 
       // load selector engine
       fuse.String(engineItem.value).split('+').each(function(path) {

@@ -110,19 +110,6 @@
       };
     },
 
-    getScriptText = function(element) {
-      if (element.childNodes.length > 1) {
-        element.normalize();
-      }
-      return element.firstChild && element.firstChild.data || '';
-    },
-
-    setScriptText = function(element, text) {
-      (element.firstChild ||
-       element.appendChild(element.ownerDocument.createTextNode('')))
-       .data = text == null ? '' : text;
-    },
-
     getScripts = function(element) {
       return getNodeName(element) == 'SCRIPT' ? [element] : getByTagName(element, 'script');
     },
@@ -133,7 +120,7 @@
         isAttached = !plugin.isDetached.call(element);
         while (script = scripts[++i]) {
           if (!script.type || script.type.toLowerCase() == 'text/javascript') {
-            isAttached && fuse.run(getScriptText(script), context || (context = getWindow(element)));
+            isAttached && fuse.run(getScriptText(script), context || (context = getDocument(element)));
           }
         }
       }
@@ -154,15 +141,6 @@
     },
 
     cloner = createCloner();
-
-    if (envTest('ELEMENT_SCRIPT_HAS_TEXT_PROPERTY')) {
-      getScriptText = function(element) {
-        return element.text;
-      };
-      setScriptText = function(element, text) {
-        element.text = text || '';
-      };
-    }
 
     /*------------------------------------------------------------------------*/
 
@@ -238,7 +216,7 @@
       var element = this.raw || this;
       if (content = toNode(content, element)) {
         element.insertBefore(content, element.firstChild);
-        //runScripts(element);
+        runScripts(element);
       }
       return this;
     };

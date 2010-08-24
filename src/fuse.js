@@ -16,8 +16,9 @@
   // private vars
   var DATA_ID_PROP, PARENT_NODE, Document, Element, Node, NodeList, Window,
    domData, eachKey, envAddTest, envTest, fromElement, getDocument, getFuseId,
-   getNodeName, getWindow, getOrCreateTagClass, hasKey, isArray, isElement,
-   isHash, isNumber, isPrimitive, isRegExp, isString, returnOffset, undef,
+   getNodeName, getScriptText, getWindow, getOrCreateTagClass, hasKey, isArray,
+   isElement, isHash, isNumber, isPrimitive, isRegExp, isString, returnOffset,
+   runScriptText, setScriptText, undef,
 
   DOCUMENT_FRAGMENT_NODE = 11,
 
@@ -65,6 +66,24 @@
   createGetter = function(name, value) {
     return Function('v', 'function ' + name + '(){return v;} return ' + name)(value);
   },
+
+  debug = (function() {
+    var script, doc = window.document, i = -1,
+     reSrcDebug = /(?:^|&)(debug)(?:=(.*?))?(?:&|$)/,
+     reFilename = /(^|\/)fuse\b.*?\.js\?/,
+     scripts = doc && doc.getElementsByTagName('script') || [],
+     query = window.location && location.search;
+
+    if (!(match = query.match(/(?:\?|&)(fusejs_debug)(?:=(.*?))?(?:&|$)/))) {
+      while (script = scripts[++i]) {
+        if (reFilename.test(script.src) && 
+            (match = (script.src.split('?')[1] || '').match(reSrcDebug))) {
+          break;
+        }
+      }
+    }
+    return !!match && (match[2] == null ? true : isNaN(+match[2]) ? match[2] : +match[2]);
+  })(),
 
   escapeRegExpChars = (function() {
     var reSpecialChars = /([.*+?^=!:${}()|[\]\/\\])/g;
@@ -181,6 +200,8 @@
     fuse.addNS =
     fuse.prototype.addNS = addNS;
 
+    fuse.uid = uid;
+    fuse.debug = debug;
     fuse.updateGenerics  = updateGenerics;
   })();
 
@@ -201,7 +222,6 @@
 
   //= require "lang/hash"
   //= require "lang/range"
-  //= require "lang/script"
   //= require "lang/template"
   //= require "lang/timer"
 
@@ -238,6 +258,7 @@
   //= require "lang/inspect"
   //= require "lang/json"
   //= require "lang/query"
+  //= require "lang/script"
   //= require "lang/util"
 
   //= require "ajax/ajax"

@@ -2,7 +2,9 @@
 
   fuse.Class.mixins.event = (function() {
 
-    var arrIndexOf = (function(fn) {
+    var huid = fuse.uid + '_eventHandler',
+
+    arrIndexOf = (function(fn) {
       return fn && fn.raw || function(value) {
         var length = this.length;
         while (length--) {
@@ -13,44 +15,27 @@
     })(fuse.Array.plugin.indexOf),
 
     fire = function fire(type) {
-      var args, length, errors = [],
-       events = this._events || (this._events = { }),
-       handlers = events[type];
+      var handler, args, i = -1, debug = fuse.debug, klass = this,
+       events = klass._events || (klass._events = { }), handlers = events[type];
 
-      if (!handlers) {
-        return this;
-      }
-      if (arguments.length > 1) {
-        args = slice.call(arguments, 1);
-      }
-
-      handlers = slice.call(handlers, 0);
-      length = handlers.length;
-      while (length--) {
-        try {
-          if (args) {
-            handlers[length].apply(this, args);
-          } else {
-            handlers[length].call(this);
+      if (handlers) {
+        handlers = slice.call(handlers, 0);
+        args = arguments.length > 1 ? slice.call(arguments, 1) : [];
+        while (handler = handlers[++i]) {
+          if (debug) {
+            // script injection allows handlers to fail without haulting the while loop
+            fuse[huid] = function() { handler.apply(klass, args) };
+            runScriptText('fuse.' + huid + '()');
+            delete fuse[huid];
           }
-        } catch (e) {
-          errors.push(e);
+          else if (args) {
+            handler.apply(this, args);
+          } else {
+            handler.call(this);
+          }
         }
       }
-
-      // re-throw errors
-      if (length = errors.length) {
-        if (length > 1) {
-          // use msg to cleanup line number of reported error
-          msg = 'Multiple errors thrown while handling the "' + type + '" event' +
-            (this.inspect ? ' for the ' + this.inspect() + ' instance' : '') +
-            ', see errors property';
-          (error = new Error(msg)).errors = errors;
-        } else {
-          error = errors[0];
-        }
-        throw error;
-      }
+      return this;
     };
 
     observe = function observe(type, handler) {

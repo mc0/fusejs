@@ -49,6 +49,7 @@
   (function(plugin) {
 
     var EVENT_TYPES  = ['abort', 'exception', 'failure', 'success', 'timeout'],
+     euid            = uid + '_error',
      isSameOrigin    = fuse.Object.isSameOrigin,
      reContentTypeJS = /^\s*(text|application)\/(x-)?(java|ecma)script(;|\s|$)/i,
      reHTTP          = /^https?:/,
@@ -351,10 +352,10 @@
           if (hasText && (evalJS == 'force' || evalJS && isSameOrigin(url) &&
               contentType.match(reContentTypeJS))) {
 
-            fuse.run('try{' + responseText.unfilterJSON() + '}catch(e){fuse.'  + uid + '_error=e}');
+            fuse.run('try{' + responseText.unfilterJSON() + '}catch(e){fuse.'  + euid + '=e}');
 
-            if (e = fuse[uid + '_error']) {
-              delete fuse[uid + '_error'];
+            if (e = fuse[euid]) {
+              delete fuse[euid];
               fireException(this, e);
             }
           }

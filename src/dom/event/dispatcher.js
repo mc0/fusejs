@@ -7,33 +7,35 @@
   // listener and execute all handlers they manage.
   fuse.dom.Event._createDispatcher = (function() {
 
-    var EVENT_TYPE_ALIAS = { 'blur': 'delegate:blur', 'focus': 'delegate:focus' },
+    var EVENT_TYPE_ALIAS =
+      { 'blur': 'delegate:blur', 'focus': 'delegate:focus' },
+
+    runScriptText = fuse.dom.runScriptText,
+
+    huid = fuse.uid + '_domHandler',
 
     createDispatcher = function createDispatcher(id, type) {
       return function(event) {
-        // shallow copy handlers to avoid issues with nested observe/stopObserving
-        var error, msg, parentNode,
-         errors    = [],
+        var handler, parentNode, stopped, i = -1,
+         debug     = fuse.debug,
          data      = fuse.dom.data[id],
          decorator = data.decorator,
          node      = decorator.raw || decorator,
          ec        = data.events[type],
-         handlers  = errors.slice.call(ec.handlers, 0),
-         length    = handlers.length;
+         handlers  = ec.handlers.slice(0);
 
         event = fuse.dom.Event(event || getWindow(node).event, decorator);
-        while (length--) {
-          // This pattern, based on work by Dean Edwards, John Resig, and MochiKit
-          // allows a handler to error out without stopping the other handlers from firing.
-          // http://groups.google.com/group/jquery-dev/browse_thread/thread/2a14c2da6bcbb5f
-          try {
-            // stop event if handler result is false
-            if (handlers[length].call(decorator, event) === false) {
-              event.stop();
-            }
-          } catch (e) {
-            errors.push(e);
+
+        while (handler = handlers[++i]) {
+          if (debug) {
+            // script injection allows handlers to fail without haulting the while loop
+            fuse[huid] = function() { handler.call(decorator, event) };
+            stopped = runScriptText('fuse.' + huid + '()') === false;
+            delete fuse[huid];
+          } else {
+            stopped = handler.call(decorator, event);
           }
+          stopped && event.stop();
         }
 
         // bubble if flagged by delegation
@@ -45,20 +47,6 @@
           event.isBubbling = fuse.dom.Event._createGetter('isBubbling', true);
           // start manual bubbling
           decorator.fire.call(parentNode, EVENT_TYPE_ALIAS[type] || type, null, event);
-        }
-
-        // re-throw errors
-        if (length = errors.length) {
-          if (length > 1) {
-            // use msg to cleanup line number of reported error
-            msg = 'Multiple errors thrown while handling the "' + type + '" event' +
-              (decorator.inspect ? ' for the ' + decorator.inspect() + ' element' : '') +
-              ', see errors property';
-            (error = new Error(msg)).errors = errors;
-          } else {
-            error = errors[0];
-          }
-          throw error;
         }
       };
     };
@@ -73,6 +61,8 @@
         return dispatcher;
       };
     }
+
+    delete fuse.uid;
     return createDispatcher;
   })();
 

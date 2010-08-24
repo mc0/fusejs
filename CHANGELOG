@@ -1,3 +1,8 @@
+* When in debug mode execute event handlers separately from the loop iterating over them allowing all handlers to execute despite errors that may be thrown. [jddalton]
+
+* Add fuse.debug detection for the window's url containing `fusejs_debug` in the query or `debug` in the fusejs script src query to trigger debug mode. [jddalton]
+  Note: fuse.debug will take the value of debug query param. For example, if debug=2 then fuse.debug would equal 2.
+
 * Fix Chrome Date#toJSON throwing errors when its result is not a primitive. [jddalton]
 
 * Ensure decorators are created when fuse.dom.Element#observe is called with a raw element as its `this`. [jddalton, Joe Gornick]
