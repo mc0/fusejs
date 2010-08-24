@@ -155,11 +155,8 @@
 
     plugin.delegate          =
     Document.plugin.delegate = function delegate(type, selector, delegatee) {
-      var docId, ec, handler, handlers, i = -1,
-       element = this.raw || this,
-       id      = getFuseId(this),
-       data    = domData[id],
-       events  = data.events;
+      var handler,element = this.raw || this,
+       id = getFuseId(this), data = domData[id];
 
       // juggle arguments
       if (typeof selector == 'function') {
@@ -167,24 +164,12 @@
         selector = null;
       }
 
-      type = EVENT_TYPE_ALIAS[type] || type;
-      selector && (selector = String(selector));
-
-      // ensure it isn't in the stack already
-      if (events && (ec = events[type])) {
-        handlers = ec.handlers;
-        while (handler = handlers[++i]) {
-          if (handler._delegatee == delegatee && handler._selector == selector) {
-            return this;
-          }
-        }
-      }
-
       // indicate handler is a delegator and pass to Element#observe
       handler = createHandler(selector, delegatee);
       handler._delegatee = delegatee;
       handler._selector  = selector;
 
+      type = EVENT_TYPE_ALIAS[type] || type;
       plugin.observe.call(this, type, handler);
 
       // if not already watching on the element, add a watcher for

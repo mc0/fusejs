@@ -41,7 +41,7 @@
     observe = function observe(type, handler) {
       var events = this._events || (this._events = { }),
        ec = events[type] || (events[type] = []);
-      if (arrIndexOf.call(ec, handler) < 0) ec.push(handler);
+      ec.push(handler);
       return this;
     },
 
