@@ -1,6 +1,6 @@
 * Add ability to exit early from fuse.Object.each() by returning false from the callback and allow setting the `this` of the callback. [jddalton]
 
-* Make fuse.Object.getClassOf() more closely follow the specification and throw a TypeError when passed an undefined or null value. [jddalton]
+* Make fuse.Object.getClassOf() more closely follow the spirit of the specification and throw a TypeError when passed an undefined or null value. [jddalton, kangax]
 
 * When in debug mode execute event handlers separately from the loop iterating over them allowing all handlers to execute despite errors that may be thrown. [jddalton]
 

@@ -241,6 +241,9 @@
     };
 
     // ES5 15.2.4.2
+    // The erratum states Object#toString should return
+    // [object Null] and [object Undefined] for null and undefined values.
+    // However, Null and Undefined are *not* [[Class]] property values.
     Obj.getClassOf = function getClassOf(object) {
       if (object == null) throw new TypeError;
       return fuse.String(toString.call(object).slice(8, -1));
