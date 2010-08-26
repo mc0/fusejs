@@ -340,7 +340,7 @@ new Test.Unit.Runner({
 
   'testElementInsertScriptElement': function() {
     var code = 'window.__testInsertScriptElement = true;',
-     head = document.getElementsByTagName('HEAD')[0],
+     head = document.getElementsByTagName('head')[0],
      script = fuse('<script type="text/javascript">');
 
     try {

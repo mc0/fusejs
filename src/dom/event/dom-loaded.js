@@ -45,8 +45,8 @@
     },
 
     getSheetElements = function() {
-      var i = 0, link, links = doc.getElementsByTagName('LINK'),
-       result = fuse.Array.fromNodeList(doc.getElementsByTagName('STYLE'));
+      var i = 0, link, links = doc.getElementsByTagName('link'),
+       result = fuse.Array.fromNodeList(doc.getElementsByTagName('style'));
       while (link = links[i++]) {
         if (link.rel.toLowerCase() == 'stylesheet')
           result.push(link);

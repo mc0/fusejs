@@ -17,8 +17,8 @@ new Test.Unit.Runner({
       'toArray');
 
     this.assertEnumEqual([document.documentElement],
-      $A(document.getElementsByTagName('HTML')),
-     'simple nodeList');
+      $A(document.getElementsByTagName('html')),
+      'simple nodeList');
 
     (function(){
       this.assertEnumEqual([1, 2, 3], $A(arguments), 'arguments object');
