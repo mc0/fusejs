@@ -10,13 +10,7 @@
 
     CHANGEABLE_ELEMENTS = { 'INPUT': 1, 'SELECT': 1, 'TEXTAREA': 1 },
 
-    NON_BUBBLING_EVENTS = {
-      'change': 1,
-      'reset':  1,
-      'submit': 1,
-      'delegate:blur':  1,
-      'delegate:focus': 1
-    },
+    NON_BUBBLING_EVENTS = { 'delegate:blur': 1, 'delegate:focus': 1 },
 
     PROBLEM_ELEMENTS = {
       'LABEL':    1,
@@ -140,7 +134,10 @@
     }
     // JScript
     else if (envTest('ELEMENT_ATTACH_EVENT')) {
-      PROBLEM_ELEMENTS.FORM = 1;
+      PROBLEM_ELEMENTS.FORM =
+      NON_BUBBLING_EVENTS.change =
+      NON_BUBBLING_EVENTS.reset  =
+      NON_BUBBLING_EVENTS.submit = 1;
 
       addWatcher = function(element, data) {
         element.attachEvent('onbeforeactivate', onBeforeActivate);
