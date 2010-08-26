@@ -22,18 +22,18 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 (function(global) {
-  var NOOP  = function() { },
+  var NOOP = function() { },
 
-   slice    = [].slice,
+   slice = [].slice,
 
    getClassOf = fuse.Object.getClassOf,
 
-   isArray  = function(object) {
-     return getClassOf(object) == 'Array';
+   isArray = function(object) {
+     return object && getClassOf(object) == 'Array';
    },
 
    isFunction = function(object) {
-     return getClassOf(object) == 'Function';
+     return object && getClassOf(object) == 'Function';
    },
 
    zip = fuse.Array.plugin.zip;

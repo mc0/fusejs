@@ -125,6 +125,18 @@ new Test.Unit.Runner({
     this.assertEqual('RegExp',   fuse.Object.getClassOf(fuse.RegExp('x')));
     this.assertEqual('String',   fuse.Object.getClassOf('x'));
     this.assertEqual('String',   fuse.Object.getClassOf(fuse.String('x')));
+
+    this.assertRaise('TypeError', function() {
+      fuse.Object.getClassOf(null);
+    });
+
+    this.assertRaise('TypeError', function() {
+      fuse.Object.getClassOf(undef);
+    });
+
+    this.assertRaise('TypeError', function() {
+      fuse.Object.getClassOf();
+    });
   },
 
   'testObjectHasKey': function() {

@@ -28,7 +28,7 @@
               // exit early if callback result is false
               if (hasKey(object, key)) {
                   callback(object[key], key, object);
-                
+
               }
             }
           }
@@ -237,7 +237,9 @@
       return destination;
     };
 
+    // ES5 15.2.4.2
     Obj.getClassOf = function getClassOf(object) {
+      if (object == null) throw new TypeError;
       return fuse.String(toString.call(object).slice(8, -1));
     };
 

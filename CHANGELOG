@@ -1,3 +1,5 @@
+* Make fuse.Object.getClassOf() more closely follow the specification and throw a TypeError when passed an undefined or null value. [jddalton]
+
 * When in debug mode execute event handlers separately from the loop iterating over them allowing all handlers to execute despite errors that may be thrown. [jddalton]
 
 * Add fuse.debug detection for the window's url containing `fusejs_debug` in the query or `debug` in the fusejs script src query to trigger debug mode. [jddalton]
