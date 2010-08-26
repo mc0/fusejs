@@ -18,11 +18,33 @@ new Test.Unit.Runner({
   },
 
   'testObjectEach': function() {
-    function klass() { this.toString = 1 }
+    var args, thisArg,
+     count    = 0,
+     otherObj = { },
+     obj      = { '1': 'a', '2': 'b', '3': 'c' },
+     klass    = function() { this.toString = 1 };
 
-    var count = 0;
+    fuse.Object.each(obj, function(value, key, o) {
+      count++;
+      thisArg = this;
+      if (key == '2') {
+        args = arguments;
+        return false;
+      }
+    }, otherObj);
+
+    this.assertEqual(2, count,
+      'Iteration should stop if the callback\'s return value === false.');
+
+    this.assertEnumEqual(['b', '2', obj], args,
+      'The callback should recieve the value, key, and object as arguments.');
+
+    this.assertEqual(otherObj, thisArg,
+      'The `this` of the callback was not set correctly.');
+
+    count = 0;
     klass.prototype.toString = 0;
-    fuse.Object.each(new klass(), function() { count++ });
+    fuse.Object.each(new klass, function() { count++ });
 
     this.assertEqual(1, count,
       'Failed to iterate correctly over the object properties');
