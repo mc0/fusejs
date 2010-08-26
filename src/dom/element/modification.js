@@ -16,6 +16,15 @@
 
     INSERTABLE_NODE_TYPES = { '1': 1, '3': 1, '8': 1, '10': 1, '11': 1 },
 
+    ELEMENT_EVALS_SCRIPT_FROM_INNERHTML =
+      envTest('ELEMENT_EVALS_SCRIPT_FROM_INNERHTML'),
+
+    ELEMENT_SCRIPT_FAILS_TO_EVAL_TEXT =
+      envTest('ELEMENT_SCRIPT_FAILS_TO_EVAL_TEXT'),
+
+    ELEMENT_SCRIPT_REEVALS_TEXT =
+      envTest('ELEMENT_SCRIPT_REEVALS_TEXT'),
+
     ELEMENT_INNERHTML_BUGGY = (function() {
       var T = false, o = { };
       if (envTest('ELEMENT_COLGROUP_INNERHTML_BUGGY')) {
@@ -119,23 +128,30 @@
       if (scripts) {
         isAttached = !plugin.isDetached.call(element);
         while (script = scripts[++i]) {
-          if (!script.type || script.type.toLowerCase() == 'text/javascript') {
+          if (!plugin.hasAttribute.call(script, 'src') &&
+              (!script.type || script.type.toLowerCase() == 'text/javascript')) {
             isAttached && fuse.run(getScriptText(script), context || (context = getDocument(element)));
           }
         }
       }
     },
 
-    toNode = function(content, context, classOf) {
-      var result;
-      classOf || (classOf = toString.call(content));
-      if (scripts = TREAT_AS_STRING[classOf]) {
+    toNode = function(content, context) {
+      var result, skipScripts, classOf = toString.call(content);
+      scripts = null;
+
+      if (TREAT_AS_STRING[classOf]) {
         result = getFragmentFromHTML(classOf == '[object String]' ? content : String(content), context);
-      } else {
+        // skip evaling scripts created from a string in Firefox 3.x
+        skipScripts = ELEMENT_EVALS_SCRIPT_FROM_INNERHTML;
+      }
+      else {
         result = content && content.raw || content || { };
+        // fix evaling inserted script elements in Safari <= 2.0.2 and Firefox 2.0.0.2
+        skipScripts = !ELEMENT_SCRIPT_FAILS_TO_EVAL_TEXT;
       }
       if (INSERTABLE_NODE_TYPES[result.nodeType]) {
-        scripts = getScripts(result);
+        !skipScripts && (scripts = getScripts(result));
         return result;
       }
     },
@@ -257,19 +273,21 @@
       if (getNodeName(element) == 'SCRIPT') {
         setScriptText(element, content.nodeType == TEXT_NODE ?
           (content.raw || content).data : content);
-        scripts = [element];
-        runScripts(element);
+        if (!ELEMENT_SCRIPT_REEVALS_TEXT) {
+          scripts = [element];
+          runScripts(element);
+        }
       }
       else {
         if (TREAT_AS_STRING[toString.call(content)]) {
           element.innerHTML = content;
-          scripts = getScripts(element);
-          runScripts(element);
         }
         else if (INSERTABLE_NODE_TYPES[content.nodeType]) {
           element.innerHTML = '';
           element.appendChild(content.raw || content);
         }
+        scripts = getScripts(element);
+        runScripts(element);
       }
       return this;
     };
@@ -295,51 +313,18 @@
 
     /*------------------------------------------------------------------------*/
 
-    // Fix inserting script elements in Safari <= 2.0.2 and Firefox 2.0.0.2
-    if (envTest('ELEMENT_SCRIPT_FAILS_TO_EVAL_TEXT')) {
-      var __replace = plugin.replace;
-      plugin.replace = function replace(content) {
-        var result = __replace.call(this, content);
-        if (INSERTABLE_NODE_TYPES[content && content.nodeType]) {
-          runScripts(result);
-        }
-        return result;
-      };
-
-      var __methods = 'prependSiblings,appendSiblings,prependChild,appendChild'.split(',');
-      do {
-        (function(method) {
-          var fn = plugin[method];
-          plugin[method] = function(content) {
-            var element = this.raw || this,
-             context = PARENT_NODE_AS_CONTEXT[method] ? element[PARENT_NODE] : element;
-            if (context && (content = toNode(content, context))) {
-              fn.call(element, content);
-              runScripts(element);
-            }
-            return this;
-          };
-        })(__methods.shift());
-      } while (__methods.length);
-    }
-
     // Fix browsers with buggy innerHTML implementations
     if (ELEMENT_INNERHTML_BUGGY) {
       var __update = plugin.update;
       plugin.update = function update(content) {
-        var classOf, element = this.raw || this, nodeName = getNodeName(element);
+        var element = this.raw || this, nodeName = getNodeName(element);
         if (ELEMENT_INNERHTML_BUGGY[nodeName]) {
-          classOf = toString.call(content);
           while (element.lastChild) {
             element.removeChild(element.lastChild);
           }
-          if (TREAT_AS_STRING[classOf] &&
-              (content = toNode(content, element, classOf))) {
+          if (content = toNode(content, element)) {
             element.appendChild(content);
             runScripts(element);
-          }
-          else if (INSERTABLE_NODE_TYPES[content && content.nodeType]) {
-            element.appendChild(content.raw || content);
           }
         } else {
           __update.call(this, content);

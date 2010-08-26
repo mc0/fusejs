@@ -349,44 +349,62 @@
     };
   })());
 
-  (function() {
+  envAddTest((function() {
     function createScriptTest(testType) {
       return function() {
-        var evalFailed, hasText,
-         div    = fuse._div,
-         doc    = fuse._doc,
-         docEl  = fuse._docEl,
-         code   = 'fuse.' + uid +'=1',
-         script = doc.createElement('script');
+        var evalFailed, hasText, reEvaled, htmlEvaled,
+         div     = fuse._div,
+         doc     = fuse._doc,
+         head    = fuse._headEl,
+         code    = 'fuse.' + uid +'=1',
+         script  = doc.createElement('script'),
+         useText = typeof script.text === 'string';
 
         try { script.appendChild(doc.createTextNode(code)) } catch (e) { }
+        useText && (script.text = code + '+1');
 
-        if ('text' in script) {
-          script.text = code + '+1';
-        }
-
-        docEl.insertBefore(script, docEl.firstChild);
-
+        head.insertBefore(script, head.firstChild);
         hasText = fuse[uid] == 2;
         evalFailed = !fuse[uid];
 
+        code += '+2';
+        if (script.firstChild) {
+          script.firstChild.data = code;
+        } else if (useText) {
+          script.text = code;
+        }
+
+        reEvaled = fuse[uid] == 3;
+
         div.appendChild(script);
+        div.innerHTML = 'x<script>' + code + '+1<\/script>';
+        div.appendChild(head.insertBefore(div.lastChild, head.firstChild));
         div.innerHTML = '';
+
+        htmlEvaled = fuse[uid] == 4;
         delete fuse[uid];
 
         envAddTest({
-          'ELEMENT_SCRIPT_HAS_TEXT_PROPERTY': hasText });
+          'ELEMENT_SCRIPT_HAS_TEXT_PROPERTY': hasText,
 
-        envAddTest({
-          'ELEMENT_SCRIPT_FAILS_TO_EVAL_TEXT': evalFailed });
+          'ELEMENT_SCRIPT_FAILS_TO_EVAL_TEXT': evalFailed,
 
-        return ({ 'feature': hasText, 'bug': evalFailed })[testType];
+          'ELEMENT_SCRIPT_REEVALS_TEXT': reEvaled,
+
+          'ELEMENT_EVALS_SCRIPT_FROM_INNERHTML': htmlEvaled
+        });
+
+        return ({ '1': hasText, '2': evalFailed, '3': reEvaled, '4': htmlEvaled })[testType];
       };
     }
 
-    envAddTest({
-      'ELEMENT_SCRIPT_HAS_TEXT_PROPERTY': createScriptTest('feature') });
+    return {
+      'ELEMENT_SCRIPT_HAS_TEXT_PROPERTY': createScriptTest('1'),
 
-    envAddTest({
-      'ELEMENT_SCRIPT_FAILS_TO_EVAL_TEXT': createScriptTest('bug') });
-  })();
+      'ELEMENT_SCRIPT_FAILS_TO_EVAL_TEXT': createScriptTest('2'),
+
+      'ELEMENT_SCRIPT_REEVALS_TEXT': createScriptTest('3'),
+
+      'ELEMENT_EVALS_SCRIPT_FROM_INNERHTML': createScriptTest('4')
+    };
+  })());
