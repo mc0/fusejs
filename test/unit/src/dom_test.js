@@ -1431,26 +1431,35 @@ new Test.Unit.Runner({
 
   'testElementGetAttribute': function() {
     var attribFormIssues = $('attributes_with_issues_form');
-    this.assert(fuse.Object.isString(attribFormIssues.getAttribute('action')));
-    this.assert(fuse.Object.isString(attribFormIssues.getAttribute('id')));
+    this.assert(fuse.Object.isString(attribFormIssues.getAttribute('action')),
+      'Failed to return a string value.');
+
+    this.assert(fuse.Object.isString(attribFormIssues.getAttribute('id')),
+      'Failed to return a string value.');
 
     this.assertEqual('blah-class',
-      attribFormIssues.getAttribute('class'));
+      attribFormIssues.getAttribute('class'),
+      'Failed to get the correct "class" attribute value.');
 
     this.assertEqual('post',
-      attribFormIssues.getAttribute('method'));
+      attribFormIssues.getAttribute('method'),
+      'Failed to get the correct "method" attribute value.');
 
     this.assertEqual('test.html',
-      $('attributes_with_issues_1').getAttribute('href'));
+      $('attributes_with_issues_1').getAttribute('href'),
+      'Failed to get the correct "href" attribute value.');
 
     this.assertEqual('L',
-      $('attributes_with_issues_1').getAttribute('accesskey'));
+      $('attributes_with_issues_1').getAttribute('accesskey'),
+      'Failed to get the correct "accesskey" attribute value.');
 
     this.assertEqual('50',
-      $('attributes_with_issues_1').getAttribute('tabindex'));
+      $('attributes_with_issues_1').getAttribute('tabindex'),
+      'Failed to get the correct "tabindex" attribute value.');
 
     this.assertEqual('a link',
-      $('attributes_with_issues_1').getAttribute('title'));
+      $('attributes_with_issues_1').getAttribute('title'),
+      'Failed to get the correct "title" attribute value.');
 
     // test cloned elements
     $('cloned_element_attributes_issue').getAttribute('foo'); // <- required
@@ -1458,42 +1467,63 @@ new Test.Unit.Runner({
     clone.setAttribute('foo', 'cloned');
 
     this.assertEqual('cloned',
-      clone.getAttribute('foo'));
+      clone.getAttribute('foo'),
+      'Clone failed to get the correct "foo" attribute value.');
 
     this.assertEqual('original',
-      $('cloned_element_attributes_issue').getAttribute('foo'));
+      $('cloned_element_attributes_issue').getAttribute('foo'),
+      'Original attribute value should not be changed by the clone.');
 
-    fuse.Array('href', 'accesskey', 'accesskey', 'title').each(function(attr) {
-      this.assertEqual('', $('attributes_with_issues_2').getAttribute(attr));
+    fuse.Array('href', 'accesskey', 'title').each(function(attr) {
+      this.assertEqual('', $('attributes_with_issues_2').getAttribute(attr),
+      "Attributes specified with empty values should return empty strings.");
     }, this);
 
     fuse.Array('checked','disabled','readonly','multiple').each(function(attr) {
-      this.assertEqual(attr, $('attributes_with_issues_' + attr).getAttribute(attr));
+      this.assertEqual(attr, $('attributes_with_issues_' + attr).getAttribute(attr),
+      'Flag attribute\'s return values should match their attribute name.');
     }, this);
 
     this.assertEqual('alert(\'hello world\');',
-      $('attributes_with_issues_1').getAttribute('onclick'));
+      $('attributes_with_issues_1').getAttribute('onclick'),
+      'Failed to get the correct "onclick" attribute value.');
 
     this.assertEqual('date',
-      $('attributes_with_issues_type').getAttribute('type'));
+      $('attributes_with_issues_type').getAttribute('type'),
+      'Failed to get the correct custom "type" attribute value.');
 
     this.assertEqual('text',
-      $('attributes_with_issues_readonly').getAttribute('type'));
+      $('attributes_with_issues_readonly').getAttribute('type'),
+      'Failed to get the correct "type" attribute value from a readonly input.');
+
+    this.assertEqual('',
+      $('attributes_with_issues_readonly').getAttribute('maxlength'),
+      'Failed to get the correct default "maxlength" attribute value.');
+
+    this.assertEqual('0',
+      $('attributes_with_issues_readonly').getAttribute('tabindex'),
+      'Failed to get the correct default "tabindex" attribute value.');
 
     var elements = $('custom_attributes').getChildren();
-    this.assertEnumEqual(['1', '2'], elements.invoke('getAttribute', 'foo'));
-    this.assertEnumEqual(['2', ''],  elements.invoke('getAttribute', 'bar'));
+    this.assertEnumEqual(['1', '2'], elements.invoke('getAttribute', 'foo'),
+      'Failed to get the correct custom "foo" attribute values.');
+
+    this.assertEnumEqual(['2', ''],  elements.invoke('getAttribute', 'bar'),
+      'Failed to get the correct custom "bar" attribute values.');
 
     // should return an empty string when the attribute is not found
     this.assertEqual('',
-      $(document.documentElement).getAttribute('class'));
+      $(document.documentElement).getAttribute('class'),
+      'Failed to return an empty string for nonexistant attributes.');
 
     this.assertEqual('',
-      $('attributes_with_issues_1').getAttribute('onmouseover'));
+      $('attributes_with_issues_1').getAttribute('onmouseover'),
+      'Failed to get the correct "onmouseover" attribute value.');
 
     $('attributes_with_issues_1').raw.onmousedown = function() { return 'testing' };
     this.assertEqual('',
-      $('attributes_with_issues_1').getAttribute('onmousedown'));
+      $('attributes_with_issues_1').getAttribute('onmousedown'),
+      'Failed to get the correct "onmousedown" attribute value.');
 
     // test IE issue with getAttribute and invalid 'type' attribute of iframes
     this.assertNothingRaised(function() {
@@ -1502,11 +1532,15 @@ new Test.Unit.Runner({
 
     $('attributes_with_issues_iframe').setAttribute('type', 'foo');
     this.assertEqual('foo',
-      $('attributes_with_issues_iframe').getAttribute('type'));
+      $('attributes_with_issues_iframe').getAttribute('type'),
+      'Failed to get the correct custom IFRAME "type" attribute value.');
 
     var table = $('write_attribute_table');
-    this.assertEqual('4', table.getAttribute('cellspacing'));
-    this.assertEqual('6', table.getAttribute('cellpadding'));
+    this.assertEqual('4', table.getAttribute('cellspacing'),
+      'Failed to get the correct "cellspacing" attribute value.');
+
+    this.assertEqual('6', table.getAttribute('cellpadding'),
+      'Failed to get the correct "cellpadding" attribute value.');
   },
 
   'testElementSetAttribute': function() {

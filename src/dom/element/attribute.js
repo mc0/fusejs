@@ -11,9 +11,37 @@
 
     var CHECKED_INPUT_TYPES = { 'checkbox': 1, 'radio': 1 },
 
-    PROP_DEFAULTS = { 'selected': 'defaultSelected', 'value': 'defaultValue' },
+    ATTR_DEFAULT_VALUE_PROP = { 'selected': 'defaultSelected', 'value': 'defaultValue' },
 
-    TAG_PROPS_WITH_DEFAULTS = { 'OPTION': 'selected', 'TEXTAREA': 'value' };
+    TAG_WITH_DEFAULT_VALUE_PROP = { 'OPTION': 'selected', 'TEXTAREA': 'value' },
+
+    // http://www.w3.org/TR/html4/index/attributes.html
+    TAG_PROP_DEFAULT_VALUE = (function() {
+      var T = {
+        'A':      { 'shape': 'rect', 'tabindex': '0' },
+        'BR':     { 'clear': 'none' },
+        'BUTTON': { 'tabindex': '0', 'type': 'submit' },
+        'COL':    { 'span': 1 }, 
+        'LI':     { 'value': 1 },
+        'TD':     { 'colspan': 1, 'rowspan': 1 },
+        'FORM':   { 'enctype': 'application/x-www-form-urlencoded', 'method': 'get' },
+        'FRAME':  { 'frameborder': 1 },
+        'INPUT':  { 'type': 'text', 'tabindex': '0' },
+        'OBJECT': { 'tabindex': '0' },
+        'OL':     { 'start': '0' },
+        'PARAM':  { 'valuetype': 'data' },
+        'PRE':    { 'width': '0' },
+        'SELECT': { 'size': '0', 'tabindex': '0' }
+      };
+
+      T['AREA'] = T['A'];
+      T['COLGROUP'] = T['COL'];
+      T['TH'] = T['TD'];
+      T['IFRAME'] = T['FRAME'];
+      T['TEXTAREA'] = T['OBJECT']; 
+
+      return T;
+    })();
 
 
     plugin.hasAttribute = function hasAttribute(name) {
@@ -21,15 +49,18 @@
     };
 
     plugin.getAttribute = function getAttribute(name) {
-      var result, T = Element.Attribute,
+      var result, defaults, T = Element.Attribute,
        element = this.raw || this,
        contentName = T.contentNames[name] || name;
 
       name = T.names[name] || name;
       if (T.read[name]) {
         result = T.read[name](element, contentName);
-      } else {
-        result = (result = element.getAttributeNode(name)) && result.value;
+      }
+      else if (!((result = element.getAttributeNode(name)) &&
+          result.specified && (result = result.value)) &&
+          (defaults = TAG_PROP_DEFAULT_VALUE[getNodeName(element)])) {
+        result = defaults[name];
       }
       return fuse.String(result || '');
     };
@@ -85,8 +116,8 @@
           } else if (name == 'checked' && CHECKED_INPUT_TYPES[node.type]) {
             defaultProp = 'defaultChecked';
           }
-        } else if (TAG_PROPS_WITH_DEFAULTS[nodeName] == name) {
-          defaultProp = PROP_DEFAULTS[name];
+        } else if (TAG_WITH_DEFAULT_VALUE_PROP[nodeName] == name) {
+          defaultProp =  ATTR_DEFAULT_VALUE_PROP[name];
         }
 
         if (defaultProp) {
