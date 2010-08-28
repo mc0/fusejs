@@ -226,6 +226,10 @@ div.style-test { margin-left: 1px }
   background: #000;
 }
 
+#test-show-css-hidden {
+  display: none;
+}
+
 /* for scroll test on really big screens */
 body {
   height: 40000px;

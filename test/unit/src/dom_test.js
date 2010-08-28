@@ -495,9 +495,18 @@ new Test.Unit.Runner({
 
   'testElementShow': function(){
     $('test-show-visible').show();
-    this.assert($('test-show-visible').isVisible());
-    this.assert(fuse.Object.isElement($('test-show-hidden').show().raw));
-    this.assert($('test-show-hidden').isVisible());
+    this.assert($('test-show-visible').isVisible(),
+      'Should keep elements shown that where not hidden.');
+
+    this.assert(fuse.Object.isElement($('test-show-hidden').show().raw),
+      'Should return an element.');
+
+    this.assert($('test-show-hidden').isVisible(),
+      'Should show elements hidden by inline styles.');
+
+    $('test-show-css-hidden').show();
+    this.assert($('test-show-css-hidden').isVisible(),
+      'Should show elements hidden by stylesheets.');
   },
 
   'testElementHide': function(){
@@ -505,11 +514,17 @@ new Test.Unit.Runner({
      data = fuse.dom.data[element.getFuseId()];
 
     element.hide();
-    this.assert(!element.isVisible());
-    this.assertUndefined(data.madeHidden);
+    this.assert(!element.isVisible(),
+      'Should hide elements.');
 
-    this.assert(fuse.Object.isElement($('test-hide-hidden').hide().raw));
-    this.assert(!$('test-hide-hidden').isVisible());
+    this.assertUndefined(data.madeHidden,
+      'Should not set the `madeHidden` data property');
+
+    this.assert(fuse.Object.isElement($('test-hide-hidden').hide().raw),
+      'Should return an element.');
+
+    this.assert(!$('test-hide-hidden').isVisible(),
+      'Should keep elements hidden that where already hidden.');
   },
 
   'testHideAndShowWithInlineDisplay': function() {

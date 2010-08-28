@@ -1,4 +1,6 @@
-* Add table of default attribute values so fuse.Element#getAttribute may constently resolve them across browsers. [fabiomcosta, jddalton] 
+* Make fuse.dom.Element#show work with elements hidden by stylesheet rules. [jddalton Joe Gornick]
+
+* Add table of default attribute values so fuse.dom.Element#getAttribute may consistently resolve them across browsers. [fabiomcosta, jddalton] 
 
 * Add ability to exit early from fuse.Object.each() by returning false from the callback and allow setting the `this` of the callback. [jddalton]
 

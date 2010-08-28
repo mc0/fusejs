@@ -302,8 +302,19 @@
         'MozOpacity'    in s ? 'MozOpacity'    :
         'WebkitOpacity' in s ? 'WebKitOpacity' :
         'KhtmlOpacity'  in s ? 'KhtmlOpacity'  : false;
-    })(fuse._div.style);
+    })(fuse._div.style),
 
+    getComputedStyle = function(element, name) {
+      var style = element.currentStyle;
+      return style && style[name];
+    };
+
+    if (envTest('ELEMENT_COMPUTED_STYLE')) {
+      getComputedStyle = function(element, name) {
+        var style = element.ownerDocument.defaultView.getComputedStyle(element, null);
+        return style && style[name];
+      };
+    }
 
     plugin.getDimensions = function getDimensions(options) {
       return {
@@ -315,25 +326,35 @@
     plugin.hide = function hide() {
       var element = this.raw || this,
        elemStyle = element.style,
-       display = elemStyle.display;
+       data = domData[getFuseId(element)],
+       display = elemStyle.display,
+       value = 'none';
 
       if (display && display != 'none') {
-        domData[getFuseId(element)].madeHidden = display;
+        data.madeHidden = display;
       }
-      elemStyle.display = 'none';
+      else if (data.hiddenByCss) { 
+        value = '';
+      }
+      delete data.hiddenByCss;
+      elemStyle.display = value;
       return this;
     };
 
     plugin.show = function show() {
-      var data, element = this.raw || this,
+      var element = this.raw || this,
        elemStyle = element.style,
+       data = domData[getFuseId(element)],
        display = elemStyle.display;
 
       if (display == 'none') {
-        data = domData[getFuseId(element)],
         elemStyle.display = data.madeHidden || '';
-        delete data.madeHidden;
       }
+      else if (getComputedStyle(element, 'display') == 'none') {
+        data.hiddenByCss = 1;
+        elemStyle.display = 'block';
+      }
+      delete data.madeHidden;
       return this;
     };
 
