@@ -1,3 +1,5 @@
+* Remove partial support for elements being passed to fuse.Object.toJSON(). [jddalton]
+
 * Make fuse.dom.Element#show work with elements hidden by stylesheet rules. [jddalton Joe Gornick]
 
 * Add table of default attribute values so fuse.dom.Element#getAttribute may consistently resolve them across browsers. [fabiomcosta, jddalton] 

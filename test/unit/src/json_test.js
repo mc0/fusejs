@@ -57,10 +57,6 @@ new Test.Unit.Runner({
     var sam = new Person('sam');
     this.assertEqual('"-sam"', fuse.Object.toJSON(sam));
 
-    var element = $('test').raw;
-    element.toJSON = function() { return 'I\'m a div with id test'; };
-    this.assertEqual('"I\'m a div with id test"', fuse.Object.toJSON(element));
-
     this.assertEqual('{"a":"A","b":"B","toString":"bar","valueOf":""}',
       fuse.Object.toJSON(Fixtures.mixed_dont_enum));
 

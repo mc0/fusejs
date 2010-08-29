@@ -31,29 +31,20 @@
           if (value === null) {
             return fuse.String(value);
           }
-          // this is not duplicating checks, one is a type check for host objects
-          // and the other is an internal [[Class]] check because Safari 3.1
-          // mistakes regexp instances as typeof `function`
-          if (typeof object.toJSON == 'function' &&
-              isFunction(object.toJSON)) {
+          if (isFunction(object.toJSON)) {
             return Obj.toJSON(object.toJSON());
           }
-          // attempt to avoid inspecting DOM nodes.
-          if (typeof object.constructor == 'function') {
-            eachKey(object, function(value, key) {
-              if (hasKey(object, key) &&
-                  typeof (value = Obj.toJSON(value)) != 'undefined') {
-                result.push(inspect.call(key, true) + ':' + value);
-              }
-            });
-            return fuse.String('{' + result.join(',') + '}');
-          }
-          break;
+          eachKey(object, function(value, key) {
+            if (hasKey(object, key) &&
+                typeof (value = Obj.toJSON(value)) != 'undefined') {
+              result.push(inspect.call(key, true) + ':' + value);
+            }
+          });
+          return fuse.String('{' + result.join(',') + '}');
 
         default:
           // other objects
-          if (typeof object.toJSON == 'function' &&
-              isFunction(object.toJSON)) {
+          if (isFunction(object.toJSON)) {
             return Obj.toJSON(object.toJSON());
           }
       }
@@ -86,10 +77,6 @@
 
     if (envTest('JSON')) {
       Obj.toJSON = function toJSON(object) {
-        if (object && typeof object.toJSON == 'function' &&
-            isFunction(object.toJSON)) {
-          object = object.toJSON();
-        }
         var result = JSON.stringify(object)
         return result != null ? fuse.String(result) : result;
       };
