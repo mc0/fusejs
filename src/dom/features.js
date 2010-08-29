@@ -16,16 +16,6 @@
       return isHostType(fuse._doc, 'createEventObject');
     },
 
-    'DOCUMENT_RANGE': function(){
-      // true for all but IE
-      return isHostType(fuse._doc, 'createRange');
-    },
-
-    'DOCUMENT_RANGE_CREATE_CONTEXTUAL_FRAGMENT': function() {
-      if (envTest('DOCUMENT_RANGE'))
-        return isHostType(fuse._doc.createRange(), 'createContextualFragment');
-    },
-
     'ELEMENT_ADD_EVENT_LISTENER': function() {
       // true for all but IE
       return isHostType(fuse._doc, 'addEventListener');
@@ -140,7 +130,9 @@
     },
 
     'ELEMENT_UNIQUE_NUMBER': function() {
-      // true for IE
+      // IE's uniqueNumber property starts at 1 when the browser session begins.
+      // To avoid a conflict with the document's data id of 1 we check
+      // uniqueNumber on a dummy element first.
       return typeof fuse._div.uniqueNumber == 'number' &&
         typeof fuse._docEl.uniqueNumber == 'number' &&
         fuse._div.uniqueNumber != fuse._docEl.uniqueNumber;
