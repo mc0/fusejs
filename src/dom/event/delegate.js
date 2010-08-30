@@ -150,8 +150,8 @@
       };
     }
 
-    plugin.delegate          =
-    Document.plugin.delegate = function delegate(type, selector, delegatee) {
+    plugin.delegate =
+    HTMLDocument.plugin.delegate = function delegate(type, selector, delegatee) {
       var handler,element = this.raw || this,
        id = getFuseId(this), data = domData[id];
 
@@ -161,7 +161,6 @@
         selector = null;
       }
 
-      // indicate handler is a delegator and pass to Element#observe
       handler = createHandler(selector, delegatee);
       handler._delegatee = delegatee;
       handler._selector  = selector;
@@ -178,8 +177,8 @@
       return this;
     };
 
-    plugin.stopDelegating          =
-    Document.plugin.stopDelegating = function stopDelegating(type, selector, delegatee) {
+    plugin.stopDelegating =
+    HTMLDocument.plugin.stopDelegating = function stopDelegating(type, selector, delegatee) {
       var ec, handler, handlers, i = -1,
        element = this.raw || this,
        isEmpty = true,
@@ -263,4 +262,4 @@
 
     // prevent JScript bug with named function expressions
     var delegate = null, stopDelegating = null;
-  })(Element.plugin);
+  })(HTMLElement.plugin);

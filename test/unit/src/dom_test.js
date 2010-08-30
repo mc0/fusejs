@@ -60,10 +60,10 @@ new Test.Unit.Runner({
   },
 
   'testElementExtend': function() {
-    fuse.dom.Element.extend({ 'cheeseCake': function() { return 'Cheese cake' } });
+    fuse.dom.HTMLElement.extend({ 'cheeseCake': function() { return 'Cheese cake' } });
     this.assertRespondsTo('cheeseCake', fuse('<div>'));
 
-    fuse.dom.Element.extendByTag('DIV', { 'toOutput': fuse.dom.Element.plugin.inspect });
+    fuse.dom.HTMLElement.extendByTag('DIV', { 'toOutput': fuse.dom.HTMLElement.plugin.inspect });
     this.assertEqual('<div id="testdiv">', $('testdiv').toOutput(),
       'Should extend element with a `toOutput` method.');
 
@@ -117,11 +117,11 @@ new Test.Unit.Runner({
   },
 
   'testFuseGetAfterAddMethods': function() {
-    var span = fuse.dom.Element('span');
-    fuse.dom.Element.extend({ 'testMethod': fuse.Function.IDENTITY });
+    var span = fuse.dom.HTMLElement('span');
+    fuse.dom.HTMLElement.extend({ 'testMethod': fuse.Function.IDENTITY });
 
     this.assertRespondsTo('testMethod', fuse(span));
-    delete fuse.dom.Element.plugin.testMethod;
+    delete fuse.dom.HTMLElement.plugin.testMethod;
   },
 
   'testDollarFunction': function() {
@@ -592,7 +592,7 @@ new Test.Unit.Runner({
     $('testdiv').update()
     this.assertEqual('', $('testdiv').raw.innerHTML);
 
-    fuse.dom.Element.update('testdiv', '&nbsp;');
+    fuse.dom.HTMLElement.update('testdiv', '&nbsp;');
     this.assert(!fuse.String.isEmpty($('testdiv').raw.innerHTML));
   },
 
@@ -1831,7 +1831,7 @@ new Test.Unit.Runner({
     input = $('write_attribute_input');
 
     $w('button input').each(function(tagName) {
-      var button = fuse.dom.Element(tagName, { 'attrs': { 'type': 'reset'} });
+      var button = fuse.dom.HTMLElement(tagName, { 'attrs': { 'type': 'reset'} });
       form.appendChild(button);
       input.setValue('something');
 
@@ -2174,7 +2174,7 @@ new Test.Unit.Runner({
   },
 
   'testCustomElementMethods': function() {
-    var Element = fuse.dom.Element,
+    var Element = fuse.dom.HTMLElement,
      elem = $('navigation_test_f');
 
     this.assertRespondsTo('hashBrowns', elem);
@@ -2185,7 +2185,7 @@ new Test.Unit.Runner({
   },
 
   'testSpecificCustomElementMethods': function() {
-    var Element = fuse.dom.Element,
+    var Element = fuse.dom.HTMLElement,
      elem = $('navigation_test_f');
 
     this.assert(fuse.dom.LiElement);

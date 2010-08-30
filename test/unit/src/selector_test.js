@@ -684,7 +684,7 @@ new Test.Unit.Runner({
       '[id=myTD] on wrapper child');
 
     var clone = $('list').raw.cloneNode(true);
-    this.assert($$('#item_1', clone)[0] == fuse.dom.Element.down(clone));
+    this.assert($$('#item_1', clone)[0] == fuse.dom.HTMLElement.down(clone));
   },
 
   'testSelectorSplit': function() {

@@ -1,6 +1,6 @@
   /*-------------------------- FORM: TIMED OBSERVER --------------------------*/
 
-  (function(Form, Field) {
+  (function() {
     var BaseTimedObserver = fuse.Class(fuse.Timer, function() {
       var BaseTimedObserver = function BaseTimedObserver(element, callback, interval, options) {
         // this._super() equivalent
@@ -25,8 +25,8 @@
 
     /*------------------------------------------------------------------------*/
 
-    Field.Observer =
-    Field.TimedObserver = (function() {
+    HTMLInputElement.Observer =
+    HTMLInputElement.TimedObserver = (function() {
       var Klass = function() { },
 
       FieldTimedObserver = function FieldTimedObserver(element, callback, interval, options) {
@@ -38,12 +38,12 @@
       return FieldTimedObserver;
     })();
 
-    Field.Observer.plugin.getValue = function getValue() {
+    HTMLInputElement.Observer.plugin.getValue = function getValue() {
       return this.element.getValue();
     };
 
-    Form.Observer =
-    Form.TimedObserver = (function() {
+    HTMLFormElement.Observer =
+    HTMLFormElement.TimedObserver = (function() {
       var Klass = function() { },
 
       FormTimedObserver = function FormTimedObserver(element, callback, interval, options) {
@@ -55,10 +55,10 @@
       return FormTimedObserver;
     })();
 
-    Form.Observer.plugin.getValue = function getValue() {
+    HTMLFormElement.Observer.plugin.getValue = function getValue() {
       return this.element.serialize();
     };
 
     // prevent JScript bug with named function expressions
     var getValue = null;
-  })(fuse.dom.FormElement, fuse.dom.InputElement);
+  })();

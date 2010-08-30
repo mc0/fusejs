@@ -1,4 +1,4 @@
-  /*--------------------------- ELEMENT: TRAVERSAL ---------------------------*/
+  /*------------------------ HTML ELEMENT: TRAVERSAL -------------------------*/
 
   (function(plugin) {
     // support W3C ElementTraversal interface
@@ -253,11 +253,11 @@
      next =                null,
      previous =            null,
      up =                  null;
-  })(Element.plugin);
+  })(HTMLElement.plugin);
 
   /*--------------------------------------------------------------------------*/
 
-  Element.plugin.contains = (function() {
+  HTMLElement.plugin.contains = (function() {
     var contains = function contains(descendant) {
       if (descendant = fuse(descendant)) {
         var element = this.raw || this;

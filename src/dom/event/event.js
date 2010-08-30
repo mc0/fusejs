@@ -485,11 +485,12 @@
 
     /*------------------------------------------------------------------------*/
 
-    Document.plugin.isLoaded = createGetter('isLoaded', false);
+    HTMLDocument.plugin.isLoaded =
+      createGetter('isLoaded', false);
 
-    Document.plugin.fire =
-    Element.plugin.fire  =
-    Window.plugin.fire   = function fire(type, memo, event) {
+    Window.plugin.fire =
+    HTMLDocument.plugin.fire =
+    HTMLElement.plugin.fire  = function fire(type, memo, event) {
       var backup, checked, dispatcher, ec, data, id,
        first    = true,
        element  = this.raw || this,
@@ -562,9 +563,9 @@
       return event;
     };
 
-    Document.plugin.observe =
-    Element.plugin.observe  =
-    Window.plugin.observe   = function observe(type, handler) {
+    Window.plugin.observe =
+    HTMLDocument.plugin.observe =
+    HTMLElement.plugin.observe  = function observe(type, handler) {
       var element = this.raw || this,
        dispatcher = addCache(element, type, handler);
 
@@ -574,9 +575,9 @@
     };
 
     stopObserving =
-    Document.plugin.stopObserving =
-    Element.plugin.stopObserving  =
-    Window.plugin.stopObserving   = function stopObserving(type, handler) {
+    Window.plugin.stopObserving =
+    HTMLDocument.plugin.stopObserving =
+    HTMLElement.plugin.stopObserving  = function stopObserving(type, handler) {
       var ec, foundAt, length,
        element = this.raw || this,
        id      = getFuseId(this),

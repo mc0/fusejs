@@ -30,6 +30,11 @@
   PARENT_NODE =
     isHostType(fuse._docEl, 'parentElement') ? 'parentElement' : 'parentNode';
 
+  // Safari 2.0.x returns `Abstract View` instead of `window`
+  PARENT_WINDOW =
+    isHostType(fuse._doc, 'defaultView') && fuse._doc.defaultView === window ? 'defaultView' :
+    isHostType(fuse._doc, 'parentWindow') ? 'parentWindow' : null;
+
   getDocument = function getDocument(element) {
     return element.ownerDocument || element.document ||
       (element.nodeType == DOCUMENT_NODE ? element : fuse._doc);
@@ -106,19 +111,9 @@
       .data = text == null ? '' : text;
   };
 
-  // IE's uniqueNumber property starts at 1 when the browser session begins.
-  // To avoid a conflict with the document's data id of 1 we initialize
-  // uniqueNumber on a dummy element.
-  fuse._div[DATA_ID_PROP];
-
-  // Safari 2.0.x returns `Abstract View` instead of `window`
-  if (isHostType(fuse._doc, 'defaultView') && fuse._doc.defaultView === window) {
+  if (PARENT_WINDOW) {
     getWindow = function getWindow(element) {
-      return getDocument(element).defaultView;
-    };
-  } else if (isHostType(fuse._doc, 'parentWindow')) {
-    getWindow = function getWindow(element) {
-      return getDocument(element).parentWindow;
+      return getDocument(element)[PARENT_WINDOW];
     };
   }
 

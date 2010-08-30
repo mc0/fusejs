@@ -1,4 +1,4 @@
-  /*---------------------------- ELEMENT: POSITION ---------------------------*/
+  /*------------------------- HTML ELEMENT: POSITION -------------------------*/
 
   (function(plugin) {
 
@@ -79,7 +79,7 @@
          elemStyle = element.style;
 
         if (!backup) {
-          throw new Error('Element#makeAbsolute must be called first.');
+          throw new Error('HTMLElement#makeAbsolute must be called first.');
         }
         elemStyle.position   = backup.position;
         elemStyle.left       = backup.left;
@@ -110,7 +110,7 @@
          overflow = data.madeClipped;
 
         if (!overflow) {
-          throw new Error('Element#makeClipping must be called first.');
+          throw new Error('HTMLElement#makeClipping must be called first.');
         }
         element.style.overflow = overflow == 'auto' ? '' : overflow;
         delete data.madeClipped;
@@ -146,7 +146,7 @@
          elemStyle = element.style;
 
         if (!backup) {
-          throw new Error('Element#makePositioned must be called first.');
+          throw new Error('HTMLElement#makePositioned must be called first.');
         }
         elemStyle.position = backup.position;
         elemStyle.top      = backup.top;
@@ -483,4 +483,4 @@
      undoAbsolute =              null,
      undoClipping =              null,
      undoPositioned =            null;
-  })(Element.plugin);
+  })(HTMLElement.plugin);

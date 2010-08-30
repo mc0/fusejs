@@ -46,11 +46,11 @@
 
     strInspect =
     strPlugin.inspect = function inspect(useDoubleQuotes) {
-      // called Obj.inspect(fuse.String.plugin) or Obj.inspect(fuse.Array)
+      // called by Obj.inspect on fuse.String or its plugin object
       if (this == strPlugin || window == this || this == null) {
         return inspectPlugin(strPlugin);
       }
-      // called normally fuse.String(...).inspect()
+      // called normally
       var string = String(this);
       return fuse.String(useDoubleQuotes
         ? '"' + string.replace(reWithDoubleQuotes, escapeSpecialChars) + '"'
@@ -100,11 +100,11 @@
     addArrayMethods.callbacks.push(function(List) {
       var plugin = List.plugin;
       plugin.inspect = function inspect() {
-        // called Obj.inspect(fuse.Array.plugin) or Obj.inspect(fuse.Array)
+        // called by Obj.inspect on fuse.Array or its plugin object
         if (this == plugin || window == this || this == null) {
           return inspectPlugin(plugin);
         }
-        // called normally fuse.Array(...).inspect()
+        // called normally
         var result = [], object = Object(this), length = object.length >>> 0;
         while (length--) {
           result[length] = fuse.Object.inspect(object[length]);
@@ -118,7 +118,6 @@
 
     if (fuse.Class.mixins.enumerable) {
       fuse.Class.mixins.enumerable.inspect = function inspect() {
-        // called normally or called Obj.inspect(fuse.Class.mixins.enumerable)
         return isFunction(this._each)
           ? fuse.String('#<Enumerable:' + this.toArray().inspect() + '>')
           : inspectPlugin(fuse.Class.mixins.enumerable);
@@ -128,11 +127,11 @@
     if (fuse.Hash) {
       var hashPlugin = fuse.Hash.plugin;
       hashPlugin.inspect = function inspect() {
-        // called Obj.inspect(fuse.Hash.plugin) or generic if added later
+        // called by Obj.inspect() on fuse.Hash or its plugin object
         if (this == hashPlugin || window == this || this == null) {
           return inspectPlugin(hashPlugin);
         }
-        // called normally fuse.Hash(...).inspect()
+        // called normally
         var pair, i = -1, pairs = this._pairs, result = [];
         while (pair = pairs[++i]) {
           result[i] = pair[0].inspect() + ': ' + fuse.Object.inspect(pair[1]);
@@ -142,13 +141,13 @@
     }
 
     if (fuse.dom) {
-      var elemPlugin = fuse.dom.Element.plugin;
+      var elemPlugin = HTMLElement.plugin;
       elemPlugin.inspect = function inspect() {
-        // called Obj.inspect(Element.plugin) or Obj.inspect(Element)
+        // called by Obj.inspect() on a fuse Element class or its plugin object
         if (this == elemPlugin || window == this || this == null) {
           return inspectPlugin(this);
         }
-        // called normally Element.inspect(element)
+        // called normally
         var element = this.raw || this,
          id         = element.id,
          className  = element.className,
@@ -167,7 +166,6 @@
     if (fuse.dom.Event) {
       var eventPlugin = fuse.dom.Event.plugin;
       eventPlugin.inspect = function inspect() {
-        // called Obj.inspect(Event.plugin) or called normally event.inspect()
         return this == eventPlugin
           ? inspectPlugin(eventPlugin)
           : '[object Event]';

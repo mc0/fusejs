@@ -1,26 +1,15 @@
-  /*--------------------------------- FIELD ----------------------------------*/
+  /*------------------------------ FORM: FIELD -------------------------------*/
 
-  (function(dom) {
-    // create form control classes
-    (function() {
-      var tagName, i = -1,
-       tagNames = ['button', 'input', 'option', 'select', 'textarea'];
-      while (tagName = tagNames[++i]) {
-        Element.extendByTag(tagName);
-      }
-    })();
+  (function() {
+    var buttonPlugin = HTMLButtonElement.plugin,
 
-    var dom        = fuse.dom,
+    inputPlugin  = HTMLInputElement.plugin,
 
-    buttonPlugin   = dom.ButtonElement.plugin,
+    optionPlugin = HTMLOptionElement.plugin,
 
-    inputPlugin    = dom.InputElement.plugin,
+    selectPlugin = HTMLSelectElement.plugin,
 
-    optionPlugin   = dom.OptionElement.plugin,
-
-    selectPlugin   = dom.SelectElement.plugin,
-
-    textAreaPlugin = dom.TextAreaElement.plugin,
+    textAreaPlugin = HTMLTextAreaElement.plugin,
 
     CHECKED_INPUT_TYPES = {
       'checkbox': 1,

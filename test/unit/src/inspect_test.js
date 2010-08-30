@@ -30,12 +30,12 @@ new Test.Unit.Runner({
       'element with no className or id');
 
     this.assertNothingRaised(
-      function() { fuse.Object.inspect(fuse.dom.Element) },
-      'Failed to inspect fuse.dom.Element');
+      function() { fuse.Object.inspect(fuse.dom.HTMLElement) },
+      'Failed to inspect fuse.dom.HTMLElement');
 
     this.assertNothingRaised(
-      function() { fuse.Object.inspect(fuse.dom.Element.plugin) },
-      'Failed to inspect fuse.dom.Element.plugin');
+      function() { fuse.Object.inspect(fuse.dom.HTMLElement.plugin) },
+      'Failed to inspect fuse.dom.HTMLElement.plugin');
   },
 
   'testEnumerableInspect': function() {

@@ -32,7 +32,7 @@ new Test.Unit.Runner({
     var container, observerA, observerB, radios,
      self = this,
      fakeEvent = { 'isEvent': true },
-     Field = fuse.dom.InputElement,
+     Field = fuse.dom.HTMLInputElement,
      callbackCounter = 0;
 
     observerA = Field.EventObserver('input_enabled', function(element, value, event) {
@@ -69,7 +69,7 @@ new Test.Unit.Runner({
   },
 
   'testFeldObserver': function() {
-    var Field = fuse.dom.InputElement,
+    var Field = fuse.dom.HTMLInputElement,
      timedCounter = 0;
 
     // first part: regular field
@@ -130,7 +130,7 @@ new Test.Unit.Runner({
   },
 
   'testFormObserver': function() {
-    var Form = fuse.dom.FormElement,
+    var Form = fuse.dom.HTMLFormElement,
      timedCounter = 0;
 
     // should work the same way was Form.Element.Observer
@@ -160,7 +160,7 @@ new Test.Unit.Runner({
   },
 
   'testFormEnabling': function() {
-    var Form = fuse.dom.FormElement,
+    var Form = fuse.dom.HTMLFormElement,
      form = $('bigform'),
      input1  = $('dummy_disabled'),
      input2  = $('focus_text');
@@ -259,7 +259,7 @@ new Test.Unit.Runner({
   },
 
   'testFormGetControls': function() {
-    var elements = fuse.dom.FormElement.getControls('various'),
+    var elements = fuse.dom.HTMLFormElement.getControls('various'),
      names = $w('tf_selectOne tf_textarea tf_checkbox tf_selectMany tf_text tf_radio tf_hidden tf_password');
     this.assertEnumEqual(names, elements.map(function(element) { return element.raw.name; }))
   },
@@ -284,8 +284,8 @@ new Test.Unit.Runner({
   },
 
   'testFormSerialize': function() {
-    var serialize = fuse.dom.FormElement.serialize,
-     serializeElements = fuse.dom.FormElement.serializeElements;
+    var serialize = fuse.dom.HTMLFormElement.serialize,
+     serializeElements = fuse.dom.HTMLFormElement.serializeElements;
 
     // form is initially empty
     var expected = {
@@ -401,7 +401,7 @@ new Test.Unit.Runner({
 
   'testFormMethodsOnExtendedElements': function() {
     var form = $('form'),
-     serialize = fuse.dom.FormElement.serialize;
+     serialize = fuse.dom.HTMLFormElement.serialize;
 
     this.assertEqual(serialize('form'), form.serialize());
 
@@ -411,13 +411,13 @@ new Test.Unit.Runner({
     this.assertNotEqual(form.serialize,
       $('input_enabled').serialize);
 
-    // ensure button elements are extended with fuse.dom.FormElement methods
+    // ensure button elements are extended with fuse.dom.HTMLFormElement methods
     this.assertNothingRaised(function() { $('button_submit').getValue() });
 
-    fuse.dom.InputElement.extend(
+    fuse.dom.HTMLInputElement.extend(
       { 'anInputMethod': function(input)  { return 'input'  } });
 
-    fuse.dom.SelectElement.extend(
+    fuse.dom.HTMLSelectElement.extend(
       { 'aSelectMethod': function(select) { return 'select' } });
 
     form = $('bigform').raw;
@@ -585,7 +585,7 @@ new Test.Unit.Runner({
     element = $('form');
     $w('disable enable focusFirstControl reset').each(function(method) {
       this.assert(element === $('form')[method](),
-        'fuse.dom.FormElement#' + method + ' returned a non element value.');
+        'fuse.dom.HTMLFormElement#' + method + ' returned a non element value.');
     }, this);
   },
 
@@ -595,7 +595,7 @@ new Test.Unit.Runner({
 
     $w('activate clear disable enable focus select').each(function(method) {
       this.assert(element === $('focus_text')[method](),
-        'fuse.dom.InputElement#' + method + ' returned a non element value.');
+        'fuse.dom.HTMLInputElement#' + method + ' returned a non element value.');
     }, this);
 
     element.value = backup;

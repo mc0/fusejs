@@ -75,7 +75,7 @@
   /*--------------------------------------------------------------------------*/
 
   (function(plugin) {
-    var elemPlugin = fuse.dom.Element.plugin,
+    var elemPlugin = fuse.dom.HTMLElement.plugin,
      funcPlugin    = fuse.Function.plugin,
      funcApply     = funcPlugin.apply,
      funcCall      = funcPlugin.call;

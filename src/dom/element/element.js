@@ -1,4 +1,4 @@
-  /*-------------------------------- ELEMENT ---------------------------------*/
+  /*------------------------------ HTML ELEMENT ------------------------------*/
 
   // add/pave statics
   (function() {
@@ -40,9 +40,9 @@
       return addToNodeList.apply(this, arguments);
     };
 
-    Element.addMixins = addMixins;
-    Element.addPlugins = addPlugins;
-    Element.updateGenerics = Node.updateGenerics;
+    HTMLElement.addMixins = addMixins;
+    HTMLElement.addPlugins = addPlugins;
+    HTMLElement.updateGenerics = Node.updateGenerics;
   })();
 
   /*--------------------------------------------------------------------------*/
@@ -91,4 +91,4 @@
 
     // prevent JScript bug with named function expressions
     var identify = null, isDetached = null, isEmpty = null;
-  })(Element.plugin);
+  })(HTMLElement.plugin);

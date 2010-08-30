@@ -1,22 +1,8 @@
   /*---------------------------------- FORM ----------------------------------*/
 
-  Element.extendByTag('form');
-
   (function(plugin) {
 
-    var Obj        = fuse.Object,
-
-    dom            = fuse.dom,
-
-    buttonPlugin   = dom.ButtonElement.plugin,
-
-    inputPlugin    = dom.InputElement.plugin,
-
-    optionPlugin   = dom.OptionElement.plugin,
-
-    selectPlugin   = dom.SelectElement.plugin,
-
-    textAreaPlugin = dom.TextAreaElement.plugin,
+    var Obj = fuse.Object,
 
     CHECKED_INPUT_TYPES = {
       'checkbox': 1,
@@ -38,11 +24,11 @@
     },
 
     PLUGINS = {
-      'BUTTON':   buttonPlugin,
-      'INPUT':    inputPlugin,
-      'OPTION':   optionPlugin,
-      'SELECT':   selectPlugin,
-      'TEXTAREA': textAreaPlugin
+      'BUTTON':   HTMLButtonElement.plugin,
+      'INPUT':    HTMLInputElement.plugin,
+      'OPTION':   HTMLOptionElement.plugin,
+      'SELECT':   HTMLSelectElement.plugin,
+      'TEXTAREA': HTMLTextAreaElement.plugin
     },
 
     SKIPPED_INPUT_TYPES = {
@@ -271,4 +257,4 @@
      reset =             null,
      serializeElements = null,
      serialize =         null;
-  })(fuse.dom.FormElement.plugin);
+  })(HTMLFormElement.plugin);

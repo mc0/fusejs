@@ -14,11 +14,14 @@
 (function(window) {
 
   // private vars
-  var DATA_ID_PROP, PARENT_NODE, Document, Element, Node, NodeList, Window,
-   domData, eachKey, envAddTest, envTest, fromElement, getDocument, getFuseId,
-   getNodeName, getScriptText, getWindow, getOrCreateTagClass, hasKey, isArray,
-   isElement, isHash, isNumber, isPrimitive, isRegExp, isString, returnOffset,
-   runScriptText, setScriptText, undef,
+  var DATA_ID_PROP, PARENT_NODE, PARENT_WINDOW, Node, NodeList, Element,
+   HTMLDocument, HTMLElement, HTMLButtonElement, HTMLFormElement,
+   HTMLInputElement, HTMLOptionElement, HTMLSelectElement, HTMLTextAreaElement,
+   Window, domData, eachKey, envAddTest, envTest, extendByTag, fromElement,
+   getDocument, getFuseId, getNodeName, getScriptText, getWindow,
+   getOrCreateTagClass, hasKey, isArray, isElement, isHash, isNumber,
+   isPrimitive, isRegExp, isString, returnOffset, runScriptText, setScriptText,
+   undef,
 
   DOCUMENT_FRAGMENT_NODE = 11,
 
@@ -68,7 +71,7 @@
   },
 
   debug = (function() {
-    var script, doc = window.document, i = -1,
+    var match, script, doc = window.document, i = -1,
      reSrcDebug = /(?:^|&)(debug)(?:=(.*?))?(?:&|$)/,
      reFilename = /(^|\/)fuse\b.*?\.js\?/,
      scripts = doc && doc.getElementsByTagName('script') || [],
@@ -76,7 +79,7 @@
 
     if (!(match = query.match(/(?:\?|&)(fusejs_debug)(?:=(.*?))?(?:&|$)/))) {
       while (script = scripts[++i]) {
-        if (reFilename.test(script.src) && 
+        if (reFilename.test(script.src) &&
             (match = (script.src.split('?')[1] || '').match(reSrcDebug))) {
           break;
         }
@@ -271,20 +274,17 @@
 
   addArrayMethods(fuse.Array);
 
-  (function(dom) {
-    var Field, Form, NodeList;
-    if (dom && (NodeList = dom.NodeList)) {
-      if (Form = dom.FormElement) eachKey(Form.plugin, addNodeListMethod);
-      if (Field = dom.InputElement) eachKey(Field.plugin, addNodeListMethod);
-      eachKey(dom.Element.plugin, addNodeListMethod);
+  if (fuse.dom && NodeList) {
+    HTMLFormElement && eachKey(HTMLFormElement.plugin, addNodeListMethod);
+    HTMLInputElement && eachKey(HTMLInputElement.plugin, addNodeListMethod);
 
-      // Pave any NodeList methods that fuse.Array shares.
-      // Element first(), last(), and contains() may be called by using invoke()
-      // Ex: elements.invoke('first');
-      addArrayMethods(NodeList);
-    }
-  })(fuse.dom);
+    eachKey(HTMLElement.plugin, addNodeListMethod);
 
+    // Pave any NodeList methods that fuse.Array shares.
+    // HTMLElement first(), last(), and contains() may be called by using invoke()
+    // Ex: elements.invoke('first');
+    addArrayMethods(NodeList);
+  }
 })(this);
 
 (function(window) {

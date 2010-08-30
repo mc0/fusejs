@@ -124,20 +124,20 @@ fuse.env.addTest({
 
 /*--------------------------------------------------------------------------*/
 
-fuse.dom.Element.extend({
+fuse.dom.HTMLElement.extend({
   'hashBrowns': function(element) { return 'hash browns' }
 });
 
-fuse.dom.Element.extendByTag('LI', {
+fuse.dom.HTMLElement.extendByTag('LI', {
   'pancakes': function(element) { return 'pancakes' }
 });
 
-fuse.dom.Element.extendByTag('DIV', {
+fuse.dom.HTMLElement.extendByTag('DIV', {
   'waffles': function(element) { return 'waffles' }
 });
 
-fuse.dom.Element.extendByTag($w('li div'), {
+fuse.dom.HTMLElement.extendByTag($w('li div'), {
   'orangeJuice': function(element) { return 'orange juice' }
 });
 
-fuse.dom.Element.updateGenerics();
+fuse.dom.HTMLElement.updateGenerics();

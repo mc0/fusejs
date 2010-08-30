@@ -22,7 +22,7 @@
         // pass to element decorator
         switch (node.nodeType) {
           case ELEMENT_NODE:  return fromElement(node, isCached);
-          case DOCUMENT_NODE: return Document(node, isCached);
+          case DOCUMENT_NODE: return HTMLDocument(node, isCached);
         }
       }
 

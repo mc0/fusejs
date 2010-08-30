@@ -1,4 +1,4 @@
-  /*----------------------------- ELEMENT: STYLE -----------------------------*/
+  /*-------------------------- HTML ELEMENT: STYLE ---------------------------*/
 
   (function(plugin) {
 
@@ -226,7 +226,7 @@
 
     // prevent JScript bug with named function expressions
     var getStyle = null, setStyle = null;
-  })(Element.plugin);
+  })(HTMLElement.plugin);
 
   /*--------------------------------------------------------------------------*/
 
@@ -289,7 +289,7 @@
      hasClassName =    null,
      removeClassName = null,
      toggleClassName = null;
-  })(Element.plugin);
+  })(HTMLElement.plugin);
 
   /*--------------------------------------------------------------------------*/
 
@@ -486,11 +486,11 @@
      isVisible =        null,
      show =             null,
      toggle =           null;
-  })(Element.plugin);
+  })(HTMLElement.plugin);
 
   /*--------------------------------------------------------------------------*/
 
-  // define Element#getWidth and Element#getHeight
+  // define HTMLElement#getWidth and HTMLElement#getHeight
   (function(plugin) {
 
     var PRESETS = {
@@ -585,4 +585,4 @@
 
     // cleanup
     i = undef;
-  })(Element.plugin);
+  })(HTMLElement.plugin);

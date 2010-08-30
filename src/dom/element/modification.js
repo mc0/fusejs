@@ -1,4 +1,4 @@
-  /*-------------------------- ELEMENT: MODIFICATION -------------------------*/
+  /*----------------------- HTML ELEMENT: MODIFICATION -----------------------*/
 
   (function(plugin) {
 
@@ -295,13 +295,13 @@
     plugin.wrap = function wrap(wrapper, attributes) {
       var rawWrapper, element = this.raw || this, parentNode = element[PARENT_NODE];
       if (isString(wrapper)) {
-        wrapper = Element(wrapper, { 'attrs': attributes, 'context': element });
+        wrapper = HTMLElement(wrapper, { 'attrs': attributes, 'context': element });
       }
       if (isElement(wrapper)) {
         wrapper = plugin.setAttribute.call(wrapper, attributes);
       }
       else {
-        wrapper = Element('div', { 'attrs': wrapper, 'context': element });
+        wrapper = HTMLElement('div', { 'attrs': wrapper, 'context': element });
       }
       rawWrapper = wrapper.raw || wrapper;
       if (parentNode) {
@@ -354,7 +354,7 @@
           if (setType) attributes.type = plugin.getAttribute.call(source, 'type');
         }
 
-        element = Element(nodeName, { 'attrs': attributes, 'context': context, 'decorate': false });
+        element = HTMLElement(nodeName, { 'attrs': attributes, 'context': context, 'decorate': false });
 
         // avoid mergeAttributes because it is buggy :/
         attributes = source.attributes || { };
@@ -411,4 +411,4 @@
      remove =          null,
      replace =         null,
      wrap =            null;
-  })(Element.plugin);
+  })(HTMLElement.plugin);

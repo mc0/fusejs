@@ -1,8 +1,45 @@
-  /*----------------------------- ELEMENT: CREATE ----------------------------*/
+  /*-------------------------- HTML ELEMENT: CREATE --------------------------*/
+
+  Element =
+  fuse.dom.Element = (function() {
+
+    var Decorator = function() { },
+
+    Element = function Element(node, isCached) {
+      // quick return if empty, decorated, or not an element node
+      var data, decorated;
+      if (!node || node.raw || node.nodeType != ELEMENT_NODE) {
+        return node;
+      }
+      if (isCached === false) {
+        decorated = new Decorator;
+      } else {
+        // return cached if available
+        data = domData[Node.getFuseId(node)];
+        if (data.decorator) {
+          return data.decorator;
+        }
+        decorated =
+        data.decorator = new Decorator;
+      }
+
+      decorated.raw = node;
+      decorated.nodeName = node.nodeName;
+      decorated.nodeType = ELEMENT_NODE;
+      return decorated;
+    };
+
+    fuse.Class(Node, { 'constructor': Element });
+    Decorator.prototype = Element.plugin;
+    Element.updateGenerics = Node.updateGenerics;
+    return Element;
+  })();
+
+  /*--------------------------------------------------------------------------*/
 
   (function() {
 
-    var getFragmentFromHTML, plugin,
+    var plugin,
 
     ELEMENT_INNERHTML_IGNORES_SCRIPTS =
       envTest('ELEMENT_INNERHTML_IGNORES_SCRIPTS'),
@@ -85,37 +122,18 @@
       this.initialize && this.initialize();
     },
 
-    Element = function Element(tagName, context) {
+    HTMLElement = function HTMLElement(tagName, context) {
       var attrs, element, result,
-        options = !CONTEXT_TYPES[context && context.nodeType] && context || { };
+        options = !CONTEXT_TYPES[context && context.nodeType] && context;
 
       if (isString(tagName)) {
         result = (tagName.charAt(0) == '<' ? fromHTML : fromTagName)(tagName, context);
-      }
-      else {
-        result = tagName;
-        if (options.decorate !== false) {
-          element = result;
-          tagName = getNodeName(element);
-          Decorator.prototype = getOrCreateTagClass(tagName).plugin;
-          result = new Decorator(element);
-          if (options.cache !== false) {
-            domData[getFuseId(element)].decorator = result;
-          }
-        }
-      }
-      return (attrs = options.attrs) ? plugin.setAttribute.call(result, attrs) : result;
-    },
-
-    extendByTag = function extendByTag(tagName, plugins, mixins, statics) {
-      if (isArray(tagName)) {
-        var i = -1;
-        while (tagName[++i]) {
-          extendByTag(tagName[i], plugins, mixins, statics);
-        }
       } else {
-        getOrCreateTagClass(tagName).extend(plugins, mixins, statics);
+        result = fromElement(tagName, context);
       }
+      return (attrs = options && options.attrs)
+        ? plugin.setAttribute.call(result, attrs)
+        : result;
     },
 
     from = function from(element, context) {
@@ -237,31 +255,7 @@
       return result;
     },
 
-    getContextualFragment = function getContextualFragment(html, context) {
-      context || (context = doc);
-      var cache = getFragmentCache(context.ownerDocument || context),
-       match = html.match(reExtractTagName),
-       range = cache.range;
-
-      if (html == '') {
-        return cache.fragment;
-      }
-      if (!match || !FROM_STRING_CHILDREN_PARENTS[match[1].toUpperCase()]) {
-        // Konqueror throws when trying to create a fragment from
-        // incompatible markup such as table rows. Similar to IE's issue
-        // with setting table's innerHTML.
-        //
-        // WebKit and KHTML throw when creating contextual fragments from
-        // orphaned elements.
-        try {
-          range.selectNode(context.body || context.firstChild);
-          return range.createContextualFragment(html);
-        } catch (e) { }
-      }
-      return getDocumentFragment(html, context, cache);
-    },
-
-    getDocumentFragment = function getDocumentFragment(html, context, cache) {
+    getFragmentFromHTML = function getFragmentFromHTML(html, context, cache) {
       context || (context = doc);
       cache   || (cache = getFragmentCache(context.ownerDocument || context));
 
@@ -309,7 +303,7 @@
     getFragmentFromChildNodes = function(parentNode, cache) {
       var fragment = cache.fragment,
        nodes = parentNode.childNodes,
-       length = node.length;
+       length = nodes.length;
       while (length--) {
         fragment.insertBefore(nodes[length], fragment.firstChild);
       }
@@ -329,7 +323,7 @@
       var isCached, isDecorated;
       if (isString(object)) {
         return object.charAt(0) == '<'
-          ? Element(object, context)
+          ? HTMLElement(object, context)
           : fromId(object, context);
       }
       if (context && !CONTEXT_TYPES[context.nodeType]) {
@@ -341,7 +335,6 @@
         : Node(Window(object, isCached), isCached);
     };
 
-    /*------------------------------------------------------------------------*/
 
     // IE7 and below need to use the sTag of createElement to set the `name` attribute
     // http://msdn.microsoft.com/en-us/library/ms536389.aspx
@@ -349,9 +342,9 @@
     // IE fails to set the BUTTON element's `type` attribute without using the sTag
     // http://dev.rubyonrails.org/ticket/10548
     if (envTest('NAME_ATTRIBUTE_IS_READONLY')) {
-      var __Element = Element;
-      Element = function Element(tagName, context) {
-        var attrs, name, type;
+      var __HTMLElement = HTMLElement;
+      HTMLElement = function HTMLElement(tagName, context) {
+        var attrs, match, name, type;
         if (isString(tagName) && context &&
             !CONTEXT_TYPES[context.nodeType] && (attrs = context.attrs) &&
             ((name = attrs.name) || (type = attrs.type)) &&
@@ -364,7 +357,7 @@
           delete attrs.name; delete attrs.type;
           return plugin.setAttribute.call(fromHTML(tagName, context), attrs);
         }
-        return __Element(tagName, context);
+        return __HTMLElement(tagName, context);
       };
     }
 
@@ -376,32 +369,9 @@
         return fragment;
       };
     }
-    else if (envTest('DOCUMENT_RANGE')) {
-      getFragmentFromChildNodes = function(parentNode, cache) {
-        var range = cache.range;
-        range.selectNodeContents(parentNode);
-        return range.extractContents() || cache.fragment;
-      };
 
-      getFragmentCache = function(ownerDoc) {
-        var id = ownerDoc === doc ? '1' : getFuseId(ownerDoc),
-         data = domData[id];
-        return data._fragmentCache || (data._fragmentCache = {
-          'node':     ownerDoc.createElement('div'),
-          'fragment': ownerDoc.createDocumentFragment(),
-          'range':    ownerDoc.createRange()
-        });
-      };
-    }
-
-    if (envTest('DOCUMENT_RANGE_CREATE_CONTEXTUAL_FRAGMENT')) {
-      getFragmentFromHTML = getContextualFragment;
-    } else {
-      getFragmentFromHTML = getDocumentFragment;
-    }
-
-    // add class sugar to Element
-    __fuse.Class(Node, { 'constructor': Element });
+    // add class sugar to HTMLElement
+    __fuse.Class(Element, { 'constructor': HTMLElement });
 
     // add class sugar to fuse
     __fuse.Class({ 'constructor': fuse });
@@ -411,18 +381,17 @@
       if (hasKey(__fuse, key)) fuse[key] = value;
     });
 
-    plugin = Element.plugin;
+    plugin = HTMLElement.plugin;
 
     // expose
-    Element.extendByTag = extendByTag;
-    Element.fromElement = fromElement;
-    Element.fromHTML    = fromHTML;
-    Element.fromId      = fromId;
-    Element.fromTagName = fromTagName;
-    Element.from        = from;
+    HTMLElement.fromElement = fromElement;
+    HTMLElement.fromHTML    = fromHTML;
+    HTMLElement.fromId      = fromId;
+    HTMLElement.fromTagName = fromTagName;
+    HTMLElement.from        = from;
 
     window.fuse = fuse;
-    fuse.dom.Element = Element;
+    fuse.dom.HTMLElement = HTMLElement;
     fuse.dom.getFragmentFromHTML = getFragmentFromHTML;
   })();
 
@@ -430,45 +399,59 @@
 
   // define private vars shared by primary closure
 
-  Element = fuse.dom.Element;
+  HTMLElement = fuse.dom.HTMLElement;
 
-  fromElement = Element.fromElement;
+  fromElement = HTMLElement.fromElement;
+
+  extendByTag = 
+  HTMLElement.extendByTag = function extendByTag(tagName, plugins, mixins, statics) {
+    if (isArray(tagName)) {
+      var i = -1;
+      while (tagName[++i]) {
+        extendByTag(tagName[i], plugins, mixins, statics);
+      }
+    } else {
+      getOrCreateTagClass(tagName).extend(plugins, mixins, statics);
+    }
+  };
 
   getOrCreateTagClass = (function() {
 
-    var dom = fuse.dom,
-
-    reTagName = /^[A-Z0-9]+$/,
+    var reTagName = /^[A-Z0-9]+$/,
 
     TAG_NAME_CLASSES = (function() {
-      var T = {
-        'A':        'AnchorElement',
-        'CAPTION':  'TableCaptionElement',
-        'COL':      'TableColElement',
-        'DEL':      'ModElement',
-        'DIR':      'DirectoryElement',
-        'DL':       'DListElement',
-        'H1':       'HeadingElement',
-        'IFRAME':   'IFrameElement',
-        'IMG':      'ImageElement',
-        'INS':      'ModElement',
-        'FIELDSET': 'FieldSetElement',
-        'FRAMESET': 'FrameSetElement',
-        'OL':       'OListElement',
-        'OPTGROUP': 'OptGroupElement',
-        'P':        'ParagraphElement',
-        'Q':        'QuoteElement',
-        'TBODY':    'TableSectionElement',
-        'TD':       'TableCellElement',
-        'TEXTAREA': 'TextAreaElement',
-        'TR':       'TableRowElement',
-        'UL':       'UListElement'
+      var i, T = {
+        'A':        'Anchor',
+        'CAPTION':  'TableCaption',
+        'COL':      'TableCol',
+        'DEL':      'Mod',
+        'DIR':      'Directory',
+        'DL':       'DList',
+        'H1':       'Heading',
+        'IFRAME':   'IFrame',
+        'IMG':      'Image',
+        'INS':      'Mod',
+        'FIELDSET': 'FieldSet',
+        'FRAMESET': 'FrameSet',
+        'OL':       'OList',
+        'OPTGROUP': 'OptGroup',
+        'P':        'Paragraph',
+        'Q':        'Quote',
+        'TBODY':    'TableSection',
+        'TD':       'TableCell',
+        'TEXTAREA': 'TextArea',
+        'TR':       'TableRow',
+        'UL':       'UList'
       };
 
       T['TH'] = T['TD'];
       T['COLGROUP'] = T['COL'];
       T['TFOOT'] = T['THEAD'] =  T['TBODY'];
       T['H2'] = T['H3'] = T['H4'] = T['H5'] = T['H6'] = T['H1'];
+
+      for (i in T) {
+        T[i] = T[i.toLowerCase()] = 'HTML' + T[i] + 'Element';
+      }
       return T;
     })();
 
@@ -477,33 +460,45 @@
        tagClassName = TAG_NAME_CLASSES[tagName];
 
       if (!tagClassName) {
-        upperCased = tagName.toUpperCase();
-        tagClassName = TAG_NAME_CLASSES[upperCased];
-
-        if (!tagClassName) {
-          // camel-case name
-          if (reTagName.test(upperCased)) {
-            tagClassName =
-            TAG_NAME_CLASSES[upperCased] = capitalize(tagName.toLowerCase()) + 'Element';
-          } else {
-            tagClassName = 'UnknownElement';
-          }
+        if (tagClassName = TAG_NAME_CLASSES[upperCased = tagName.toUpperCase()]) {
+          TAG_NAME_CLASSES[tagName] = tagClassName;
+        } else {
+          tagClassName = 
+          TAG_NAME_CLASSES[tagName] =
+          TAG_NAME_CLASSES[upperCased] = 'HTML' +
+            (reTagName.test(upperCased)
+              ? capitalize(tagName.toLowerCase())
+              : 'Unknown') + 'Element';
         }
-        TAG_NAME_CLASSES[tagName] = tagClassName;
       }
-      if (!(TagClass = dom[tagClassName])) {
+      if (!(TagClass = fuse.dom[tagClassName])) {
         TagClass =
-        dom[tagClassName] = fuse.Class(Element, {
+        fuse.dom[tagClassName] = fuse.Class(HTMLElement, {
           'constructor': Function('fn',
-            'function ' + tagClassName + '(element){' +
-            'return element&&(element.raw?element:fn(element))' +
+            'function ' + tagClassName + '(element,options){' +
+            'return element&&(element.raw?element:fn(element,options))' +
             '}return ' + tagClassName)(fromElement)
         });
 
-        TagClass.addMixins = Element.addMixins;
-        TagClass.addPlugins = Element.addPlugins;
-        TagClass.updateGenerics = Element.updateGenerics;
+        TagClass.addMixins = Node.addMixins;
+        TagClass.addPlugins = Node.addPlugins;
+        TagClass.updateGenerics = Node.updateGenerics;
       }
       return TagClass;
     };
   })();
+
+  extendByTag('button');
+  extendByTag('form');
+  extendByTag('input');
+  extendByTag('option');
+  extendByTag('select');
+  extendByTag('textarea');
+
+  HTMLButtonElement   = fuse.dom.HTMLButtonElement;
+  HTMLFormElement     = fuse.dom.HTMLFormElement;
+  HTMLInputElement    = fuse.dom.HTMLInputElement;
+  HTMLOptionElement   = fuse.dom.HTMLOptionElement;
+  HTMLSelectElement   = fuse.dom.HTMLSelectElement;
+  HTMLTextAreaElement = fuse.dom.HTMLTextAreaElement;
+ 

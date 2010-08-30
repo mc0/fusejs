@@ -36,7 +36,7 @@
         }
       }
       return this;
-    };
+    },
 
     observe = function observe(type, handler) {
       var events = this._events || (this._events = { }),

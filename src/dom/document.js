@@ -1,11 +1,11 @@
   /*----------------------------- DOM: DOCUMENT ------------------------------*/
 
-  Document =
-  fuse.dom.Document = (function() {
+  HTMLDocument =
+  fuse.dom.HTMLDocument = (function() {
 
     var Decorator = function() { },
 
-    Document = function Document(node, isCached) {
+    HTMLDocument = function HTMLDocument(node, isCached) {
       // quick return if empty, decorated, or not a document node
       var data, decorated, pluginViewport, viewport;
       if (!node || node.raw || node.nodeType != DOCUMENT_NODE) {
@@ -23,14 +23,14 @@
         data.decorator = new Decorator;
       }
 
-      pluginViewport = Document.plugin.viewport;
+      pluginViewport = HTMLDocument.plugin.viewport;
       viewport = decorated.viewport = { };
 
       viewport.ownerDocument =
       decorated.raw = node;
       decorated.nodeName = node.nodeName;
       decorated.nodeType = DOCUMENT_NODE;
- 
+
       eachKey(pluginViewport, function(value, key, object) {
         if (hasKey(object, key)) viewport[key] = value;
       });
@@ -38,10 +38,10 @@
       return decorated;
     };
 
-    fuse.Class(Node, { 'constructor': Document });
-    Decorator.prototype = Document.plugin;
-    Document.updateGenerics = Node.updateGenerics;
-    return Document;
+    fuse.Class(Node, { 'constructor': HTMLDocument });
+    Decorator.prototype = HTMLDocument.plugin;
+    HTMLDocument.updateGenerics = Node.updateGenerics;
+    return HTMLDocument;
   })();
 
   (function(plugin) {
@@ -106,4 +106,4 @@
 
     // prevent JScript bug with named function expressions
     var getDimensions = null, getHeight = null, getWidth = null, getScrollOffsets = null;
-  })(Document.plugin);
+  })(HTMLDocument.plugin);

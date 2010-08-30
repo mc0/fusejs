@@ -277,7 +277,7 @@ new Test.Unit.Runner({
 
   'testObjectIsElement': function() {
     this.assert(fuse.Object.isElement(document.createElement('div')));
-    this.assert(fuse.Object.isElement(fuse.dom.Element('div').raw));
+    this.assert(fuse.Object.isElement(fuse.dom.HTMLElement('div').raw));
     this.assert(fuse.Object.isElement($('testlog').raw));
 
     this.assert(!fuse.Object.isElement(document.createTextNode('bla')));

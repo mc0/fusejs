@@ -1,3 +1,5 @@
+* Add fuse.dom.HTMLElement and move HTML related methods from fuse.dom.Element to HTMLElement. [jddalton]
+
 * Remove partial support for elements being passed to fuse.Object.toJSON(). [jddalton]
 
 * Make fuse.dom.Element#show work with elements hidden by stylesheet rules. [jddalton Joe Gornick]
