@@ -1,1 +1,1 @@
-fuse.dom.InputElement.plugin.coffee = fuse.Function.IDENTITY;
+fuse.dom.HTMLInputElement.plugin.coffee = fuse.Function.IDENTITY;
