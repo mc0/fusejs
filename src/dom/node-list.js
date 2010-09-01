@@ -10,7 +10,7 @@
      reBool          = /^(?:(?:is|has)[A-Z]|contains$)/,
      reGetter        = /^(?:(?:get|read)[A-Z]|(?:(?:down|first|identify|inspect|last|next|previous)$))/,
      reMod           = /^(?:update|replace|(?:append|prepend)(?:Child|Sibling)(?:To)?)$/,
-     reScript        = /<script[ >]/i,
+     reScript        = /<script[\x20\t\n\r>]/i,
      arrEach         = ['for(;i<l;i++){if(e=es[i]){', '}}'],
      arrEvery        = ['for(;i<l;i++){if((e=es[i])&&!(', '))return false}return true'],
      arrSome         = ['for(;i<l;i++){if((e=es[i])&&(', '))return true}return false'];

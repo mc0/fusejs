@@ -8,15 +8,15 @@
     reTags = (function() {
       var name   = '[-\\w]+',
        space     = '[\\x20\\t\\n\\r]',
-       eq        = space + '?=' + space + '?',
+       eq        = space + '*=' + space + '*',
        charRef   = '&#[0-9]+;',
        entityRef = '&' + name + ';',
        reference = entityRef + '|' + charRef,
        attValue  = '"(?:[^<&"]|' + reference + ')*"|\'(?:[^<&\']|' + reference + ')*\'',
        attribute = '(?:' + name + eq + attValue + '|' + name + ')';
 
-      return new RegExp('<'+ name + '(?:' + space + attribute + ')*' + space + '?/?>|' +
-        '</' + name + space + '?>', 'g');
+      return new RegExp('<'+ name + '(?:' + space + '+' + attribute + ')*' + space + '*/?>|' +
+        '</' + name + space + '*>', 'g');
     })(),
 
     define = function() {
