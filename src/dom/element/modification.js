@@ -4,9 +4,7 @@
 
     var scripts,
 
-    TREAT_AS_STRING = { '[object Number]': 1, '[object String]': 1 },
-
-    CHECKED_INPUT_TYPES = { 'checkbox': 1, 'radio': 1 },
+    DO_NOT_DECORATE = { 'decorate': false },
 
     PARENT_NODE_AS_CONTEXT = { 'appendSibling': 1, 'prependSibling': 1 },
 
@@ -42,85 +40,110 @@
       return T;
     })(),
 
-    getFragmentFromHTML = fuse.dom.getFragmentFromHTML,
-
-    getByTagName = function(node, tagName) {
-      var result = [], child = node.firstChild, upper = tagName.toUpperCase();
-      while (child) {
-        if (getNodeName(child) == upper) {
-          result.push(child);
-        }
-        else if (typeof child.getElementsByTagName != 'undefined') {
-          // concatList implementation for nodeLists
-          var i = 0, pad = result.length, nodes = child.getElementsByTagName(tagName);
-          while (result[pad + i] = nodes[i++]) { }
-          result.length--;
-        }
-        child = child.nextSibling;
-      }
-      return result;
-    },
-
     cloneNode = function(source) {
       return source.cloneNode(false);
     },
 
-    createCloner = function() {
-      return function(source, deep, isData, isEvents, excludes, context) {
-        var addDispatcher, data, id, length, node, nodes, srcData, srcEvents, i = -1,
-         element = cloneNode(source, excludes, null, context);
+    cloner = function(source, deep, isData, isEvents, excludes, context) {
+      var addDispatcher, child, childQueue, children, data, i, id, j,
+       newQueue, parentNode, parentQueue, srcData, srcEvents, k = 0,
+       result = cloneNode(source, excludes, null, context);
 
-        if (excludes) {
-          length = excludes.length;
-          while (length--) {
-            plugin.removeAttribute.call(element, excludes[length]);
+      if (excludes) {
+        i = excludes.length;
+        while (i--) {
+          plugin.removeAttribute.call(result, excludes[i]);
+        }
+      }
+      if (isData || isEvents) {
+        srcData = domData[getFuseId(source, true)];
+        srcEvents = srcData && srcData.events;
+
+        if (srcData && isData) {
+          id || (id = getFuseId(result));
+          data = domData[id];
+
+          delete srcData.events;
+          fuse.Object.extend(data, srcData);
+          srcEvents && (srcData.events = srcEvents);
+        }
+        if (srcEvents && isEvents) {
+          id   || (id = getFuseId(result));
+          data || (data = domData[id]);
+          addDispatcher = fuse.dom.Event._addDispatcher;
+
+          // copy delegation watcher
+          if (srcData._isWatchingDelegation) {
+            fuse.dom.Event._addWatcher(result, data);
+          }
+          // copy events
+          for (i in srcEvents) {
+            addDispatcher(result, i, null, id);
+            data.events[i].handlers = srcEvents[i].handlers.slice(0);
           }
         }
+      }
 
-        if (isData || isEvents) {
-          srcData = domData[getFuseId(source, true)];
-          srcEvents = srcData && srcData.events;
+      // http://www.jslab.dk/articles/non.recursive.preorder.traversal.part4
+      if (deep) {
+        parentNode  = result;
+        childQueue  = source.childNodes;
+        parentQueue = [parentNode, childQueue.length - 1];
 
-          if (srcData && isData) {
-            id || (id = getFuseId(element));
-            data = domData[id];
+        while (childQueue.length) {
+          // drill down through the queued descendant children
+          i = -1; newQueue = [];
+          while (child = childQueue[++i]) {
+            j = -1;
+            children = child.childNodes;
+            length   = children.length;
+            child    = child.nodeType == ELEMENT_NODE
+              ? cloner(child, false, isData, isEvents, excludes, context)
+              : child.cloneNode(false);
 
-            delete srcData.events;
-            fuse.Object.extend(data, srcData);
-            srcEvents && (srcData.events = srcEvents);
-          }
-          if (srcEvents && isEvents) {
-            id   || (id = getFuseId(element));
-            data || (data = domData[id]);
-
-            // copy delegation watcher
-            if (srcData._isWatchingDelegation) {
-              fuse.dom.Event._addWatcher(element, data);
+            // jump to the next queued parent if starting a new child queue
+            // or passed the child count of the current parent
+            if ((i == 0 || i > parentQueue[k + 1]) && parentQueue[k + 2]) {
+              parentNode = parentQueue[k += 2];
             }
-            // copy events
-            addDispatcher = fuse.dom.Event._addDispatcher;
-            eachKey(srcEvents, function(ec, type) {
-              addDispatcher(element, type, null, id);
-              data.events[type].handlers = ec.handlers.slice(0);
-            });
+            // if the child has children add it along with the last
+            // childQueue index of its children to the parents queue
+            if (length) {
+              parentQueue.push(child, newQueue.length + length - 1);
+            }
+            // queue children of descendants
+            while (++j < length) {
+              newQueue.push(children[j]);
+            }
+            parentNode.appendChild(child);
           }
+          childQueue = newQueue;
         }
-
-  		  if (deep) {
-  		    cloner = createCloner();
-  		    nodes  = source.childNodes;
-    		  while (node = nodes[++i]) {
-    	      element.appendChild(node.nodeType == ELEMENT_NODE
-    	        ? cloner(node, deep, isData, isEvents, excludes, context)
-    	        : node.cloneNode(false));
-    		  }
-  		  }
-  			return element;
-      };
+      }
+      return result;
     },
 
     getScripts = function(element) {
-      return getNodeName(element) == 'SCRIPT' ? [element] : getByTagName(element, 'script');
+      var child, i, pad, nodes, result = [];
+      if (getNodeName(element) == 'SCRIPT') {
+        result[0] = element;
+      }
+      else {
+        child = element.firstChild;
+        while (child) {
+          if (getNodeName(child) == 'SCRIPT') {
+            result.push(child);
+          }
+          else if (typeof child.getElementsByTagName != 'undefined') {
+            // concatList implementation for nodeLists
+            i = 0; pad = result.length; nodes = child.getElementsByTagName('script');
+            while (result[pad + i] = nodes[i++]) { }
+            result.length--;
+          }
+          child = child.nextSibling;
+        }
+      }
+      return result;
     },
 
     runScripts = function(element) {
@@ -137,26 +160,26 @@
     },
 
     toNode = function(content, context) {
-      var result, skipScripts, classOf = toString.call(content);
+      var result, skipScripts;
       scripts = null;
 
-      if (TREAT_AS_STRING[classOf]) {
-        result = getFragmentFromHTML(classOf == '[object String]' ? content : String(content), context);
-        // skip evaling scripts created from a string in Firefox 3.x
-        skipScripts = ELEMENT_EVALS_SCRIPT_FROM_INNERHTML;
+      if (content || content == '0') {
+        if (content.nodeName) {
+          result = content && content.raw || content || { };
+          // fix evaling inserted script elements in Safari <= 2.0.2 and Firefox 2.0.0.2
+          skipScripts = !ELEMENT_SCRIPT_FAILS_TO_EVAL_TEXT;
+        }
+        else {
+          result = getFragmentFromHTML(content, context);
+          // skip evaling scripts created from a string in Firefox 3.x
+          skipScripts = ELEMENT_EVALS_SCRIPT_FROM_INNERHTML;
+        }
+        if (INSERTABLE_NODE_TYPES[result.nodeType]) {
+          !skipScripts && (scripts = getScripts(result));
+          return result;
+        }
       }
-      else {
-        result = content && content.raw || content || { };
-        // fix evaling inserted script elements in Safari <= 2.0.2 and Firefox 2.0.0.2
-        skipScripts = !ELEMENT_SCRIPT_FAILS_TO_EVAL_TEXT;
-      }
-      if (INSERTABLE_NODE_TYPES[result.nodeType]) {
-        !skipScripts && (scripts = getScripts(result));
-        return result;
-      }
-    },
-
-    cloner = createCloner();
+    };
 
     /*------------------------------------------------------------------------*/
 
@@ -191,22 +214,22 @@
     };
 
     plugin.prependChildTo = function prependChildTo(content) {
-      fuse(content).prependChild(this);
+      content && plugin.prependChild.call(content.raw || fuse(content, DO_NOT_DECORATE), this);
       return this;
     };
 
     plugin.appendChildTo = function appendChildTo(content) {
-      fuse(content).appendChild(this);
+      content && plugin.appendChild.call(content.raw || fuse(content, DO_NOT_DECORATE), this);
       return this;
     };
 
     plugin.prependSiblingTo = function prependSiblingTo(content) {
-      fuse(content).prependSibling(this);
+      content && plugin.prependSibling.call(content.raw || fuse(content, DO_NOT_DECORATE), this);
       return this;
     };
 
     plugin.appendSiblingTo = function appendSiblingTo(content) {
-      fuse(content).appendSibling(this);
+      content && plugin.appendSibling.call(content.raw || fuse(content, DO_NOT_DECORATE), this);
       return this;
     };
 
@@ -267,27 +290,26 @@
 
     plugin.update = function update(content) {
       var element = this.raw || this;
-      if (content == null) {
-        content = '';
-      }
-      if (getNodeName(element) == 'SCRIPT') {
-        setScriptText(element, content.nodeType == TEXT_NODE ?
-          (content.raw || content).data : content);
-        if (!ELEMENT_SCRIPT_REEVALS_TEXT) {
-          scripts = [element];
+
+      if (content || content == '0') {
+        if (getNodeName(element) == 'SCRIPT') {
+          setScriptText(element, content.nodeType == TEXT_NODE ?
+            (content.raw || content).data : content);
+          if (!ELEMENT_SCRIPT_REEVALS_TEXT) {
+            scripts = [element];
+            runScripts(element);
+          }
+        }
+        else {
+          if (INSERTABLE_NODE_TYPES[content.nodeType]) {
+            element.innerHTML = '';
+            element.appendChild(content.raw || content);
+          } else {
+            element.innerHTML = content;
+          }
+          scripts = getScripts(element);
           runScripts(element);
         }
-      }
-      else {
-        if (TREAT_AS_STRING[toString.call(content)]) {
-          element.innerHTML = content;
-        }
-        else if (INSERTABLE_NODE_TYPES[content.nodeType]) {
-          element.innerHTML = '';
-          element.appendChild(content.raw || content);
-        }
-        scripts = getScripts(element);
-        runScripts(element);
       }
       return this;
     };
@@ -379,36 +401,39 @@
 
         // copy troublesome attributes/properties
         excludes = excludes && ' ' + excludes.join(' ') + ' ' || '';
-  		  if (nodeName == 'INPUT') {
-  		    if (excludes.indexOf(' value ') == -1) {
-  		      element.defaultValue = source.defaultValue;
-  		      element.value = source.value;
-  		    }
-  		    if (CHECKED_INPUT_TYPES[element.type] &&
-  		        excludes.indexOf(' checked ') == -1) {
-  		      element.defaultChecked = source.defaultChecked;
-  		      element.checked = source.checked;
-  		    }
-  		  }
-  		  else if (prop = PROPS_TO_COPY[nodeName] &&
-  		      excludes.indexOf(' ' + prop + ' ') == -1) {
-		      defaultProp = DEFAULTS_TO_COPY[prop];
-		      element[defaultProp]  = source[defaultProp];
-		      element[prop] = source[prop];
-  		  }
-  		  return element;
+        if (nodeName == 'INPUT') {
+          if (excludes.indexOf(' value ') == -1) {
+            element.defaultValue = source.defaultValue;
+            element.value = source.value;
+          }
+          if (CHECKED_INPUT_TYPES[element.type] &&
+              excludes.indexOf(' checked ') == -1) {
+            element.defaultChecked = source.defaultChecked;
+            element.checked = source.checked;
+          }
+        }
+        else if (prop = PROPS_TO_COPY[nodeName] &&
+            excludes.indexOf(' ' + prop + ' ') == -1) {
+          defaultProp = DEFAULTS_TO_COPY[prop];
+          element[defaultProp]  = source[defaultProp];
+          element[prop] = source[prop];
+        }
+        return element;
       };
     }
 
     // prevent JScript bug with named function expressions
-    var append =       null,
-     cleanWhitespace = null,
-     clone =           null,
-     insert =          null,
-     insertAfter =     null,
-     insertBefore =    null,
-     prepend =         null,
-     remove =          null,
-     replace =         null,
-     wrap =            null;
-  })(HTMLElement.plugin);
+    var appendChild =   null,
+     appendChildTo =    null,
+     appendSibling =    null,
+     appendSiblingTo =  null,
+     cleanWhitespace =  null,
+     clone =            null,
+     prependChild =     null,
+     prependChildTo =   null,
+     prependSibling =   null,
+     prependSiblingTo = null,
+     remove =           null,
+     replace =          null,
+     wrap =             null;
+  })(Element.plugin);
