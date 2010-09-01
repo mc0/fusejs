@@ -9,11 +9,11 @@
 
   (function(plugin) {
 
-    var CHECKED_INPUT_TYPES = { 'checkbox': 1, 'radio': 1 },
+    var ATTR_DEFAULT_VALUE_PROP =
+      { 'selected': 'defaultSelected', 'value': 'defaultValue' },
 
-    ATTR_DEFAULT_VALUE_PROP = { 'selected': 'defaultSelected', 'value': 'defaultValue' },
-
-    TAG_WITH_DEFAULT_VALUE_PROP = { 'OPTION': 'selected', 'TEXTAREA': 'value' },
+    TAG_WITH_DEFAULT_VALUE_PROP =
+      { 'OPTION': 'selected', 'TEXTAREA': 'value' },
 
     // http://www.w3.org/TR/html4/index/attributes.html
     TAG_PROP_DEFAULT_VALUE = (function() {
@@ -34,12 +34,11 @@
         'SELECT': { 'size': '0', 'tabindex': '0' }
       };
 
-      T['AREA'] = T['A'];
-      T['COLGROUP'] = T['COL'];
-      T['TH'] = T['TD'];
-      T['IFRAME'] = T['FRAME'];
-      T['TEXTAREA'] = T['OBJECT']; 
-
+      T.AREA = T.A;
+      T.COLGROUP = T.COL;
+      T.TH = T.TD;
+      T.IFRAME = T.FRAME;
+      T.TEXTAREA = T.OBJECT; 
       return T;
     })();
 

@@ -3,9 +3,10 @@
   (function() {
     var cssPoller, readyStatePoller,
 
-    FINAL_DOCUMENT_READY_STATES = { 'loaded': 1, 'interactive': 1, 'complete': 1 },
+    FINAL_DOCUMENT_READY_STATES =
+      { 'loaded': 1, 'interactive': 1, 'complete': 1 },
 
-    doc          = fuse._doc,
+    doc = fuse._doc,
 
     decoratedDoc = fuse(doc),
 

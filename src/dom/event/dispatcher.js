@@ -10,20 +10,21 @@
     var EVENT_TYPE_ALIAS =
       { 'blur': 'delegate:blur', 'focus': 'delegate:focus' },
 
-    runScriptText = fuse.dom.runScriptText,
-
     huid = fuse.uid + '_domHandler',
+
+    runScriptText = fuse.dom.runScriptText,
 
     createDispatcher = function createDispatcher(id, type) {
       return function(event) {
-        var handler, parentNode, stopped, i = -1,
+        var decorator, handler, parentNode, node, stopped, i = -1,
          debug     = fuse.debug,
          data      = fuse.dom.data[id],
          decorator = data.decorator,
-         node      = decorator.raw || decorator,
          ec        = data.events[type],
          handlers  = ec.handlers.slice(0);
 
+        decorator || (decorator = fuse(data.raw));
+        node = decorator.raw;
         event = fuse.dom.Event(event || getWindow(node).event, decorator);
 
         while (handler = handlers[++i]) {
@@ -70,9 +71,7 @@
 
   (function(Event) {
 
-    var fixReadyState = typeof fuse._doc.readyState != 'string',
-
-    addDispatcher     = Event._addDispatcher,
+    var addDispatcher = Event._addDispatcher,
 
     createGetter      = Event._createGetter,
 
@@ -82,6 +81,8 @@
 
     winLoadDispatcher = createDispatcher(0, 'load'),
 
+    fixReadyState     = typeof fuse._doc.readyState != 'string',
+    
     domLoadWrapper = function(event) {
       var doc = fuse._doc, docEl = fuse._docEl, decorated = fuse(doc);
       if (!decorated.isLoaded()) {

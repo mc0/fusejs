@@ -24,6 +24,12 @@
 
   /*--------------------------------------------------------------------------*/
 
+  CHECKED_INPUT_TYPES = { 'checkbox': 1, 'radio': 1 };
+
+  EVENT_TYPE_ALIAS = { 'blur': 'delegate:blur', 'focus': 'delegate:focus' },
+
+  INPUT_BUTTONS = { 'button': 1, 'image': 1, 'reset':  1, 'submit': 1 };
+
   DATA_ID_PROP =
     envTest('ELEMENT_UNIQUE_NUMBER') ? 'uniqueNumber' : '_fuseId';
 

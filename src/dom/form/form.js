@@ -4,37 +4,9 @@
 
     var Obj = fuse.Object,
 
-    CHECKED_INPUT_TYPES = {
-      'checkbox': 1,
-      'radio':    1
-    },
+    CONTROL_NODE_NAMES = { 'BUTTON': 1, 'INPUT': 1, 'SELECT': 1, 'TEXTAREA': 1 },
 
-    CONTROL_NODE_NAMES = {
-      'BUTTON':   1,
-      'INPUT':    1,
-      'SELECT':   1,
-      'TEXTAREA': 1
-    },
-
-    INPUT_BUTTONS = {
-      'button': 1,
-      'image':  1,
-      'reset':  1,
-      'submit': 1
-    },
-
-    PLUGINS = {
-      'BUTTON':   HTMLButtonElement.plugin,
-      'INPUT':    HTMLInputElement.plugin,
-      'OPTION':   HTMLOptionElement.plugin,
-      'SELECT':   HTMLSelectElement.plugin,
-      'TEXTAREA': HTMLTextAreaElement.plugin
-    },
-
-    SKIPPED_INPUT_TYPES = {
-      'file': 1,
-      'reset': 1
-    },
+    SKIPPED_INPUT_TYPES = { 'file': 1, 'reset': 1 },
 
     eachElement = function(element, callback) {
       var node, i = 0,
@@ -223,7 +195,7 @@
             continue;
           }
 
-          value = PLUGINS[nodeName].getValue.call(element);
+          value = CONTROL_PLUGINS[nodeName].getValue.call(element);
           if (isArray(value) && value.length < 2) {
             value = value[0];
           }

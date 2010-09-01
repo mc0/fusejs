@@ -14,12 +14,13 @@
 (function(window) {
 
   // private vars
-  var DATA_ID_PROP, PARENT_NODE, PARENT_WINDOW, Node, NodeList, Element,
+  var CHECKED_INPUT_TYPES, CONTROL_PLUGINS, DATA_ID_PROP, EVENT_TYPE_ALIAS,
+   INPUT_BUTTONS, PARENT_NODE, PARENT_WINDOW, Node, NodeList, Element,
    HTMLDocument, HTMLElement, HTMLButtonElement, HTMLFormElement,
    HTMLInputElement, HTMLOptionElement, HTMLSelectElement, HTMLTextAreaElement,
    Window, domData, eachKey, envAddTest, envTest, extendByTag, fromElement,
-   getDocument, getFuseId, getNodeName, getScriptText, getWindow,
-   getOrCreateTagClass, hasKey, isArray, isElement, isHash, isNumber,
+   getDocument, getFragmentFromHTML, getFuseId, getNodeName, getScriptText,
+   getWindow, getOrCreateTagClass, hasKey, isArray, isElement, isHash, isNumber,
    isPrimitive, isRegExp, isString, returnOffset, runScriptText, setScriptText,
    undef,
 

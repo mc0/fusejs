@@ -40,14 +40,17 @@
       return addToNodeList.apply(this, arguments);
     };
 
+    Element.addMixins =
     HTMLElement.addMixins = addMixins;
+
+    Element.addPlugins =
     HTMLElement.addPlugins = addPlugins;
-    HTMLElement.updateGenerics = Node.updateGenerics;
   })();
 
   /*--------------------------------------------------------------------------*/
 
   (function(plugin) {
+
     var idCounter = 0;
 
     plugin.identify = function identify() {
@@ -91,4 +94,4 @@
 
     // prevent JScript bug with named function expressions
     var identify = null, isDetached = null, isEmpty = null;
-  })(HTMLElement.plugin);
+  })(Element.plugin);

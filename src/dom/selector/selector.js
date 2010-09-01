@@ -24,4 +24,4 @@
 
     // prevent JScript bug with named function expressions
     var match = null, query = null;
-  })(HTMLDocument.plugin, HTMLElement.plugin);
+  })(HTMLDocument.plugin, Element.plugin);

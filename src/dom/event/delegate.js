@@ -4,8 +4,6 @@
 
     var BUTTON_TYPES    = { 'image': 1, 'reset': 1, 'submit': 1 },
 
-    EVENT_TYPE_ALIAS    = { 'blur': 'delegate:blur', 'focus': 'delegate:focus' },
-
     REAL_EVENT_TYPE     = { 'delegate:blur': 'blur', 'delegate:focus': 'focus' },
 
     CHANGEABLE_ELEMENTS = { 'INPUT': 1, 'SELECT': 1, 'TEXTAREA': 1 },

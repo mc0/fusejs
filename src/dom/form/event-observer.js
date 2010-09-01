@@ -1,9 +1,7 @@
   /*-------------------------- FORM: EVENT OBSERVER --------------------------*/
 
   (function() {
-    var CHECKED_INPUT_TYPES = { 'checkbox': 1, 'radio': 1 },
-
-    BaseEventObserver = fuse.Class(function() {
+    var BaseEventObserver = fuse.Class(function() {
       var BaseEventObserver = function BaseEventObserver(element, callback) {
         var member, name, i = -1,
          eventObserver = this, onElementEvent = this.onElementEvent;

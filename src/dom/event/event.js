@@ -62,13 +62,9 @@
 
     BUGGY_EVENT_TYPES = { 'error': 1, 'load': 1 },
 
-    CHECKED_INPUT_TYPES = { 'checkbox': 1, 'radio': 1 },
-
     CLICK_MAP  = { 'L': 1, 'M': 2, 'R': 3 },
 
     CLICK_PROP = 'which',
-
-    EVENT_TYPE_ALIAS = { 'blur': 'delegate:blur', 'focus': 'delegate:focus' },
 
     plugin = Event.plugin,
 
@@ -201,11 +197,11 @@
 
     addCache = function(element, type, handler, id) {
       id || (id = getFuseId(element));
-      var result = false, ec = getOrCreateCache(id, type);
+      var data, result = false, ec = getOrCreateCache(id, type);
 
       ec.handlers.push(handler);
       if (!ec.dispatcher) {
-        domData[id].decorator || fuse(element);
+        (data = domData[id]).decorator || data.raw || (data.raw = element);
         ec.dispatcher = Event._createDispatcher(id, type);
         result = ec.dispatcher;
       }
@@ -214,10 +210,10 @@
 
     addDispatcher = function(element, type, dispatcher, id) {
       id || (id = getFuseId(element));
-      var result, ec = getOrCreateCache(id, type);
+      var data, result, ec = getOrCreateCache(id, type);
 
       if (result = !ec.dispatcher) {
-        domData[id].decorator || fuse(element);
+        (data = domData[id]).decorator || data.raw || (data.raw = element);
         addObserver(element, type,
           (ec.dispatcher = dispatcher || Event._createDispatcher(id, type)));
       }

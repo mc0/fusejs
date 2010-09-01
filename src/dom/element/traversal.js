@@ -2,17 +2,17 @@
 
   (function(plugin) {
     // support W3C ElementTraversal interface
-    var firstNode = 'firstChild',
+    var FIRST_NODE = 'firstChild',
 
-    lastNode      = 'lastChild',
+    LAST_NODE      = 'lastChild',
 
-    nextNode      = 'nextSibling',
+    NEXT_NODE      = 'nextSibling',
 
-    prevNode      = 'previousSibling',
+    PREV_NODE      = 'previousSibling',
 
-    nextElement   = 'nextElementSibling',
+    NEXT_ELEMENT   = 'nextElementSibling',
 
-    prevElement   = 'previousElementSibling',
+    PREV_ELEMENT   = 'previousElementSibling',
 
     getSome = function(element, property, count, selectors, thisArg) {
       var isSingle, match, result = null, i = 0;
@@ -86,20 +86,20 @@
       return result;
     };
 
-    if (isHostType(fuse._docEl, nextElement) &&
-        isHostType(fuse._docEl, prevElement)) {
-      nextNode  = nextElement;
-      prevNode  = prevElement;
-      firstNode = 'firstElementChild';
-      lastNode  = 'lastElementChild';
+    if (isHostType(fuse._docEl, NEXT_ELEMENT) &&
+        isHostType(fuse._docEl, PREV_ELEMENT)) {
+      NEXT_NODE  = NEXT_ELEMENT;
+      PREV_NODE  = PREV_ELEMENT;
+      FIRST_NODE = 'firstElementChild';
+      LAST_NODE  = 'lastElementChild';
     }
 
     /*------------------------------------------------------------------------*/
 
     plugin.getChildren = function getChildren(selectors) {
-      var element = (this.raw || this)[firstNode];
+      var element = (this.raw || this)[FIRST_NODE];
       while (element && element.nodeType != ELEMENT_NODE) {
-        element = element[nextNode];
+        element = element[NEXT_NODE];
       }
       if (!element) {
         return NodeList();
@@ -117,19 +117,19 @@
        original = element, result = NodeList();
 
       if (element = element[PARENT_NODE]) {
-        element = element[firstNode];
+        element = element[FIRST_NODE];
         if (selectors && selectors.length) {
           match = fuse.dom.selector.match;
           do {
             if (element.nodeType == ELEMENT_NODE &&
                 element !== original && match(element, selectors))
               result[i++] = fromElement(element);
-          } while (element = element[nextNode]);
+          } while (element = element[NEXT_NODE]);
         } else {
           do {
             if (element.nodeType == ELEMENT_NODE && element != original)
               result[i++] = fromElement(element);
-          } while (element = element[nextNode]);
+          } while (element = element[NEXT_NODE]);
         }
       }
       return result;
@@ -205,11 +205,11 @@
     };
 
     plugin.next = function next(count, selectors, thisArg) {
-      return getSome((this.raw || this)[nextNode], nextNode, count, selectors, thisArg);
+      return getSome((this.raw || this)[NEXT_NODE], NEXT_NODE, count, selectors, thisArg);
     };
 
     plugin.previous = function previous(count, selectors, thisArg) {
-      return getSome((this.raw || this)[prevNode], prevNode, count, selectors, thisArg);
+      return getSome((this.raw || this)[PREV_NODE], PREV_NODE, count, selectors, thisArg);
     };
 
     plugin.up = function up(count, selectors, thisArg) {
@@ -217,11 +217,11 @@
     };
 
     plugin.first = function first(count, selectors, thisArg) {
-      return getSome((this.raw || this)[firstNode], nextNode, count, selectors, thisArg);
+      return getSome((this.raw || this)[FIRST_NODE], NEXT_NODE, count, selectors, thisArg);
     };
 
     plugin.last = function last(count, selectors, thisArg) {
-      return getSome((this.raw || this)[lastNode], prevNode, count, selectors, thisArg);
+      return getSome((this.raw || this)[LAST_NODE], PREV_NODE, count, selectors, thisArg);
     };
 
     plugin.getAncestors = function getAncestors(selectors, thisArg) {
@@ -233,11 +233,11 @@
     };
 
     plugin.getNextSiblings = function getNextSiblings(selectors, thisArg) {
-      return getSome((this.raw || this)[nextNode], nextNode, Infinity, selectors, thisArg) || NodeList();
+      return getSome((this.raw || this)[NEXT_NODE], NEXT_NODE, Infinity, selectors, thisArg) || NodeList();
     };
 
     plugin.getPreviousSiblings = function getPreviousSiblings(selectors, thisArg) {
-      return getSome((this.raw || this)[prevNode], prevNode, Infinity, selectors, thisArg) || NodeList();
+      return getSome((this.raw || this)[PREV_NODE], PREV_NODE, Infinity, selectors, thisArg) || NodeList();
     };
 
     // prevent JScript bug with named function expressions
@@ -253,11 +253,11 @@
      next =                null,
      previous =            null,
      up =                  null;
-  })(HTMLElement.plugin);
+  })(Element.plugin);
 
   /*--------------------------------------------------------------------------*/
 
-  HTMLElement.plugin.contains = (function() {
+  Element.plugin.contains = (function() {
     var contains = function contains(descendant) {
       if (descendant = fuse(descendant)) {
         var element = this.raw || this;
