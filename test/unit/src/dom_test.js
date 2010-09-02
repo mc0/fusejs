@@ -592,7 +592,7 @@ new Test.Unit.Runner({
     $('testdiv').update()
     this.assertEqual('', $('testdiv').raw.innerHTML);
 
-    fuse.dom.HTMLElement.update('testdiv', '&nbsp;');
+    fuse.dom.Element.update('testdiv', '&nbsp;');
     this.assert(!fuse.String.isEmpty($('testdiv').raw.innerHTML));
   },
 
