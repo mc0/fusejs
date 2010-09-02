@@ -1,3 +1,5 @@
+* Allow decorator caching options to accept non null/undefined falsey values. [jddalton]
+
 * Reduce recursion in the element cloner() function and make getScripts() absorb getByTagName(). [jddalton]
 
 * Optimize NodeList modification methods by creating an element/fragment once instead of for each iteration. [jddalton]

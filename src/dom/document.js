@@ -11,9 +11,7 @@
       if (!node || node.raw || node.nodeType != DOCUMENT_NODE) {
         return node;
       }
-      if (isCached === false) {
-        decorated = new Decorator;
-      } else {
+      if (isCached == null || isCached) {
         // return cached if available
         data = domData[Node.getFuseId(node)];
         if (data.decorator) {
@@ -21,6 +19,9 @@
         }
         decorated =
         data.decorator = new Decorator;
+      }
+      else {
+        decorated = new Decorator;
       }
 
       pluginViewport = HTMLDocument.plugin.viewport;

@@ -76,7 +76,7 @@
     }
 
     function HTMLElement(tagName, context) {
-      var attrs, element, result, options;
+      var attrs, element, options, result;
       if (!tagName || tagName.raw) {
         return tagName;
       }
@@ -109,19 +109,20 @@
     function fromElement(element, options) {
       var data, isCached, isDecorated, raw, result = element;
       if (options && !CONTEXT_TYPES[options.nodeType]) {
-        isCached    = options.cache;
+        isCached = options.cache;
         isDecorated = options.decorate;
       }
+      isDecorated = isDecorated == null || isDecorated;
       if (raw = element.raw) {
-        result = isDecorated === false ? raw : element;
+        result = isDecorated ? element : raw;
       }
-      else if (isDecorated !== false) {
+      else if (isDecorated) {
         Decorator.prototype = getOrCreateTagClass(element.tagName).plugin;
-        if (isCached === false) {
-          result = new Decorator(element);
-        } else {
+        if (isCached == null || isCached) {
           data = domData[getFuseId(element)];
           result = data.decorator || (data.decorator = new Decorator(element));
+        } else {
+          result = new Decorator(element);
         }
       }
       return result;
@@ -139,8 +140,8 @@
         context     = context.context;
       }
 
-      isCached    = isCached !== false;
-      isDecorated = isDecorated !== false;
+      isCached    = isCached == null || isCached;
+      isDecorated = isDecorated == null || isDecorated;
       fragment    = getFragmentFromHTML(html, context);
 
       // multiple elements return a NodeList
@@ -187,9 +188,9 @@
         context     = context.context;
       }
       element = (context || doc).getElementById(id || uid);
-      return isDecorated === false
-        ? element
-        : element && fromElement(element, isCached);
+      return isDecorated == null || isDecorated
+        ? element && fromElement(element, isCached)
+        : element;
     }
 
     function fromTagName(tagName, context) {
@@ -210,11 +211,11 @@
       result = (nodes[tagName] ||
         (nodes[tagName] = context.createElement(tagName))).cloneNode(false);
 
-      if (isDecorated !== false) {
+      if (isDecorated == null || isDecorated) {
         element = result;
         Decorator.prototype = getOrCreateTagClass(tagName).plugin;
         result = new Decorator(element);
-        if (isCached !== false) {
+        if (isCached == null || isCached) {
           domData[getFuseId(element)].decorator = result;
         }
       }
@@ -296,9 +297,9 @@
         isCached    = context.cache;
         isDecorated = context.decorate;
       }
-      return isDecorated === false
-        ? object
-        : Node(Window(object, isCached), isCached);
+      return isDecorated == null || isDecorated
+        ? Node(Window(object, isCached), isCached)
+        : object;
     }
 
 

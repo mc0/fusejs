@@ -13,7 +13,7 @@
       }
       if (node.nodeType != TEXT_NODE) {
         // return cached if available
-        if (isCached !== false) {
+        if (isCached == null || isCached) {
           data = domData[Node.getFuseId(node)];
           if (data.decorator) {
             return data.decorator;

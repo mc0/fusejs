@@ -14,9 +14,7 @@
       if (!object || object.raw || !isWindow(object)) {
         return object;
       }
-      if (isCached === false) {
-        decorated = new Decorator;
-      } else {
+      if (isCached == null || isCached) {
         // return cached if available
         data = domData[Node.getFuseId(object)];
         if (data.decorator) {
@@ -25,7 +23,9 @@
         decorated =
         data.decorator = new Decorator;
       }
-
+      else {
+        decorated = new Decorator;
+      }
       decorated.raw = object;
       return decorated;
     };
