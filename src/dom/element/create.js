@@ -391,7 +391,7 @@
   getOrCreateTagClass = (function() {
 
     var TAG_NAME_CLASSES = (function() {
-      var i, T = {
+      var i, T = { }, temp = {
         'A':        'Anchor',
         'CAPTION':  'TableCaption',
         'COL':      'TableCol',
@@ -415,13 +415,13 @@
         'UL':       'UList'
       };
 
-      T.TH = T.TD;
-      T.COLGROUP = T.COL;
-      T.TFOOT = T.THEAD =  T.TBODY;
-      T.H2 = T.H3 = T.H4 = T.H5 = T.H6 = T.H1;
+      temp.TH = temp.TD;
+      temp.COLGROUP = temp.COL;
+      temp.TFOOT = temp.THEAD =  temp.TBODY;
+      temp.H2 = temp.H3 = temp.H4 = temp.H5 = temp.H6 = temp.H1;
 
-      for (i in T) {
-        T[i] = T[i.toLowerCase()] = 'HTML' + T[i] + 'Element';
+      for (i in temp) {
+       T[i] = T[i.toLowerCase()] = 'HTML' + temp[i] + 'Element';
       }
       return T;
     })(),
