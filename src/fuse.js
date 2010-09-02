@@ -280,9 +280,10 @@
     HTMLInputElement && eachKey(HTMLInputElement.plugin, addNodeListMethod);
 
     eachKey(HTMLElement.plugin, addNodeListMethod);
+    eachKey(Element.plugin, addNodeListMethod);
 
     // Pave any NodeList methods that fuse.Array shares.
-    // HTMLElement first(), last(), and contains() may be called by using invoke()
+    // Element first(), last(), and contains() may be called by using invoke()
     // Ex: elements.invoke('first');
     addArrayMethods(NodeList);
   }
