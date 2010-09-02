@@ -3,7 +3,7 @@
   (function(plugin) {
 
     var counter         = 0,
-     indexOf            = ''.indexOf,
+     rawIndexOf         = plugin.indexOf.raw,
      reHTMLComments     = /<!--[^\x00]*?-->/g,
      reOpenHTMLComments = /<!--/g,
      reOpenScriptTag    = /<script/i,
@@ -66,7 +66,7 @@
       if (!reOpenScriptTag.test(string)) {
         return result;
       }
-      if (indexOf.call(string, '<!--') > -1) {
+      if (rawIndexOf.call(string, '<!--') > -1) {
         string = strReplace
           .call(string, reScripts, swapScriptsToTokens)
           .replace(reHTMLComments, '')
@@ -138,7 +138,7 @@
       catch (e) {
         var __run = run;
         run = function(code, context) {
-          if (indexOf.call(code, '<!--') > -1) {
+          if (rawIndexOf.call(code, '<!--') > -1) {
             code = strReplace
               .call(code, reQuotes,    swapQuotesToTokens)
               .replace(reRegexps,      swapRegexpsToTokens)

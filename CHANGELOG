@@ -1,3 +1,5 @@
+* Make fuse.String escapeHTML()/unescapeHTML() escape only `<`, `>`, and `&` characters by default and escape more entities by passing a truthy `all` argument. [FuseJS LH #65] [jddalton]
+
 * Allow decorator caching options to accept non null/undefined falsey values. [jddalton]
 
 * Reduce recursion in the element cloner() function and make getScripts() absorb getByTagName(). [jddalton]

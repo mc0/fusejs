@@ -23,9 +23,9 @@ new Test.Unit.Runner({
       'one < two <a href="# "\ntitle="foo > bar" >blah<\/a > <input disabled>baz').stripTags(),
       'failed to ignore none tag related `<` or `>` characters');
 
-    this.assertEqual('1<invalid a="b&c"\/>2<invalid a="b<c">3<invald a="b"c">4<invalid  a =  "bc">', fuse.String(
+    this.assertEqual('1<invalid a="b&c"\/>2<invalid a="b<c">3<invald a ="b"c">4<invalid a"=  "bc">', fuse.String(
       '<b>1<\/b><invalid a="b&c"\/><img a="b>c" \/>2<invalid a="b<c"><b a="b&amp;c">3<\/b>' +
-      '<invald a="b"c"><b a="b&#38;c" >4<\/b><invalid  a =  "bc">').stripTags(),
+      '<invald a ="b"c"><b a="b&#38;c" >4<\/b><invalid a"=  "bc">').stripTags(),
       'failed to ignore invalid tags');
   },
 
@@ -33,7 +33,7 @@ new Test.Unit.Runner({
     this.assertEqual('foo bar', fuse.String('foo bar').escapeHTML());
 
     var expected = 'foo \u00c3\u00178 bar';
-    this.assertEqual(expected, fuse.String(expected).escapeHTML());
+    this.assertEqual(expected, fuse.String(expected).escapeHTML(true));
 
     this.assertEqual('foo &lt;span&gt;bar&lt;\/span&gt;',
       fuse.String('foo <span>bar<\/span>').escapeHTML());
@@ -43,7 +43,7 @@ new Test.Unit.Runner({
       '\u00b3\u00e3\u00ac\u00e3\u00af\u00e3\u00b7\u00e3\u00a7\u00e3\u00b3';
 
     this.assertEqual(expected,
-      fuse.String(expected).escapeHTML());
+      fuse.String(expected).escapeHTML(true));
 
     this.assertEqual('a&lt;a href="blah"&gt;blub&lt;\/a&gt;b&lt;span&gt;&lt;div&gt;&lt;\/div&gt;&lt;\/span&gt;cdef&lt;strong&gt;!!!!&lt;\/strong&gt;g',
       fuse.String('a<a href="blah">blub<\/a>b<span><div><\/div><\/span>cdef<strong>!!!!<\/strong>g').escapeHTML());
@@ -64,7 +64,7 @@ new Test.Unit.Runner({
       fuse.String('foo &lt;span&gt;bar&lt;\/span&gt;').unescapeHTML());
 
     this.assertEqual('foo ß bar',
-      fuse.String('foo ß bar').unescapeHTML());
+      fuse.String('foo ß bar').unescapeHTML(true));
 
     this.assertEqual('a<a href="blah">blub<\/a>b<span><div><\/div><\/span>cdef<strong>!!!!<\/strong>g',
       fuse.String('a&lt;a href="blah"&gt;blub&lt;\/a&gt;b&lt;span&gt;&lt;div&gt;&lt;\/div&gt;&lt;\/span&gt;cdef&lt;strong&gt;!!!!&lt;\/strong&gt;g').unescapeHTML());
@@ -72,7 +72,7 @@ new Test.Unit.Runner({
     this.assertEqual(largeTextUnescaped, largeTextEscaped.unescapeHTML());
 
     this.assertEqual('test \xfa',
-      fuse.String('test &uacute;').unescapeHTML());
+      fuse.String('test &uacute;').unescapeHTML(true));
 
     this.assertEqual('1\n2',
       fuse.String('1\n2').unescapeHTML(),
