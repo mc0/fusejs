@@ -227,7 +227,7 @@
       var match, node, nodeName, tbody, times, wrapping,
        ownerDoc = context.ownerDocument || context,
        data = domData[ownerDoc == doc ? '1': getFuseId(ownerDoc)],
-       cache = data._fragmentCache || (data._fragmentCache = {
+       cache = data.fragments || (data.fragments = {
          'node': ownerDoc.createElement('div'),
          'fragment': ownerDoc.createDocumentFragment()
        });

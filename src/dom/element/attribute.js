@@ -1,16 +1,12 @@
   /*------------------------ HTML ELEMENT: ATTRIBUTE -------------------------*/
 
-  Element.Attribute = {
-    'contentNames': { },
-    'read':         { },
-    'write':        { },
-    'names':        { }
-  };
-
   (function(plugin) {
 
     var ATTR_DEFAULT_VALUE_PROP =
       { 'selected': 'defaultSelected', 'value': 'defaultValue' },
+
+    ATTR_NAME = domData['1'].attributes =
+      { 'contentNames': { }, 'read': { }, 'write': { }, 'names': { } },
 
     TAG_WITH_DEFAULT_VALUE_PROP =
       { 'OPTION': 'selected', 'TEXTAREA': 'value' },
@@ -42,19 +38,17 @@
       return T;
     })();
 
-
     plugin.hasAttribute = function hasAttribute(name) {
       return (this.raw || this).hasAttribute(name);  
     };
 
     plugin.getAttribute = function getAttribute(name) {
-      var result, defaults, T = Element.Attribute,
-       element = this.raw || this,
-       contentName = T.contentNames[name] || name;
+      var result, defaults, element = this.raw || this,
+       contentName = ATTR_NAME.contentNames[name] || name;
 
-      name = T.names[name] || name;
-      if (T.read[name]) {
-        result = T.read[name](element, contentName);
+      name = ATTR_NAME.names[name] || name;
+      if (ATTR_NAME.read[name]) {
+        result = ATTR_NAME.read[name](element, contentName);
       }
       else if (!((result = element.getAttributeNode(name)) &&
           result.specified && (result = result.value)) &&
@@ -65,13 +59,13 @@
     };
 
     plugin.removeAttribute = function removeAttribute(name) {
-      (this.raw || this).removeAttribute(Element.Attribute.contentNames[name] || name);
+      (this.raw || this).removeAttribute(ATTR_NAME.contentNames[name] || name);
       return this;
     };
 
     plugin.setAttribute = function setAttribute(name, value) {
       var contentName, isRemoved, node,
-       element = this.raw || this, attributes = { }, T = Element.Attribute;
+       element = this.raw || this, attributes = { };
 
       if (isHash(name)) {
         attributes = name._object;
@@ -83,12 +77,12 @@
 
       for (name in attributes) {
         value = attributes[name];
-        contentName = T.contentNames[name] || name;
-        name = T.names[name] || name;
+        contentName = ATTR_NAME.contentNames[name] || name;
+        name = ATTR_NAME.names[name] || name;
         isRemoved = value === false || value == null;
 
-        if (T.write[name]) {
-          if (T.write[name](element, value, isRemoved) === false) {
+        if (ATTR_NAME.write[name]) {
+          if (ATTR_NAME.write[name](element, value, isRemoved) === false) {
             element.removeAttribute(contentName);
           }
         }
@@ -124,7 +118,7 @@
         }
         // IE6/7 fails to detect value attributes as well as colspan and rowspan
         // attributes with a value of 1
-        node = node.getAttributeNode(Element.Attribute.names[name] || name);
+        node = node.getAttributeNode(ATTR_NAME.names[name] || name);
         return !!node && node.specified;
       };
     }
@@ -134,12 +128,13 @@
      hasAttribute =    null,
      setAttribute =    null,
      removeAttribute = null;
-  })(HTMLElement.plugin);
+  })(Element.plugin);
 
   /*--------------------------------------------------------------------------*/
 
-  (function(T) {
-    var plugin = HTMLElement.plugin,
+  (function(plugin) {
+
+    var T = domData['1'].attributes,
 
     getAttribute = function(element, contentName) {
       return element.getAttribute(contentName);
@@ -347,4 +342,4 @@
           T.names[contentName]  = lower;
       });
     }
-  })(Element.Attribute);
+  })(Element.plugin);
