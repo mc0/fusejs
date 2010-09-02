@@ -315,15 +315,19 @@
     };
 
     plugin.wrap = function wrap(wrapper, attributes) {
-      var rawWrapper, element = this.raw || this, parentNode = element[PARENT_NODE];
+      var rawWrapper, element = this.raw || this, 
+       parentNode = element[PARENT_NODE],
+       options = { 'attrs': attributes, 'context': element }
+
       if (isString(wrapper)) {
-        wrapper = HTMLElement(wrapper, { 'attrs': attributes, 'context': element });
+        wrapper = Element(wrapper, options);
       }
       if (isElement(wrapper)) {
         wrapper = plugin.setAttribute.call(wrapper, attributes);
       }
       else {
-        wrapper = HTMLElement('div', { 'attrs': wrapper, 'context': element });
+        options.attrs = wrapper;
+        wrapper = HTMLElement('div', options);
       }
       rawWrapper = wrapper.raw || wrapper;
       if (parentNode) {
@@ -376,7 +380,8 @@
           if (setType) attributes.type = plugin.getAttribute.call(source, 'type');
         }
 
-        element = HTMLElement(nodeName, { 'attrs': attributes, 'context': context, 'decorate': false });
+        element = Element(nodeName,
+          { 'attrs': attributes, 'context': context, 'decorate': false });
 
         // avoid mergeAttributes because it is buggy :/
         attributes = source.attributes || { };

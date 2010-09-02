@@ -32,7 +32,7 @@
         }
         else if (reMod.test(key)) {
           // when a html string is used with dom modification methods convert it
-          // to an element/fragment once and clone it instead of converting it 
+          // to an element/fragment once and clone it instead of converting it
           // for each iteration
           snippet = 'p=(c[n=e.nodeName]||(c[n]=gc(n))).plugin;m=p.' + key + ';m&&m.call(e,';
 

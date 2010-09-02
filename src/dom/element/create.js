@@ -1,47 +1,8 @@
   /*-------------------------- HTML ELEMENT: CREATE --------------------------*/
 
-  Element =
-  fuse.dom.Element = (function() {
-
-    var Decorator = function() { },
-
-    Element = function Element(node, isCached) {
-      // quick return if empty, decorated, or not an element node
-      var data, decorated;
-      if (!node || node.raw || node.nodeType != ELEMENT_NODE) {
-        return node;
-      }
-      if (isCached === false) {
-        decorated = new Decorator;
-      } else {
-        // return cached if available
-        data = domData[Node.getFuseId(node)];
-        if (data.decorator) {
-          return data.decorator;
-        }
-        decorated =
-        data.decorator = new Decorator;
-      }
-
-      decorated.raw = node;
-      decorated.nodeName = node.nodeName;
-      decorated.nodeType = ELEMENT_NODE;
-      return decorated;
-    };
-
-    fuse.Class(Node, { 'constructor': Element });
-    Decorator.prototype = Element.plugin;
-    Element.updateGenerics = Node.updateGenerics;
-    return Element;
-  })();
-
-  /*--------------------------------------------------------------------------*/
-
   (function() {
 
-    var plugin,
-
-    ELEMENT_INNERHTML_IGNORES_SCRIPTS =
+    var ELEMENT_INNERHTML_IGNORES_SCRIPTS =
       envTest('ELEMENT_INNERHTML_IGNORES_SCRIPTS'),
 
     ELEMENT_TABLE_INNERHTML_INSERTS_TBODY =
@@ -93,8 +54,7 @@
       return T;
     })(),
 
-    __fuse           = window.fuse,
-    doc              = __fuse._doc,
+    doc              = window.fuse._doc,
     reSimpleTag      = /^<([A-Za-z0-9]+)\/?>$/,
     reTagStart       = /^\s*</,
     reTBody          = /<tbody /i,
@@ -110,18 +70,36 @@
       this.initialize && this.initialize();
     }
 
-    function HTMLElement(tagName, context) {
-      var attrs, element, result,
-        options = !CONTEXT_TYPES[context && context.nodeType] && context;
+    function Element(tagName, context) {
+      // pass to HTMLElement until we have a non-html element solution
+      return HTMLElement(tagName, context);
+    }
 
-      if (isString(tagName)) {
-        result = (tagName.charAt(0) == '<' ? fromHTML : fromTagName)(tagName, context);
-      } else {
-        result = fromElement(tagName, context);
+    function HTMLElement(tagName, context) {
+      var attrs, element, result, options;
+      if (!tagName || tagName.raw) {
+        return tagName;
       }
+      if (tagName.nodeType) {
+        result = fromElement(tagName, context);
+      } else {
+        result = (tagName.charAt(0) == '<' ? fromHTML : fromTagName)(tagName, context);
+      }
+      options = !CONTEXT_TYPES[context && context.nodeType] && context;
       return (attrs = options && options.attrs)
-        ? plugin.setAttribute.call(result, attrs)
+        ? Element.plugin.setAttribute.call(result, attrs)
         : result;
+    }
+
+    function extendByTag(tagName, plugins, mixins, statics) {
+      var i = -1;
+      if (isArray(tagName)) {
+        while (tagName[++i]) {
+          extendByTag(tagName[i], plugins, mixins, statics);
+        }
+      } else {
+        getOrCreateTagClass(tagName).extend(plugins, mixins, statics);
+      }
     }
 
     function from(element, context) {
@@ -253,8 +231,6 @@
          'fragment': ownerDoc.createDocumentFragment()
        });
 
-      node = cache.node;
-
       if (html == '') {
         return cache.fragment;
       }
@@ -264,13 +240,13 @@
       if (!nodeName) {
         nodeName = getNodeName(context);
       }
-
       // skip auto-inserted tbody
       if (nodeName == 'TABLE' && ELEMENT_TABLE_INNERHTML_INSERTS_TBODY &&
           reStartsWithTR.test(html)) {
         nodeName = 'TBODY';
       }
 
+      node = cache.node;
       wrapping = FROM_STRING_PARENT_WRAPPERS[nodeName];
 
       // Fix IE rendering issue with innerHTML and script
@@ -353,34 +329,46 @@
 
     if (envTest('ELEMENT_REMOVE_NODE')) {
       getFragmentFromChildNodes = function(parentNode, cache) {
-        // removeNode: removes the parent but keeps the children
         var fragment = cache.fragment;
         fragment.appendChild(parentNode).removeNode();
         return fragment;
       };
     }
 
-    // add class sugar to HTMLElement
-    __fuse.Class(Element, { 'constructor': HTMLElement });
-
-    // add class sugar to fuse
-    __fuse.Class({ 'constructor': fuse });
-
     // copy old fuse properties to new window.fuse
-    eachKey(__fuse, function(value, key) {
-      if (hasKey(__fuse, key)) fuse[key] = value;
+    eachKey(window.fuse, function(value, key) {
+      if (hasKey(window.fuse, key)) fuse[key] = value;
     });
 
-    plugin = HTMLElement.plugin;
+    // add class sugar
+    fuse.Class({ 'constructor': fuse });
+    fuse.Class(Node, { 'constructor': Element });
+    fuse.Class(Element, { 'constructor': HTMLElement });
 
     // expose
-    HTMLElement.from        = from;
+    Element.extendByTag =
+    HTMLElement.extendByTag = extendByTag;
+
+    Element.from =
+    HTMLElement.from = from;
+
+    Element.fromElement =
     HTMLElement.fromElement = fromElement;
-    HTMLElement.fromHTML    = fromHTML;
-    HTMLElement.fromId      = fromId;
+
+    Element.fromId =
+    HTMLElement.fromId = fromId;
+
+    Element.fromTagName =
     HTMLElement.fromTagName = fromTagName;
 
+    Element.fromHTML =
+    HTMLElement.fromHTML = fromHTML;
+
+    Element.updateGenerics =
+    HTMLElement.updateGenerics = Node.updateGenerics;
+
     window.fuse = fuse;
+    fuse.dom.Element = Element;
     fuse.dom.HTMLElement = HTMLElement;
     fuse.dom.getFragmentFromHTML = getFragmentFromHTML;
   })();
@@ -389,29 +377,19 @@
 
   // define private vars shared by primary closure
 
+  Element = fuse.dom.Element;
+
   HTMLElement = fuse.dom.HTMLElement;
 
-  fromElement = HTMLElement.fromElement;
+  extendByTag = Element.extendByTag;
+
+  fromElement = Element.fromElement;
 
   getFragmentFromHTML = fuse.dom.getFragmentFromHTML;
 
-  extendByTag =
-  HTMLElement.extendByTag = function extendByTag(tagName, plugins, mixins, statics) {
-    if (isArray(tagName)) {
-      var i = -1;
-      while (tagName[++i]) {
-        extendByTag(tagName[i], plugins, mixins, statics);
-      }
-    } else {
-      getOrCreateTagClass(tagName).extend(plugins, mixins, statics);
-    }
-  };
-
   getOrCreateTagClass = (function() {
 
-    var reTagName = /^[A-Z0-9]+$/,
-
-    TAG_NAME_CLASSES = (function() {
+    var TAG_NAME_CLASSES = (function() {
       var i, T = {
         'A':        'Anchor',
         'CAPTION':  'TableCaption',
@@ -445,7 +423,9 @@
         T[i] = T[i.toLowerCase()] = 'HTML' + T[i] + 'Element';
       }
       return T;
-    })();
+    })(),
+
+    reTagName = /^[A-Z0-9]+$/;
 
     return function(tagName) {
       var upperCased, TagClass,

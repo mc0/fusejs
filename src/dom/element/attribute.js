@@ -1,6 +1,6 @@
   /*------------------------ HTML ELEMENT: ATTRIBUTE -------------------------*/
 
-  HTMLElement.Attribute = {
+  Element.Attribute = {
     'contentNames': { },
     'read':         { },
     'write':        { },
@@ -48,7 +48,7 @@
     };
 
     plugin.getAttribute = function getAttribute(name) {
-      var result, defaults, T = HTMLElement.Attribute,
+      var result, defaults, T = Element.Attribute,
        element = this.raw || this,
        contentName = T.contentNames[name] || name;
 
@@ -65,13 +65,13 @@
     };
 
     plugin.removeAttribute = function removeAttribute(name) {
-      (this.raw || this).removeAttribute(HTMLElement.Attribute.contentNames[name] || name);
+      (this.raw || this).removeAttribute(Element.Attribute.contentNames[name] || name);
       return this;
     };
 
     plugin.setAttribute = function setAttribute(name, value) {
       var contentName, isRemoved, node,
-       element = this.raw || this, attributes = { }, T = HTMLElement.Attribute;
+       element = this.raw || this, attributes = { }, T = Element.Attribute;
 
       if (isHash(name)) {
         attributes = name._object;
@@ -124,7 +124,7 @@
         }
         // IE6/7 fails to detect value attributes as well as colspan and rowspan
         // attributes with a value of 1
-        node = node.getAttributeNode(HTMLElement.Attribute.names[name] || name);
+        node = node.getAttributeNode(Element.Attribute.names[name] || name);
         return !!node && node.specified;
       };
     }
@@ -347,4 +347,4 @@
           T.names[contentName]  = lower;
       });
     }
-  })(HTMLElement.Attribute);
+  })(Element.Attribute);
