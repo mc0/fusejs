@@ -78,7 +78,7 @@
         plugin.contains.call(element.ownerDocument, element));
     };
 
-    if (envTest('ELEMENT_SOURCE_INDEX', 'DOCUMENT_ALL_COLLECTION')) {
+    if (envTest('ELEMENT_SOURCE_INDEX')) {
       plugin.isDetached = function isDetached() {
         var element = this.raw || this;
         return element.ownerDocument.all[element.sourceIndex] != element;

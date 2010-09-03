@@ -1,21 +1,6 @@
   /*----------------------------- DOM: FEATURES ------------------------------*/
 
   envAddTest({
-    'DOCUMENT_ALL_COLLECTION': function() {
-      // true for all but Firefox
-      isHostType(fuse._doc, 'all');
-    },
-
-    'DOCUMENT_CREATE_EVENT': function() {
-      // true for all but IE
-      return isHostType(fuse._doc, 'createEvent');
-    },
-
-    'DOCUMENT_CREATE_EVENT_OBJECT': function() {
-      // true for IE
-      return isHostType(fuse._doc, 'createEventObject');
-    },
-
     'ELEMENT_ADD_EVENT_LISTENER': function() {
       // true for all but IE
       return isHostType(fuse._doc, 'addEventListener');
@@ -63,19 +48,9 @@
     },
 
     // features
-    'ELEMENT_DISPATCH_EVENT': function() {
-      // true for all but IE
-      return isHostType(fuse._docEl, 'dispatchEvent');
-    },
-
     'ELEMENT_DO_SCROLL': function() {
       // true for IE
       return isHostType(fuse._docEl, 'doScroll');
-    },
-
-    'ELEMENT_FIRE_EVENT': function() {
-      // true for IE
-      return isHostType(fuse._docEl, 'fireEvent');
     },
 
     'ELEMENT_GET_ATTRIBUTE_IFLAG': function() {
@@ -121,7 +96,8 @@
 
     'ELEMENT_SOURCE_INDEX': function() {
       // true for IE and Opera
-      return typeof fuse._docEl.sourceIndex == 'number';
+      return isHostType(fuse._doc, 'all') &&
+        typeof fuse._docEl.sourceIndex == 'number'
     },
 
     'ELEMENT_TEXT_CONTENT': function() {
@@ -257,15 +233,6 @@
       var div = fuse._div;
       div.innerHTML = '<table><tr><td><\/td><\/tr><\/table>';
       var result = getNodeName(div.firstChild.firstChild) == 'TBODY';
-      div.innerHTML = '';
-      return result;
-    },
-
-    'GET_ELEMENTS_BY_TAG_NAME_RETURNS_COMMENT_NODES': function() {
-      // true for IE
-      var div = fuse._div;
-      div.innerHTML = '<p>x<\/p><!--y-->';
-      var result = div.getElementsByTagName('*').length == 2;
       div.innerHTML = '';
       return result;
     },
