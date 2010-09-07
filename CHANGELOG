@@ -1,3 +1,7 @@
+* Add fuse.dom.Element#destroy and fuse.dom.Element#purge. [FuseJS LH #71, #72] [jddalton]
+
+* Add XHTML support for FuseJS. [jddalton]
+
 * Make fuse.String escapeHTML()/unescapeHTML() escape only `<`, `>`, and `&` characters by default and escape more entities by passing a truthy `all` argument. [FuseJS LH #65] [jddalton]
 
 * Allow decorator caching options to accept non null/undefined falsey values. [jddalton]

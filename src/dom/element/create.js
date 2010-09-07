@@ -2,11 +2,11 @@
 
   (function() {
 
-    var ELEMENT_INNERHTML_IGNORES_SCRIPTS =
-      envTest('ELEMENT_INNERHTML_IGNORES_SCRIPTS'),
+    var ELEMENT_INNER_HTML_IGNORES_SCRIPTS =
+      envTest('ELEMENT_INNER_HTML_IGNORES_SCRIPTS'),
 
-    ELEMENT_TABLE_INNERHTML_INSERTS_TBODY =
-      envTest('ELEMENT_TABLE_INNERHTML_INSERTS_TBODY'),
+    ELEMENT_TABLE_INNER_HTML_INSERTS_TBODY =
+      envTest('ELEMENT_TABLE_INNER_HTML_INSERTS_TBODY'),
 
     CONTEXT_TYPES = (function() {
       var T = { };
@@ -59,23 +59,9 @@
     reTagStart       = /^\s*</,
     reTBody          = /<tbody /i,
     reExtractTagName = /^<([^> ]+)/,
-    reStartsWithTR   = /^<tr/i;
+    reStartsWithTR   = /^<tr/i,
 
-    function Decorator(element) {
-      this.raw = element;
-      this.style = element.style;
-      this.nodeType = ELEMENT_NODE;
-      this.childNodes = element.childNodes;
-      this.tagName = this.nodeName = element.nodeName;
-      this.initialize && this.initialize();
-    }
-
-    function Element(tagName, context) {
-      // pass to HTMLElement until we have a non-html element solution
-      return HTMLElement(tagName, context);
-    }
-
-    function HTMLElement(tagName, context) {
+    HTMLElement = function HTMLElement(tagName, context) {
       var attrs, element, options, result;
       if (!tagName || tagName.raw) {
         return tagName;
@@ -89,6 +75,20 @@
       return (attrs = options && options.attrs)
         ? Element.plugin.setAttribute.call(result, attrs)
         : result;
+    };
+
+    function Decorator(element) {
+      this.raw = element;
+      this.style = element.style;
+      this.nodeType = ELEMENT_NODE;
+      this.childNodes = element.childNodes;
+      this.tagName = this.nodeName = element.nodeName;
+      this.initialize && this.initialize();
+    }
+
+    function Element(tagName, context) {
+      // pass to HTMLElement until we have a non-html element solution
+      return HTMLElement(tagName, context);
     }
 
     function extendByTag(tagName, plugins, mixins, statics) {
@@ -242,7 +242,7 @@
         nodeName = getNodeName(context);
       }
       // skip auto-inserted tbody
-      if (nodeName == 'TABLE' && ELEMENT_TABLE_INNERHTML_INSERTS_TBODY &&
+      if (nodeName == 'TABLE' && ELEMENT_TABLE_INNER_HTML_INSERTS_TBODY &&
           reStartsWithTR.test(html)) {
         nodeName = 'TBODY';
       }
@@ -252,7 +252,7 @@
 
       // Fix IE rendering issue with innerHTML and script
       // and link elements by prefixing the html with text
-      if (!wrapping && ELEMENT_INNERHTML_IGNORES_SCRIPTS && reTagStart.test(html)) {
+      if (!wrapping && ELEMENT_INNER_HTML_IGNORES_SCRIPTS && reTagStart.test(html)) {
         node.innerHTML = 'x' + html;
         node.removeChild(node.firstChild);
       }
@@ -270,7 +270,7 @@
         return node.firstChild;
       }
       // remove auto-inserted tbody
-      if (nodeName == 'TABLE' && ELEMENT_TABLE_INNERHTML_INSERTS_TBODY &&
+      if (nodeName == 'TABLE' && ELEMENT_TABLE_INNER_HTML_INSERTS_TBODY &&
           !reTBody.test(html) && (tbody = node.getElementsByTagName('tbody')[0])) {
         tbody.parentNode.removeChild(tbody);
       }
@@ -301,7 +301,6 @@
         ? Node(Window(object, isCached), isCached)
         : object;
     }
-
 
     // IE7 and below need to use the sTag of createElement to set the `name` attribute
     // http://msdn.microsoft.com/en-us/library/ms536389.aspx

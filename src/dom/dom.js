@@ -41,6 +41,18 @@
     isHostType(fuse._doc, 'defaultView') && fuse._doc.defaultView === window ? 'defaultView' :
     isHostType(fuse._doc, 'parentWindow') ? 'parentWindow' : null;
 
+  destroyElement = function(element, parentNode) {
+    parentNode || (element = element[PARENT_NODE]);
+    parentNode && parentNode.removeChild(element);
+  };
+
+  emptyElement = function(element) {
+    var child;
+    while (child = element.lastChild) {
+      destroyElement(child, element);
+    }
+  };
+
   getDocument = function getDocument(element) {
     return element.ownerDocument || element.document ||
       (element.nodeType == DOCUMENT_NODE ? element : fuse._doc);
@@ -123,10 +135,25 @@
     };
   }
 
+  if (envTest('ELEMENT_INNER_HTML')) {
+    emptyElement = function(element) {
+      element.innerHTML = '';
+    };
+
+    destroyElement = (function() {
+      var trash = document.createElement('div');
+      return function(element) {
+        trash.appendChild(element);
+        trash.innerHTML = '';
+      };
+    })();
+  }
+
   if (envTest('ELEMENT_SCRIPT_HAS_TEXT_PROPERTY')) {
     getScriptText = function(element) {
       return element.text;
     };
+
     setScriptText = function(element, text) {
       element.text = text || '';
     };

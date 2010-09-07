@@ -18,11 +18,11 @@
    INPUT_BUTTONS, PARENT_NODE, PARENT_WINDOW, Node, NodeList, Element,
    HTMLDocument, HTMLElement, HTMLButtonElement, HTMLFormElement,
    HTMLInputElement, HTMLOptionElement, HTMLSelectElement, HTMLTextAreaElement,
-   Window, domData, eachKey, envAddTest, envTest, extendByTag, fromElement,
-   getDocument, getFragmentFromHTML, getFuseId, getNodeName, getScriptText,
-   getWindow, getOrCreateTagClass, hasKey, isArray, isElement, isHash, isNumber,
-   isPrimitive, isRegExp, isString, returnOffset, runScriptText, setScriptText,
-   undef,
+   Window, destroyElement, domData, eachKey, emptyElement, envAddTest, envTest,
+   extendByTag, fromElement, getDocument, getFragmentFromHTML, getFuseId,
+   getNodeName, getScriptText, getWindow, getOrCreateTagClass, hasKey, isArray,
+   isElement, isHash, isNumber, isPrimitive, isRegExp, isString, returnOffset,
+   runScriptText, setScriptText, undef,
 
   DOCUMENT_FRAGMENT_NODE = 11,
 

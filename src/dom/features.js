@@ -38,11 +38,12 @@
       // true for all but Safari 2
       if(isHostType(fuse._docEl, 'contains')) {
         var result, div = fuse._div;
-        div.innerHTML = '<div><\/div><div><div><\/div><\/div>';
+        div.appendChild(div.cloneNode(false));
+        div.appendChild(div.cloneNode(true));
 
         // ensure element.contains() returns the correct results;
         result = !div.firstChild.contains(div.childNodes[1].firstChild);
-        div.innerHTML = '';
+        emptyElement(div);
         return result;
       }
     },
@@ -75,6 +76,12 @@
       return result;
     },
 
+    'ELEMENT_INNER_HTML': function() {
+      var div = fuse._div;
+      try { div.innerHTML = '<p><\/p>' } catch(e) { }
+      return !!div.firstChild;
+    },
+    
     'ELEMENT_INNER_TEXT': function() {
       // true for IE
       return !envTest('ELEMENT_TEXT_CONTENT') &&
@@ -218,22 +225,27 @@
 
     'ELEMENT_COORD_OFFSETS_DONT_INHERIT_ANCESTOR_BORDER_WIDTH': function() {
       // true for all but IE8
-      var body = fuse._body, div = fuse._div, bs = fuse._body.style, backup = bs.cssText;
+      var result, value, body = fuse._body, div = fuse._div,
+       bs = fuse._body.style, backup = bs.cssText;
+
       body.appendChild(div);
-      var value = div.offsetLeft;
+      value = div.offsetLeft;
       bs.cssText += ';border: 1px solid transparent;';
-      var result = (value == div.offsetLeft);
+
+      result = value == div.offsetLeft;
       bs.cssText = backup;
       body.removeChild(div);
       return result;
     },
 
-    'ELEMENT_TABLE_INNERHTML_INSERTS_TBODY': function() {
+    'ELEMENT_TABLE_INNER_HTML_INSERTS_TBODY': function() {
       // true for IE and Firefox 3
-      var div = fuse._div;
-      div.innerHTML = '<table><tr><td><\/td><\/tr><\/table>';
-      var result = getNodeName(div.firstChild.firstChild) == 'TBODY';
-      div.innerHTML = '';
+      var result, div = fuse._div;
+      if (envTest('ELEMENT_INNER_HTML')) {
+        div.innerHTML = '<table><tr><td><\/td><\/tr><\/table>';
+        result = getNodeName(div.firstChild.firstChild) == 'TBODY';
+        div.innerHTML = '';
+      }
       return result;
     },
 
@@ -252,16 +264,24 @@
 
       node.name = 'x';
       result = !div.getElementsByTagName('*')['x'];
-      div.innerHTML = '';
+      emptyElement(div);
       return result;
     },
 
     'TABLE_ELEMENTS_RETAIN_OFFSET_DIMENSIONS_WHEN_HIDDEN': function() {
       // true for IE7 and lower
-      fuse._div.innerHTML = '<table><tbody style="display:none"><tr style="width:1px"><td><\/td><\/tr><\/tbody><\/table>';
-      fuse._body.appendChild(fuse._div);
-      var result = !!fuse._div.firstChild.firstChild.offsetWidth;
-      fuse._body.removeChild(fuse._div);
+      var result, doc = fuse._doc, body = fuse._body,
+       table = doc.createElement('table'),
+       tbody = table.appendChild(doc.createElement('tbody')),
+       tr    = tbody.appendChild(doc.createElement('tr')),
+       tr    = tr.appendChild(doc.createElement('td'));
+
+      tbody.style.display = 'none';
+      tr.style.width = '1px';
+      body.appendChild(table);
+
+      result = !!table.firstChild.offsetWidth;
+      destroyElement(table, body);
       return result;
     }
   });
@@ -270,38 +290,40 @@
     function createInnerHTMLTest(source, innerHTML, targetNode) {
       return function() {
         var element, div = fuse._div, result = true;
-        div.innerHTML = source;
-        element = div.firstChild;
-        if (targetNode) element = element.getElementsByTagName(targetNode)[0];
-        try {
-          element.innerHTML = innerHTML;
-          result = element.innerHTML.toLowerCase() != innerHTML;
-        } catch(e) { }
-        div.innerHTML = '';
+        if (envTest('ELEMENT_INNER_HTML')) {
+          div.innerHTML = source;
+          element = div.firstChild;
+          if (targetNode) element = element.getElementsByTagName(targetNode)[0];
+          try {
+            element.innerHTML = innerHTML;
+            result = element.innerHTML.toLowerCase() != innerHTML;
+          } catch(e) { }
+          div.innerHTML = '';
+        }
         return result;
       };
     }
 
     return {
-      'ELEMENT_COLGROUP_INNERHTML_BUGGY': createInnerHTMLTest(
+      'ELEMENT_COLGROUP_INNER_HTML_BUGGY': createInnerHTMLTest(
         '<table><colgroup><\/colgroup><tbody><\/tbody><\/table>',
         '<col><col>', 'colgroup'
       ),
 
-      'ELEMENT_OPTGROUP_INNERHTML_BUGGY': createInnerHTMLTest(
+      'ELEMENT_OPTGROUP_INNER_HTML_BUGGY': createInnerHTMLTest(
         '<select><optgroup><\/optgroup><\/select>',
         '<option>x<\/option>', 'optgroup'
       ),
 
-      'ELEMENT_SELECT_INNERHTML_BUGGY': createInnerHTMLTest(
+      'ELEMENT_SELECT_INNER_HTML_BUGGY': createInnerHTMLTest(
         '<select><option><\/option><\/select>', '<option>x<\/option>'
       ),
 
-      'ELEMENT_INNERHTML_IGNORES_SCRIPTS': createInnerHTMLTest(
+      'ELEMENT_INNER_HTML_IGNORES_SCRIPTS': createInnerHTMLTest(
         '<div><\/div>', '<script><\/script>'
       ),
 
-      'ELEMENT_TABLE_INNERHTML_BUGGY': createInnerHTMLTest(
+      'ELEMENT_TABLE_INNER_HTML_BUGGY': createInnerHTMLTest(
         // left out tbody to test if it's auto inserted
         '<table><tr><td><\/td><\/tr><\/table>', '<tr><td><p>x<\/p><\/td><\/tr>'
       )
@@ -334,12 +356,13 @@
         }
 
         reEvaled = fuse[uid] == 3;
+        destroyElement(script);
 
-        div.appendChild(script);
-        div.innerHTML = 'x<script>' + code + '+1<\/script>';
-        div.appendChild(head.insertBefore(div.lastChild, head.firstChild));
-        div.innerHTML = '';
-
+        if (envTest('ELEMENT_INNER_HTML')) {
+          div.innerHTML = 'x<script>' + code + '+1<\/script>';
+          div.appendChild(head.insertBefore(div.lastChild, head.firstChild));
+          div.innerHTML = '';
+        }
         htmlEvaled = fuse[uid] == 4;
         delete fuse[uid];
 
@@ -350,7 +373,7 @@
 
           'ELEMENT_SCRIPT_REEVALS_TEXT': reEvaled,
 
-          'ELEMENT_EVALS_SCRIPT_FROM_INNERHTML': htmlEvaled
+          'ELEMENT_EVALS_SCRIPT_FROM_INNER_HTML': htmlEvaled
         });
 
         return ({ '1': hasText, '2': evalFailed, '3': reEvaled, '4': htmlEvaled })[testType];
@@ -364,6 +387,6 @@
 
       'ELEMENT_SCRIPT_REEVALS_TEXT': createScriptTest('3'),
 
-      'ELEMENT_EVALS_SCRIPT_FROM_INNERHTML': createScriptTest('4')
+      'ELEMENT_EVALS_SCRIPT_FROM_INNER_HTML': createScriptTest('4')
     };
   })());

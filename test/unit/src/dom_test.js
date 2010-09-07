@@ -68,14 +68,14 @@ new Test.Unit.Runner({
       'Should extend element with a `toOutput` method.');
 
     // remove toString addition
-    delete fuse.dom.DivElement.plugin.toOutput;
+    delete fuse.dom.HTMLDivElement.plugin.toOutput;
   },
 
   'testFuseGet': function() {
     var element = $('element_extend_test');
     this.assertRespondsTo('show', element);
 
-    var XHTML_TAGS = $w(
+    var HTML_TAGS = $w(
       'a abbr acronym address applet area '+
       'b bdo big blockquote br button caption '+
       'cite code col colgroup dd del dfn div dl dt '+
@@ -85,7 +85,7 @@ new Test.Unit.Runner({
       'script select small span strong style sub sup '+
       'table tbody td textarea tfoot th thead tr tt ul var');
 
-    XHTML_TAGS.each(function(tag) {
+    HTML_TAGS.each(function(tag) {
       var element = document.createElement(tag),
        nodeName = element.nodeName.toUpperCase();
 
@@ -105,7 +105,7 @@ new Test.Unit.Runner({
     }, this);
 
     // don't extend XML documents
-    var xmlDoc = (new DOMParser()).parseFromString('<note><to>Sam</to></note>', 'text/xml');
+    var xmlDoc = (new DOMParser).parseFromString('<note><to>Sam</to></note>', 'text/xml');
     this.assertUndefined(fuse(xmlDoc.firstChild).hide);
   },
 
@@ -1845,6 +1845,26 @@ new Test.Unit.Runner({
     }, this);
   },
 
+  'testElementDestroy': function(){
+    var element = $('destroy_me'), id = element.getFuseId();
+    element.destroy();
+
+    this.assertNull(element.raw,
+      'Destroyed element should not exist.');
+
+    this.assertUndefined(fuse.dom.data[id],
+      'Destroyed element should not have data.');
+  },
+
+  'testElementPurge': function(){
+    var element = $('purge_me'), id = element.getFuseId();
+    element.observe('click', fuse.Function.NOOP);
+    element.purge();
+
+    this.assertUndefined(fuse.dom.data[id],
+      'Destroyed element should not have data.');
+  },
+
   'testElementGetHeight': function() {
     this.assertEqual(100, $('dimensions-visible').getHeight());
     this.assertEqual(100, $('dimensions-display-none').getHeight());
@@ -2188,13 +2208,13 @@ new Test.Unit.Runner({
     var Element = fuse.dom.HTMLElement,
      elem = $('navigation_test_f');
 
-    this.assert(fuse.dom.LiElement);
+    this.assert(fuse.dom.HTMLLiElement);
     this.assertRespondsTo('pancakes', elem);
     this.assertEqual('pancakes', elem.pancakes());
 
     var elem2 = $('test-visible');
 
-    this.assert(fuse.dom.DivElement);
+    this.assert(fuse.dom.HTMLDivElement);
     this.assertUndefined(elem2.pancakes);
     this.assertRespondsTo('waffles', elem2);
     this.assertEqual('waffles', elem2.waffles());

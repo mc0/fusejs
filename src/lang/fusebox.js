@@ -50,13 +50,12 @@
       postProcessIframe(instance);
 
       return (function() {
-        var errored, div = doc.createElement('div'),
-         toString = instance.Object().toString;
+        var errored, toString = instance.Object().toString;
 
         // Safari does not support sandboxed natives from iframes :(
         if (instance.Array().constructor == Array) {
-          // move first iframe to trash
-          errored = !!div.appendChild(cache.pop());
+          errored = true;
+          destroyIframe(cache.pop());
 
           if (HAS_ACTIVEX) {
             setMode(ACTIVEX_MODE);
@@ -78,16 +77,17 @@
           try {
             instance.Array().map(NOOP);
           } catch (e) {
-            // move iframe to trash
-            IS_MAP_CORRUPT = errored = !!div.appendChild(cache.pop());
+            IS_MAP_CORRUPT = errored = true;
+            destroyIframe(cache.pop());
           }
-          // move other iframe to trash
-          div.appendChild(cache.pop());
+          destroyIframe(cache.pop());
         }
-
-        div.innerHTML = '';
         return errored ? Fusebox(instance) : instance;
       })();
+    },
+
+    destroyIframe = function(iframe) {
+      setTimeout(function() { destroyElement(iframe) }, 10);
     },
 
     getMode = function() {
@@ -1003,7 +1003,7 @@
     (function() {
       var backup, key, i = -1,
 
-      SKIPPED_KEYS = { 'constructor': 1 },
+      SKIPPED_KEYS = { 'callSuper': 1, 'constructor': 1 },
 
       createGeneric = function(proto, methodName) {
         return Function('o,s',
@@ -1051,7 +1051,6 @@
         fuse.RegExp   = backup.RegExp;
         fuse.String   = backup.String;
       }
-
       // redifine `toString` if there are no issues
       if (fuse.Object().toString.call([]) == '[object Array]') {
         toString = { }.toString;

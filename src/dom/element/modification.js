@@ -14,8 +14,8 @@
 
     INSERTABLE_NODE_TYPES = { '1': 1, '3': 1, '8': 1, '10': 1, '11': 1 },
 
-    ELEMENT_EVALS_SCRIPT_FROM_INNERHTML =
-      envTest('ELEMENT_EVALS_SCRIPT_FROM_INNERHTML'),
+    ELEMENT_EVALS_SCRIPT_FROM_INNER_HTML =
+      envTest('ELEMENT_EVALS_SCRIPT_FROM_INNER_HTML'),
 
     ELEMENT_SCRIPT_FAILS_TO_EVAL_TEXT =
       envTest('ELEMENT_SCRIPT_FAILS_TO_EVAL_TEXT'),
@@ -23,22 +23,26 @@
     ELEMENT_SCRIPT_REEVALS_TEXT =
       envTest('ELEMENT_SCRIPT_REEVALS_TEXT'),
 
-    ELEMENT_INNERHTML_BUGGY = (function() {
-      var T = false, o = { };
-      if (envTest('ELEMENT_COLGROUP_INNERHTML_BUGGY')) {
-        (T = T || o).COLGROUP = 1;
-      }
-      if (envTest('ELEMENT_OPTGROUP_INNERHTML_BUGGY')) {
-        (T = T || o).OPTGROUP = 1;
-      }
-      if (envTest('ELEMENT_SELECT_INNERHTML_BUGGY')) {
-        (T = T || o).SELECT = 1;
-      }
-      if (envTest('ELEMENT_TABLE_INNERHTML_BUGGY')) {
-        (T = T || o).TABLE = T.TBODY = T.TR = T.TD = T.TFOOT = T.TH = T.THEAD = 1;
+    ELEMENT_INNER_HTML_BUGGY = (function() {
+      var T = !envTest('ELEMENT_INNER_HTML'), o = { };
+      if (!T) {
+        if (envTest('ELEMENT_COLGROUP_INNER_HTML_BUGGY')) {
+          (T = T || o).COLGROUP = 1;
+        }
+        if (envTest('ELEMENT_OPTGROUP_INNER_HTML_BUGGY')) {
+          (T = T || o).OPTGROUP = 1;
+        }
+        if (envTest('ELEMENT_SELECT_INNER_HTML_BUGGY')) {
+          (T = T || o).SELECT = 1;
+        }
+        if (envTest('ELEMENT_TABLE_INNER_HTML_BUGGY')) {
+          (T = T || o).TABLE = T.TBODY = T.TR = T.TD = T.TFOOT = T.TH = T.THEAD = 1;
+        }
       }
       return T;
     })(),
+
+    htmlPlugin = HTMLElement.plugin,
 
     cloneNode = function(source) {
       return source.cloneNode(false);
@@ -146,6 +150,21 @@
       return result;
     },
 
+    purgeDescendants = function(element) {
+      var data, id, i = -1,
+       elements = element.getElementsByTagName('*');
+
+      while (element = elements[++i]) {
+        if (element.nodeType == ELEMENT_NODE) {
+          id = getFuseId(element, true);
+          if (data = domData[id]) {
+            data.events && htmlPlugin.stopObserving.call(element);
+            delete domData[id];
+          }
+        }
+      }
+    },
+
     runScripts = function(element) {
       var context, isAttached, script, i = -1;
       if (scripts) {
@@ -172,12 +191,24 @@
         else {
           result = getFragmentFromHTML(content, context);
           // skip evaling scripts created from a string in Firefox 3.x
-          skipScripts = ELEMENT_EVALS_SCRIPT_FROM_INNERHTML;
+          skipScripts = ELEMENT_EVALS_SCRIPT_FROM_INNER_HTML;
         }
         if (INSERTABLE_NODE_TYPES[result.nodeType]) {
           !skipScripts && (scripts = getScripts(result));
           return result;
         }
+      }
+    },
+
+    updateElement = function(element, content) {
+      var child;
+      purgeDescendants(element);
+      while (child = element.lastChild) {
+        destroyElement(child, element);
+      }
+      if (content = toNode(content, element)) {
+        element.appendChild(content);
+        runScripts(element);
       }
     };
 
@@ -185,9 +216,7 @@
 
     plugin.cleanWhitespace = function cleanWhitespace() {
       // removes whitespace-only text node children
-      var nextNode, element = this.raw || this,
-       node = element.firstChild;
-
+      var nextNode, element = this.raw || this, node = element.firstChild;
       while (node) {
         nextNode = node.nextSibling;
         if (node.nodeType == TEXT_NODE && node.data == false) {
@@ -199,18 +228,25 @@
     };
 
     plugin.clone = function clone(deep) {
-      var context, excludes, element = this.raw || this;
+      var context, data, events, excludes, element = this.raw || this;
       if (deep && typeof deep == 'object') {
+        context = deep.context;
+        data = deep.data;
+        events = deep.events;
         excludes = deep.excludes;
-        context  = deep.context || getDocument(element);
+        deep = deep.data;
         if (excludes && !isArray(excludes)) {
           excludes = [excludes];
         }
-        result = cloner(element, deep.deep, deep.data, deep.events, excludes, context);
-      } else {
-        result = cloner(element, deep, null, null, null, getDocument(element));
       }
-      return fromElement(result);
+      return fromElement(cloner(element, deep, data, events, excludes, context || getDocument(element)));
+    };
+
+    plugin.destroy = function() {
+      var element = this.raw || this;
+      destroyElement(plugin.purge.call(element), element[PARENT_NODE]);
+      this.raw && (this.raw = null);
+      return null;
     };
 
     plugin.prependChildTo = function prependChildTo(content) {
@@ -269,6 +305,19 @@
       return this;
     };
 
+    plugin.purge = function purge() {
+      var element = this.raw || this,
+       id = getFuseId(element, true),
+       data = domData[id];
+
+      if (data) {
+        data.events && htmlPlugin.stopObserving.call(element);
+        delete domData[id];
+      }
+      purgeDescendants(element);
+      return this;
+    };
+
     plugin.remove = function remove() {
       var element = this.raw || this, parentNode = element[PARENT_NODE];
       parentNode && parentNode.removeChild(element);
@@ -290,26 +339,26 @@
 
     plugin.update = function update(content) {
       var element = this.raw || this;
+      content || content == '0' || (content = '');
 
-      if (content || content == '0') {
-        if (getNodeName(element) == 'SCRIPT') {
-          setScriptText(element, content.nodeType == TEXT_NODE ?
-            (content.raw || content).data : content);
-          if (!ELEMENT_SCRIPT_REEVALS_TEXT) {
-            scripts = [element];
-            runScripts(element);
-          }
-        }
-        else {
-          if (INSERTABLE_NODE_TYPES[content.nodeType]) {
-            element.innerHTML = '';
-            element.appendChild(content.raw || content);
-          } else {
-            element.innerHTML = content;
-          }
-          scripts = getScripts(element);
+      if (getNodeName(element) == 'SCRIPT') {
+        setScriptText(element, content.nodeType == TEXT_NODE ?
+          (content.raw || content).data : content);
+        if (!ELEMENT_SCRIPT_REEVALS_TEXT) {
+          scripts = [element];
           runScripts(element);
         }
+      }
+      else {
+        purgeDescendants(element);
+        if (INSERTABLE_NODE_TYPES[content.nodeType]) {
+          element.innerHTML = '';
+          element.appendChild(content.raw || content);
+        } else {
+          element.innerHTML = content;
+        }
+        scripts = getScripts(element);
+        runScripts(element);
       }
       return this;
     };
@@ -340,18 +389,18 @@
     /*------------------------------------------------------------------------*/
 
     // Fix browsers with buggy innerHTML implementations
-    if (ELEMENT_INNERHTML_BUGGY) {
+    if (ELEMENT_INNER_HTML_BUGGY === true) {
+      plugin.update = function update(content) {
+        updateElement(this.raw || this, content);
+        return this;
+      };
+    }
+    else if (ELEMENT_INNER_HTML_BUGGY) {
       var __update = plugin.update;
       plugin.update = function update(content) {
-        var element = this.raw || this, nodeName = getNodeName(element);
-        if (ELEMENT_INNERHTML_BUGGY[nodeName]) {
-          while (element.lastChild) {
-            element.removeChild(element.lastChild);
-          }
-          if (content = toNode(content, element)) {
-            element.appendChild(content);
-            runScripts(element);
-          }
+        var element = this.raw || this;
+        if (ELEMENT_INNER_HTML_BUGGY[getNodeName(element)]) {
+          updateElement(element, content);
         } else {
           __update.call(this, content);
         }
@@ -434,10 +483,12 @@
      appendSiblingTo =  null,
      cleanWhitespace =  null,
      clone =            null,
+     destroy =          null,
      prependChild =     null,
      prependChildTo =   null,
      prependSibling =   null,
      prependSiblingTo = null,
+     purge =            null,
      remove =           null,
      replace =          null,
      wrap =             null;
