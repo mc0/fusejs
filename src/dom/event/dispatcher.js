@@ -29,7 +29,7 @@
 
         while (handler = handlers[++i]) {
           if (debug) {
-            // script injection allows handlers to fail without haulting the while loop
+            // script injection allows handlers to fail without halting the while loop
             fuse[huid] = function() { handler.call(decorator, event) };
             stopped = runScriptText('fuse.' + huid + '()') === false;
             delete fuse[huid];

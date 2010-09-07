@@ -256,8 +256,8 @@
         // Request status/statusText have really bad cross-browser consistency.
         // Monsur Hossain has done an exceptional job cataloging the cross-browser
         // differences.
-        // http://monsur.com/blog/2007/12/28/xmlhttprequest-status-codes/
-        // http://blogs.msdn.com/ieinternals/archive/2009/07/23/The-IE8-Native-XMLHttpRequest-Object.aspx
+        // http://replay.waybackmachine.org/20090629230725/http://monsur.com/blog/2007/12/28/xmlhttprequest-status-codes/
+        // http://blogs.msdn.com/b/ieinternals/archive/2009/07/23/the-ie8-native-xmlhttprequest-object.aspx
 
         // Assume Firefox is throwing an error accessing status/statusText
         // caused by a 408 request timeout
