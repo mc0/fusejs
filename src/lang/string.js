@@ -24,7 +24,7 @@
 
     strReplace = function(pattern, replacement) {
       return (strReplace = envTest('STRING_REPLACE_COERCE_FUNCTION_TO_STRING') ?
-        plugin.replace : plugin.replace.raw).call(this, pattern, replacement);
+        plugin.replace : rawReplace).call(this, pattern, replacement);
     },
 
     toUpperCase = function(match, character) {

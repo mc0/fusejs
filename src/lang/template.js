@@ -50,6 +50,7 @@
   /*--------------------------------------------------------------------------*/
 
   (function(plugin) {
+
     var strPlugin = fuse.String.plugin,
 
     reBackslashs = /\\/g,

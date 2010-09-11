@@ -16,6 +16,26 @@
 
     IFRAME_MODE  = 3,
 
+    ARRAY_CLASS    = '[object Array]',
+
+    BOOLEAN_CLASS  = '[object Boolean]',
+
+    DATE_CLASS     = '[object Date]',
+
+    FUNCTION_CLASS = '[object Function]',
+
+    NUMBER_CLASS   = '[object Number]',
+
+    OBJECT_CLASS   = '[object Object]',
+
+    REGEXP_CLASS   = '[object RegExp]',
+
+    STRING_CLASS   = '[object String]',
+
+    CLASS = '[[Class]]',
+
+    PROTO = '__proto__',
+
     HAS_ACTIVEX = (function() {
       try {
         // ensure ActiveX is enabled
@@ -188,7 +208,7 @@
     createFusebox = function(instance) {
       // Most methods try to follow ES5 spec but may differ from
       // the documented method.length value or allow null callbacks.
-      var Array, Boolean, Date, Function, Number, Object, RegExp, String, from, reStrict,
+      var Array, Boolean, Date, Function, Number, Object, RegExp, String, reStrict,
        sandbox              = createSandbox(),
        filterCallback       = function(value) { return value != null },
        glFunction           = window.Function,
@@ -273,22 +293,22 @@
 
       instance || (instance = new Klass);
 
-      from = function(value) {
+      function from(value) {
         var classOf = toString.call(value);
         switch (classOf) {
-          case '[object Array]':
+          case ARRAY_CLASS:
             if (value.constructor != instance.Array) {
               return instance.Array.fromArray(value);
             }
             break;
 
-          case '[object Boolean]':
+          case BOOLEAN_CLASS:
             if (value.constructor != instance.Boolean) {
               return instance.Boolean(value == true);
             }
             break;
 
-          case '[object RegExp]':
+          case REGEXP_CLASS:
             if (value.constructor != instance.RegExp) {
               return instance.RegExp(value.source,
                 (value.global     ? 'g' : '') +
@@ -297,17 +317,16 @@
             }
             break;
 
-          case '[object Date]'   :
-          case '[object Number]' :
-          case '[object String]' :
+          case DATE_CLASS   :
+          case NUMBER_CLASS :
+          case STRING_CLASS :
             classOf = classOf.slice(8,-1);
             if (value.constructor != instance[classOf]) {
               return new instance[classOf](value);
             }
         }
         return value;
-      };
-
+      }
 
       /*------------------------ CREATE CONSTRUCTORS -------------------------*/
 
@@ -321,13 +340,13 @@
               result.push.apply(result, arguments);
             }
           }
-          result.__proto__ = arrPlugin;
+          result[PROTO] = arrPlugin;
           return result;
         };
 
         Boolean = function Boolean(value) {
           var result = new __Boolean(value);
-          result['__proto__'] = boolPlugin;
+          result[PROTO] = boolPlugin;
           return result;
         };
 
@@ -337,7 +356,7 @@
             result = arguments.length == 1
               ? new __Date(year)
               : new __Date(year, month, date || 1, hours || 0, minutes || 0, seconds || 0, ms || 0);
-            result['__proto__'] = datePlugin;
+            result[PROTO] = datePlugin;
           } else {
             result = instance.String(new __Date);
           }
@@ -348,13 +367,13 @@
           var result = arguments.length < 3
             ? __Function(argN, body)
             : __Function.apply(__Function, arguments);
-          result['__proto__'] = funcPlugin;
+          result[PROTO] = funcPlugin;
           return result;
         };
 
         Number = function Number(value) {
           var result = new __Number(value);
-          result['__proto__'] = numPlugin;
+          result[PROTO] = numPlugin;
           return result;
         };
 
@@ -363,19 +382,19 @@
             return from(value);
           }
           var result = new __Object;
-          result['__proto__'] = objPlugin;
+          result[PROTO] = objPlugin;
           return result;
         };
 
         RegExp = function RegExp(pattern, flags) {
           var result = new __RegExp(pattern, flags);
-          result['__proto__'] = regPlugin;
+          result[PROTO] = regPlugin;
           return result;
         };
 
         String = function String(value) {
           var result = new __String(arguments.length ? value : '');
-          result['__proto__'] = strPlugin;
+          result[PROTO] = strPlugin;
           return result;
         };
       }
@@ -522,7 +541,7 @@
       // ES5 15.4.3.2
       if (!isFunction(Array.isArray = __Array.isArray)) {
         Array.isArray = function isArray(value) {
-          return toString.call(value) == '[object Array]';
+          return toString.call(value) == ARRAY_CLASS;
         };
       }
 
@@ -536,7 +555,7 @@
       if (isProtoMode) {
         Array.fromArray = function fromArray(array) {
           var result = __slice.call(array, 0);
-          result['__proto__'] = arrPlugin;
+          result[PROTO] = arrPlugin;
           return result;
         };
       } else if (isArrayChainable) {
@@ -582,14 +601,7 @@
       // find the strict mode directive which may be preceded by comments or whitespace
       reStrict = RegExp('^(?:/\\*+[\\w|\\W]*?\\*/|//.*?[\\n\\r\\u2028\\u2029]|\\s)*(["\'])use strict\\1');
 
-
       /*-------------------------- ADD CHAINABILITY --------------------------*/
-
-      if (isFunction(arrPlugin.every)) {
-        (arrPlugin.every = function every(callback, thisArg) {
-          return __every.call(this, callback || IDENTITY, thisArg);
-        }).raw = __every;
-      }
 
       if (isFunction(arrPlugin.filter)) {
         (arrPlugin.filter = function filter(callback, thisArg) {
@@ -615,23 +627,13 @@
       }
 
       if (isFunction(arrPlugin.map)) {
-        if (!IS_MAP_CORRUPT && isArrayChainable) {
+        if (IS_MAP_CORRUPT || !isArrayChainable) {
           arrPlugin.map = function map(callback, thisArg) {
-            return __map.call(this, callback || IDENTITY, thisArg);
-          };
-        } else {
-          arrPlugin.map = function map(callback, thisArg) {
-            var result = __map.call(this, callback || IDENTITY, thisArg);
+            var result = __map.call(this, callback, thisArg);
             return result.length ? Array.fromArray(result) : Array();
           };
         }
         arrPlugin.map.raw = __map;
-      }
-
-      if (isFunction(arrPlugin.some)) {
-        (arrPlugin.some = function some(callback, thisArg) {
-          return __some.call(this, callback || IDENTITY, thisArg);
-        }).raw = __some;
       }
 
       if (isFunction(datePlugin.toISOString)) {
@@ -903,37 +905,50 @@
       (arrPlugin.slice = arrPlugin.slice).raw = __slice;
       (arrPlugin.splice.raw = arrPlugin.splice).raw = __splice;
 
-
       /*------------------------- MODIFY PROTOTYPES --------------------------*/
-
-      Array.prototype    = Array.plugin    = arrPlugin;
-      Boolean.prototype  = Boolean.plugin  = boolPlugin;
-      Date.prototype     = Date.plugin     = datePlugin;
-      Function.prototype = Function.plugin = funcPlugin;
-      Object.prototype   = Object.plugin   = objPlugin;
-      Number.prototype   = Number.plugin   = numPlugin;
-      RegExp.prototype   = RegExp.plugin   = regPlugin;
-      String.prototype   = String.plugin   = strPlugin;
-
-      // point constructor properties to the native wrappers
-      arrPlugin.constructor  = Array;
-      boolPlugin.constructor = Boolean;
-      datePlugin.constructor = Date;
-      funcPlugin.constructor = Function;
-      numPlugin.constructor  = Number;
-      regPlugin.constructor  = RegExp;
-      strPlugin.constructor  = String;
 
       // add [[Class]] property to eaches prototype as a fallback in case
       // toString.call(value) doesn't work on sandboxed natives
-      arrPlugin['[[Class]]']  = '[object Array]';
-      boolPlugin['[[Class]]'] = '[object Boolean]';
-      datePlugin['[[Class]]'] = '[object Date]';
-      funcPlugin['[[Class]]'] = '[object Function]';
-      numPlugin['[[Class]]']  = '[object Number]';
-      regPlugin['[[Class]]']  = '[object RegExp]';
-      strPlugin['[[Class]]']  = '[object String]';
+      arrPlugin[CLASS]  = ARRAY_CLASS;
+      boolPlugin[CLASS] = BOOLEAN_CLASS;
+      datePlugin[CLASS] = DATE_CLASS;
+      funcPlugin[CLASS] = FUNCTION_CLASS;
+      numPlugin[CLASS]  = NUMBER_CLASS;
+      regPlugin[CLASS]  = REGEXP_CLASS;
+      strPlugin[CLASS]  = STRING_CLASS;
 
+      // point constructor properties to the native wrappers,
+      // assign native wrappers to instance object, and add raw properties
+      (instance.Object = Object).raw = __Object;
+      Object.prototype = Object.plugin = objPlugin;
+
+      (instance.Array =
+      (Array.prototype = Array.plugin = arrPlugin).constructor = Array)
+      .raw = __Array;
+
+      (instance.Boolean =
+      (Boolean.prototype = Boolean.plugin = boolPlugin).constructor = Boolean)
+      .raw = __Boolean;
+
+      (instance.Date =
+      (Date.prototype = Date.plugin = datePlugin).constructor = Date)
+      .raw = __Date;
+
+      (instance.Function =
+      (Function.prototype = Function.plugin = funcPlugin).constructor = Function)
+      .raw = __Function;
+
+      (instance.Number =
+      (Number.prototype = Number.plugin = numPlugin).constructor = Number)
+      .raw = __Number;
+
+      (instance.RegExp =
+      (RegExp.prototype = RegExp.plugin = regPlugin).constructor = RegExp)
+      .raw = __RegExp;
+
+      (instance.String =
+      (String.prototype = String.plugin = strPlugin).constructor = String)
+      .raw = __String;
 
       /*------------------------------ CLEANUP -------------------------------*/
 
@@ -952,16 +967,6 @@
        toLowerCase = null, toLocaleLowerCase = null, toLocaleUpperCase = null,
        toPrecision = null, toUpperCase = null, trim = null, trimLeft = null,
        trimRight = null, unshift = null;
-
-      // assign native wrappers to instance object
-      (instance.Array    = Array).raw    = __Array;
-      (instance.Boolean  = Boolean).raw  = __Boolean;
-      (instance.Date     = Date).raw     = __Date;
-      (instance.Function = Function).raw = __Function;
-      (instance.Number   = Number).raw   = __Number;
-      (instance.Object   = Object).raw   = __Object;
-      (instance.RegExp   = RegExp).raw   = __RegExp;
-      (instance.String   = String).raw   = __String;
 
       return instance;
     };
@@ -1033,7 +1038,8 @@
       // for consistency across sandbox variations.
       if (MODE != PROTO_MODE) {
         backup = {
-          'Array': fuse.Array, 'Boolean': fuse.Boolean,
+          'Array':    fuse.Array,
+          'Boolean':  fuse.Boolean,
           'Date':     fuse.Date,
           'Function': fuse.Function,
           'Number':   fuse.Number,
@@ -1052,7 +1058,7 @@
         fuse.String   = backup.String;
       }
       // redifine `toString` if there are no issues
-      if (fuse.Object().toString.call([]) == '[object Array]') {
+      if (fuse.Object().toString.call([]) == ARRAY_CLASS) {
         toString = { }.toString;
       }
 

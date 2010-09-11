@@ -147,11 +147,15 @@
 
     'getTests': function(testcases) {
       var tests, options = this.options;
-      if (this.queryParams.tests) tests = this.queryParams.tests.split(',');
-      else if (options.tests) tests = options.tests;
-      else if (options.test) tests = [option.test];
-      else tests = fuse.Object.keys(testcases).grep(/^test/);
-
+      if (this.queryParams.tests) {
+        tests = this.queryParams.tests.split(',');
+      } else if (options.tests) {
+        tests = options.tests;
+      } else if (options.test) {
+        tests = fuse.Array(option.test);
+      } else {
+        tests = fuse.Object.keys(testcases).grep(/^test/);
+      }
       return tests.map(function(test) {
         if (testcases[test])
           return new Test.Unit.Testcase(test, testcases[test], testcases.setup, testcases.teardown);

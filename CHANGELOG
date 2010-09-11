@@ -4,7 +4,7 @@
 
 * Make fuse.String escapeHTML()/unescapeHTML() escape only `<`, `>`, and `&` characters by default and escape more entities by passing a truthy `all` argument. [FuseJS LH #65] [jddalton]
 
-* Allow decorator caching options to accept non null/undefined falsey values. [jddalton]
+* Allow decorator caching options to accept non null/undefined falsy values. [jddalton]
 
 * Reduce recursion in the element cloner() function and make getScripts() absorb getByTagName(). [jddalton]
 
@@ -911,7 +911,7 @@
 * unit test: Add Form unit tests to ensure Fuse works with Safari's input type="search". [jddalton, malsup]
   Originally reported on http://dev.jquery.com/ticket/4107.
 
-* Make Ajax.Request() use the window.location.href value if a falsey url is given. [Prototype LH #597] [jddalton, Spezi]
+* Make Ajax.Request() use the window.location.href value if a falsy url is given. [Prototype LH #597] [jddalton, Spezi]
 
 * Ensure IE String#replace converts null/undefined return values to string `null`/`undefined` and add more unit tests for String#replace, String#gsub, and String#sub. [jddalton, Michael Hollauf, Samuel Lebeau]
 
@@ -1146,7 +1146,7 @@
 
 * Add IE support for the event.currentTarget property. [Prototype LH #519] [Daniel Varga, jddalton]
 
-* Ensure the `target` property on events is never undefined in IE. [Prototype LH #383] [Mathias Karstädt, Diego Perini, Andrew Dupont]
+* Ensure the `target` property on events is never undefined in IE. [Prototype LH #383] [Mathias Karstï¿½dt, Diego Perini, Andrew Dupont]
   Note: This update exposes a bug in Gecko/WebKit browsers where event.currentTarget/event.target are incorrect for window `onload` and document `dom:loaded` events.
 
 * Fix Opera bug in Object.isOwnProperty() when checking properties of the `window` object. [Garrett Smith]
@@ -1334,7 +1334,7 @@
 
 * Make document.viewport methods take advantage of the "root" private variable. [jddalton]
 
-* Ensure Template#evaluate does not error when the evaluation object is null/undefined. [jddalton, Jürgen Hörmann]
+* Ensure Template#evaluate does not error when the evaluation object is null/undefined. [jddalton, Jï¿½rgen Hï¿½rmann]
 
 * Add bgColor, vLink, and aLink to the Element._attributeTranslations.names mapping object. [jddalton, Thomas Lahn]
 
