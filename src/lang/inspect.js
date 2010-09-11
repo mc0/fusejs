@@ -1,7 +1,7 @@
   /*----------------------------- LANG: INSPECT ------------------------------*/
 
   (function() {
-    var strInspect,
+    var elemPlugin, eventPlugin, hashPlugin, strInspect,
 
     SPECIAL_CHARS = {
       '\b': '\\b',
@@ -19,6 +19,10 @@
 
     // charCodes 0-31 and \ and "
     reWithDoubleQuotes = /[\x00-\x1f\\"]/g,
+
+    arrPlugin = fuse.Array.plugin,
+
+    nlPlugin  = NodeList && NodeList.plugin || arrPlugin,
 
     strPlugin = fuse.String.plugin,
 
@@ -55,6 +59,23 @@
       return fuse.String(useDoubleQuotes
         ? '"' + string.replace(reWithDoubleQuotes, escapeSpecialChars) + '"'
         : "'" + string.replace(reWithSingleQuotes, escapeSpecialChars) + "'");
+    };
+
+    arrPlugin.inspect = function inspect() {
+      // called by Obj.inspect on fuse.Array/fuse.dom.NodeList or its plugin object
+      var length, object, result, plugin = this == nlPlugin ? nlPlugin : arrPlugin;
+      if (this == plugin || window == this || this == null) {
+        return inspectPlugin(plugin);
+      }
+      // called normally
+      object = Object(this);
+      length = object.length >>> 0;
+      result = [];
+
+      while (length--) {
+        result[length] = fuse.Object.inspect(object[length]);
+      }
+      return fuse.String('[' + result.join(', ') + ']');
     };
 
     fuse.Object.inspect = function inspect(value) {
@@ -97,25 +118,6 @@
       }
     };
 
-    addArrayMethods.callbacks.push(function(List) {
-      var plugin = List.plugin;
-      plugin.inspect = function inspect() {
-        // called by Obj.inspect on fuse.Array or its plugin object
-        if (this == plugin || window == this || this == null) {
-          return inspectPlugin(plugin);
-        }
-        // called normally
-        var result = [], object = Object(this), length = object.length >>> 0;
-        while (length--) {
-          result[length] = fuse.Object.inspect(object[length]);
-        }
-        return fuse.String('[' + result.join(', ') + ']');
-      };
-
-      // prevent JScript bug with named function expressions
-      var inspect = null;
-    });
-
     if (fuse.Class.mixins.enumerable) {
       fuse.Class.mixins.enumerable.inspect = function inspect() {
         return isFunction(this._each)
@@ -125,7 +127,7 @@
     }
 
     if (fuse.Hash) {
-      var hashPlugin = fuse.Hash.plugin;
+      hashPlugin = fuse.Hash.plugin;
       hashPlugin.inspect = function inspect() {
         // called by Obj.inspect() on fuse.Hash or its plugin object
         if (this == hashPlugin || window == this || this == null) {
@@ -141,7 +143,7 @@
     }
 
     if (fuse.dom) {
-      var elemPlugin = HTMLElement.plugin;
+      elemPlugin = HTMLElement.plugin;
       elemPlugin.inspect = function inspect() {
         // called by Obj.inspect() on a fuse Element class or its plugin object
         if (this == elemPlugin || window == this || this == null) {
@@ -164,7 +166,7 @@
     }
 
     if (fuse.dom.Event) {
-      var eventPlugin = fuse.dom.Event.plugin;
+      eventPlugin = fuse.dom.Event.plugin;
       eventPlugin.inspect = function inspect() {
         return this == eventPlugin
           ? inspectPlugin(eventPlugin)

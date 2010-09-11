@@ -90,9 +90,6 @@ new Test.Unit.Runner({
     b = a.clone();
     this.assertNotIdentical(a, b);
 
-    this.assert(fuse.Array.plugin.clone.call([]).each,
-      'convert regular arrays to fuse.Array');
-
     this.assertEnumEqual([0, undef, 2], fuse.Array.plugin.clone.call(Fixtures.Object),
       'called with an object as the `this` value');
   },
@@ -158,10 +155,11 @@ new Test.Unit.Runner({
  },
 
   'testEvery': function() {
-    this.assert(fuse.Array().every());
-    this.assert(fuse.Array(true, true, true).every());
-    this.assert(!fuse.Array(true, false, false).every());
-    this.assert(!fuse.Array(false, false, false).every());
+    var IDENTITY = fuse.Function.IDENTITY;
+
+    this.assert(fuse.Array(true, true, true).every(IDENTITY));
+    this.assert(!fuse.Array(true, false, false).every(IDENTITY));
+    this.assert(!fuse.Array(false, false, false).every(IDENTITY));
 
     this.assert(Fixtures.Basic.every(function(value) {
       return value > 0;
@@ -221,7 +219,7 @@ new Test.Unit.Runner({
     this.assertEqual(0, fuse.Array.plugin.first.call(Fixtures.Object),
       'called with an object as the `this` value');
 
-    this.assertEnumEqual([0, undef], fuse.Array.plugin.first.call(Fixtures.Object, 2),
+    this.assertEnumEqual([0], fuse.Array.plugin.first.call(Fixtures.Object, 2),
       'called with an object as the `this` value iterated over an undefined index');
   },
 
@@ -434,20 +432,22 @@ new Test.Unit.Runner({
   },
 
   'testMap': function() {
-    this.assertEqual(Fixtures.Nicknames.join(', '),
-      Fixtures.People.map(function(person) {
-        return person.nickname;
-      }).join(', '));
-
-    this.assertEqual(26,  Fixtures.Primes.map().length);
-
     var count = 0;
     var result = fuse.Array.plugin.map.call(Fixtures.Object, function(value) {
       count++;
       return value;
     });
 
-    this.assertEqual(2, count, 'iterated over an undefined index');
+    this.assertEqual(Fixtures.Nicknames.join(', '),
+      Fixtures.People.map(function(person) {
+        return person.nickname;
+      }).join(', '));
+
+    this.assertEqual(26,
+      Fixtures.Primes.map(fuse.Function.IDENTITY).length);
+
+    this.assertEqual(2, count,
+      'iterated over an undefined index');
 
     this.assertEnumEqual([0, undef, 2], result,
       'called with an object as the `this` value');
@@ -521,7 +521,7 @@ new Test.Unit.Runner({
       'length': 3
     };
 
-    this.assertEnumEqual(['Joe', 'John', undef],
+    this.assertEnumEqual(['Joe', 'John'],
       fuse.Array.plugin.pluck.call(object, 'name').sort(),
       'called with an object as the `this` value');
   },
@@ -534,11 +534,11 @@ new Test.Unit.Runner({
   },
 
   'testSome': function() {
-    this.assert(!(fuse.Array().some()));
+    var IDENTITY = fuse.Function.IDENTITY;
 
-    this.assert(fuse.Array(true, true, true).some());
-    this.assert(fuse.Array(true, false, false).some());
-    this.assert(!fuse.Array(false, false, false).some());
+    this.assert(fuse.Array(true, true, true).some(IDENTITY));
+    this.assert(fuse.Array(true, false, false).some(IDENTITY));
+    this.assert(!fuse.Array(false, false, false).some(IDENTITY));
 
     this.assert(Fixtures.Basic.some(function(value) {
       return value > 2;

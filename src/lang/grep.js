@@ -1,33 +1,31 @@
   /*------------------------------- LANG: GREP -------------------------------*/
 
-  addArrayMethods.callbacks.push(function(List) {
-    var plugin = List.plugin, toArray = plugin.clone || plugin.slice;
+  (function() {
 
-    plugin.grep = function grep(pattern, callback, thisArg) {
-      if (toArray && (!pattern || pattern == '' ||
-          isRegExp(pattern) && !pattern.source)) {
-        return toArray.call(this, 0);
+    var grep =
+    fuse.Array.plugin.grep = function grep(pattern, callback, thisArg) {
+      var item, result, i = -1, Array = grep[ORIGIN].Array,
+       object = Object(this), length = object.length >>> 0, result = Array();
+
+      if (!pattern || pattern == '' || isRegExp(pattern) && !pattern.source) {
+        result = Array.prototype.slice.call(object, 0);
       }
-
-      var item, i = -1, result = List(), object = Object(this),
-       length = object.length >>> 0;
-      if (isString(pattern)) {
-        pattern = new RegExp(escapeRegExpChars(pattern));
-      }
-
-      callback || (callback = IDENTITY);
-      while (++i < length) {
-        if (i in object && pattern.test(object[i]))
-          result.push(callback.call(thisArg, object[i], i, object));
+      else {
+        result = Array();
+        callback || (callback = IDENTITY);
+        if (isString(pattern)) {
+          pattern = new RegExp(escapeRegExpChars(pattern));
+        }
+        while (++i < length) {
+          if (i in object && pattern.test(object[i]))
+            result.push(callback.call(thisArg, object[i], i, object));
+        }
       }
       return result;
     };
 
-    // prevent JScript bug with named function expressions
-    var grep = null;
-  });
+    grep[ORIGIN] = fuse;
 
-  (function() {
     if (fuse.Class.mixins.enumerable) {
       fuse.Class.mixins.enumerable.grep = function grep(pattern, callback, thisArg) {
         if (!pattern || pattern == '' || isRegExp(pattern) &&!pattern.source) {
@@ -63,7 +61,4 @@
         return result;
       };
     }
-
-    // prevent JScript bug with named function expressions
-    var grep = null;
   })();

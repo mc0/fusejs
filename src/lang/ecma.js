@@ -1,28 +1,30 @@
   /*----------------------------- LANG: ES5 BUGS -----------------------------*/
 
-  (function(funcPlugin, regPlugin, strPlugin) {
-    var __apply   = funcPlugin.apply,
+  (function() {
+
+   var arrPlugin  = fuse.Array.plugin,
+    funcPlugin    = fuse.Function.plugin,
+    regPlugin     = fuse.RegExp.plugin,
+    strPlugin     = fuse.String.plugin,
+    __apply       = funcPlugin.apply,
     __call        = funcPlugin.call,
+    __concat      = arrPlugin.concat,
     __exec        = regPlugin.exec,
     __lastIndexOf = strPlugin.lastIndexOf,
     __match       = strPlugin.match,
     __replace     = strPlugin.replace,
     __search      = strPlugin.search,
+    __slice       = arrPlugin.slice,
     __split       = strPlugin.split,
     __test        = regPlugin.test,
     __trim        = strPlugin.trim,
     __trimLeft    = strPlugin.trimLeft,
     __trimRight   = strPlugin.trimRight,
-
-    reOptCapture = /\)[*?]/,
-
-    regExec = __exec.raw,
-
-    rawExec = regExec,
-
-    sMap = fuse.RegExp.SPECIAL_CHARS.s,
-
-    strReplace = __replace.raw,
+    rawExec       = __exec.raw,
+    reOptCapture  = /\)[*?]/,
+    regExec       = rawExec,
+    sMap          = fuse.RegExp.SPECIAL_CHARS.s,
+    strReplace    = __replace.raw,
 
     apply = function apply(thisArg) {
       if (thisArg == null) throw new TypeError;
@@ -50,7 +52,7 @@
     ARRAY_CONCAT_ARGUMENTS_BUGGY = (function() {
       // true for Opera
       var array = [];
-      return array.concat && array.concat(arguments).length == 2; 
+      return array.concat && array.concat(arguments).length == 2;
     })(1, 2),
 
     ARRAY_SLICE_EXLUDES_TRAILING_UNDEFINED_INDEXES = (function() {
@@ -100,13 +102,13 @@
       // true for Firefox
       var result;
       'x'.replace(/x(y)?/, function(x, y) { result = typeof y == 'string'; });
-      return result; 
+      return result;
     })(),
 
     STRING_SPLIT_RETURNS_UNDEFINED_VALUES_AS_STRINGS = (function() {
       // true for Firefox
       var result = 'oxo'.split(/x(y)?/);
-      return result.length == 3 && typeof result[1] == 'string'; 
+      return result.length == 3 && typeof result[1] == 'string';
     })(),
 
     STRING_SPLIT_ZERO_LENGTH_MATCH_RETURNS_NON_EMPTY_ARRAY =
@@ -121,65 +123,53 @@
 
     /*------------------------------------------------------------------------*/
 
-    addArrayMethods.callbacks.push(function(List) {
-      var plugin = List.plugin,
-       __concat  = plugin.concat,
-       __slice   = plugin.slice;
+    // Opera's implementation of Array.prototype.concat treats a functions arguments
+    // object as an array so we overwrite concat to fix it.
+    // ES5 15.4.4.4
+    if (ARRAY_CONCAT_ARGUMENTS_BUGGY) {
+      var concat =
+      arrPlugin.concat = function concat() {
+        var item, itemLen, j, i = -1,
+         Array = concat[ORIGIN].Array,
+         length = arguments.length,
+         object = Object(this),
+         result = isArray(object) ? Array.fromArray(object) : Array(object),
+         n      = result.length;
 
-      // Opera's implementation of Array.prototype.concat treats a functions arguments
-      // object as an array so we overwrite concat to fix it.
-      // ES5 15.4.4.4
-      if (ARRAY_CONCAT_ARGUMENTS_BUGGY) {
-        plugin.concat = function concat() {
-          var item, itemLen, j, i = -1,
-           length = arguments.length,
-           object = Object(this),
-           result = isArray(object) ? List.fromArray(object) : List(object),
-           n      = result.length;
-
-          while (++i < length) {
-            item = arguments[i];
-            if (isArray(item)) {
-              j = 0; itemLen = item.length;
-              for ( ; j < itemLen; j++, n++) {
-                if (j in item) result[n] = item[j];
-              }
-            } else {
-              result[n++] = item;
+        while (++i < length) {
+          item = arguments[i];
+          if (isArray(item)) {
+            j = 0; itemLen = item.length;
+            for ( ; j < itemLen; j++, n++) {
+              if (j in item) result[n] = item[j];
             }
+          } else {
+            result[n++] = item;
           }
-          return result;
-        };
-      }
+        }
+        return result;
+      };
+      concat[ORIGIN] = fuse;
+    }
 
-      // ES5 15.4.4.10
-      if (ARRAY_SLICE_EXLUDES_TRAILING_UNDEFINED_INDEXES) {
-        plugin.slice = function slice(start, end) {
-          var endIndex, result, object = Object(this),
-           length = object.length >>> 0;
+    // ES5 15.4.4.10
+    if (ARRAY_SLICE_EXLUDES_TRAILING_UNDEFINED_INDEXES) {
+      arrPlugin.slice = function slice(start, end) {
+        var endIndex, result, object = Object(this),
+         length = object.length >>> 0;
 
-          end = typeof end == 'undefined' ? length : toInteger(end);
-          endIndex = end - 1;
+        end = typeof end == 'undefined' ? length : toInteger(end);
+        endIndex = end - 1;
 
-          if (end > length || endIndex in object) {
-            return __slice.call(object, start, end);
-          }
-          object[endIndex] = undef;
-          result = __slice.call(object, start, end);
-          delete object[endIndex];
-          return result;
-        };
-      }
-
-      plugin.concat.raw = __concat.raw;
-      plugin.slice.raw  = __slice.raw;
-
-      // enforce ES5 rules for `this`
-      wrapApplyAndCall(plugin);
-
-      // prevent JScript bug with named function expressions
-      var concat = null, slice = null;
-    });
+        if (end > length || endIndex in object) {
+          return __slice.call(object, start, end);
+        }
+        object[endIndex] = undef;
+        result = __slice.call(object, start, end);
+        delete object[endIndex];
+        return result;
+      };
+    }
 
     /*------------------------------------------------------------------------*/
 
@@ -306,7 +296,7 @@
         }
 
         // set pattern.lastIndex to 0 before we perform string operations
-        var match, 
+        var match,
          index     = 0,
          nonGlobal = !pattern.global,
          result    = '',
@@ -511,6 +501,8 @@
       };
     }
 
+    arrPlugin.concat.raw      = __concat.raw;
+    arrPlugin.slice.raw       = __slice.raw;
     regPlugin.exec.raw        = __exec.raw;
     strPlugin.lastIndexOf.raw = __lastIndexOf.raw;
     strPlugin.match.raw       = __match.raw;
@@ -522,6 +514,7 @@
     strPlugin.trimRight.raw   = __trimRight.raw;
 
     // enforce ES5 rules for `this`
+    wrapApplyAndCall(arrPlugin);
     wrapApplyAndCall(strPlugin);
 
     // prevent JScript bug with named function expressions
@@ -535,4 +528,4 @@
      trim =        null,
      trimLeft =    null,
      trimRight =   null;
-  })(fuse.Function.plugin, fuse.RegExp.plugin, fuse.String.plugin);
+  })();

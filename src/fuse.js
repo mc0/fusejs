@@ -38,6 +38,8 @@
 
   NON_HOST_TYPES = { 'boolean': 1, 'number': 1, 'string': 1, 'undefined': 1 },
 
+  ORIGIN = '__origin__',
+
   slice = [].slice,
 
   setTimeout = window.setTimeout,
@@ -48,18 +50,32 @@
 
   addNodeListMethod = NOOP,
 
-  addArrayMethods = (function() {
-    var result = function(List) {
-      var callbacks = addArrayMethods.callbacks, i = -1;
-      while (callbacks[++i]) callbacks[i](List);
-    };
-    result.callbacks = [];
-    return result;
-  })(),
-
   capitalize = function(string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
   },
+
+  cloneMethod = (function() {
+    var cloneMethod = function cloneMethod(method, origin) {
+      var result = Function('var ORIGIN="' + ORIGIN + '";return ' + method)();
+      origin && method[ORIGIN] && (result[ORIGIN] = origin);
+      return result;
+    };
+
+    try {
+      if (String(cloneMethod(cloneMethod)(cloneMethod)).indexOf('cloneMethod') < 0) throw 1;
+    } catch (e) {
+      return function(method, origin) {
+        return function() {
+          var result, backup = method[ORIGIN];
+          backup && (method[ORIGIN] = origin);
+          result = method.apply(this, arguments);
+          backup && (method[ORIGIN] = backup);
+          return result;
+        };
+      }
+    }
+    return cloneMethod;
+  })(),
 
   concatList = function(list, otherList) {
     var pad = list.length, length = otherList.length;
@@ -136,11 +152,6 @@
     })()
   };
 
-  /**
-  * ## fuse.version
-  *
-  * The version of [FuseJS](http://fusejs.com) that you're using (e.g., <%= Version %>).
-  */
   window.fuse = (function() {
     var fuse = function fuse() { };
     fuse.version = '<%= Version %>';
@@ -206,7 +217,7 @@
 
     fuse.uid = uid;
     fuse.debug = debug;
-    fuse.updateGenerics  = updateGenerics;
+    fuse.updateGenerics = updateGenerics;
   })();
 
   //= require "env"
@@ -273,8 +284,6 @@
   //= require "ajax/timed-updater"
   /*--------------------------------------------------------------------------*/
 
-  addArrayMethods(fuse.Array);
-
   if (fuse.dom && NodeList) {
     HTMLFormElement && eachKey(HTMLFormElement.plugin, addNodeListMethod);
     HTMLInputElement && eachKey(HTMLInputElement.plugin, addNodeListMethod);
@@ -282,10 +291,19 @@
     eachKey(HTMLElement.plugin, addNodeListMethod);
     eachKey(Element.plugin, addNodeListMethod);
 
-    // Pave any NodeList methods that fuse.Array shares.
-    // Element first(), last(), and contains() may be called by using invoke()
-    // Ex: elements.invoke('first');
-    addArrayMethods(NodeList);
+    (function(origin) {
+      // Pave any NodeList methods that fuse.Array shares.
+      // Element first(), last(), and contains() may be called by using invoke()
+      // Ex: elements.invoke('first');
+      var nlPlugin = NodeList.plugin;
+      eachKey(fuse.Array.plugin, function(value, key) {
+        if (value[ORIGIN] || !nlPlugin[key])
+          nlPlugin[key] = cloneMethod(value, origin);
+      });
+
+      NodeList.from = cloneMethod(fuse.Array.from, origin);
+      NodeList.fromNodeList = cloneMethod(fuse.Array.fromNodeList, origin);
+    })({ 'Number': fuse.Number, 'Array': NodeList });
   }
 })(this);
 
