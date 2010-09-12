@@ -55,18 +55,30 @@
   },
 
   cloneMethod = (function() {
-    var cloneMethod = function cloneMethod(method, origin) {
-      var source = String(method),
-       name = source.match(/^[\s\(]*function([^(]*)\(/)[1],
-       result = Function('var ORIGIN="' + ORIGIN + '";' + source + '; return ' + name)();
+    function cloneMethod(method, origin) {
+      var result, source = String(method);
+      if (!cloneMethod.reName) {
+        // init props on method to avoid problems when cloning itself
+        cloneMethod.reName = /^[\s\(]*function([^(]*)\(/;
+        cloneMethod.varOrigin = String(function() { return ORIGIN })
+          .match(/return\s+([^}\s]*)/)[1];
+      }
+      result = Function(
+        'var ' + cloneMethod.varOrigin + '="' +
+        ORIGIN + '";' + source + '; return ' + 
+        source.match(cloneMethod.reName)[1])();
 
       origin && method[ORIGIN] && (result[ORIGIN] = origin);
       return result;
-    };
+    }
 
     try {
-      if (String(cloneMethod(cloneMethod)(cloneMethod)).indexOf('cloneMethod') < 0) throw 1;
-    } catch (e) {
+      if (String(cloneMethod(cloneMethod)(cloneMethod)).indexOf('cloneMethod') < 0) {
+        throw 1;
+      }
+      return cloneMethod;
+    }
+    catch (e) {
       return function(method, origin) {
         return function() {
           var result, backup = method[ORIGIN];
@@ -77,7 +89,6 @@
         };
       }
     }
-    return cloneMethod;
   })(),
 
   concatList = function(list, otherList) {
