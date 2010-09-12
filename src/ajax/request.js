@@ -48,12 +48,12 @@
 
   (function(plugin) {
 
-    var EVENT_TYPES  = ['abort', 'exception', 'failure', 'success', 'timeout'],
-     euid            = uid + '_error',
-     isSameOrigin    = fuse.Object.isSameOrigin,
+    var EVENT_TYPES = ['abort', 'exception', 'failure', 'success', 'timeout'],
+     euid           = uid + '_error',
+     isSameOrigin   = fuse.Object.isSameOrigin,
      reContentTypeJS = /^\s*(text|application)\/(x-)?(java|ecma)script(;|\s|$)/i,
      reHTTP          = /^https?:/,
-     responders      = fuse.ajax.responders,
+     responders     = fuse.ajax.responders,
      fireEvent       = fuse.Class.mixins.event.fire,
 
     fireException = function(request, exception) {
@@ -334,7 +334,10 @@
 
           // set responseXML
           responseXML = xhr.responseXML;
-          if (responseXML) {
+
+          // IE will return an invalid XML object if the response
+          // content-type header is not text/xml
+          if (responseXML && isHostType(responseXML, 'documentElement')) {
             this.responseXML = responseXML;
           }
 

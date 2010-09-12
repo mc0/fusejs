@@ -1,3 +1,5 @@
+* Ensure fuse.ajax.Request#responseXML is a valid XML object or null. [fabiomcosta, jddalton]
+
 * Modify fuse.Array methods so they can be dumped to the global for Prototype emulation. [jddalton]
 
 * Remove support for null callbacks from fuse.Array, fuse.Hash, and fuse.Class.mixins.enumerable methods. [jddalton]
