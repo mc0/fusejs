@@ -233,7 +233,7 @@ new Test.Unit.Runner({
     this.assertEqual(0, fuse.Array.plugin.first.call(Fixtures.Object),
       'Called with an object as the `this` value.');
 
-    this.assertEnumEqual([0], fuse.Array.plugin.first.call(Fixtures.Object, 2),
+    this.assertEnumEqual([0, undef], fuse.Array.plugin.first.call(Fixtures.Object, 2),
       'Called with an object as the `this` value iterated over an undefined index.');
   },
 
@@ -543,7 +543,7 @@ new Test.Unit.Runner({
       'length': 3
     };
 
-    this.assertEnumEqual(['Joe', 'John'],
+    this.assertEnumEqual(['Joe', 'John', undef],
       fuse.Array.plugin.pluck.call(object, 'name').sort(),
       'Called with an object as the `this` value.');
   },

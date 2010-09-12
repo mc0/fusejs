@@ -405,6 +405,10 @@
       return result;
     };
 
+    plugin.toArray = function toArray() {
+      return slice.call(this, 0);
+    };
+
     var zip =
     plugin.zip = function zip() {
       var lists, plucked, j, k, i = -1,
@@ -604,11 +608,13 @@
     zip[ORIGIN] = fuse;
 
     // prevent JScript bug with named function expressions
-    var clear = null,
+    var _each = null,
+     clear =    null,
      each =     null,
      every =    null,
      forEach =  null,
      max =      null,
      min =      null,
-     some =     null;
+     some =     null,
+     toArray =  null;
   })(fuse.Array.plugin);
