@@ -327,19 +327,22 @@
     eachKey(HTMLElement.plugin, addNodeListMethod);
     eachKey(Element.plugin, addNodeListMethod);
 
-    (function(origin) {
+    (function(nlPlugin, origin) {
       // Pave any NodeList methods that fuse.Array shares.
       // Element first(), last(), and contains() may be called by using invoke()
       // Ex: elements.invoke('first');
-      var nlPlugin = NodeList.plugin;
       eachKey(fuse.Array.plugin, function(value, key) {
-        if (value[ORIGIN] || !nlPlugin[key])
+        if (value[ORIGIN]) {
           nlPlugin[key] = cloneMethod(value, origin);
+        }
+        else if (!nlPlugin[key]) {
+          nlPlugin[key] = value;
+        }
       });
 
       NodeList.from = cloneMethod(fuse.Array.from, origin);
       NodeList.fromNodeList = cloneMethod(fuse.Array.fromNodeList, origin);
-    })({ 'Number': fuse.Number, 'Array': NodeList });
+    })(NodeList.plugin, { 'Number': fuse.Number, 'Array': NodeList });
   }
 })(this);
 
