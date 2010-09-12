@@ -1,3 +1,5 @@
+* Follow spec and make fuse.ajax.Request check the response content-type header in a case-insensitive mannor. [jddalton]
+
 * Ensure fuse.ajax.Request#responseXML is a valid XML object or null. [fabiomcosta, jddalton]
 
 * Modify fuse.Array methods so they can be dumped to the global for Prototype emulation. [jddalton]

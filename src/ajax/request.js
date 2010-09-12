@@ -50,19 +50,22 @@
 
     var EVENT_TYPES = ['abort', 'exception', 'failure', 'success', 'timeout'],
      euid           = uid + '_error',
+     fireEvent      = fuse.Class.mixins.event.fire,
      isSameOrigin   = fuse.Object.isSameOrigin,
-     reContentTypeJS = /^\s*(text|application)\/(x-)?(java|ecma)script(;|\s|$)/i,
-     reHTTP          = /^https?:/,
      responders     = fuse.ajax.responders,
-     fireEvent       = fuse.Class.mixins.event.fire,
+     reHTTP         = /^https?:/,
+     // content-type is case-insensitive
+     // http://www.w3.org/Protocols/rfc2616/rfc2616-sec3.html#sec3.7
+     reContentTypeJS   = /^\s*(?:text|application)\/(x-)?(?:java|ecma)script(?:;|\s|$)/i,
+     reContentTypeJSON = /^\s*(?:application\/json)(?:;|\s|$)/i;
 
-    fireException = function(request, exception) {
+    function fireException(request, exception) {
       fireEvent.call(request, 'exception', request, exception);
       responders && responders.fire('exception', request, exception);
       // throw error if not caught by a request exception handler
       var handlers = request._events.exception;
       if (!handlers || !handlers.length) throw exception;
-    };
+    }
 
     /*------------------------------------------------------------------------*/
 
@@ -343,7 +346,7 @@
 
           // set responseJSON
           if (evalJSON == 'force' || evalJSON && hasText &&
-              contentType.indexOf('application/json') > -1) {
+              reContentTypeJSON.test(contentType)) {
             try {
               this.responseJSON = responseText.evalJSON(sanitizeJSON);
             } catch (e) {
@@ -353,7 +356,7 @@
 
           // eval javascript
           if (hasText && (evalJS == 'force' || evalJS && isSameOrigin(url) &&
-              contentType.match(reContentTypeJS))) {
+              reContentTypeJS.test(contentType))) {
 
             fuse.run('try{' + responseText.unfilterJSON() + '}catch(e){fuse.'  + euid + '=e}');
 
