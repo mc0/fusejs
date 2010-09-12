@@ -15,10 +15,10 @@
        classOf = toString.call(object);
 
       switch (classOf) {
-        case '[object Boolean]': return fuse.String(value);
-        case '[object Number]' : return fuse.String(isFinite(value) ? value : 'null');
-        case '[object String]' : return inspect.call(value, true);
-        case '[object Array]'  :
+        case BOOLEAN_CLASS : return fuse.String(value);
+        case NUMBER_CLASS  : return fuse.String(isFinite(value) ? value : 'null');
+        case STRING_CLASS  : return inspect.call(value, true);
+        case ARRAY_CLASS   :
           length = object.length;
           while (++i < length) {
             value = Obj.toJSON(object[i]);
@@ -26,7 +26,7 @@
           }
           return fuse.String('[' + result.join(',') + ']');
 
-        case '[object Object]' :
+        case OBJECT_CLASS :
           // handle null
           if (value === null) {
             return fuse.String(value);

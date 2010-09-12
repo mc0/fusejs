@@ -19,7 +19,7 @@
             var i = result.length, j = 0, length = i + value.length;
             while (i < length) result[i++] = toQueryPair(key, value[j++]);
           }
-          else if (!value || toString.call(value) != '[object Object]') {
+          else if (!value || toString.call(value) != OBJECT_CLASS) {
             result.push(toQueryPair(key, value));
           }
         }

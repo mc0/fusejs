@@ -56,13 +56,13 @@
 
     'OBJECT__PROTO__': function() {
       // true for Gecko and Webkit
-      var result, arr = [], obj = { }, backup = arr['__proto__'];
-      if (arr['__proto__'] == Array.prototype  &&
-          obj['__proto__'] == Object.prototype) {
+      var result, arr = [], obj = { }, backup = arr[PROTO];
+      if (arr[PROTO] == Array.prototype  &&
+          obj[PROTO] == Object.prototype) {
         // test if it's writable and restorable
-        arr['__proto__'] = obj;
+        arr[PROTO] = obj;
         result = typeof arr.push == 'undefined';
-        arr['__proto__'] = backup;
+        arr[PROTO] = backup;
         return result && typeof arr.push == 'function';
       }
     },

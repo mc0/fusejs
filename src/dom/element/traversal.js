@@ -18,7 +18,7 @@
       var isSingle, match, result = null, i = 0;
       if (!element) return result;
 
-      if (toString.call(count) != '[object Number]') {
+      if (toString.call(count) != NUMBER_CLASS) {
         selectors = count;
         count = null;
       }
@@ -139,7 +139,7 @@
       var isSingle, match, node, nodes, result = null, i = 0, j = 0,
        element = this.raw || this;
 
-      if (toString.call(count) != '[object Number]') {
+      if (toString.call(count) != NUMBER_CLASS) {
         selectors = count;
         count = null;
       }

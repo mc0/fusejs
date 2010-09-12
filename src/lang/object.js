@@ -102,10 +102,10 @@
           // convert primatives to objects so IN operator will work
           object = Object(object);
 
-          var result, proto = object['__proto__'];
-          object['__proto__'] = null;
+          var result, proto = object[PROTO];
+          object[PROTO] = null;
           result = property in object;
-          object['__proto__'] = proto;
+          object[PROTO] = proto;
           return result;
         };
       } else {
@@ -167,7 +167,7 @@
 
   isNumber =
   fuse.Object.isNumber = function isNumber(value) {
-    return toString.call(value) == '[object Number]' && isFinite(value);
+    return toString.call(value) == NUMBER_CLASS && isFinite(value);
   };
 
   // ES5 4.3.2
@@ -179,12 +179,12 @@
 
   isRegExp =
   fuse.Object.isRegExp = function isRegExp(value) {
-    return toString.call(value) == '[object RegExp]';
+    return toString.call(value) == REGEXP_CLASS;
   };
 
   isString =
   fuse.Object.isString = function isString(value) {
-    return toString.call(value) == '[object String]';
+    return toString.call(value) == STRING_CLASS;
   };
 
   /*--------------------------------------------------------------------------*/
@@ -199,7 +199,7 @@
         if (typeof object == 'object') {
           var length, result, constructor = object.constructor, i = -1;
           switch (toString.call(object)) {
-            case '[object Array]'  :
+            case ARRAY_CLASS  :
               if (deep) {
                 result = constructor();
                 length = object.length;
@@ -209,16 +209,16 @@
               }
               return result;
 
-            case '[object RegExp]' :
+            case REGEXP_CLASS :
               return constructor(object.source,
                 (object.global     ? 'g' : '') +
                 (object.ignoreCase ? 'i' : '') +
                 (object.multiline  ? 'm' : ''));
 
-            case '[object Number]' :
-            case '[object String]' : return new constructor(object);
-            case '[object Boolean]': return new constructor(object == true);
-            case '[object Date]'   : return new constructor(+object);
+            case NUMBER_CLASS  :
+            case STRING_CLASS  : return new constructor(object);
+            case BOOLEAN_CLASS : return new constructor(object == true);
+            case DATE_CLASS    : return new constructor(+object);
           }
 
           result = Obj();

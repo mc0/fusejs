@@ -96,7 +96,7 @@
         // IE8 node constructors are typeof "object"
         try {
           classOf = toString.call(object);
-          if (classOf == '[object Object]' && typeof object.constructor == 'function') {
+          if (classOf == OBJECT_CLASS && typeof object.constructor == 'function') {
             result = [];
             eachKey(object, function(value, key) {
               hasKey(object, key) &&

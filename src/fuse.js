@@ -32,6 +32,26 @@
 
   TEXT_NODE = 3,
 
+  ARRAY_CLASS    = '[object Array]',
+
+  BOOLEAN_CLASS  = '[object Boolean]',
+
+  DATE_CLASS     = '[object Date]',
+
+  FUNCTION_CLASS = '[object Function]',
+
+  NUMBER_CLASS   = '[object Number]',
+
+  OBJECT_CLASS   = '[object Object]',
+
+  REGEXP_CLASS   = '[object RegExp]',
+
+  STRING_CLASS   = '[object String]',
+
+  CLASS = '[[Class]]',
+
+  PROTO = '__proto__',
+
   IDENTITY = function IDENTITY(x) { return x; },
 
   NOOP = function NOOP() { },
@@ -65,7 +85,7 @@
       }
       result = Function(
         'var ' + cloneMethod.varOrigin + '="' +
-        ORIGIN + '";' + source + '; return ' + 
+        ORIGIN + '";' + source + '; return ' +
         source.match(cloneMethod.reName)[1])();
 
       origin && method[ORIGIN] && (result[ORIGIN] = origin);
@@ -127,7 +147,7 @@
   })(),
 
   isFunction = function isFunction(value) {
-    return toString.call(value) == '[object Function]';
+    return toString.call(value) == FUNCTION_CLASS;
   },
 
   // Host objects can return type values that are different from their actual
@@ -161,14 +181,13 @@
     'call': (function() {
       var __toString = {}.toString;
       return function(object) {
-        return object != null && object['[[Class]]'] || __toString.call(object);
+        return object != null && object[CLASS] || __toString.call(object);
       };
     })()
   };
 
   window.fuse = (function() {
-    var fuse = function fuse() { };
-    fuse.version = '<%= Version %>';
+    function fuse() { };
     return fuse;
   })();
 
@@ -229,8 +248,11 @@
     fuse.addNS =
     fuse.prototype.addNS = addNS;
 
+    // deleted later
     fuse.uid = uid;
+
     fuse.debug = debug;
+    fuse.version = '<%= Version %>';
     fuse.updateGenerics = updateGenerics;
   })();
 

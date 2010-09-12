@@ -16,26 +16,6 @@
 
     IFRAME_MODE  = 3,
 
-    ARRAY_CLASS    = '[object Array]',
-
-    BOOLEAN_CLASS  = '[object Boolean]',
-
-    DATE_CLASS     = '[object Date]',
-
-    FUNCTION_CLASS = '[object Function]',
-
-    NUMBER_CLASS   = '[object Number]',
-
-    OBJECT_CLASS   = '[object Object]',
-
-    REGEXP_CLASS   = '[object RegExp]',
-
-    STRING_CLASS   = '[object String]',
-
-    CLASS = '[[Class]]',
-
-    PROTO = '__proto__',
-
     HAS_ACTIVEX = (function() {
       try {
         // ensure ActiveX is enabled
@@ -89,7 +69,7 @@
         // Opera 9.5 - 9.64 will error by simply calling the methods.
         // Opera 10 will error when first accessing the contentDocument of
         // another iframe and then accessing the methods.
-        else if (toString.call(instance.Array().map) == '[object Function]') {
+        else if (toString.call(instance.Array().map) == FUNCTION_CLASS) {
           // create and remove second iframe
           postProcessIframe(createSandbox());
 
@@ -585,7 +565,7 @@
 
           // redefine RegExp to auto-fix \s issues
           RegExp = function RegExp(pattern, flags) {
-            return new RE((toString.call(pattern) == '[object RegExp]' ?
+            return new RE((toString.call(pattern) == REGEXP_CLASS ?
               pattern.source : window.String(pattern))
                 .replace(reCharClass, newCharClass), flags);
           };
