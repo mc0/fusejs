@@ -313,12 +313,16 @@
         var attrs, match, name, type;
         if (isString(tagName) && context &&
             !CONTEXT_TYPES[context.nodeType] && (attrs = context.attrs) &&
-            ((name = attrs.name) || (type = attrs.type)) &&
+            ('name' in attrs || 'type' in attrs) &&
             (tagName.charAt(0) != '<' || (match = tagName.match(reSimpleTag)))) {
 
-          tagName = '<' + match[1] +
-            (name ? ' name="' + name + '"' : '') +
-            (type ? ' type="' + type + '"' : '') + '>';
+          name = attrs.name;
+          type = attrs.type;
+          tagName = match && match[1] || tagName;
+
+          tagName = '<' + tagName +
+            (name == null ? '' : ' name="' + name + '"') +
+            (type == null ? '' : ' type="' + type + '"') + '>';
 
           delete attrs.name; delete attrs.type;
           return plugin.setAttribute.call(fromHTML(tagName, context), attrs);

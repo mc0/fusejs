@@ -42,7 +42,7 @@
     isHostType(fuse._doc, 'parentWindow') ? 'parentWindow' : null;
 
   destroyElement = function(element, parentNode) {
-    parentNode || (element = element[PARENT_NODE]);
+    parentNode || (parentNode = element[PARENT_NODE]);
     parentNode && parentNode.removeChild(element);
   };
 
