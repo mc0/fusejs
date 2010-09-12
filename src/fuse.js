@@ -56,7 +56,10 @@
 
   cloneMethod = (function() {
     var cloneMethod = function cloneMethod(method, origin) {
-      var result = Function('var ORIGIN="' + ORIGIN + '";return ' + method)();
+      var source = String(method),
+       name = source.match(/^[\s\(]*function([^(]*)\(/)[1],
+       result = Function('var ORIGIN="' + ORIGIN + '";' + source + '; return ' + name)();
+
       origin && method[ORIGIN] && (result[ORIGIN] = origin);
       return result;
     };

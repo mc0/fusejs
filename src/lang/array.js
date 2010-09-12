@@ -2,22 +2,7 @@
 
   (function(plugin) {
 
-    var funcPlugin = fuse.Function.plugin,
-
-    funcApply = funcPlugin.apply,
-
-    funcCall = funcPlugin.call,
-
-    filterCallback = function(value) {
-      return value != null;
-    },
-
-    sorter = function(left, right) {
-      var a = left.criteria, b = right.criteria;
-      return a < b ? -1 : a > b ? 1 : 0;
-    },
-
-    from =
+    var from =
     fuse.Array.from = function from(iterable) {
       var length, object, result, Array = from[ORIGIN].Array;
       if (!arguments.length) {
@@ -121,7 +106,8 @@
 
     var insert =
     plugin.insert = function insert(index, value) {
-      var splice = insert[ORIGIN].Array.prototype.splice,
+      var plugin = insert[ORIGIN].Array.prototype,
+       slice = plugin.slice, splice = plugin.splice,
        object = Object(this), length = object.length >>> 0;
 
       if (length < index) object.length = index;
@@ -149,9 +135,9 @@
 
     var without =
     plugin.without = function without() {
-      var args, i = -1, j = i, Array = without[ORIGIN].Array,
-       indexOf = Array.prototype.indexOf, object = Object(this),
-       length = object.length >>> 0, result = Array();
+      var args, i = -1, j = i, object = Object(this),
+       length = object.length >>> 0, result = without[ORIGIN].Array(),
+       indexOf = result.indexOf, slice = result.slice;
 
       if (length) {
         args = slice.call(arguments, 0);
@@ -272,19 +258,20 @@
 
     var invoke =
     plugin.invoke = function invoke(method) {
-      var args, result = invoke[ORIGIN].Array(), object = Object(this),
-       length = object.length >>> 0;
+      var args, result = invoke[ORIGIN].Array(),
+       apply = invoke.apply, call = invoke.call, slice = result.slice,
+       object = Object(this), length = object.length >>> 0;
 
       if (arguments.length < 2) {
         while (length--) {
           if (length in object)
-            result[length] = funcCall.call(object[length][method], object[length]);
+            result[length] = call.call(object[length][method], object[length]);
         }
       } else {
         args = slice.call(arguments, 1);
         while (length--) {
           if (length in object)
-            result[length] = funcApply.call(object[length][method], object[length], args);
+            result[length] = apply.call(object[length][method], object[length], args);
         }
       }
       return result;
@@ -309,7 +296,7 @@
         if (isNaN(count)) return result;
 
         count = count < 1 ? 1 : count > length ? length : count;
-        return Array.prototype.slice.call(object, length - count);
+        return result.slice.call(object, length - count);
       }
     };
 
@@ -365,7 +352,7 @@
        object = Object(this), length = object.length >>> 0,
        trues = Array(), falses = Array();
 
-      callback || (callback = IDENTITY);
+      callback || (callback = fuse.Function.IDENTITY);
       while (++i < length) {
         if (i in object) {
           if (callback.call(thisArg, item = object[i], i, object)) {
@@ -400,15 +387,18 @@
        length = object.length >>> 0,
        result = sortBy[ORIGIN].Array();
 
-      callback || (callback = IDENTITY);
+      callback || (callback = fuse.Function.IDENTITY);
       while (length--) {
         value = object[length];
         array[length] = { 'value': value, 'criteria': callback.call(thisArg, value, length, object) };
       }
 
-      array = array.sort(sorter);
-      length = array.length;
+      array = array.sort(function(left, right) {
+        var a = left.criteria, b = right.criteria;
+        return a < b ? -1 : a > b ? 1 : 0;
+      });
 
+      length = array.length;
       while (++i < length) {
         if (i in array) result[i] = array[i].value;
       }
@@ -418,9 +408,9 @@
     var zip =
     plugin.zip = function zip() {
       var lists, plucked, j, k, i = -1,
-       args     = slice.call(arguments, 0),
-       callback = IDENTITY,
        result   = zip[ORIGIN].Array(),
+       args     = result.slice.call(arguments, 0),
+       callback = fuse.Function.IDENTITY,
        object   = Object(this),
        length   = object.length >>> 0;
 
