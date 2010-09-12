@@ -1,6 +1,7 @@
   /*------------------------------- LANG: HASH -------------------------------*/
 
   fuse.Hash = (function() {
+
     var Klass = function() { },
 
     Hash = function Hash(object) {
@@ -88,6 +89,7 @@
   /*--------------------------------------------------------------------------*/
 
   (function(plugin) {
+
     function _returnPair(pair) {
       var key, value;
       pair = fuse.Array(key = pair[0], value = pair[1]);
@@ -146,6 +148,7 @@
   /*--------------------------------------------------------------------------*/
 
   (function(plugin, $H) {
+
     plugin.clear = function clear() {
       this._data   = { };
       this._object = { };
@@ -182,8 +185,9 @@
 
     plugin.filter = function filter(callback, thisArg) {
       var key, pair, value, i = -1, pairs = this._pairs, result = $H();
-      callback = callback || function(value) { return value != null; };
-
+      if (typeof callback != 'function') {
+        throw new TypeError;
+      }
       while (pair = pairs[++i]) {
         if (callback.call(thisArg, value = pair[1], key = pair[0], this))
           result.set(key, value);
@@ -214,9 +218,10 @@
     };
 
     plugin.map = function map(callback, thisArg) {
-      if (!callback) return this;
       var key, pair, i = -1, pairs = this._pairs, result = $H();
-
+      if (typeof callback != 'function') {
+        throw new TypeError;
+      }
       if (thisArg) {
         while (pair = pairs[++i])
           result.set(key = pair[0], callback.call(thisArg, pair[1], key, this));

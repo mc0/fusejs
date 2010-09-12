@@ -1783,21 +1783,15 @@ new Test.Unit.Runner({
       while (testTags()) { };
     }
 
-    /* window.ElementOld = function(tagName, attributes) {
-      if (fuse.env.agent.IE && attributes && attributes.name) {
-        tagName = '<' + tagName + ' name="' + attributes.name + '">';
-        delete attributes.name;
-      }
-      return $(document.createElement(tagName)).setAttribute(attributes || {});
-    };
-
+    /*
     this.benchmark(function(){
       XHTML_TAGS.each(function(tagName) { new Element(tagName) });
     }, 5);
 
     this.benchmark(function(){
       XHTML_TAGS.each(function(tagName) { new ElementOld(tagName) });
-    }, 5); */
+    }, 5);
+    */
 
     this.assert(fuse('<h1>'));
     this.assertRespondsTo('update', fuse('<div>'));

@@ -81,6 +81,8 @@ new Test.Unit.Runner({
   },
 
   'testFilter': function() {
+    var callback = function(value) { return value != null };
+
     this.assertHashEqual({ 'a':'A', 'b':'B' },
       $H(Fixtures.many).filter(function(value, key) {
         return /[ab]/.test(key);
@@ -91,15 +93,18 @@ new Test.Unit.Runner({
         return /^(bar|)$/.test(value);
       }));
 
-    // test passing no arguments to filter()
     this.assertHashEqual({ 'a':'b' },
-      $H(Fixtures.value_undefined).filter());
+      $H(Fixtures.value_undefined).filter(callback));
 
     this.assertHashEqual({ 'a':'b' },
-      $H(Fixtures.value_null).filter());
+      $H(Fixtures.value_null).filter(callback));
 
     this.assertHashEqual(Fixtures.value_zero,
-      $H(Fixtures.value_zero).filter());
+      $H(Fixtures.value_zero).filter(callback));
+
+    this.assertRaise('TypeError',
+      function() { $H(Fixtures.many).filter(); },
+      'Should throw a TypeError if no callback is provided.');
   },
 
   'testFirst': function() {
@@ -218,6 +223,16 @@ new Test.Unit.Runner({
     this.assertEnumEqual(['d', 'D#'], results[3]);
 
     this.assertEnumEqual([], $H(Fixtures.many).last('r0x0r5'));
+  },
+
+  'testMap': function() {
+    this.assertHashEqual({ 'a': 'Aa', 'b': 'Bb', 'c': 'Cc', 'd': 'D#d' },
+      $H(Fixtures.many).map(function(value, key) { return value + key; }),
+      'Should pass the value and key arguments to the map callback.');
+
+    this.assertRaise('TypeError',
+      function() { $H(Fixtures.many).map(); },
+      'Should throw a TypeError if no callback is provided.');
   },
 
   'testMerge': function() {

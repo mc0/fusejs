@@ -207,10 +207,9 @@
 
     createFusebox = function(instance) {
       // Most methods try to follow ES5 spec but may differ from
-      // the documented method.length value or allow null callbacks.
+      // the documented method.length value.
       var Array, Boolean, Date, Function, Number, Object, RegExp, String, reStrict,
        sandbox              = createSandbox(),
-       filterCallback       = function(value) { return value != null },
        glFunction           = window.Function,
        isProtoMode          = MODE == PROTO_MODE,
        isArrayChainable     = sandbox.Array().constructor !== window.Array,
@@ -475,19 +474,19 @@
 
       /*---------------------------- ADD STATICS -----------------------------*/
 
-      Function.FALSE           = function FALSE() { return false; };
+      Function.FALSE    = function FALSE() { return false };
 
-      Function.TRUE            = function TRUE() { return true; };
+      Function.TRUE     = function TRUE() { return true };
 
-      Function.IDENTITY        = IDENTITY;
+      Function.IDENTITY = IDENTITY;
 
-      Function.NOOP            = NOOP;
+      Function.NOOP     = NOOP;
 
-      Number.MAX_VALUE         = 1.7976931348623157e+308;
+      Number.MAX_VALUE  = 1.7976931348623157e+308;
 
-      Number.MIN_VALUE         = 5e-324;
+      Number.MIN_VALUE  = 5e-324;
 
-      Number.NaN               = NaN;
+      Number.NaN        = NaN;
 
       Number.NEGATIVE_INFINITY = -Infinity;
 
@@ -604,12 +603,13 @@
       /*-------------------------- ADD CHAINABILITY --------------------------*/
 
       if (isFunction(arrPlugin.filter)) {
-        (arrPlugin.filter = function filter(callback, thisArg) {
-          var result = __filter.call(this, callback || filterCallback, thisArg);
-          return result.length
-            ? Array.fromArray(result)
-            : Array();
-        }).raw = __filter;
+        if (!isArrayChainable) {
+          arrPlugin.filter = function filter(callback, thisArg) {
+            var result = __filter.call(this, callback, thisArg);
+            return result.length ? Array.fromArray(result) : Array();
+          };
+        }
+        arrPlugin.filter.raw = __filter;
       }
 
       if (isFunction(arrPlugin.indexOf)) {

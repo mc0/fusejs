@@ -1,5 +1,11 @@
 new Test.Unit.Runner({
 
+  'testEach': function() {
+    this.assertRaise('TypeError',
+      function() { new EnumObject([]).each() },
+      'Should throw a TypeError if no callback is provided.');
+  },
+
   'testEachBreak': function() {
     var result = 0;
     Fixtures.Basic.each(function(value) {
@@ -72,11 +78,12 @@ new Test.Unit.Runner({
   },
 
   'testEvery': function() {
-    this.assert(new EnumObject([]).every());
-    this.assert(new EnumObject([true, true, true]).every());
+    var IDENTITY = fuse.Function.IDENTITY;
 
-    this.assert(!new EnumObject([true, false, false]).every());
-    this.assert(!new EnumObject([false, false, false]).every());
+    this.assert(new EnumObject([true, true, true]).every(IDENTITY));
+
+    this.assert(!new EnumObject([true, false, false]).every(IDENTITY));
+    this.assert(!new EnumObject([false, false, false]).every(IDENTITY));
 
     this.assert(Fixtures.Basic.every(function(value) {
       return value > 0;
@@ -85,6 +92,10 @@ new Test.Unit.Runner({
     this.assert(!Fixtures.Basic.every(function(value) {
       return value > 1;
     }));
+
+    this.assertRaise('TypeError',
+      function() { new EnumObject([]).every() },
+      'Should throw a TypeError if no callback is provided.');
   },
 
   'testEachSlice': function() {
@@ -117,20 +128,25 @@ new Test.Unit.Runner({
   },
 
   'testFilter': function() {
+    var callback = function(value) { return value != null };
+
     this.assertEqual(Fixtures.Primes.toArray().join(', '),
       Fixtures.Z.filter(prime).toArray().join(', '));
 
-    // test passing no arguments to filter()
-    this.assertEqual(2, Fixtures.NullValues.filter().toArray().length);
-    this.assertEqual(2, Fixtures.UndefinedValues.filter().toArray().length);
-    this.assertEqual(3, Fixtures.ZeroValues.filter().toArray().length);
+    this.assertEqual(2, Fixtures.NullValues.filter(callback).toArray().length);
+    this.assertEqual(2, Fixtures.UndefinedValues.filter(callback).toArray().length);
+    this.assertEqual(3, Fixtures.ZeroValues.filter(callback).toArray().length);
+
+    this.assertRaise('TypeError',
+      function() { new EnumObject([]).filter() },
+      'Should throw a TypeError if no callback is provided.');
   },
 
   'testFirst': function() {
     this.assertUndefined(Fixtures.Empty.first());
     this.assertUndefined(Fixtures.Empty.first(function(item) { return item === 2 }));
     this.assertUndefined(Fixtures.Basic.first(function(item) { return item === 4 }));
-    
+
     this.assertEqual(2, Fixtures.Basic.first(function(item) { return item === 2 }));
     this.assertEqual(1, Fixtures.Basic.first());
     this.assertEqual('Marcel Molina Jr.', Fixtures.People.first(function(person) {
@@ -178,7 +194,7 @@ new Test.Unit.Runner({
         return sum + value;
       }));
   },
-  
+
   'testInvoke': function() {
     var result = new EnumObject([
       new EnumObject([2, 1, 3]),
@@ -235,7 +251,12 @@ new Test.Unit.Runner({
         return person.nickname;
       }).toArray().join(', '));
 
-    this.assertEqual(26,  Fixtures.Primes.map().size());
+    this.assertEqual(26,
+      Fixtures.Primes.map(fuse.Function.IDENTITY).size());
+
+    this.assertRaise('TypeError',
+      function() { new EnumObject([]).map() },
+      'Should throw a TypeError if no callback is provided.');
   },
 
   'testMax': function() {
@@ -293,11 +314,13 @@ new Test.Unit.Runner({
   },
 
   'testSome': function() {
-    this.assert(new EnumObject([true, true, true]).some());
-    this.assert(new EnumObject([true, false, false]).some());
+    var IDENTITY = fuse.Function.IDENTITY;
 
-    this.assert(!new EnumObject([]).some());
-    this.assert(!new EnumObject([false, false, false]).some());
+    this.assert(new EnumObject([true, true, true]).some(IDENTITY));
+    this.assert(new EnumObject([true, false, false]).some(IDENTITY));
+
+    this.assert(!new EnumObject([]).some(IDENTITY));
+    this.assert(!new EnumObject([false, false, false]).some(IDENTITY));
 
     this.assert(Fixtures.Basic.some(function(value) {
       return value > 2;
@@ -306,6 +329,10 @@ new Test.Unit.Runner({
     this.assert(!Fixtures.Basic.some(function(value) {
       return value > 5;
     }));
+
+    this.assertRaise('TypeError',
+      function() { new EnumObject([]).some() },
+      'Should throw a TypeError if no callback is provided.');
   },
 
   'testSortBy': function() {

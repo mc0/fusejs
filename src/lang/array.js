@@ -20,8 +20,9 @@
     from =
     fuse.Array.from = function from(iterable) {
       var length, object, result, Array = from[ORIGIN].Array;
-      if (!arguments.length) return Array();
-
+      if (!arguments.length) {
+        return Array();
+      }
       // Safari 2.x will crash when accessing a non-existent property of a
       // node list, not in the document, that contains a text node unless we
       // use the `in` operator
@@ -32,11 +33,14 @@
       if ('item' in object) {
         return Array.fromNodeList(iterable);
       }
+      if (isString(object)) {
+        object = object.split('');
+      }
       if ('length' in object) {
-        length = iterable.length >>> 0;
+        length = object.length >>> 0;
         result = Array(length);
         while (length--) {
-          if (length in object) result[length] = iterable[length];
+          if (length in object) result[length] = object[length];
         }
         return result;
       }
@@ -190,6 +194,9 @@
 
     plugin.each = function each(callback, thisArg) {
       var i = -1, object = Object(this), length = object.length >>> 0;
+      if (typeof callback != 'function') {
+        throw new TypeError;
+      }
       while (++i < length) {
         if (i in object && callback.call(thisArg, object[i], i, object) === false) {
           break;
@@ -225,6 +232,9 @@
     plugin.inject = (function() {
       var inject = function inject(accumulator, callback, thisArg) {
         var i = -1, object = Object(this), length = object.length >>> 0;
+        if (typeof callback != 'function') {
+          throw new TypeError;
+        }
         while (++i < length) {
           if (i in object)
             accumulator = callback.call(thisArg, accumulator, object[i], i, object);
@@ -608,10 +618,7 @@
      each =     null,
      every =    null,
      forEach =  null,
-     invoke =   null,
      max =      null,
      min =      null,
-     pluck =    null,
-     some =     null,
-     zip =      null;
+     some =     null;
   })(fuse.Array.plugin);

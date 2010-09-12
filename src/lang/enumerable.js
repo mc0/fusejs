@@ -20,6 +20,9 @@
     };
 
     mixin.each = function each(callback, thisArg) {
+      if (typeof callback != 'function') {
+        throw new TypeError;
+      }
       try {
         this._each(function(value, index, iterable) {
           if (callback.call(thisArg, value, index, iterable) === false)
@@ -43,8 +46,10 @@
     };
 
     mixin.every = function every(callback, thisArg) {
-      callback || (callback = IDENTITY);
       var result = true;
+      if (typeof callback != 'function') {
+        throw new TypeError;
+      }
       this.each(function(value, index, iterable) {
         if (!callback.call(thisArg, value, index, iterable)) {
           return (result = false);
@@ -55,7 +60,9 @@
 
     mixin.filter = function filter(callback, thisArg) {
       var result = fuse.Array();
-      callback = callback || function(value) { return value != null; };
+      if (typeof callback != 'function') {
+        throw new TypeError;
+      }
       this._each(function(value, index, iterable) {
         if (callback.call(thisArg, value, index, iterable))
           result.push(value);
@@ -81,6 +88,9 @@
     };
 
     mixin.inject = function inject(accumulator, callback, thisArg) {
+      if (typeof callback != 'function') {
+        throw new TypeError;
+      }
       this._each(function(value, index, iterable) {
         accumulator = callback.call(thisArg, accumulator, value, index, iterable);
       });
@@ -99,8 +109,10 @@
     };
 
     mixin.map = function map(callback, thisArg) {
-      if (!callback) return this.toArray();
       var result = fuse.Array();
+      if (typeof callback != 'function') {
+        throw new TypeError;
+      }
       if (thisArg) {
         this._each(function(value, index, iterable) {
           result.push(callback.call(thisArg, value, index, iterable));
@@ -158,8 +170,10 @@
     };
 
     mixin.some = function some(callback, thisArg) {
-      callback || (callback = IDENTITY);
       var result = false;
+      if (typeof callback != 'function') {
+        throw new TypeError;
+      }
       this.each(function(value, index, iterable) {
         if (callback.call(thisArg, value, index, iterable)) {
           return !(result = true);

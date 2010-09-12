@@ -1,6 +1,6 @@
 * Modify fuse.Array methods so they can be dumped to the global for Prototype emulation. [jddalton]
 
-* Remove support for null callbacks in fuse.Array#every, fuse.Array#some, and fuse.Array#map. [jddalton]
+* Remove support for null callbacks from fuse.Array, fuse.Hash, and fuse.Class.mixins.enumerable methods. [jddalton]
   Note: Backwards compatibility warning.
 
 * Add fuse.dom.Element#destroy and fuse.dom.Element#purge. [FuseJS LH #71, #72] [jddalton]
