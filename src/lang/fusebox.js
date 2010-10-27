@@ -10,23 +10,45 @@
 
     doc = window.document,
 
+    slice = [].slice,
+    
     ACTIVEX_MODE = 1,
 
     PROTO_MODE   = 2,
 
     IFRAME_MODE  = 3,
 
+    ARRAY_CLASS    = '[object Array]',
+
+    BOOLEAN_CLASS  = '[object Boolean]',
+
+    DATE_CLASS     = '[object Date]',
+
+    FUNCTION_CLASS = '[object Function]',
+
+    NUMBER_CLASS   = '[object Number]',
+
+    OBJECT_CLASS   = '[object Object]',
+
+    REGEXP_CLASS   = '[object RegExp]',
+
+    STRING_CLASS   = '[object String]',
+
+    CLASS = '[[Class]]',
+
+    IDENTITY = function(x) { return x },
+
     HAS_ACTIVEX = (function() {
       try {
         // ensure ActiveX is enabled
-        return envTest('ACTIVE_X_OBJECT') && !!new ActiveXObject('htmlfile');
+        return fuse.env.test('ACTIVE_X_OBJECT') && !!new ActiveXObject('htmlfile');
       } catch (e) {
         return false;
       }
     })(),
 
-    HAS_IFRAME = doc && isHostType(doc, 'createElement') &&
-      isHostType(window, 'frames') && 'src' in doc.createElement('iframe'),
+    HAS_IFRAME = doc && typeof doc.createElement != 'undefined' &&
+      typeof window.frames != 'undefined' && 'src' in doc.createElement('iframe'),
 
     HAS_PROTO = envTest('OBJECT__PROTO__'),
 
@@ -90,6 +112,10 @@
       setTimeout(function() { destroyElement(iframe) }, 10);
     },
 
+    isFunction = function(object) {
+      return typeof object == 'function';
+    },
+
     getMode = function() {
       return MODE;
     },
@@ -117,7 +143,7 @@
           // IE doesn't support bfcache so we don't have to worry about breaking it.
           if (!CLEANED_ACTIVEX) {
             CLEANED_ACTIVEX = true;
-            if (isHostType(window, 'attachEvent')) {
+            if (typeof window.attachEvent != 'undefined') {
               attachEvent('onunload', function() { cache.length = 0 });
             }
           }
@@ -125,7 +151,7 @@
 
         case IFRAME_MODE:
           key = '/* fuse_iframe_cache_fix */';
-          name = uid + counter++;
+          name = fuse.uid + counter++;
           parentNode = doc.body || doc.documentElement;
 
           try {
@@ -140,7 +166,7 @@
             // A side effect is that Firefox will use the __proto__ technique
             // when served from the file:// protocol as well
             if ('MozOpacity' in doc.documentElement.style &&
-                isHostType(window, 'sessionStorage') &&
+                typeof window.sessionStorage != 'undefined' &&
                 !sessionStorage[key]) {
               sessionStorage[key] = 1;
               throw new Error;
@@ -273,7 +299,7 @@
       instance || (instance = new Klass);
 
       function from(value) {
-        var classOf = toString.call(value);
+        var classOf = fuse._.toString.call(value);
         switch (classOf) {
           case ARRAY_CLASS:
             if (value.constructor != instance.Array) {
@@ -296,9 +322,9 @@
             }
             break;
 
-          case DATE_CLASS   :
-          case NUMBER_CLASS :
-          case STRING_CLASS :
+          case DATE_CLASS  :
+          case NUMBER_CLASS:
+          case STRING_CLASS:
             classOf = classOf.slice(8,-1);
             if (value.constructor != instance[classOf]) {
               return new instance[classOf](value);
@@ -319,13 +345,13 @@
               result.push.apply(result, arguments);
             }
           }
-          result[PROTO] = arrPlugin;
+          result.__proto__ = arrPlugin;
           return result;
         };
 
         Boolean = function Boolean(value) {
           var result = new __Boolean(value);
-          result[PROTO] = boolPlugin;
+          result.__proto__ = boolPlugin;
           return result;
         };
 
@@ -335,7 +361,7 @@
             result = arguments.length == 1
               ? new __Date(year)
               : new __Date(year, month, date || 1, hours || 0, minutes || 0, seconds || 0, ms || 0);
-            result[PROTO] = datePlugin;
+            result.__proto__ = datePlugin;
           } else {
             result = instance.String(new __Date);
           }
@@ -346,13 +372,13 @@
           var result = arguments.length < 3
             ? __Function(argN, body)
             : __Function.apply(__Function, arguments);
-          result[PROTO] = funcPlugin;
+          result.__proto__ = funcPlugin;
           return result;
         };
 
         Number = function Number(value) {
           var result = new __Number(value);
-          result[PROTO] = numPlugin;
+          result.__proto__ = numPlugin;
           return result;
         };
 
@@ -361,19 +387,19 @@
             return from(value);
           }
           var result = new __Object;
-          result[PROTO] = objPlugin;
+          result.__proto__ = objPlugin;
           return result;
         };
 
         RegExp = function RegExp(pattern, flags) {
           var result = new __RegExp(pattern, flags);
-          result[PROTO] = regPlugin;
+          result.__proto__ = regPlugin;
           return result;
         };
 
         String = function String(value) {
           var result = new __String(arguments.length ? value : '');
-          result[PROTO] = strPlugin;
+          result.__proto__ = strPlugin;
           return result;
         };
       }
@@ -408,14 +434,14 @@
 
           // ensure we aren't in strict mode and map arguments.callee to the wrapper
           if (body && !reStrict.test(body)) {
-            body = 'arguments.callee = arguments.callee.' + uid + '; ' + body;
+            body = 'arguments.callee = arguments.callee.' + fuse.uid + '; ' + body;
           }
 
           // create function using window.Function constructor
           fn = new glFunction(args.join(','), body);
 
           // ensure `thisArg` isn't set to the sandboxed global
-          result = fn[uid] = new __Function('window, fn',
+          result = fn[fuse.uid] = new __Function('window, fn',
             'var sb=this;' +
             'return function(){' +
             'return fn.apply(this==sb?window:this,arguments)' +
@@ -458,9 +484,9 @@
 
       Function.TRUE     = function TRUE() { return true };
 
-      Function.IDENTITY = IDENTITY;
+      Function.IDENTITY = function IDENTITY(x) { return x };
 
-      Function.NOOP     = NOOP;
+      Function.NOOP     = function NOOP() { };
 
       Number.MAX_VALUE  = 1.7976931348623157e+308;
 
@@ -472,10 +498,11 @@
 
       Number.POSITIVE_INFINITY = Infinity;
 
+      // ES5 7.2
       RegExp.SPECIAL_CHARS = {
         's': {
           // whitespace
-          '\x09': '\\x09', '\x0B': '\\x0B', '\x0C': '\\x0C', '\x20': '\\x20', '\xA0': '\\xA0',
+          '\x09': '\\x09', '\x0B': '\\x0B', '\x0C': '\\x0C', '\x20': '\\x20', '\xA0': '\\xA0', '\ufeff': '\\ufeff',
 
           // line terminators
           '\x0A': '\\x0A', '\x0D': '\\x0D', '\u2028': '\\u2028', '\u2029': '\\u2029',
@@ -520,7 +547,7 @@
       // ES5 15.4.3.2
       if (!isFunction(Array.isArray = __Array.isArray)) {
         Array.isArray = function isArray(value) {
-          return toString.call(value) == ARRAY_CLASS;
+          return fuse._.toString.call(value) == ARRAY_CLASS;
         };
       }
 
@@ -534,7 +561,7 @@
       if (isProtoMode) {
         Array.fromArray = function fromArray(array) {
           var result = __slice.call(array, 0);
-          result[PROTO] = arrPlugin;
+          result.__proto__ = arrPlugin;
           return result;
         };
       } else if (isArrayChainable) {
@@ -565,7 +592,7 @@
 
           // redefine RegExp to auto-fix \s issues
           RegExp = function RegExp(pattern, flags) {
-            return new RE((toString.call(pattern) == REGEXP_CLASS ?
+            return new RE((fuse._.toString.call(pattern) == REGEXP_CLASS ?
               pattern.source : window.String(pattern))
                 .replace(reCharClass, newCharClass), flags);
           };
@@ -933,16 +960,17 @@
       /*------------------------------ CLEANUP -------------------------------*/
 
       // prevent JScript bug with named function expressions
-      var charAt = null, charCodeAt = null, concat = null, every = null, exec = null,
-       filter = null, getDate = null, getDay = null, getFullYear = null,
-       getHours = null, getMilliseconds = null, getMinutes = null, getMonth = null,
-       getSeconds = null, getTime = null, getTimezoneOffset = null, getUTCDate = null,
-       getUTCDay = null, getUTCFullYear = null, getUTCHours = null,
-       getUTCMilliseconds = null, getUTCMinutes = null, getUTCMonth = null,
-       getUTCSeconds = null, getYear = null, join = null, indexOf = null,
-       lastIndexOf = null, localeCompare = null, match = null, map = null, push = null,
-       replace = null, reverse = null, search = null, slice = null, some = null,
-       sort = null, split = null, splice = null, substr = null, substring = null,
+      var FALSE = null, IDENTITY = null, NOOP = null, TRUE = null, charAt = null,
+       charCodeAt = null, concat = null, every = null, exec = null, filter = null,
+       getDate = null, getDay = null, getFullYear = null, getHours = null,
+       getMilliseconds = null, getMinutes = null, getMonth = null, getSeconds = null,
+       getTime = null, getTimezoneOffset = null, getUTCDate = null, getUTCDay = null,
+       getUTCFullYear = null, getUTCHours = null, getUTCMilliseconds = null,
+       getUTCMinutes = null, getUTCMonth = null, getUTCSeconds = null,
+       getYear = null, join = null, indexOf = null, lastIndexOf = null,
+       localeCompare = null, match = null, map = null, push = null, replace = null,
+       reverse = null, search = null, slice = null, some = null, sort = null,
+       split = null, splice = null, substr = null, substring = null,
        toExponential = null, toFixed = null, toISOString = null, toJSON = null,
        toLowerCase = null, toLocaleLowerCase = null, toLocaleUpperCase = null,
        toPrecision = null, toUpperCase = null, trim = null, trimLeft = null,
@@ -958,7 +986,7 @@
     // content warnings in IE6. It is also used as a workaround for access denied errors
     // thrown when using iframes to create sandboxes after the document.domain is
     // set (Opera 9.25 is out of luck here).
-    if (HAS_ACTIVEX && !isHostType(window, 'XMLHttpRequest') &&
+    if (HAS_ACTIVEX && typeof window.XMLHttpRequest == 'undefined' &&
           window.location && location.protocol == 'https:') {
       setMode(ACTIVEX_MODE);
     }
@@ -1006,7 +1034,7 @@
           fuse.updateGenerics(Klass, deep);
         } else {
           fuse.Object.each(Klass.prototype, function(value, key, proto) {
-            if (!SKIPPED_KEYS[key] && isFunction(proto[key]) && hasKey(proto, key))
+            if (!SKIPPED_KEYS[key] && isFunction(proto[key]) && fuse.Object.hasKey(proto, key))
               Klass[key] = createGeneric(proto, key);
           });
         }
@@ -1039,7 +1067,7 @@
       }
       // redifine `toString` if there are no issues
       if (fuse.Object().toString.call([]) == ARRAY_CLASS) {
-        toString = { }.toString;
+        fuse._.toString = { }.toString;
       }
 
       // assign sandboxed natives to Fuse and add `updateGeneric` methods

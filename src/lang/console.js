@@ -6,6 +6,8 @@
 
     var logger, object,
 
+    isHostType = fuse.Object.isHostType,
+
     error = fuse.Function.FALSE,
 
     info = error,
@@ -63,6 +65,7 @@
     }
     else if (hasGlobalConsole || hasJaxerConsole) {
       object = hasGlobalConsole ? window.console : window.Jaxer.Log;
+
       logger = isHostType(object, 'log') ? 'log' :
         isHostType(object, 'debug') ? 'debug' : 'info';
 

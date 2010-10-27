@@ -2,69 +2,69 @@
 
   fuse.Class.mixins.event = (function() {
 
-    var huid = fuse.uid + '_eventHandler',
+    var huid = fuse.uid + '_eventHandler';
 
-    arrIndexOf = (function(fn) {
-      return fn && fn.raw || function(value) {
-        var length = this.length;
-        while (length--) {
-          if (this[length] === value) return length;
+    function createDispatcher(type) {
+      return function() {
+        var handler, i = -1, debug = fuse.debug,
+         klass = this, args = arguments, ec = klass._events.events[type],
+         handlers = ec && ec.handlers;
+
+        if (handlers) {
+          handlers = handlers.slice(0);
+          while (handler = handlers[++i]) {
+            if (debug) {
+              // script injection allows handlers to fail without halting the while loop
+              fuse[huid] = function() { handler.apply(klass, args) };
+              fuse.dom.runScriptText('fuse.' + huid + '()');
+              delete fuse[huid];
+            }
+            else {
+              handler.apply(klass, args);
+            }
+          }
         }
-        return -1;
       };
-    })(fuse.Array.plugin.indexOf),
+    }
 
-    fire = function fire(type) {
-      var handler, args, i = -1, debug = fuse.debug, klass = this,
-       events = klass._events || (klass._events = { }), handlers = events[type];
-
-      if (handlers) {
-        handlers = slice.call(handlers, 0);
-        args = arguments.length > 1 ? slice.call(arguments, 1) : [];
-        while (handler = handlers[++i]) {
-          if (debug) {
-            // script injection allows handlers to fail without halting the while loop
-            fuse[huid] = function() { handler.apply(klass, args) };
-            runScriptText('fuse.' + huid + '()');
-            delete fuse[huid];
-          }
-          else if (args) {
-            handler.apply(this, args);
-          } else {
-            handler.call(this);
-          }
-        }
+    function fire(type) {
+      var ec, data = this._events;
+      if (data && (ec = data.events[type])) {
+        ec.dispatcher.apply(this, Array.prototype.slice.call(arguments, 1))
       }
       return this;
-    },
+    }
 
-    observe = function observe(type, handler) {
-      var events = this._events || (this._events = { }),
-       ec = events[type] || (events[type] = []);
-      ec.push(handler);
+    function observe(type, handler) {
+      var data = this._events || (this._events = { 'createDispatcher': createDispatcher, 'events': { } }),
+       ec = (data.events[type] || data.events[type] = { 'handlers': [], 'dispatcher': createDispatcher(type) });
+      ec.handlers.push(handler);
       return this;
-    },
+    }
 
-    stopObserving = function stopObserving(type, handler) {
-      var ec, foundAt, length,
-       events = this._events || (this._events = { });
+    function stopObserving(type, handler) {
+      var ec, events, foundAt, length, data = this._events;
 
-      if (!events) return this;
-      type = isString(type) ? type && String(type) : null;
-
+      if (!data) {
+        return this;
+      }
+      if (fuse.Object.isString(type)) {
+        type = String(type);
+      }
       // if the event type is omitted we stop
       // observing all handlers on the element
+      events = data.events;
       if (!type) {
-        eachKey(events, function(handlers, type) {
+        fuse.Object.each(events, function(handlers, type) {
           stopObserving.call(element, type);
         });
         return this;
       }
-      if (handlers = events[type]) {
+      if (ec = events[type]) {
         // if the handler is omitted we stop
         // observing all handlers of that type
         if (handler == null) {
-          length = handlers.length;
+          length = ec.handlers.length;
           while (length--) stopObserving.call(this, type, length);
           return this;
         }
@@ -73,22 +73,25 @@
         return this;
       }
 
-      foundAt = isNumber(handler) ? handler : arrIndexOf.call(handlers, handler);
-      if (foundAt < 0) return this;
+      foundAt = fuse.Object.isNumber(handler) ?
+        handler : fuse._.arrIndexOf.call(ec.handlers, handler);
 
+      if (foundAt < 0) {
+        return this;
+      }
       // remove handler
-      handlers.splice(foundAt, 1);
+      ec.handlers.splice(foundAt, 1);
 
       // if no more handlers remove the event type data
-      if (!handlers.length) {
+      if (!ec.handlers.length) {
         delete events[type];
       }
       return this;
-    };
+    }
 
     return {
-      'fire':          fire,
-      'observe':       observe,
+      'fire': fire,
+      'observe': observe,
       'stopObserving': stopObserving
     };
   })();

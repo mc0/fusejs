@@ -15,27 +15,27 @@
     INSERTABLE_NODE_TYPES = { '1': 1, '3': 1, '8': 1, '10': 1, '11': 1 },
 
     ELEMENT_EVALS_SCRIPT_FROM_INNER_HTML =
-      envTest('ELEMENT_EVALS_SCRIPT_FROM_INNER_HTML'),
+      fuse.env.test('ELEMENT_EVALS_SCRIPT_FROM_INNER_HTML'),
 
     ELEMENT_SCRIPT_FAILS_TO_EVAL_TEXT =
-      envTest('ELEMENT_SCRIPT_FAILS_TO_EVAL_TEXT'),
+      fuse.env.test('ELEMENT_SCRIPT_FAILS_TO_EVAL_TEXT'),
 
     ELEMENT_SCRIPT_REEVALS_TEXT =
-      envTest('ELEMENT_SCRIPT_REEVALS_TEXT'),
+      fuse.env.test('ELEMENT_SCRIPT_REEVALS_TEXT'),
 
     ELEMENT_INNER_HTML_BUGGY = (function() {
-      var T = !envTest('ELEMENT_INNER_HTML'), o = { };
+      var T = !fuse.env.test('ELEMENT_INNER_HTML'), o = { };
       if (!T) {
-        if (envTest('ELEMENT_COLGROUP_INNER_HTML_BUGGY')) {
+        if (fuse.env.test('ELEMENT_COLGROUP_INNER_HTML_BUGGY')) {
           (T = T || o).COLGROUP = 1;
         }
-        if (envTest('ELEMENT_OPTGROUP_INNER_HTML_BUGGY')) {
+        if (fuse.env.test('ELEMENT_OPTGROUP_INNER_HTML_BUGGY')) {
           (T = T || o).OPTGROUP = 1;
         }
-        if (envTest('ELEMENT_SELECT_INNER_HTML_BUGGY')) {
+        if (fuse.env.test('ELEMENT_SELECT_INNER_HTML_BUGGY')) {
           (T = T || o).SELECT = 1;
         }
-        if (envTest('ELEMENT_TABLE_INNER_HTML_BUGGY')) {
+        if (fuse.env.test('ELEMENT_TABLE_INNER_HTML_BUGGY')) {
           (T = T || o).TABLE = T.TBODY = T.TR = T.TD = T.TFOOT = T.TH = T.THEAD = 1;
         }
       }
@@ -101,7 +101,7 @@
             j = -1;
             children = child.childNodes;
             length   = children.length;
-            child    = child.nodeType == ELEMENT_NODE
+            child    = child.nodeType == 1
               ? cloner(child, false, isData, isEvents, excludes, context)
               : child.cloneNode(false);
 
@@ -155,7 +155,7 @@
        elements = element.getElementsByTagName('*');
 
       while (element = elements[++i]) {
-        if (element.nodeType == ELEMENT_NODE) {
+        if (element.nodeType == 1) {
           id = getFuseId(element, true);
           if (data = domData[id]) {
             data.events && htmlPlugin.stopObserving.call(element);
@@ -219,7 +219,7 @@
       var nextNode, element = this.raw || this, node = element.firstChild;
       while (node) {
         nextNode = node.nextSibling;
-        if (node.nodeType == TEXT_NODE && node.data == false) {
+        if (node.nodeType == 3 && node.data == false) {
           element.removeChild(node);
         }
         node = nextNode;
@@ -235,7 +235,7 @@
         events = deep.events;
         excludes = deep.excludes;
         deep = deep.data;
-        if (excludes && !isArray(excludes)) {
+        if (excludes && !fuse.Object.isArray(excludes)) {
           excludes = [excludes];
         }
       }
@@ -342,7 +342,7 @@
       content || content == '0' || (content = '');
 
       if (getNodeName(element) == 'SCRIPT') {
-        setScriptText(element, content.nodeType == TEXT_NODE ?
+        setScriptText(element, content.nodeType == 3 ?
           (content.raw || content).data : content);
         if (!ELEMENT_SCRIPT_REEVALS_TEXT) {
           scripts = [element];
@@ -368,10 +368,10 @@
        parentNode = element[PARENT_NODE],
        options = { 'attrs': attributes, 'context': element }
 
-      if (isString(wrapper)) {
+      if (fuse.Object.isString(wrapper)) {
         wrapper = Element(wrapper, options);
       }
-      if (isElement(wrapper)) {
+      if (fuse.Object.isElement(wrapper)) {
         wrapper = plugin.setAttribute.call(wrapper, attributes);
       }
       else {
@@ -409,8 +409,8 @@
     }
 
     // Fix cloning elements in IE 6/7
-    if (envTest('NAME_ATTRIBUTE_IS_READONLY') ||
-        envTest('ATTRIBUTE_NODES_SHARED_ON_CLONED_ELEMENTS')) {
+    if (fuse.env.test('NAME_ATTRIBUTE_IS_READONLY') ||
+        fuse.env.test('ATTRIBUTE_NODES_SHARED_ON_CLONED_ELEMENTS')) {
 
       cloneNode = function(source, excludes, nodeName, context) {
         var attr, node, attributes = { }, setName = 1, setType = 1;
@@ -447,7 +447,7 @@
     }
 
     // Fix form element attributes in IE
-    if (envTest('INPUT_VALUE_PROPERTY_SETS_ATTRIBUTE')) {
+    if (fuse.env.test('INPUT_VALUE_PROPERTY_SETS_ATTRIBUTE')) {
       var __cloneNode = cloneNode;
       cloneNode = function(source, excludes, nodeName, context) {
         nodeName || (nodeName = getNodeName(source));

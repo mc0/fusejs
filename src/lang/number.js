@@ -1,63 +1,68 @@
   /*------------------------------ LANG: NUMBER ------------------------------*/
 
+  /* create shared pseudo private props */
+
+  fuse._.pad = '000000';
+
+  /*--------------------------------------------------------------------------*/
+
   (function(plugin) {
-    var pad    = '000000',
-     __toFixed = 0..toFixed,
-     __abs     = Math.abs,
-     __ceil    = Math.ceil,
-     __floor   = Math.floor,
-     __round   = Math.round;
 
-    plugin.abs = function abs() {
-      return fuse.Number(__abs(this));
-    };
+    function abs() {
+      return abs[ORIGIN].Number(Math.abs(this));
+    }
 
-    plugin.ceil = function ceil() {
-      return fuse.Number(__ceil(this));
-    };
+    function ceil() {
+      return ceil[ORIGIN].Number(Math.ceil(this));
+    }
 
-    plugin.clone = function clone() {
-      return fuse.Number(this);
-    };
+    function clone() {
+      return clone[ORIGIN].Number(this);
+    }
 
-    plugin.floor = function floor() {
-      return fuse.Number(__floor(this));
-    };
+    function floor() {
+      return floor[ORIGIN].Number(Math.floor(this));
+    }
 
-    plugin.round = function round(fractionDigits) {
-      return fuse.Number(fractionDigits
-        ? parseFloat(__toFixed.call(this, fractionDigits))
-        : __round(this));
-    };
+    function round(fractionDigits) {
+      return round[ORIGIN].Number(fractionDigits
+        ? parseFloat(0..toFixed.call(this, fractionDigits))
+        : Math.round(this));
+    }
 
-    plugin.times = function times(callback, thisArg) {
-      var i = -1, length = toInteger(this);
+    function times(callback, thisArg) {
+      var i = -1, length = fuse._.toInteger(this);
       if (arguments.length == 1) {
         while (++i < length) callback(i, i);
       } else {
         while (++i < length) callback.call(thisArg, i, i);
       }
       return this;
-    };
+    }
 
-    plugin.toColorPart = function toColorPart() {
-      return plugin.toPaddedString.call(this, 2, 16);
-    };
+    function toColorPart() {
+      return toColorPart[ORIGIN].Number.toPaddedString(this, 2, 16);
+    }
 
-    plugin.toPaddedString = function toPaddedString(length, radix) {
-      var string = toInteger(this).toString(radix || 10);
-      if (length <= string.length) return fuse.String(string);
-      if (length > pad.length) pad = Array(length + 1).join('0');
-      return fuse.String((pad + string).slice(-length));
-    };
+    function toPaddedString(length, radix) {
+      var origin = toPaddedString[ORIGIN], p = fuse._,
+       string = p.toInteger(this).toString(radix || 10);
 
-    // prevent JScript bug with named function expressions
-    var abs =         null,
-     ceil =           null,
-     clone =          null,
-     floor =          null,
-     round =          null,
-     times =          null,
-     toColorPart =    null,
-     toPaddedString = null;
+      if (length <= string.length) return origin.String(string);
+      if (length > p.pad.length) p.pad = Array(length + 1).join('0');
+      return origin.String((p.pad + string).slice(-length));
+    }
+
+    /*------------------------------------------------------------------------*/
+
+    plugin.times = times;
+
+    (plugin.abs   = abs)[ORIGIN]   =
+    (plugin.ceil  = ceil)[ORIGIN]  =
+    (plugin.clone = clone)[ORIGIN] =
+    (plugin.floor = floor)[ORIGIN] =
+    (plugin.round = round)[ORIGIN] =
+    (plugin.toColorPart = toColorPart)[ORIGIN] =
+    (plugin.toPaddedString = toPaddedString)[ORIGIN] = fuse;
+
   })(fuse.Number.plugin);

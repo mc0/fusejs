@@ -41,11 +41,9 @@
     // enforce ES5 rules for Array and String methods
     // where `this` cannot be undefined or null
     wrapApplyAndCall = function(object) {
-      eachKey(object, function(value, key) {
-        if (hasKey(object, key)) {
-          object[key].call = call;
-          object[key].apply = apply;
-        }
+      fuse.Object.each(object, function(value, key) {
+        object[key].call = call;
+        object[key].apply = apply;
       });
     },
 
@@ -118,7 +116,7 @@
       // true for Firefox
       var key, whitespace = '';
       for (key in sMap) whitespace += key;
-      return !isFunction(whitespace.trim) || !!whitespace.trim();
+      return !fuse.Object.isFunction(whitespace.trim) || !!whitespace.trim();
     })();
 
     /*------------------------------------------------------------------------*/
@@ -133,12 +131,12 @@
          Array = concat[ORIGIN].Array,
          length = arguments.length,
          object = Object(this),
-         result = isArray(object) ? Array.fromArray(object) : Array(object),
+         result = fuse.Object.isArray(object) ? Array.fromArray(object) : Array(object),
          n      = result.length;
 
         while (++i < length) {
           item = arguments[i];
-          if (isArray(item)) {
+          if (fuse.Object.isArray(item)) {
             j = 0; itemLen = item.length;
             for ( ; j < itemLen; j++, n++) {
               if (j in item) result[n] = item[j];
@@ -158,7 +156,7 @@
         var endIndex, result, object = Object(this),
          length = object.length >>> 0;
 
-        end = typeof end == 'undefined' ? length : toInteger(end);
+        end = typeof end == 'undefined' ? length : fuse._.toInteger(end);
         endIndex = end - 1;
 
         if (end > length || endIndex in object) {
@@ -177,7 +175,7 @@
     // Based on work by Steve Levithan
     if (REGEXP_EXEC_RETURNS_UNDEFINED_VALUES_AS_STRINGS ||
         REGEXP_INCREMENTS_LAST_INDEX_AFTER_ZERO_LENGTH_MATCHES) {
-      reExec =
+      regExec =
       regPlugin.exec = function exec(string) {
         var cache, exec = __exec;
         if (reOptCapture.test(this.source)) {
@@ -263,7 +261,7 @@
         REGEXP_EXEC_RETURNS_UNDEFINED_VALUES_AS_STRINGS) {
       strPlugin.match = function match(pattern) {
         var result = __match.call(this, pattern);
-        if (isRegExp(pattern)) {
+        if (fuse.Object.isRegExp(pattern)) {
           if (!pattern.global && reOptCapture.test(pattern)) {
             // ensure undefined values are not turned to empty strings
             strReplace.call(this, pattern, function() {
@@ -284,14 +282,14 @@
     // For Safari 2.0.2- and Chrome 1+
     // Based on work by Dean Edwards:
     // http://code.google.com/p/base2/source/browse/trunk/lib/src/base2-legacy.js?r=239#174
-    if (envTest('STRING_REPLACE_COERCE_FUNCTION_TO_STRING') ||
+    if (fuse.env.test('STRING_REPLACE_COERCE_FUNCTION_TO_STRING') ||
         STRING_REPLACE_BUGGY_WITH_GLOBAL_FLAG_AND_EMPTY_PATTERN) {
       strReplace =
       strPlugin.replace = function replace(pattern, replacement) {
         if (typeof replacement != 'function') {
           return __replace.call(this, pattern, replacement);
         }
-        if (!isRegExp(pattern)) {
+        if (!fuse.Object.isRegExp(pattern)) {
           pattern = new RegExp(escapeRegExpChars(pattern));
         }
 
@@ -337,7 +335,7 @@
     if (STRING_REPLACE_PASSES_UNDEFINED_VALUES_AS_STRINGS) {
       var __replace2 = strPlugin.replace;
       strPlugin.replace = function replace(pattern, replacement) {
-        if (typeof replacement == 'function' && isRegExp(pattern) &&
+        if (typeof replacement == 'function' && fuse.Object.isRegExp(pattern) &&
             reOptCapture.test(pattern.source)) {
           var __replacement = replacement;
           replacement = function(match) {
@@ -366,13 +364,13 @@
           };
         }
         var result = __replace3.call(this, pattern, replacement);
-        if (isRegExp(pattern)) pattern.lastIndex = 0;
+        if (fuse.Object.isRegExp(pattern)) pattern.lastIndex = 0;
         return result;
       };
 
       // ES5 15.5.4.12
       strPlugin.search = function search(pattern) {
-        if (isRegExp(pattern)) {
+        if (fuse.Object.isRegExp(pattern)) {
           var backup = pattern.lastIndex,
            result = __search.call(this, pattern);
           pattern.lastIndex = backup;
@@ -386,12 +384,13 @@
     // For IE and Firefox
     // Based on work by Steve Levithan
     // http://xregexp.com/
-    if (envTest('STRING_SPLIT_BUGGY_WITH_REGEXP') ||
+    if (fuse.env.test('STRING_SPLIT_BUGGY_WITH_REGEXP') ||
         STRING_SPLIT_RETURNS_UNDEFINED_VALUES_AS_STRINGS) {
+
       strPlugin.split = function split(separator, limit) {
         // max limit Math.pow(2, 32) - 1
         limit = typeof limit == 'undefined' ? 4294967295 : limit >>> 0;
-        if (!limit || !isRegExp(separator)) {
+        if (!limit || !fuse.Object.isRegExp(separator)) {
           return __split.call(this, separator, limit);
         }
 
@@ -454,7 +453,7 @@
     else if (STRING_SPLIT_ZERO_LENGTH_MATCH_RETURNS_NON_EMPTY_ARRAY) {
       strPlugin.split = function split(separator, limit) {
         var backup, result = __split.call(this, separator, limit);
-        if (result && isRegExp(separator)) {
+        if (result && fuse.Object.isRegExp(separator)) {
           if (separator.global) {
             backup = separator.lastIndex;
             separator.lastIndex = 0;

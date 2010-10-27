@@ -1,37 +1,40 @@
   /*------------------------------ AJAX: UPDATER -----------------------------*/
 
   fuse.ajax.Updater = (function() {
-    var Request = fuse.ajax.Request,
 
-    Klass = function() { },
+    function Klass() { }
 
-    Updater = function Updater(container, url, options) {
-      var callbackName = 'on' + capitalize(Request.READY_STATES[4]),
+    function Updater(container, url, options) {
+      var dispatcher, ec,
+       callbackName = 'on' + fuse._.capitalize(Updater.superclass.READY_STATES[4]),
        instance = __instance || new Klass,
-       onDone = options[callbackName];
-
-      __instance = null;
+       onDone = options[callbackName] || Klass;
 
       instance.container = {
         'success': fuse(container.success || container),
         'failure': fuse(container.failure || (container.success ? null : container))
       };
 
-      options[callbackName] = function(request, json) {
+      instance.observe(callbackName, onDone);
+      ec = instance._events.events[callbackName];
+      dispatcher = ec.dispatcher;
+
+      ec.dispatcher = function(request, json) {
         instance.updateContent(request.responseText);
-        onDone && onDone(request, json);
+        dispatcher(request, json);
       };
 
-      // this._super() equivalent
+      __instance = null;
+      delete options[callbackName];
       fuse.ajax.Request.call(instance, url, options);
-      if (onDone) options[callbackName] = onDone;
-
+      
+      if (onDone == Klass) {
+        ec.handlers = [];
+      } else {
+        options[callbackName] = onDone;
+      }
       return instance;
-    },
-
-    __instance,
-    __apply = Updater.apply,
-    __call = Updater.call;
+    }
 
     Updater.call = function(thisArg) {
       __instance = thisArg;
@@ -43,13 +46,16 @@
       return __apply.call(this, thisArg, argArray);
     };
 
+    var __instance, __apply = Klass.apply, __call = Klass.call;
+
     fuse.Class(fuse.ajax.Request, { 'constructor': Updater });
+    Updater.addMixins(fuse.Class.mixins.event);
     Klass.prototype = Updater.plugin;
     return Updater;
   })();
 
   fuse.ajax.Updater.plugin.updateContent = (function() {
-    var updateContent = function updateContent(responseText) {
+    function updateContent(responseText) {
       var options = this.options,
        updateBy = optiona.updateBy || 'appendChild',
        receiver = this.container[this.isSuccess() ? 'success' : 'failure'];
@@ -58,13 +64,13 @@
         if (!options.runScripts) {
           responseText = responseText.stripScripts();
         }
-        if (isString(updateBy)) {
+        if (fuse.Object.isString(updateBy)) {
           receiver[updateBy](responseText);
         } else {
           updateBy(receiver, responseText);
         }
       }
-    };
+    }
 
     return updateContent;
   })();

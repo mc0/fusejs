@@ -3,17 +3,12 @@
   (function() {
 
     var ELEMENT_INNER_HTML_IGNORES_SCRIPTS =
-      envTest('ELEMENT_INNER_HTML_IGNORES_SCRIPTS'),
+      window.fuse.env.test('ELEMENT_INNER_HTML_IGNORES_SCRIPTS'),
 
     ELEMENT_TABLE_INNER_HTML_INSERTS_TBODY =
-      envTest('ELEMENT_TABLE_INNER_HTML_INSERTS_TBODY'),
+      window.fuse.env.test('ELEMENT_TABLE_INNER_HTML_INSERTS_TBODY'),
 
-    CONTEXT_TYPES = (function() {
-      var T = { };
-      T[ELEMENT_NODE] =
-      T[DOCUMENT_NODE] = 1;
-      return T;
-    })(),
+    CONTEXT_TYPES = { '1': 1, '9': 1 },
 
     FROM_STRING_PARENT_WRAPPERS = (function() {
       var T = {
@@ -80,7 +75,7 @@
     function Decorator(element) {
       this.raw = element;
       this.style = element.style;
-      this.nodeType = ELEMENT_NODE;
+      this.nodeType = 1;
       this.childNodes = element.childNodes;
       this.tagName = this.nodeName = element.nodeName;
       this.initialize && this.initialize();
@@ -93,7 +88,7 @@
 
     function extendByTag(tagName, plugins, mixins, statics) {
       var i = -1;
-      if (isArray(tagName)) {
+      if (fuse.Object.isArray(tagName)) {
         while (tagName[++i]) {
           extendByTag(tagName[i], plugins, mixins, statics);
         }
@@ -145,7 +140,7 @@
       fragment    = getFragmentFromHTML(html, context);
 
       // multiple elements return a NodeList
-      if (fragment.nodeType == DOCUMENT_FRAGMENT_NODE) {
+      if (fragment.nodeType == 11) {
         result = NodeList();
         length = fragment.childNodes.length;
         if (isDecorated) {
@@ -187,7 +182,7 @@
         isDecorated = context.decorate;
         context     = context.context;
       }
-      element = (context || doc).getElementById(id || uid);
+      element = (context || doc).getElementById(id || fuse.uid);
       return isDecorated == null || isDecorated
         ? element && fromElement(element, isCached)
         : element;
@@ -235,7 +230,7 @@
       if (html == '') {
         return cache.fragment;
       }
-      if (context.nodeType == DOCUMENT_NODE && (match = html.match(reExtractTagName))) {
+      if (context.nodeType == 9 && (match = html.match(reExtractTagName))) {
         nodeName = FROM_STRING_CHILDREN_PARENTS[match[1].toUpperCase()];
       }
       if (!nodeName) {
@@ -288,7 +283,7 @@
 
     function fuse(object, context) {
       var isCached, isDecorated;
-      if (isString(object)) {
+      if (fuse.Object.isString(object)) {
         return object.charAt(0) == '<'
           ? HTMLElement(object, context)
           : fromId(object, context);
@@ -298,7 +293,7 @@
         isDecorated = context.decorate;
       }
       return isDecorated == null || isDecorated
-        ? Node(Window(object, isCached), isCached)
+        ? fuse.dom.Node(fuse.dom.Window(object, isCached), isCached)
         : object;
     }
 
@@ -307,11 +302,11 @@
     //
     // IE fails to set the BUTTON element's `type` attribute without using the sTag
     // http://dev.rubyonrails.org/ticket/10548
-    if (envTest('NAME_ATTRIBUTE_IS_READONLY')) {
+    if (window.fuse.env.test('NAME_ATTRIBUTE_IS_READONLY')) {
       var __HTMLElement = HTMLElement;
       HTMLElement = function HTMLElement(tagName, context) {
         var attrs, match, name, type;
-        if (isString(tagName) && context &&
+        if (fuse.Object.isString(tagName) && context &&
             !CONTEXT_TYPES[context.nodeType] && (attrs = context.attrs) &&
             ('name' in attrs || 'type' in attrs) &&
             (tagName.charAt(0) != '<' || (match = tagName.match(reSimpleTag)))) {
@@ -331,7 +326,7 @@
       };
     }
 
-    if (envTest('ELEMENT_REMOVE_NODE')) {
+    if (window.fuse.env.test('ELEMENT_REMOVE_NODE')) {
       getFragmentFromChildNodes = function(parentNode, cache) {
         var fragment = cache.fragment;
         fragment.appendChild(parentNode).removeNode();
@@ -340,8 +335,8 @@
     }
 
     // copy old fuse properties to new window.fuse
-    eachKey(window.fuse, function(value, key) {
-      if (hasKey(window.fuse, key)) fuse[key] = value;
+    window.fuse.Object.each(window.fuse, function(value, key) {
+      fuse[key] = value;
     });
 
     // add class sugar
@@ -443,7 +438,7 @@
           TAG_NAME_CLASSES[tagName] =
           TAG_NAME_CLASSES[upperCased] = 'HTML' +
             (reTagName.test(upperCased)
-              ? capitalize(tagName.toLowerCase())
+              ? fuse._.capitalize(tagName.toLowerCase())
               : 'Unknown') + 'Element';
         }
       }

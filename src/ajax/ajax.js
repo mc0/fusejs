@@ -13,8 +13,11 @@
     //
     // Attempt ActiveXObject first because IE7+ implementation of
     // XMLHttpRequest doesn't work with local files.
-    var create = fuse.Function.FALSE;
-    if (envTest('ACTIVE_X_OBJECT')) {
+    var create = function create() {
+      throw Error("Missing XMLHttpRequest");
+    };
+
+    if (fuse.env.test('ACTIVE_X_OBJECT')) {
       try {
         new ActiveXObject('MSXML2.XMLHTTP');
         create = function create() {
@@ -28,7 +31,7 @@
           };
         } catch (e) { }
       }
-    } else if (isHostType(window, 'XMLHttpRequest')) {
+    } else if (fuse.Object.isHostType(window, 'XMLHttpRequest')) {
       create = function create() {
         return new XMLHttpRequest();
       };

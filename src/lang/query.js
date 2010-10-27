@@ -1,45 +1,52 @@
   /*------------------------------ LANG: QUERY -------------------------------*/
 
-  (function() {
+  /* create shared pseudo private props */
 
-    var split = envTest('STRING_SPLIT_BUGGY_WITH_REGEXP') ?
-      fuse.String.plugin.split : fuse.String.plugin.split.raw,
+  fuse._.toQueryPair = function(origin, key, value) {
+    return origin.String(typeof value == 'undefined' ? key :
+      key + '=' + encodeURIComponent(value == null ? '' : value));
+  };
 
-    toQueryPair = function(key, value) {
-      return fuse.String(typeof value == 'undefined' ? key :
-        key + '=' + encodeURIComponent(value == null ? '' : value));
-    };
+  /*--------------------------------------------------------------------------*/
 
-    fuse.Object.toQueryString = function toQueryString(object) {
-      var result = [];
-      eachKey(object, function(value, key) {
-        if (hasKey(object, key)) {
-          key = encodeURIComponent(key);
-          if (value && isArray(value)) {
-            var i = result.length, j = 0, length = i + value.length;
-            while (i < length) result[i++] = toQueryPair(key, value[j++]);
-          }
-          else if (!value || toString.call(value) != OBJECT_CLASS) {
-            result.push(toQueryPair(key, value));
+  (function(Object) {
+
+    function toQueryString(object) {
+      var p = fuse._, origin = toQueryString[ORIGIN],
+       isArray = Object.isArray, result = [];
+
+      Object.each(object, function(value, key) {
+        var i, length, j = 0;
+        key = encodeURIComponent(key);
+
+        if (value && isArray(value)) {
+          i = result.length;
+          length = i + value.length;
+          while (i < length) {
+            result[i++] = p.toQueryPair(origin, key, value[j++]);
           }
         }
+        else if (!value || p.toString.call(value) != '[object Object]') {
+          result.push(p.toQueryPair(origin, key, value));
+        }
       });
-      return fuse.String(result.join('&'));
-    };
+      return origin.String(result.join('&'));
+    }
 
-    fuse.String.plugin.toQueryParams = function toQueryParams(separator) {
+    function toQueryParams(separator) {
+      var index, key, length, pair, pairs, value, i = -1,
+       match = String(this).split('?'), result = toQueryParams[ORIGIN].Object();
+
       // grab query after the ? (question mark) and before the # (hash) and\or spaces
-      var match = String(this).split('?'), object = fuse.Object();
       if (match.length > 1 && !match[1] ||
           !((match = (match = match[1] || match[0]).split('#')) &&
           (match = match[0].split(' ')[0]))) {
         // bail if there is no query
-        return object;
+        return result;
       }
 
-      var pair, key, value, index, i = -1,
-       pairs  = split.call(match, separator || '&'),
-       length = pairs.length;
+      pairs = match.split(separator || '&');
+      length = pairs.length;
 
       // iterate over key-value pairs
       while (++i < length) {
@@ -48,28 +55,39 @@
         if (pair && index) {
           if (index != -1) {
             key = decodeURIComponent(pair.slice(0, index));
-            value = pair.slice(index + 1);
-            if (value) value = decodeURIComponent(value);
+            if (value = pair.slice(index + 1)) {
+              value = decodeURIComponent(value);
+            }
           } else {
             key = pair;
           }
-          if (hasKey(object, key)) {
-            if (!isArray(object[key])) object[key] = [object[key]];
-            object[key].push(value);
+          if (Object.hasKey(result, key)) {
+            if (!Object.isArray(result[key])) {
+              result[key] = [result[key]];
+            }
+            result[key].push(value);
           } else {
-            object[key] = value;
+            result[key] = value;
           }
         }
       }
-      return object;
-    };
-
-    if (fuse.Hash) {
-      fuse.Hash.plugin.toQueryString = function toQueryString() {
-        return fuse.Object.toQueryString(this._object);
-      };
+      return result;
     }
 
-    // prevent JScript bug with named function expressions
-    var toQueryParams = null, toQueryString = null;
+    (fuse.Object.toQueryString = toQueryString)[ORIGIN] =
+    (fuse.String.plugin.toQueryParams = toQueryParams)[ORIGIN] = fuse;
+
+  })(fuse.Object);
+
+  /*--------------------------------------------------------------------------*/
+
+  (function() {
+
+    function toQueryString() {
+      return toQueryString[ORIGIN].Object.toQueryString(this._object);
+    }
+
+    if (fuse.Hash) {
+      (fuse.Hash.plugin.toQueryString = toQueryString)[ORIGIN] = fuse;
+    }
   })();

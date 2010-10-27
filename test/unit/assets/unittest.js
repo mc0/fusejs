@@ -299,8 +299,8 @@
     }
 
     function assertEnumNotEqual(expected, actual, message) {
-      expected = fuse.util.$A(expected);
-      actual   = fuse.util.$A(actual);
+      expected = fuse.Array.from(expected);
+      actual   = fuse.Array.from(actual);
       message  = buildMessage(message || 'assertEnumNotEqual', '<?> was the same as <?>', expected, actual);
 
       this.assertBlock(message, function() {

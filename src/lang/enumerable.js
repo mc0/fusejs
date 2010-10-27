@@ -3,9 +3,10 @@
   fuse.Class.mixins.enumerable = { };
 
   (function(mixin) {
-    var $break = function $break() { };
+ 
+    var $break = function() { };
 
-    mixin.contains = function contains(value) {
+    function contains(value) {
       var result = 0;
       this.each(function(item) {
         // basic strict match
@@ -17,9 +18,9 @@
       });
 
       return !!result;
-    };
+    }
 
-    mixin.each = function each(callback, thisArg) {
+    function each(callback, thisArg) {
       if (typeof callback != 'function') {
         throw new TypeError;
       }
@@ -32,9 +33,9 @@
         if (e != $break) throw e;
       }
       return this;
-    };
+    }
 
-    mixin.eachSlice = function eachSlice(size, callback, thisArg) {
+    function eachSlice(size, callback, thisArg) {
       var index = -size, slices = fuse.Array(), list = this.toArray();
       if (size < 1) return list;
       while ((index += size) < list.length) {
@@ -43,9 +44,9 @@
       return callback
         ? slices.map(callback, thisArg)
         : slices;
-    };
+    }
 
-    mixin.every = function every(callback, thisArg) {
+    function every(callback, thisArg) {
       var result = true;
       if (typeof callback != 'function') {
         throw new TypeError;
@@ -56,9 +57,9 @@
         }
       });
       return result;
-    };
+    }
 
-    mixin.filter = function filter(callback, thisArg) {
+    function filter(callback, thisArg) {
       var result = fuse.Array();
       if (typeof callback != 'function') {
         throw new TypeError;
@@ -68,26 +69,26 @@
           result.push(value);
       });
       return result;
-    };
+    }
 
-    mixin.first = function first(callback, thisArg) {
+    function first(callback, thisArg) {
       if (callback == null) {
         var result;
         this.each(function(value) { result = value; return false; });
         return result;
       }
       return this.toArray().first(callback, thisArg);
-    };
+    }
 
-    mixin.inGroupsOf = function inGroupsOf(size, filler) {
+   function inGroupsOf(size, filler) {
       filler = typeof filler == 'undefined' ? null : filler;
       return this.eachSlice(size, function(slice) {
         while (slice.length < size) slice.push(filler);
         return slice;
       });
-    };
+    }
 
-    mixin.inject = function inject(accumulator, callback, thisArg) {
+    function inject(accumulator, callback, thisArg) {
       if (typeof callback != 'function') {
         throw new TypeError;
       }
@@ -95,20 +96,20 @@
         accumulator = callback.call(thisArg, accumulator, value, index, iterable);
       });
       return accumulator;
-    };
+    }
 
-    mixin.invoke = function invoke(method) {
-      var args = slice.call(arguments, 1), funcProto = Function.prototype;
+    function invoke(method) {
+      var args = Array.prototype.slice.call(arguments, 1), funcProto = Function.prototype;
       return this.map(function(value) {
         return funcProto.apply.call(value[method], value, args);
       });
-    };
+    }
 
-    mixin.last = function last(callback, thisArg) {
+    function last(callback, thisArg) {
       return this.toArray().last(callback, thisArg);
-    };
+    }
 
-    mixin.map = function map(callback, thisArg) {
+    function map(callback, thisArg) {
       var result = fuse.Array();
       if (typeof callback != 'function') {
         throw new TypeError;
@@ -123,10 +124,10 @@
         });
       }
       return result;
-    };
+    }
 
-    mixin.max = function max(callback, thisArg) {
-      callback || (callback = IDENTITY);
+    function max(callback, thisArg) {
+      callback || (callback = fuse.Function.IDENTITY);
       var comparable, max, result;
       this._each(function(value, index, iterable) {
         comparable = callback.call(thisArg, value, index, iterable);
@@ -135,10 +136,10 @@
         }
       });
       return result;
-    };
+    }
 
-    mixin.min = function min(callback, thisArg) {
-      callback || (callback = IDENTITY);
+    function min(callback, thisArg) {
+      callback || (callback = fuse.Function.IDENTITY);
       var comparable, min, result;
       this._each(function(value, index, iterable) {
         comparable = callback.call(thisArg, value, index, iterable);
@@ -147,29 +148,29 @@
         }
       });
       return result;
-    };
+    }
 
-    mixin.partition = function partition(callback, thisArg) {
-      callback || (callback = IDENTITY);
+    function partition(callback, thisArg) {
+      callback || (callback = fuse.Function.IDENTITY);
       var trues = fuse.Array(), falses = fuse.Array();
       this._each(function(value, index, iterable) {
         (callback.call(thisArg, value, index, iterable) ?
           trues : falses).push(value);
       });
       return fuse.Array(trues, falses);
-    };
+    }
 
-    mixin.pluck = function pluck(property) {
+    function pluck(property) {
       return this.map(function(value) {
         return value[property];
       });
-    };
+    }
 
-    mixin.size = function size() {
+    function size() {
       return fuse.Number(this.toArray().length);
-    };
+    }
 
-    mixin.some = function some(callback, thisArg) {
+    function some(callback, thisArg) {
       var result = false;
       if (typeof callback != 'function') {
         throw new TypeError;
@@ -180,9 +181,9 @@
         }
       });
       return result;
-    };
+    }
 
-    mixin.sortBy = function sortBy(callback, thisArg) {
+    function sortBy(callback, thisArg) {
       return this.map(function(value, index, iterable) {
         return {
           'value': value,
@@ -192,24 +193,24 @@
         var a = left.criteria, b = right.criteria;
         return a < b ? -1 : a > b ? 1 : 0;
       }).pluck('value');
-    };
+    }
 
-    mixin.toArray = function toArray() {
+    function toArray() {
       var result = fuse.Array();
       this._each(function(value, index) { result[index] = value; });
       return result;
-    };
+    }
 
-    mixin.zip = function zip() {
-      var j, length, lists, plucked, callback = IDENTITY,
-       args = slice.call(arguments, 0);
+    function zip() {
+      var j, length, lists, plucked, callback = fuse.Function.IDENTITY,
+       args = Array.prototype.slice.call(arguments, 0);
 
       // if last argument is a function it is the callback
       if (typeof args[args.length-1] == 'function') {
         callback = args.pop();
       }
 
-      lists = prependList(args, this.toArray());
+      lists = fuse._.prependList(args, this.toArray());
       length = lists.length;
 
       return this.map(function(value, index, iterable) {
@@ -219,27 +220,27 @@
         }
         return callback(plucked, index, iterable);
       });
-    };
+    }
 
-    // prevent JScript bug with named function expressions
-    var contains = null,
-     each =        null,
-     eachSlice =   null,
-     every =       null,
-     filter =      null,
-     first =       null,
-     inject =      null,
-     inGroupsOf =  null,
-     invoke =      null,
-     last =        null,
-     map =         null,
-     max =         null,
-     min =         null,
-     partition =   null,
-     pluck =       null,
-     size =        null,
-     some =        null,
-     sortBy =      null,
-     toArray =     null,
-     zip =         null;
+    mixin.contains = contains;
+    mixin.each = each;
+    mixin.eachSlice = eachSlice;
+    mixin.every = every;
+    mixin.filter = filer;
+    mixin.first = first;
+    mixin.inGroupsOf = inGroupsOf;
+    mixin.inject = inject;
+    mixin.invoke = invoke;
+    mixin.last = last;
+    mixin.map = map;
+    mixin.max = max;
+    mixin.min = min;
+    mixin.partition = partition;
+    mixin.pluck = pluck;
+    mixin.size = size;
+    mixin.some = some;
+    mixin.sortBy = sortBy;
+    mixin.toArray = toArray;
+    mixin.zip = zip;
+
   })(fuse.Class.mixins.enumerable);

@@ -279,7 +279,7 @@
       // IE throws an error if the element is not in the document.
       // Many browsers report offsetParent as null if the element's
       // style is display:none.
-      if (isDetached.call(this) || element.nodeType == DOCUMENT_NODE ||
+      if (isDetached.call(this) || element.nodeType == 9 ||
           OFFSET_PARENT_EXIT_BEFORE_NODES[nodeName] ||
           !element.offsetParent && getStyle.call(this, 'display') != 'none') {
         return null;
@@ -303,7 +303,7 @@
       function getCumulativeOffset(ancestor) {
         ancestor = fuse(ancestor);
         var backup, elemStyle, result;
-        if (!isElement(ancestor)) ancestor = null;
+        if (!fuse.Object.isElement(ancestor)) ancestor = null;
 
         ensureLayout(this);
 
@@ -326,11 +326,11 @@
       var getOffset = function(element, ancestor) {
         var offsetParent, position, raw, valueT = 0, valueL = 0;
         if (BODY_OFFSETS_INHERIT_ITS_MARGINS === null) {
-          BODY_OFFSETS_INHERIT_ITS_MARGINS = envTest('BODY_OFFSETS_INHERIT_ITS_MARGINS');
+          BODY_OFFSETS_INHERIT_ITS_MARGINS = fuse.env.test('BODY_OFFSETS_INHERIT_ITS_MARGINS');
         }
         if (ELEMENT_COORD_OFFSETS_DONT_INHERIT_ANCESTOR_BORDER_WIDTH === null) {
           ELEMENT_COORD_OFFSETS_DONT_INHERIT_ANCESTOR_BORDER_WIDTH =
-            envTest('ELEMENT_COORD_OFFSETS_DONT_INHERIT_ANCESTOR_BORDER_WIDTH');
+            fuse.env.test('ELEMENT_COORD_OFFSETS_DONT_INHERIT_ANCESTOR_BORDER_WIDTH');
         }
 
         do {
@@ -355,7 +355,7 @@
         return returnOffset(valueL, valueT);
       };
 
-      if (envTest('ELEMENT_BOUNDING_CLIENT_RECT')) {
+      if (fuse.env.test('ELEMENT_BOUNDING_CLIENT_RECT')) {
         getOffset = (function(__getOffset) {
           return function(element, ancestor) {
             var doc, info, rect, raw, root, scrollEl, valueT, valueL;
@@ -405,7 +405,7 @@
           }
         }
         element = element.parentNode;
-      } while (element && element.nodeType == ELEMENT_NODE);
+      } while (element && element.nodeType == 1);
 
       if (onlyAncestors || ((nodeName = getNodeName(original)) &&
           nodeName == 'TEXTAREA' || nodeName == 'INPUT')) {
@@ -443,7 +443,7 @@
         return returnOffset(valueL, valueT);
       };
 
-      if (envTest('ELEMENT_BOUNDING_CLIENT_RECT')) {
+      if (fuse.env.test('ELEMENT_BOUNDING_CLIENT_RECT')) {
         getViewportOffset = function getViewportOffset() {
           var valueT = 0, valueL = 0;
 

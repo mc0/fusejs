@@ -13,13 +13,13 @@
       while (++i < imax) {
         arg = args[i];
         if (typeof arg == 'function') arg = arg();
-        if (!isArray(arg)) arg = [arg];
+        if (!fuse.Object.isArray(arg)) arg = [arg];
 
         j = -1; jmax = arg.length;
         while (++j < jmax) {
-          eachKey(arg[j], function(method, key) {
+          fuse.Object.each(arg[j], function(method, key) {
             if (!isMixin || isMixin && !method.$super) {
-              addNodeListMethod(method, key, prototype);
+              fuse._.addNodeListMethod(method, key, prototype);
             }
           });
         }
@@ -58,8 +58,8 @@
       // child controls with ids/names of "id"
       var ownerDoc, element = this.raw || this,
        id = plugin.getAttribute.call(this, 'id');
-      if (id != '') return id;
 
+      if (id != '') return id;
       ownerDoc = element.ownerDocument;
       while (ownerDoc.getElementById(id = 'anonymous_element_' + counter++)) { }
 
@@ -70,7 +70,7 @@
     plugin.isEmpty = function isEmpty() {
       var element = this.raw || this, node = element.firstChild;
       while (node) {
-        if (node.nodeType != TEXT_NODE || node.data != false) {
+        if (node.nodeType != 3 || node.data != false) {
           return false;
         }
         node = node.nextSibling;
@@ -84,19 +84,19 @@
         plugin.contains.call(element.ownerDocument, element));
     };
 
-    if (envTest('ELEMENT_INNER_HTML')) {
+    if (fuse.env.test('ELEMENT_INNER_HTML')) {
       plugin.isEmpty = function isEmpty() {
         return (this.raw || this).innerHTML == false;
       };
     }
 
-    if (envTest('ELEMENT_SOURCE_INDEX')) {
+    if (fuse.env.test('ELEMENT_SOURCE_INDEX')) {
       plugin.isDetached = function isDetached() {
         var element = this.raw || this;
         return element.ownerDocument.all[element.sourceIndex] != element;
       };
     }
-    else if (envTest('ELEMENT_COMPARE_DOCUMENT_POSITION')) {
+    else if (fuse.env.test('ELEMENT_COMPARE_DOCUMENT_POSITION')) {
       plugin.isDetached = function isDetached() {
         /* DOCUMENT_POSITION_DISCONNECTED = 0x01 */
         var element = this.raw || this;

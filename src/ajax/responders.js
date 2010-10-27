@@ -7,30 +7,31 @@
   (function(responders) {
 
     var eventMixins = fuse.Class.mixins.event,
+     isHash = fuse.Object.isHash,
      observe = eventMixins.observe,
      stopObserving = eventMixins.stopObserving;
 
-    responders._events = { };
-
-    responders.fire = eventMixins.fire;
-
-    responders.register = function register(responder) {
+    function register(responder) {
       var name;
       if (isHash(responder)) responder = responder._object;
       for (name in responder) {
         observe.call(responders, name.slice(2).toLowerCase(), responder[name]);
       }
-    };
+    }
 
-    responders.unregister = function unregister(responder) {
+    function unregister(responder) {
       var name;
       if (isHash(responder)) responder = responder._object;
       for (name in responder) {
         stopObserving.call(responders, name.slice(2).toLowerCase(), responder[name]);
       }
-    };
+    }
 
-    responders.register({
+    responders.fire = eventMixins.fire;
+    responders.register = register;
+    responders.unregister = unregister;
+
+    register({
       'onCreate': function() {
         fuse.ajax.activeRequestCount++;
       },
@@ -39,6 +40,4 @@
       }
     });
 
-    // prevent JScript bug with named function expressions
-    var register = null, unregister = null;
   })(fuse.ajax.responders);

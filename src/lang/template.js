@@ -1,93 +1,91 @@
   /*----------------------------- LANG: TEMPLATE -----------------------------*/
 
+  /* create shared pseudo private props */
+
+  fuse.Object.extend(fuse._, {
+    reBackslashs: /\\/g,
+    reBrackets: /\[((?:(?!\])[^\\]|\\.)*)\]/g,
+    reDots: /\./g,
+    reSplitByDot: /\b(?!\\)\./g
+  });
+
+  fuse._.escapeDots = function(match, path) {
+    return '.' + path.replace(fuse._.reDots, '\\.');
+  };
+
+  fuse._.prepareSubReplacement = function(replacement) {
+    var template, slice = Array.prototype.slice;
+    if (typeof replacement == 'function') {
+      return function() { return replacement(slice.call(arguments, 0, -2)); };
+    }
+    template = fuse.Template(replacement);
+    return function() { return template.parse(slice.call(arguments, 0, -2)); };
+  };
+
+  /*--------------------------------------------------------------------------*/
+
   fuse.Template = (function() {
-    var Klass = function() { },
 
-    Template = function Template(template, pattern) {
-      pattern || (pattern = Template.defaults.pattern);
-      if (!isRegExp(pattern)) {
-        pattern = fuse.RegExp(escapeRegExpChars(pattern));
-      }
-      if (!pattern.global) {
-        pattern = fuse.RegExp.clone(pattern, { 'global': true });
-      }
-      if (pattern.constructor != fuse.RegExp) {
-        pattern = fuse.Object(pattern);
-      }
+    function Klass() { }
 
-      var instance = __instance || new Klass;
+    function Template(template, pattern) {
+      var p = fuse._, origin = Template[ORIGIN],
+       RegExp = origin.RegExp, instance = __instance || new Klass;
+
+      pattern || (pattern = origin.Template.defaults.pattern);
       __instance = null;
 
+      if (!origin.Object.isRegExp(pattern)) {
+        pattern = RegExp(p.escapeRegExpChars(pattern));
+      }
+      if (!pattern.global) {
+        pattern = RegExp.clone(pattern, { 'global': true });
+      }
+      if (pattern.constructor != RegExp) {
+        pattern = origin.Object(pattern);
+      }
       instance.pattern = pattern;
-      instance.template = fuse.String(template);
+      instance.template = origin.String(template);
       instance.preparse();
       return instance;
-    },
-
-    __instance,
-    __apply = Template.apply,
-    __call = Template.call;
+    }
 
     Template.apply = function(thisArg, argArray) {
       __instance = thisArg;
       return __apply.call(this, thisArg, argArray);
     };
 
-    Template.call = function(thisArg) {
+    Template.call = function call(thisArg) {
       __instance = thisArg;
       return __call.apply(this, arguments);
     };
 
-    fuse.Class({ 'constructor': Template });
+    var __instance, __apply = Klass.apply, __call = Klass.call;
+
+    fuse.Class({ constructor: Template });
+    Template[ORIGIN] = fuse;
     Klass.prototype = Template.plugin;
     return Template;
   })();
 
   fuse.Template.defaults = {
-    'pattern': /(\\)?(#\{([^}]*)\})/g
+    pattern: /(\\)?(#\{([^}]*)\})/g
   };
 
   /*--------------------------------------------------------------------------*/
 
   (function(plugin) {
 
-    var strPlugin = fuse.String.plugin,
+    function clone() {
+      return this.constructor(this.template, this.pattern);
+    }
 
-    reBackslashs = /\\/g,
-
-    reBrackets = /\[((?:(?!\])[^\\]|\\.)*)\]/g,
-
-    reDots = /\./g,
-
-    reSplitByDot = /\b(?!\\)\./g,
-
-    escapeDots = function(match, path) {
-      return '.' + path.replace(reDots, '\\.');
-    },
-
-    strReplace = function(pattern, replacement) {
-      return (strReplace = envTest('STRING_REPLACE_COERCE_FUNCTION_TO_STRING') ?
-        strPlugin.replace : strPlugin.replace.raw).call(this, pattern, replacement);
-    },
-
-    strSplit = function(separator) {
-      return (strSplit = envTest('STRING_SPLIT_BUGGY_WITH_REGEXP') ?
-        strPlugin.split : strPlugin.split.raw).call(this, separator);
-    };
-
-
-    plugin.clone = function clone() {
-      return fuse.Template(this.template, this.pattern);
-    };
-
-    plugin.preparse = function preparse() {
-      var backslash, chain, escaped, prop, temp, token, tokens, j, i = 1,
-       template = String(this.template),
-       parts    = strSplit.call(template, this.pattern),
-       length   = parts.length;
-
-      escaped = this._escaped = { };
-      tokens  = this._tokens  = { };
+    function preparse() {
+      var backslash, chain, escaped, prop, temp, token, tokens, j,
+       p = fuse._, i = 1, template = String(this.template),
+       parts = p.strSplit.call(template, this.pattern), length = parts.length,
+       escaped = this._escaped = { }, tokens  = this._tokens  = { };
+       
       this._lastTemplate = this.template;
 
       for ( ; i < length; i += 4) {
@@ -100,13 +98,13 @@
           // avoid parsing duplicates
           if (tokens[token]) continue;
 
-          j = -1; temp = strSplit.call(chain, reSplitByDot); chain = [];
+          j = -1; temp = p.strSplit.call(chain, p.reSplitByDot); chain = [];
           while (prop = temp[++j]) {
             // convert bracket notation to dot notation then split and add
             if (prop.indexOf('[') > -1) {
-              prop = strReplace.call(prop, reBrackets, escapeDots);
+              prop = p.strReplace.call(prop, p.reBrackets, p.escapeDots);
               if (prop.charAt(0) == '.') prop = prop.slice(1);
-              chain.push.apply(chain, strSplit.call(prop, reSplitByDot));
+              chain.push.apply(chain, p.strSplit.call(prop, p.reSplitByDot));
             }
             // simply add
             else {
@@ -116,18 +114,17 @@
           // unescape property names
           j = -1;
           while (prop = chain[++j]) {
-            chain[j] = prop.replace(reBackslashs, '');
+            chain[j] = prop.replace(p.reBackslashs, '');
           }
-
           // cache tokens
           tokens[token] = {
             'chain': chain,
-            'reToken': new RegExp(escapeRegExpChars(token), 'g')
+            'reToken': new RegExp(p.escapeRegExpChars(token), 'g')
           };
         }
         else {
           // mark to unescape
-          escaped[token] = escapeRegExpChars(backslash + token);
+          escaped[token] = p.escapeRegExpChars(backslash + token);
         }
       }
 
@@ -141,30 +138,32 @@
         // replaced like thier none-escaped duplicates
         else {
           temp = Math.floor(token.length / 2);
-          temp = token.slice(0, temp) + uid + token.slice(temp);
+          temp = token.slice(0, temp) + fuse.uid + token.slice(temp);
           template = template.replace(new RegExp(escaped[token], 'g'), temp);
-          escaped[token] = new RegExp(escapeRegExpChars(temp), 'g');
+          escaped[token] = new RegExp(p.escapeRegExpChars(temp), 'g');
         }
       }
 
       // cache modified template
       this._template = template;
       return this;
-    };
+    }
 
-    plugin.parse = function parse(object) {
+    function parse(object) {
+      var i, o, c, chain, escaped, found, lastIndex, length, prop, 
+       token, tokens, result, origin = parse[ORIGIN];
+
       // check if cache has expired
       if (this.template != this._lastTemplate) {
         this.preparse();
       }
 
-      var i, o, c, chain, found, lastIndex, length, prop, token,
-       escaped = this._escaped,
-       tokens  = this._tokens,
-       result  = String(this._template);
+      escaped = this._escaped;
+      tokens  = this._tokens;
+      result  = String(this._template);
 
       if (object) {
-        if (isHash(object)) {
+        if (origin.Object.isHash(object)) {
           object = object._object;
         } else if (typeof object.toTemplateReplacements == 'function') {
           object = object.toTemplateReplacements();
@@ -174,90 +173,94 @@
       }
 
       object || (object = { });
+
       for (token in tokens) {
-        i = -1; found = false; c = tokens[token]; o = object;
+        i = -1;
+        c = tokens[token];
+        o = object;
         chain = c.chain;
+        found = false;
         length = chain.length;
         lastIndex = length - 1;
 
         while (++i < length) {
-          if (!hasKey(o, prop = chain[i])) break;
+          if (!origin.Object.hasKey(o, prop = chain[i])) {
+            break;
+          }
           o = o[prop];
           found = i == lastIndex;
         }
         // replace token with property value if found and != null
         result = result.replace(c.reToken, found && o != null ? o : '');
       }
-
       // unescape remianing tokens
       for (token in escaped) {
         result = result.replace(escaped[token], token);
       }
+      return origin.String(result);
+    }
 
-      return fuse.String(result);
-    };
+    /*------------------------------------------------------------------------*/
 
-    // prevent JScript bug with named function expressions
-    var clone = null, preparse = null, parse = null;
+    plugin.clone = clone;
+    plugin.preparse = preparse; 
+    (plugin.parse = parse)[ORIGIN] = fuse;
+
   })(fuse.Template.plugin);
 
   /*--------------------------------------------------------------------------*/
 
   (function(plugin) {
-    var strReplace = function(pattern, replacement) {
-      return (strReplace = plugin.replace).call(this, pattern, replacement);
-    },
 
-    prepareReplacement = function(replacement) {
-      if (typeof replacement == 'function') {
-        return function() { return replacement(slice.call(arguments, 0, -2)); };
-      }
-      var template = fuse.Template(replacement);
-      return function() { return template.parse(slice.call(arguments, 0, -2)); };
-    };
-
-    plugin.gsub = function gsub(pattern, replacement) {
-      if (!isRegExp(pattern)) {
-        pattern = fuse.RegExp(escapeRegExpChars(pattern), 'g');
+    function gsub(pattern, replacement) {
+      var p = fuse._, origin = gsub[ORIGIN];
+      if (!origin.Object.isRegExp(pattern)) {
+        pattern = origin.RegExp(p.escapeRegExpChars(pattern), 'g');
       }
       if (!pattern.global) {
-        pattern = fuse.RegExp.clone(pattern, { 'global': true });
+        pattern = origin.RegExp.clone(pattern, { 'global': true });
       }
-      return strReplace.call(this, pattern, prepareReplacement(replacement));
-    };
+      return origin.String.prototype.replace
+        .call(this, pattern, p.prepareSubReplacement(replacement));
+    }
 
-    plugin.interpolate = function interpolate(object, pattern) {
-      return fuse.Template(this, pattern).parse(object);
-    };
+    function interpolate(object, pattern) {
+      return interpolate[ORIGIN].Template(this, pattern).parse(object);
+    }
 
-    plugin.scan = function scan(pattern, callback) {
-      var result = fuse.String(this);
+    function scan(pattern, callback) {
+      var result = scan[ORIGIN].String(this);
       result.gsub(pattern, callback);
       return result;
-    };
+    }
 
-    plugin.sub = function sub(pattern, replacement, count) {
+    function sub(pattern, replacement, count) {
+      var template, p = fuse._, origin = sub[ORIGIN];
       if (count == null || count == 1) {
-        if (!isRegExp(pattern)) {
-          pattern = fuse.RegExp(escapeRegExpChars(pattern));
+        if (!origin.Object.isRegExp(pattern)) {
+          pattern = origin.RegExp(p.escapeRegExpChars(pattern));
         }
         if (pattern.global) {
-          pattern = fuse.RegExp.clone(pattern, { 'global': false });
+          pattern = origin.RegExp.clone(pattern, { 'global': false });
         }
-        return strReplace.call(this, pattern, prepareReplacement(replacement));
+        return origin.String.prototype.replace
+          .call(this, pattern, p.prepareSubReplacement(replacement));
       }
-
       if (typeof replacement != 'function') {
-        var template = fuse.Template(replacement);
+        template = origin.Template(replacement);
         replacement = function(match) { return template.parse(match); };
       }
-
-      return fuse.String(this).gsub(pattern, function(match) {
+      return origin.String(this).gsub(pattern, function(match) {
         if (--count < 0) return match[0];
         return replacement(match);
       });
-    };
+    }
 
-    // prevent JScript bug with named function expressions
-    var gsub = null, interpolate = null, scan = null, sub = null;
+    /*------------------------------------------------------------------------*/
+
+    (plugin.gsub = gsub)[ORIGIN] =
+    (plugin.interpolate = interpolate)[ORIGIN] =
+    (plugin.scan = scan)[ORIGIN] =
+    (plugin.sub = sub)[ORIGIN] = fuse;
+
   })(fuse.String.plugin);

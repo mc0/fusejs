@@ -130,15 +130,15 @@ new Test.Unit.Runner({
     this.assertEqual('Not scared!', attackTarget);
 
     this.assertEqual('hello world!',
-      fuse.String('/*-secure- \r  \n ' + valid + ' \n  */').evalJSON().test);
+      fuse.String('/*-secure- \r  \n ' + valid + ' \n  */').unfilterJSON().evalJSON().test);
 
-    var temp = fuse.Object.JSON_FILTER;
-    fuse.Object.JSON_FILTER = /^\/\*([\s\S]*)\*\/$/; // test custom delimiters.
+    var temp = fuse._.JSON_FILTER;
+    fuse._.JSON_FILTER = /^\/\*([\s\S]*)\*\/$/; // test custom delimiters.
 
     this.assertEqual('hello world!',
-      fuse.String('/*' + valid + '*/').evalJSON().test);
+      fuse.String('/*' + valid + '*/').unfilterJSON().evalJSON().test);
 
-    fuse.Object.JSON_FILTER = temp;
+    fuse._.JSON_FILTER = temp;
 
     this.assertMatch(123,      fuse.Array.last(huge.evalJSON(true)).test);
     this.assertEqual('',       fuse.String('""').evalJSON());

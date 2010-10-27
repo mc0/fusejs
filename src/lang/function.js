@@ -1,9 +1,12 @@
   /*----------------------------- LANG: FUNCTIONS ----------------------------*/
 
-  (function(Func) {
+  (function(Function) {
+
+    var concatList = fuse._.concatList, isArray = fuse.Object.isArray,
+     prependList = fuse._.prependList, slice = [].slice;
 
     // ES5 15.3.4.5
-    Func.bind = function bind(fn, thisArg) {
+    var bind = function bind(fn, thisArg) {
       // allows lazy loading the target method
       var f, context, curried, name, reset;
       if (isArray(fn)) {
@@ -36,7 +39,7 @@
       };
     };
 
-    Func.bindAsEventListener = function bindAsEventListener(fn, thisArg) {
+    function bindAsEventListener(fn, thisArg) {
       // allows lazy loading the target method
       var f, context, curried, name;
       if (isArray(fn)) {
@@ -49,16 +52,16 @@
         curried = slice.call(arguments, 2);
         return function(event) {
           return (f || context[name]).apply(thisArg,
-            prependList(curried, event || getWindow(this).event));
+            prependList(curried, event || fuse.dom.getWindow(this).event));
         };
       }
       // simple bind
       return function(event) {
-        return (f || context[name]).call(thisArg, event || getWindow(this).event);
+        return (f || context[name]).call(thisArg, event || fuse.dom.getWindow(this).event);
       };
-    };
+    }
 
-    Func.curry = function curry(fn) {
+    function curry(fn) {
       // allows lazy loading the target method
       var f, context, curried, name, reset;
       if (isArray(fn)) {
@@ -81,9 +84,9 @@
       }
 
       return f || context[name];
-    };
+    }
 
-    Func.delay = function delay(fn, timeout) {
+    function delay(fn, timeout) {
       // allows lazy loading the target method
       var f, context, name, args = slice.call(arguments, 2);
       if (isArray(fn)) {
@@ -96,14 +99,14 @@
         var fn = f || context[name];
         return fn.apply(fn, args);
       }, timeout * 1000);
-    };
+    }
 
-    Func.defer = function defer(fn) {
-      return Func.delay.apply(window,
+    function defer(fn) {
+      return Function.delay.apply(window,
         concatList([fn, 0.01], slice.call(arguments, 1)));
-    };
+    }
 
-    Func.methodize = function methodize(fn) {
+    function methodize(fn) {
       // allows lazy loading the target method
       var f, context, name;
       if (isArray(fn)) {
@@ -118,9 +121,9 @@
           ? fn.apply(window, prependList(arguments, this))
           : fn.call(window, this);
       });
-    };
+    }
 
-    Func.wrap = function wrap(fn, wrapper) {
+    function wrap(fn, wrapper) {
       // allows lazy loading the target method
       var f, context, name;
       if (isArray(fn)) {
@@ -132,77 +135,92 @@
       return function() {
         var fn = f || context[name];
         return arguments.length
-          ? wrapper.apply(this, prependList(arguments, Func.bind(fn, this)))
-          : wrapper.call(this, Func.bind(fn, this));
+          ? wrapper.apply(this, prependList(arguments, Function.bind(fn, this)))
+          : wrapper.call(this, Function.bind(fn, this));
       };
-    };
-
-    /*------------------------------------------------------------------------*/
-
-    var plugin = Func.plugin;
+    }
 
     // native support
-    if (isFunction(plugin.bind)) {
-      var __bind = Func.bind;
-      Func.bind = function bind(fn, thisArg) {
+    if (fuse.Object.isFunction(Function.plugin.bind)) {
+      var __bind = bind;
+      bind = function bind(fn, thisArg) {
         // bind with curry
         var isLazy = isArray(fn);
         if (arguments.length > 2) {
           return isLazy
             ? __bind.apply(null, args)
-            : plugin.bind.apply(fn, slice.call(args, 1));
+            : this.bind.apply(fn, slice.call(args, 1));
         }
         // simple bind
         return isLazy
           ? __bind(fn, thisArg)
-          : plugin.bind.call(fn, thisArg);
-      };
-    } else {
-      plugin.bind = function bind(thisArg) {
-        return arguments.length > 1
-          ? Func.bind.apply(Func, prependList(arguments, this))
-          : Func.bind(this, thisArg);
+          : this.bind.call(fn, thisArg);
       };
     }
 
-    plugin.bindAsEventListener = function bindAdEventListener(thisArg) {
-      return arguments.length > 1
-        ? Func.bindAdEventListener.apply(Func, prependList(arguments, this))
-        : Func.bindAdEventListener(this, thisArg);
-    };
+    Function.bind = bind;
+    Function.bindAsEventListener = bindAsEventListener;
+    Function.curry = curry;
+    Function.delay = delay;
+    Function.defer = defer;
+    Function.methodize = methodize;
+    Function.wrap = wrap;
 
-    plugin.curry = function curry() {
+  })(fuse.Function)
+
+  /*--------------------------------------------------------------------------*/
+
+  (function(Function) {
+
+    var plugin = Function.plugin;
+
+    function bind(thisArg) {
+        return arguments.length > 1
+          ? Function.bind.apply(Function, prependList(arguments, this))
+          : Function.bind(this, thisArg);
+      };
+    }
+
+    function bindAdEventListener(thisArg) {
+      return arguments.length > 1
+        ? Function.bindAdEventListener.apply(Function, prependList(arguments, this))
+        : Function.bindAdEventListener(this, thisArg);
+    }
+
+    function curry() {
       return arguments.length
-        ? Func.curry.apply(Func, prependList(arguments, this))
+        ? Function.curry.apply(Function, prependList(arguments, this))
         : this;
-    };
+    }
 
-    plugin.delay = function delay(timeout) {
+    function delay(timeout) {
       return arguments.length > 1
-        ? Func.delay.apply(Func, prependList(arguments, this))
-        : Func.delay(this, timeout);
-    };
+        ? Function.delay.apply(Function, prependList(arguments, this))
+        : Function.delay(this, timeout);
+    }
 
-    plugin.defer = function defer() {
+    function defer() {
       return arguments.length
-        ? Func.defer.apply(Func, prependList(arguments, this))
-        : Func.defer(this);
-    };
+        ? Function.defer.apply(Function, prependList(arguments, this))
+        : Function.defer(this);
+    }
 
-    plugin.methodize = function methodize() {
-      return Func.methodize(this);
-    };
+    function methodize() {
+      return Function.methodize(this);
+    }
 
-    plugin.wrap = function wrap(wrapper) {
-      return Func.wrap(this, wrapper);
-    };
+    function wrap(wrapper) {
+      return Function.wrap(this, wrapper);
+    }
 
-    // prevent JScript bug with named function expressions
-    var bind =             null,
-     bindAsEventListener = null,
-     curry =               null,
-     delay =               null,
-     defer =               null,
-     methodize =           null,
-     wrap =                null;
+    plugin.bindAsEventListener = bindAsEventListener;
+    plugin.curry = curry;
+    plugin.delay = delay;
+    plugin.defer = defer;
+    plugin.methodize = methodize;
+    plugin.wrap = wrap;
+
+    if (!fuse.Object.isFunction(plugin.bind)) {
+      plugin.bind = bind;
+    }
   })(fuse.Function);

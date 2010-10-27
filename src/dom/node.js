@@ -11,7 +11,7 @@
       if (!node || node.raw) {
         return node;
       }
-      if (node.nodeType != TEXT_NODE) {
+      if (node.nodeType != 3) {
         // return cached if available
         if (isCached == null || isCached) {
           data = domData[Node.getFuseId(node)];
@@ -21,8 +21,8 @@
         }
         // pass to element decorator
         switch (node.nodeType) {
-          case ELEMENT_NODE:  return fromElement(node, isCached);
-          case DOCUMENT_NODE: return HTMLDocument(node, isCached);
+          case 1: return fromElement(node, isCached);
+          case 9: return HTMLDocument(node, isCached);
         }
       }
 
@@ -58,7 +58,7 @@
         ';return a.length' +
         '?m.apply(n,s.call(a,1))' +
         ':m.call(n)' +
-        '}return ' + methodName)(proto, slice);
+        '}return ' + methodName)(proto, Array.prototype.slice);
     },
 
     updateGenerics = function updateGenerics(deep) {
@@ -67,7 +67,7 @@
         fuse.updateGenerics(Klass, deep);
       } else {
         fuse.Object.each(Klass.prototype, function(value, key, proto) {
-          if (!SKIPPED_KEYS[key] && hasKey(proto, key) && isFunction(proto[key]))
+          if (!SKIPPED_KEYS[key] && fuse.Object.isFunction(proto[key]))
             Klass[key] = createGeneric(proto, key);
         });
       }
@@ -87,7 +87,7 @@
         if (node == win) {
           id = node == window ? '0' : getFuseId(node.frameElement) + '-0';
         }
-        else if (node.nodeType == DOCUMENT_NODE) {
+        else if (node.nodeType == 9) {
           // quick return for common case OR
           // calculate id for foreign document objects
           id = node == fuse._doc ? '1' : getFuseId(win.frameElement) + '-1';
@@ -109,17 +109,17 @@
     };
 
     return {
-      'DOCUMENT_FRAGMENT_NODE':      DOCUMENT_FRAGMENT_NODE,
-      'DOCUMENT_NODE':               DOCUMENT_NODE,
-      'ELEMENT_NODE':                ELEMENT_NODE,
-      'TEXT_NODE':                   TEXT_NODE,
+      'ELEMENT_NODE':                1,
       'ATTRIBUTE_NODE':              2,
+      'TEXT_NODE':                   3,
       'CDATA_SECTION_NODE':          4,
       'ENTITY_REFERENCE_NODE':       5,
       'ENTITY_NODE':                 6,
       'PROCESSING_INSTRUCTION_NODE': 7,
       'COMMENT_NODE':                8,
+      'DOCUMENT_NODE':               9,
       'DOCUMENT_TYPE_NODE':          10,
+      'DOCUMENT_FRAGMENT_NODE':      11,
       'NOTATION_NODE':               12,
       'getFuseId':      getFuseId,
       'updateGenerics': updateGenerics

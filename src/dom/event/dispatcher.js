@@ -45,7 +45,7 @@
           // cancel real bubbling
           event.stopBubbling();
           // fake out and set it to bubbling
-          event.isBubbling = fuse.dom.Event._createGetter('isBubbling', true);
+          event.isBubbling = fuse._.createGetter('isBubbling', true);
           // start manual bubbling
           decorator.fire.call(parentNode, EVENT_TYPE_ALIAS[type] || type, null, event);
         }
@@ -63,7 +63,6 @@
       };
     }
 
-    delete fuse.uid;
     return createDispatcher;
   })();
 
@@ -73,7 +72,7 @@
 
     var addDispatcher = Event._addDispatcher,
 
-    createGetter      = Event._createGetter,
+    createGetter      = fuse._.createGetter,
 
     createDispatcher  = Event._createDispatcher,
 

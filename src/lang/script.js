@@ -1,131 +1,91 @@
   /*------------------------------ LANG: SCRIPT ------------------------------*/
 
+  /* create shared pseudo private props */
+
+  fuse.Object.extend(fuse._, {
+    reHTMLComments:     /<!--[^\x00]*?-->/g,
+    reOpenHTMLComments: /<!--/g,
+    reOpenScriptTag:    /<script/i,
+    reQuotes:           /(["'])(?:(?!\1)[^\\]|[^\\]|\\.)+?\1/g,
+    reRegexps:          /(\/)(?:(?!\1)[^\\]|[^\\]|\\.)+?\1/g, //"
+    reScripts:          /<script[^>]*>([^\x00]*?)<\/script>/gi,
+    reQuoteTokens:      /@fuseQuoteToken/g,
+    reRegexpTokens:     /@fuseRegexpToken/g,
+    reScriptTokens:     /@fuseScript\d+Token/g,
+    swappedQuotes:      [],
+    swappedRegExps:     [],
+    swappedScripts:     {}
+  });
+
+  fuse._.runCallback = function(code, index, array) {
+    array[index] = fuse.run(code);
+  };
+
+  fuse._.swapQuotesToTokens = function(quote) {
+    fuse._.swappedQuotes.unshift(quote);
+    return '@fuseQuoteToken';
+  };
+
+  fuse._.swapRegexpsToTokens = function(regexp) {
+    fuse._.swappedRegExps.unshift(regexp);
+    return '@fuseRegexpToken';
+  };
+
+  fuse._.swapScriptsToTokens = function(script) {
+    var p = fuse._, token = '@fuseScript' + (p.counter++) + 'Token';
+    p.swappedScripts[token] = script;
+    return token;
+  };
+
+  fuse._.swapTokensToQuotes = function() {
+    return fuse._.swappedQuotes.pop();
+  };
+
+  fuse._.swapTokensToRegexps = function() {
+    return fuse._.swappedRegExps.pop();
+  };
+
+  fuse._.swapTokensToScripts = function(token) {
+    return fuse._.swappedScripts[token];
+  };
+
+  /*--------------------------------------------------------------------------*/
+
   (function(plugin) {
 
-    var counter         = 0,
-     rawIndexOf         = plugin.indexOf.raw,
-     reHTMLComments     = /<!--[^\x00]*?-->/g,
-     reOpenHTMLComments = /<!--/g,
-     reOpenScriptTag    = /<script/i,
-     reQuotes           = /(["'])(?:(?!\1)[^\\]|[^\\]|\\.)+?\1/g,
-     reRegexps          = /(\/)(?:(?!\1)[^\\]|[^\\]|\\.)+?\1/g, //"
-     reScripts          = /<script[^>]*>([^\x00]*?)<\/script>/gi,
-     reQuoteTokens      = /@fuseQuoteToken/g,
-     reRegexpTokens     = /@fuseRegexpToken/g,
-     reScriptTokens     = /@fuseScript\d+Token/g,
-     swappedQuotes      = [],
-     swappedRegExps     = [],
-     swappedScripts     = {},
+    function makeExecuter(context) {
+      return context.Function('window',
+        'return function (' + fuse.uid + '){' +
+        'var arguments=window.arguments;' +
+        'return window.eval(String(' + fuse.uid + '))}')(context);
+    }
 
-    runCallback = function(code, index, array) {
-      array[index] = fuse.run(code);
-    },
-
-    strReplace = function(pattern, replacement) {
-      return (strReplace = envTest('STRING_REPLACE_COERCE_FUNCTION_TO_STRING') ?
-        plugin.replace : plugin.replace.raw).call(this, pattern, replacement);
-    },
-
-    swapQuotesToTokens = function(quote) {
-      swappedQuotes.unshift(quote);
-      return '@fuseQuoteToken';
-    },
-
-    swapRegexpsToTokens = function(regexp) {
-      swappedRegExps.unshift(regexp);
-      return '@fuseRegexpToken';
-    },
-
-    swapScriptsToTokens = function(script) {
-      var token = '@fuseScript' + (counter++) + 'Token';
-      swappedScripts[token] = script;
-      return token;
-    },
-
-    swapTokensToQuotes = function() {
-      return swappedQuotes.pop();
-    },
-
-    swapTokensToRegexps = function() {
-      return swappedRegExps.pop();
-    },
-
-    swapTokensToScripts = function(token) {
-      return swappedScripts[token];
-    };
-
-    /*------------------------------------------------------------------------*/
-
-    plugin.runScripts = function runScripts() {
-      return plugin.extractScripts.call(this, runCallback);
-    };
-
-    plugin.extractScripts = function extractScripts(callback) {
-      var match, i = -1, string = String(this), result = fuse.Array();
-
-      if (!reOpenScriptTag.test(string)) {
-        return result;
-      }
-      if (rawIndexOf.call(string, '<!--') > -1) {
-        string = strReplace
-          .call(string, reScripts, swapScriptsToTokens)
-          .replace(reHTMLComments, '')
-          .replace(reScriptTokens, swapTokensToScripts);
-
-        // cleanup
-        swappedScripts = { };
-      }
-      // clear lastIndex because exec() uses it as a starting point
-      reScripts.lastIndex = 0;
-
-      while (match = reScripts.exec(string)) {
-        if (match = match[1]) {
-          result[++i] = match;
-          callback && callback(match, i, result);
-        }
-      }
-      return result;
-    };
-
-    plugin.stripScripts = function stripScripts() {
-      return fuse.String(String(this).replace(reScripts, ''));
-    };
-
-    /*------------------------------------------------------------------------*/
-
-    fuse.run = function run(code, context) {
+    function run(code, context) {
       var backup = window.fuse,
+       execute = makeExecuter(window);
 
-      makeExecuter = function(context) {
-        return context.Function('window',
-          'return function (' + uid + '){' +
-          'var arguments=window.arguments;' +
-          'return window.eval(String(' + uid + '))}')(context);
-      },
-
-      run = function run(code, context) {
+      var run = function run(code, context) {
         context || (context = window);
         if (context == window) return execute(code);
 
+        var data, dom = fuse.dom;
         context = getWindow(context.raw || context);
         if (context == window) return execute(code);
 
         // cache executer for other contexts
-        var id = getFuseId(context), data = domData[id];
+        data = dom.data[dom.Node.getFuseId(context)];
         return (data._evaluator || (data._evaluator = makeExecuter(context)))(code);
-      },
-
-      execute = makeExecuter(window);
+      };
 
       run('var fuse="x"');
 
-      if (window.fuse != 'x' && isHostType(window, 'document')) {
+      if (window.fuse != 'x' && fuse.Object.isHostType(window, 'document')) {
         window.fuse = backup;
-        if (runScriptText('typeof this.fuse=="function"')) {
-          run = runScriptText;
+        if (fuse.dom.runScriptText('typeof this.fuse=="function"')) {
+          run = fuse.dom.runScriptText;
         } else {
           // for Safari 2.0.0 and Firefox 2.0.0.2
-          fuse.dom.runScriptText = runScriptText = run;
+          fuse.dom.runScriptText = run;
         }
       } else {
         window.fuse = backup;
@@ -138,13 +98,14 @@
       catch (e) {
         var __run = run;
         run = function(code, context) {
-          if (rawIndexOf.call(code, '<!--') > -1) {
-            code = strReplace
-              .call(code, reQuotes,    swapQuotesToTokens)
-              .replace(reRegexps,      swapRegexpsToTokens)
-              .replace(reHTMLComments, '//<!--')
-              .replace(reQuoteTokens,  swapTokensToQuotes)
-              .replace(reRegexpTokens, swapTokensToRegexps);
+          var p = fuse._;
+          if (p.rawIndexOf.call(code, '<!--') > -1) {
+            code = p.strReplace
+              .call(code, p.reQuotes,    p.swapQuotesToTokens)
+              .replace(p.reRegexps,      p.swapRegexpsToTokens)
+              .replace(p.reHTMLComments, '//<!--')
+              .replace(p.reQuoteTokens,  p.swapTokensToQuotes)
+              .replace(p.reRegexpTokens, p.swapTokensToRegexps);
           }
           return __run(code, context);
         };
@@ -152,8 +113,51 @@
 
       fuse.run = run;
       return run(code, context);
-    };
+    }
 
-    // prevent JScript bug with named function expressions
-    var extractScripts = null, run = null, runScripts = null, stripScripts = null;
+    function runScripts() {
+      return runScripts[ORIGIN].String.prototype
+        .extractScripts.call(this, fuse._.runCallback);
+    }
+
+    function extractScripts(callback) {
+      var match, p = fuse._, i = -1, string = String(this),
+       result = extractScripts[ORIGIN].Array();
+
+      if (!p.reOpenScriptTag.test(string)) {
+        return result;
+      }
+      if (p.rawIndexOf.call(string, '<!--') > -1) {
+        string = p.strReplace
+          .call(string, p.reScripts, p.swapScriptsToTokens)
+          .replace(p.reHTMLComments, '')
+          .replace(p.reScriptTokens, p.swapTokensToScripts);
+
+        // cleanup
+        p.swappedScripts = { };
+      }
+      // clear lastIndex because exec() uses it as a starting point
+      p.reScripts.lastIndex = 0;
+
+      while (match = p.reScripts.exec(string)) {
+        if (match = match[1]) {
+          result[++i] = match;
+          callback && callback(match, i, result);
+        }
+      }
+      return result;
+    }
+
+    function stripScripts() {
+      return stripScripts[ORIGIN].String(String(this).replace(fuse._.reScripts, ''));
+    }
+
+    /*------------------------------------------------------------------------*/
+
+    fuse.run = run;
+
+    (plugin.extractScripts = extractScripts)[ORIGIN] =
+    (plugin.runScripts = runScripts)[ORIGIN] =
+    (plugin.stripScripts = stripScripts)[ORIGIN] = fuse;
+
   })(fuse.String.plugin);

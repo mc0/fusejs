@@ -8,7 +8,7 @@
     HTMLDocument = function HTMLDocument(node, isCached) {
       // quick return if empty, decorated, or not a document node
       var data, decorated, pluginViewport, viewport;
-      if (!node || node.raw || node.nodeType != DOCUMENT_NODE) {
+      if (!node || node.raw || node.nodeType != 9) {
         return node;
       }
       if (isCached == null || isCached) {
@@ -30,10 +30,10 @@
       viewport.ownerDocument =
       decorated.raw = node;
       decorated.nodeName = node.nodeName;
-      decorated.nodeType = DOCUMENT_NODE;
+      decorated.nodeType = 9;
 
-      eachKey(pluginViewport, function(value, key, object) {
-        if (hasKey(object, key)) viewport[key] = value;
+      fuse.Object.each(pluginViewport, function(value, key, object) {
+        viewport[key] = value;
       });
 
       return decorated;

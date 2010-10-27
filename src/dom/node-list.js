@@ -3,7 +3,7 @@
   NodeList =
   fuse.dom.NodeList = fuse.Fusebox().Array;
 
-  addNodeListMethod = (function(plugin) {
+  fuse._.addNodeListMethod = (function(plugin) {
 
     var SKIPPED_KEYS = { 'callSuper': 1, 'constructor': 1, 'match': 1, 'query': 1 },
      domClassCache   = { },
@@ -19,7 +19,7 @@
       var snippet, arrMethod = reBool.test(key) ?
         (key.indexOf('is') ? arrSome : arrEvery) : arrEach;
 
-      if (!SKIPPED_KEYS[key] && hasKey(object, key) && isFunction(value)) {
+      if (!SKIPPED_KEYS[key] && fuse.Object.hasKey(object, key) && fuse.Object.isFunction(value)) {
         if (reGetter.test(key)) {
           // getters return the value of the first element
           plugin[key] = Function('c,gc',

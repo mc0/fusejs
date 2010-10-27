@@ -1,9 +1,17 @@
   /*----------------------------- LANG: INSPECT ------------------------------*/
 
-  (function() {
-    var elemPlugin, eventPlugin, hashPlugin, strInspect,
+  /* create shared pseudo private props */
 
-    SPECIAL_CHARS = {
+  fuse.Object.extend(fuse._, {
+
+    // charCodes 0-31 and \ and '
+    reWithSingleQuotes: /[\x00-\x1f\\']/g,
+
+    // charCodes 0-31 and \ and "
+    reWithDoubleQuotes: /[\x00-\x1f\\"]/g,
+
+    // escaped chars lookup
+    SPECIAL_CHARS: {
       '\b': '\\b',
       '\f': '\\f',
       '\n': '\\n',
@@ -12,60 +20,42 @@
       '\\': '\\\\',
       '"' : '\\"',
       "'" : "\\'"
-    },
+    }
+  });
 
-    // charCodes 0-31 and \ and '
-    reWithSingleQuotes = /[\x00-\x1f\\']/g,
+  fuse._.inspectPlugin = function(plugin) {
+    var result, backup = plugin.inspect, uid = fuse.uid;
+    plugin.inspect = uid;
+    result = fuse.Object.inspect(plugin).replace(uid, String(backup));
+    plugin.inspect = backup;
+    return result;
+  };
 
-    // charCodes 0-31 and \ and "
-    reWithDoubleQuotes = /[\x00-\x1f\\"]/g,
+  fuse._.escapeSpecialChars = function(match) {
+    return fuse._.SPECIAL_CHARS[match];
+  };
 
-    arrPlugin = fuse.Array.plugin,
-
-    nlPlugin  = NodeList && NodeList.plugin || arrPlugin,
-
-    strPlugin = fuse.String.plugin,
-
-    escapeSpecialChars = function(match) {
-      return SPECIAL_CHARS[match];
-    },
-
-    inspectPlugin = function(plugin) {
-      var result, backup = plugin.inspect;
-      plugin.inspect = uid;
-      result = fuse.Object.inspect(plugin).replace(uid, String(backup));
-      plugin.inspect = backup;
-      return result;
-    };
-
-    // populate SPECIAL_CHARS with control characters
-    (function(i, key) {
-      while (--i) {
-        key = String.fromCharCode(i);
-        SPECIAL_CHARS[key] || (SPECIAL_CHARS[key] = '\\u' + ('0000' + i.toString(16)).slice(-4));
+  // populate SPECIAL_CHARS with control characters
+  (function(p, i, key) {
+    while (--i) {
+      key = String.fromCharCode(i);
+      if (!p.SPECIAL_CHARS[key]) {
+        p.SPECIAL_CHARS[key] = '\\u' + ('0000' + i.toString(16)).slice(-4);
       }
-    })(32);
+    }
+  })(fuse._, 32);
 
-    /*------------------------------------------------------------------------*/
+  /*--------------------------------------------------------------------------*/
 
-    strInspect =
-    strPlugin.inspect = function inspect(useDoubleQuotes) {
-      // called by Obj.inspect on fuse.String or its plugin object
-      if (this == strPlugin || window == this || this == null) {
-        return inspectPlugin(strPlugin);
-      }
-      // called normally
-      var string = String(this);
-      return fuse.String(useDoubleQuotes
-        ? '"' + string.replace(reWithDoubleQuotes, escapeSpecialChars) + '"'
-        : "'" + string.replace(reWithSingleQuotes, escapeSpecialChars) + "'");
-    };
+  (function() {
 
-    arrPlugin.inspect = function inspect() {
+    function inspect() {
+      var length, object, result, p = fuse._,
+       origin = inspect[ORIGIN], proto = (origin.Array || origin.NodeList).prototype;
+
       // called by Obj.inspect on fuse.Array/fuse.dom.NodeList or its plugin object
-      var length, object, result, plugin = this == nlPlugin ? nlPlugin : arrPlugin;
-      if (this == plugin || window == this || this == null) {
-        return inspectPlugin(plugin);
+      if (this == proto || window == this || this == null) {
+        return p.inspectPlugin(proto);
       }
       // called normally
       object = Object(this);
@@ -73,21 +63,51 @@
       result = [];
 
       while (length--) {
-        result[length] = fuse.Object.inspect(object[length]);
+        result[length] = origin.Object.inspect(object[length]);
       }
-      return fuse.String('[' + result.join(', ') + ']');
-    };
+      return origin.String('[' + result.join(', ') + ']');
+    }
 
-    fuse.Object.inspect = function inspect(value) {
-      var classOf, object, result;
+    (fuse.Array.plugin.inspect = inspect)[ORIGIN] = fuse;
+  })();
+
+  /*--------------------------------------------------------------------------*/
+
+  (function() {
+
+    function inspect(useDoubleQuotes) {
+      var string = this, p = fuse._, origin = inspect[ORIGIN],
+       String = origin.String, strProto = String.prototype;
+
+      // called by Obj.inspect on fuse.String or its plugin object
+      if (string == strProto || window == string || string == null) {
+        return p.inspectPlugin(strProto);
+      }
+      // called normally
+      return String(useDoubleQuotes
+        ? '"' + p.strReplace.call(string, p.reWithDoubleQuotes, p.escapeSpecialChars) + '"'
+        : "'" + p.strReplace.call(string, p.reWithSingleQuotes, p.escapeSpecialChars) + "'");
+    }
+
+    (fuse.String.plugin.inspect = inspect)[ORIGIN] = fuse;
+  })();
+
+  /*--------------------------------------------------------------------------*/
+
+  (function() {
+
+    function inspect(value) {
+      var classOf, object, result = [],
+       origin = inspect[ORIGIN], Object = origin.Object,
+       String = origin.String, strInspect = String.prototype.inspect;
+
       if (value != null) {
-        object = fuse.Object(value);
-
         // this is not duplicating checks, one is a type check for host objects
         // and the other is an internal [[Class]] check because Safari 3.1
         // mistakes regexp instances as typeof `function`
+        object = Object(value);
         if (typeof object.inspect == 'function' &&
-            isFunction(object.inspect)) {
+            Object.isFunction(object.inspect)) {
           return object.inspect();
         }
         // attempt to avoid inspecting DOM nodes.
@@ -95,85 +115,120 @@
         // IE7 and below are missing the node's constructor property
         // IE8 node constructors are typeof "object"
         try {
-          classOf = toString.call(object);
-          if (classOf == OBJECT_CLASS && typeof object.constructor == 'function') {
-            result = [];
-            eachKey(object, function(value, key) {
-              hasKey(object, key) &&
-                result.push(strInspect.call(key) + ': ' + fuse.Object.inspect(object[key]));
+          classOf = Object.prototype.toString.call(object);
+          if (classOf == '[object Object]' && typeof object.constructor == 'function') {
+            Object.each(object, function(value, key) {
+              result.push(strInspect.call(key) + ': ' + fuse.Object.inspect(object[key]));
             });
-            return fuse.String('{' + result.join(', ') + '}');
+            return String('{' + result.join(', ') + '}');
           }
         } catch (e) { }
       }
       // try coercing to string
       try {
-        return fuse.String(value);
+        return String(value);
       } catch (e) {
         // probably caused by having the `toString` of an object call inspect()
         if (e.constructor == window.RangeError) {
-          return fuse.String('...');
+          return String('...');
         }
         throw e;
       }
-    };
+    }
 
-    if (fuse.Class.mixins.enumerable) {
-      fuse.Class.mixins.enumerable.inspect = function inspect() {
-        return isFunction(this._each)
-          ? fuse.String('#<Enumerable:' + this.toArray().inspect() + '>')
-          : inspectPlugin(fuse.Class.mixins.enumerable);
-      };
+    (fuse.Object.inspect = inspect)[ORIGIN] = fuse;
+  })();
+
+  /*--------------------------------------------------------------------------*/
+
+  (function() {
+
+    function inspect() {
+      return fuse.Object.isFunction(this._each)
+        ? inspect[ORIGIN].String('#<Enumerable:' + this.toArray().inspect() + '>')
+        : fuse._.inspectPlugin(fuse.Class.mixins.enumerable);
+    }
+
+    var mixin = fuse.Class.mixins.enumerable;
+    if (mixin) {
+      (mixin.inspect = inspect)[ORIGIN] = fuse;
+    }
+  })();
+
+  /*--------------------------------------------------------------------------*/
+
+  (function() {
+
+    function inspect() {
+      var pair, i = -1, p = fuse._, origin = inspect[ORIGIN],
+       hashPlugin = origin.Hash.plugin, pairs = this._pairs, result = [];
+
+      // called by Obj.inspect() on fuse.Hash or its plugin object
+      if (this == hashPlugin || window == this || this == null) {
+        result = p.inspectPlugin(hashPlugin);
+      }
+      else {
+        // called normally
+        while (pair = pairs[++i]) {
+          result[i] = pair[0].inspect() + ': ' + origin.Object.inspect(pair[1]);
+        }
+        result = '#<Hash:{' + result.join(', ') + '}>';
+      }
+      return origin.String(result);
     }
 
     if (fuse.Hash) {
-      hashPlugin = fuse.Hash.plugin;
-      hashPlugin.inspect = function inspect() {
-        // called by Obj.inspect() on fuse.Hash or its plugin object
-        if (this == hashPlugin || window == this || this == null) {
-          return inspectPlugin(hashPlugin);
-        }
+      (fuse.Hash.plugin.inspect = inspect)[ORIGIN] = fuse;
+    }
+  })();
+
+  /*--------------------------------------------------------------------------*/
+
+  (function() {
+
+    function inspect() {
+      var className, element, id, result,
+       p = fuse._, origin = inspect[ORIGIN],
+       strInspect = origin.String.prototype.inspect,
+       elemProto = (origin.dom ? origin.dom.HTMLElement : origin.HTMLElement).prototype;
+
+      // called by Obj.inspect() on a fuse Element class or its plugin object
+      if (this == elemProto || window == this || this == null) {
+        result = p.inspectPlugin(elemProto);
+      }
+      else {
         // called normally
-        var pair, i = -1, pairs = this._pairs, result = [];
-        while (pair = pairs[++i]) {
-          result[i] = pair[0].inspect() + ': ' + fuse.Object.inspect(pair[1]);
+        element = this.raw || this;
+        result = '<' + element.nodeName.toLowerCase();
+        if (id = element.id) {
+          result += ' id=' + strInspect.call(id, true);
         }
-        return '#<Hash:{' + result.join(', ') + '}>';
-      };
+        if (className = element.className) {
+          result += ' class=' + strInspect.call(className, true);
+        }
+        result += '>';
+      }
+      return origin.String(result);
     }
 
     if (fuse.dom) {
-      elemPlugin = HTMLElement.plugin;
-      elemPlugin.inspect = function inspect() {
-        // called by Obj.inspect() on a fuse Element class or its plugin object
-        if (this == elemPlugin || window == this || this == null) {
-          return inspectPlugin(this);
-        }
-        // called normally
-        var element = this.raw || this,
-         id         = element.id,
-         className  = element.className,
-         result     = '<' + element.nodeName.toLowerCase();
+      (fuse.dom.HTMLElement.plugin.inspect = inspect)[ORIGIN] = fuse;
+    }
+  })();
 
-        if (id) {
-          result += ' id=' + strInspect.call(id, true);
-        }
-        if (className) {
-          result += ' class=' + strInspect.call(className, true);
-        }
-        return fuse.String(result + '>');
-      };
+  /*--------------------------------------------------------------------------*/
+
+  (function() {
+
+    function inspect() {
+      var origin = inspect[ORIGIN],
+       eventProto = (origin.dom ? origin.dom.Event : origin.Event).prototype;
+      return origin.String(this == eventProto
+        ? fuse._.inspectPlugin(eventProto)
+        : '[object Event]');
     }
 
-    if (fuse.dom.Event) {
-      eventPlugin = fuse.dom.Event.plugin;
-      eventPlugin.inspect = function inspect() {
-        return this == eventPlugin
-          ? inspectPlugin(eventPlugin)
-          : '[object Event]';
-      };
+    if (fuse.dom && fuse.dom.Event) {
+      (fuse.dom.Event.plugin.inspect = inspect)[ORIGIN] = fuse;
     }
-
-    // prevent JScript bug with named function expressions
-    var inspect = null;
   })();

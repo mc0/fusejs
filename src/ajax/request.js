@@ -2,29 +2,37 @@
 
   fuse.ajax.Request = (function() {
 
-    var Klass = function() { },
+    function Klass() { }
 
-    Request = function Request(url, options) {
-      var instance   = __instance || new Klass,
-       onStateChange = instance.onStateChange,
-       onTimeout     = instance.onTimeout;
+    function Request(url, options) {
+      var eventType, handler, i = -1,
+       capitalize = fuse._.capitalize,
+       instance = __instance || new Klass,
+       origin = instance.send[ORIGIN];
 
       __instance = null;
-      instance.raw = fuse.ajax.create();
+      fuse.ajax.Base.call(instance, url, options || { });
+      options = instance.options;
 
-      instance.onTimeout =
-        function() { onTimeout.call(instance); };
+      while (eventType = Request.READY_STATES[++i]) {
+        if (handler = options['on' + capitalize(eventType)]) {
+          instance.observe(eventType, handler);
+        }
+      }
+      while (eventType = EVENT_TYPES[++j]) {
+        if (handler = options['on' + capitalize(eventType)]) {
+          instance.observe(eventType, handler);
+        }
+      }
 
-      instance.onStateChange =
-        function(event, forceState) { onStateChange.call(instance, event, forceState); };
+      instance.readyState   = origin.Number(0);
+      instance.responseText = origin.String('');
+      instance.status       = origin.Number(0);
+      instance.statusText   = origin.String('');
 
-      instance.request(url, options);
+      instance.fire('create');
       return instance;
-    },
-
-    __instance,
-    __apply = Request.apply,
-    __call  = Request.call;
+    }
 
     Request.call = function(thisArg) {
       __instance = thisArg;
@@ -36,11 +44,15 @@
       return __apply.call(this, thisArg, argArray);
     };
 
-    fuse.Class(fuse.ajax.Base, { 'constructor': Request });
-    Klass.prototype = Request.plugin;
+    Request.READY_STATES = 
+     fuse.Array('unsent', 'opened', 'headersReceived', 'loading', 'done');
 
-    Request.READY_STATES = fuse.Array('unsent', 'opened', 'headersReceived', 'loading', 'done');
+    var __instance, __apply = Klass.apply, __call = Klass.call,
+     EVENT_TYPES = ['abort', 'create', 'exception', 'failure', 'success', 'timeout'];
+
+    fuse.Class(fuse.ajax.Base, { 'constructor': Request });
     Request.addMixins(fuse.Class.mixins.event);
+    Klass.prototype = Request.plugin;
     return Request;
   })();
 
@@ -48,212 +60,106 @@
 
   (function(plugin) {
 
-    var EVENT_TYPES = ['abort', 'exception', 'failure', 'success', 'timeout'],
-     euid           = uid + '_error',
-     fireEvent      = fuse.Class.mixins.event.fire,
-     isSameOrigin   = fuse.Object.isSameOrigin,
-     responders     = fuse.ajax.responders,
-     reHTTP         = /^https?:/,
+    var createGetter = fuse._.createGetter,
+     euid            = fuse._.uid + '_error',
+     fireEvent       = fuse.Class.mixins.event.fire,
+     isSameOrigin    = fuse.Object.isSameOrigin,
+     noop            = fuse.Function.NOOP,
+     responders      = fuse.ajax.responders,
+
      // content-type is case-insensitive
      // http://www.w3.org/Protocols/rfc2616/rfc2616-sec3.html#sec3.7
+     reHTTP            = /^https?:/,
      reContentTypeJS   = /^\s*(?:text|application)\/(x-)?(?:java|ecma)script(?:;|\s|$)/i,
      reContentTypeJSON = /^\s*(?:application\/json)(?:;|\s|$)/i;
 
-    function fireException(request, exception) {
-      fireEvent.call(request, 'exception', request, exception);
-      responders && responders.fire('exception', request, exception);
-      // throw error if not caught by a request exception handler
-      var handlers = request._events.exception;
-      if (!handlers || !handlers.length) throw exception;
-    }
-
     /*------------------------------------------------------------------------*/
 
-    plugin._useStatus   = true;
-    plugin._timerId     = null;
-    plugin.readyState   = fuse.Number(0);
-    plugin.responseText = fuse.String('');
-    plugin.status       = fuse.Number(0);
-    plugin.statusText   = fuse.String('');
+    function curry(method, instance) {
+      return function(event) {
+        return method(instance, event);
+      };
+    }
 
-    plugin.headerJSON   =
-    plugin.responseJSON =
-    plugin.responseXML  = null;
-
-    plugin.isAborted    = createGetter('isAborted', false);
-    plugin.isTimedout   = createGetter('isTimedout', false);
-
-    plugin.abort = function abort() {
-      var xhr = this.raw;
-      if (this.readyState != 4) {
-        // clear onreadystatechange handler to stop some browsers calling
-        // it when the request is aborted
-        xhr.onreadystatechange = NOOP;
-        xhr.abort();
-
-        // skip to complete readyState and flag it as aborted
-        this.isAborted = createGetter('isAborted', true);
-        this.setReadyState(4);
+    function createIsSuccess(useStatus) {
+      // http status code definitions
+      // http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
+      var isSuccess = function isSuccess() { return this.status == 0 };
+      if (useStatus) {
+        isSuccess = function isSuccess() {
+          var status = this.status;
+          return status >= 200 && status < 300 || status == 304;
+        };
       }
-    };
+      return isSuccess;
+    }
 
-    plugin.fire = function fire(eventType) {
-      try {
-        fireEvent.apply(this, arguments);
-      } catch (e) {
-        fireException(this, e);
+    function fireException(instance, exception) {
+      fireEvent.call(instance, 'exception', instance, exception);
+      // support global responders
+      responders && responders.fire('exception', instance, exception);
+      // throw error if not caught by a request exception handler
+      var handlers = instance._events.events.exception;
+      if (!handlers || !handlers.length) {
+        throw exception;
       }
-      if (responders) {
-        responders.fire.apply(responders, arguments);
-      }
-    };
+    }
 
-    plugin.getAllHeaders = function getAllHeaders() {
-      var result;
-      try { result = this.raw.getAllResponseHeaders(); } catch (e) { }
-      return fuse.String(result || '');
-    };
-
-    plugin.getHeader = function getHeader(name) {
-      var result;
-      try { result = this.raw.getResponseHeader(name); } catch (e) { }
-      return result ? fuse.String(result) : null;
-    };
-
-    plugin.onTimeout = function onTimeout() {
-      var xhr = this.raw;
-      if (this.readyState != 4) {
-        xhr.onreadystatechange = NOOP;
-        xhr.abort();
-
-        // skip to complete readyState and flag it as timedout
-        this.isTimedout = createGetter('isTimedout', true);
-        this.setReadyState(4);
-      }
-    };
-
-    plugin.onStateChange = function onStateChange(event, forceState) {
+    function onStateChange(instance, event, forceState) {
       // ensure all states are fired and only fired once per change
-      var endState = this.raw.readyState, readyState = this.readyState;
+      var endState = instance.raw.readyState, readyState = instance.readyState;
       if (readyState < 4) {
         if (forceState != null) {
           readyState = forceState - 1;
         }
         while (readyState < endState) {
-          this.setReadyState(++readyState);
+          setReadyState(instance, ++readyState);
         }
       }
-    };
+    }
 
-    plugin.request = function request(url, options) {
-      var async, body, eventType, handler, headers, key, timeout, url,
-       i = -1, j = i, xhr = this.raw;
-
-      // treat request() as the constructor and call Base as $super
-      // if first call or new options are passed
-      if (!this.options || options) {
-        fuse.ajax.Base.call(this, url, options);
-        options = this.options;
-
-        while (eventType = fuse.ajax.Request.READY_STATES[++i]) {
-          if (handler = options['on' + capitalize(eventType)]) {
-            this.observe(eventType, handler);
-          }
-        }
-        while (eventType = EVENT_TYPES[++j]) {
-          if (handler = options['on' + capitalize(eventType)]) {
-            this.observe(eventType, handler);
-          }
-        }
-      } else {
-        options = this.options;
+    function onTimeout(instance) {
+      var xhr = instance.raw;
+      if (instance.readyState != 4) {
+        xhr.onreadystatechange = noop;
+        xhr.abort();
+        // skip to complete readyState and flag it as timedout
+        instance.isTimedout = createGetter('isTimedout', true);
+        setReadyState(instance, 4);
       }
+    }
 
-      async   = options.asynchronous;
-      headers = options.headers;
-      timeout = options.timeout;
-      body    = this.body;
-      url     = this.url;
-
-      // reset flags
-      this.isAborted  = createGetter('isAborted', false);
-      this.isTimedout = createGetter('isTimedout', false);
-
-      // reset response values
-      this.headerJSON   = this.responseJSON = this.responseXML = null;
-      this.readyState   = fuse.Number(0);
-      this.responseText = fuse.String('');
-      this.status       = fuse.Number(0);
-      this.statusText   = fuse.String('');
-
-      // non-http requests don't use http status codes
-      // return true if request url is http(s) or, if relative, the pages url is http(s)
-      this._useStatus = reHTTP.test(url) ||
-        (url.slice(0, 6).indexOf(':') < 0 ?
-          reHTTP.test(window.location.protocol) : false);
-
-      // start timeout timer if provided
-      if (timeout != null) {
-        this._timerId = setTimeout(this.onTimeout, timeout * this.timerMultiplier);
-      }
-
-      // fire onCreate callbacks
-      this.fire('create', options.onCreate);
-
-      // trigger uninitialized readyState 0
-      this.onStateChange(null, 0);
-
-      try {
-        // attach onreadystatechange event after open() to avoid some browsers
-        // firing duplicate readyState events
-        xhr.open(this.method.toUpperCase(), url, async, options.username, options.password);
-        xhr.onreadystatechange = this.onStateChange;
-
-        // set headers
-        // use regular for...in because we aren't worried about shadowed properties
-        for (key in headers) {
-          xhr.setRequestHeader(key, headers[key]);
-        }
-
-        // if body is a string ensure it's a primitive
-        xhr.send(isString(body) ? String(body) : body);
-
-        // force Firefox to handle readyState 4 for synchronous requests
-        if (!async) this.onStateChange();
-      }
-      catch (e) {
-        fireException(this, e);
-      }
-    };
-
-    plugin.setReadyState = function setReadyState(readyState) {
+    function setReadyState(instance, readyState) {
       var contentType, e, evalJS, eventType, hasText, heandlers, json, responseText,
        responseXML, status, statusText, successOrFailure, timerId, i = -1,
-       events       = this._events,
+       events       = instance._events.events,
        eventTypes   = [],
        skipped      = { },
-       options      = this.options,
-       url          = this.url,
-       xhr          = this.raw,
-       isAborted    = this.isAborted(),
-       isTimedout   = this.isTimedout(),
+       options      = instance.options,
+       origin       = instance.send[ORIGIN],
+       url          = instance.url,
+       xhr          = instance.raw,
+       isAborted    = instance.isAborted(),
+       isTimedout   = instance.isTimedout(),
        evalJSON     = options.evalJSON,
        sanitizeJSON = options.sanitizeJSON || !isSameOrigin(url);
 
       // exit if no headers and wait for state 3 to fire states 2 and 3
-      if (readyState == 2 && this.getAllHeaders() == '' &&
+      if (readyState == 2 && instance.getAllHeaders() == '' &&
         xhr.readyState == 2) {
         return;
       }
 
-      this.readyState = fuse.Number(readyState);
+      instance.readyState = origin.Number(readyState);
 
       // clear response values on aborted/timedout requests
       if (isAborted || isTimedout) {
-        this.headerJSON   = this.responseJSON = this.responseXML = null;
-        this.responseText = fuse.String('');
-        this.status       = fuse.Number(0);
-        this.statusText   = fuse.String('');
+        instance.headerJSON   =
+        instance.responseJSON =
+        instance.responseXML  = null;
+        instance.responseText = origin.String('');
+        instance.status       = origin.Number(0);
+        instance.statusText   = origin.String('');
       }
       else if (readyState > 1) {
         // Request status/statusText have really bad cross-browser consistency.
@@ -273,42 +179,42 @@
         }
 
         // IE will return 1223 for 204 no content
-        this.status = fuse.Number(status == 1223 ? 204 : status);
+        instance.status = origin.Number(status == 1223 ? 204 : status);
 
         // set statusText
-        this.statusText = fuse.String(statusText);
+        instance.statusText = origin.String(statusText);
 
         // set responseText
         if (readyState > 2) {
           // IE will throw an error when accessing responseText in state 3
           try {
             if (responseText = xhr.responseText) {
-              this.responseText = fuse.String(responseText);
+              instance.responseText = origin.String(responseText);
             }
           } catch (e) { }
         }
         else if (readyState == 2 && evalJSON &&
-            (json = this.getHeader('X-JSON')) && json != '') {
+            (json = instance.getHeader('X-JSON')) && json != '') {
           // set headerJSON
           try {
-            this.headerJSON = json.evalJSON(sanitizeJSON);
+            instance.headerJSON = json.evalJSON(sanitizeJSON);
           } catch (e) {
-            fireException(this, e);
+            fireException(instance, e);
           }
         }
       }
 
       if (readyState == 4) {
-        contentType  = this.getHeader('Content-type') || '',
-        evalJS       = options.evalJS,
-        timerId      = this._timerId;
-        responseText = this.responseText;
+        contentType  = instance.getHeader('Content-type') || '';
+        evalJS       = options.evalJS;
+        timerId      = instance._timerId;
+        responseText = instance.responseText;
         hasText      = !responseText.isBlank();
 
         // clear timeout timer
         if (timerId != null) {
           window.clearTimeout(timerId);
-          this._timerId = null;
+          instance._timerId = null;
         }
 
         if (status != null) {
@@ -325,7 +231,7 @@
         else {
           // don't call global/request onSuccess/onFailure callbacks on aborted/timedout requests
           if (status) eventTypes.push(status);
-          successOrFailure = this.isSuccess() ? 'success' : 'failure';
+          successOrFailure = instance.isSuccess() ? 'success' : 'failure';
           eventTypes.push(successOrFailure);
 
           // skip success/failure request events if status handler exists
@@ -333,24 +239,24 @@
             successOrFailure : status)] = 1;
 
           // remove event handler to avoid memory leak in IE
-          xhr.onreadystatechange = NOOP;
+          xhr.onreadystatechange = noop;
 
           // set responseXML
           responseXML = xhr.responseXML;
 
           // IE will return an invalid XML object if the response
           // content-type header is not text/xml
-          if (responseXML && isHostType(responseXML, 'documentElement')) {
-            this.responseXML = responseXML;
+          if (responseXML && fuse.Object.isHostType(responseXML, 'documentElement')) {
+            instance.responseXML = responseXML;
           }
 
           // set responseJSON
           if (evalJSON == 'force' || evalJSON && hasText &&
               reContentTypeJSON.test(contentType)) {
             try {
-              this.responseJSON = responseText.evalJSON(sanitizeJSON);
+              instance.responseJSON = responseText.evalJSON(sanitizeJSON);
             } catch (e) {
-              fireException(this, e);
+              fireException(instance, e);
             }
           }
 
@@ -362,46 +268,145 @@
 
             if (e = fuse[euid]) {
               delete fuse[euid];
-              fireException(this, e);
+              fireException(instance, e);
             }
           }
         }
       }
 
       // add readyState to the list of events to fire
-      eventTypes.push(fuse.ajax.Request.READY_STATES[readyState]);
+      eventTypes.push(instance.constructor.READY_STATES[readyState]);
 
       while (eventType = eventTypes[++i]) {
         // temporarily remove handlers so only responders are called
         if (skipped[eventType]) {
           handlers = events[eventType];
           delete events[eventType];
-          this.fire(eventType, this, this.headerJSON);
+          instance.fire(eventType, instance, instance.headerJSON);
           events[eventType] = handlers;
         }
         else {
-          this.fire(eventType, this, this.headerJSON);
+          instance.fire(eventType, instance, instance.headerJSON);
         }
       }
-    };
+    }
 
-    plugin.isSuccess = function isSuccess() {
-      // http status code definitions
-      // http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
-      var status = this.status;
-      return this._useStatus
-        ? (status >= 200 && status < 300 || status == 304)
-        : status == 0;
-    };
+    /*------------------------------------------------------------------------*/
 
-    // prevent JScript bug with named function expressions
-    var abort =      null,
-     fire =          null,
-     getHeader =     null,
-     getAllHeaders = null,
-     isSuccess =     null,
-     onStateChange = null,
-     onTimeout =     null,
-     request =       null,
-     setReadyState = null;
+    function abort() {
+      var xhr = this.raw;
+      if (this.readyState != 4) {
+        // clear onreadystatechange handler to stop some browsers calling
+        // it when the request is aborted
+        xhr.onreadystatechange = noop;
+        xhr.abort();
+
+        this.isAborted = createGetter('isAborted', true);
+        setReadyState(this, 4);
+      }
+      return this;
+    }
+
+    function fire(eventType) {
+      try {
+        fireEvent.apply(this, arguments);
+      } catch (e) {
+        fireException(this, e);
+      }
+      if (responders) {
+        responders.fire.apply(responders, arguments);
+      }
+      return this;
+    }
+
+    function getAllHeaders() {
+      var result;
+      try { result = this.raw.getAllResponseHeaders(); } catch (e) { }
+      return getAllHeaders[ORIGIN].String(result || '');
+    }
+
+    function getHeader(name) {
+      var result;
+      try { result = this.raw.getResponseHeader(name); } catch (e) { }
+      return result != null ? getHeader[ORIGIN].String(result) : null;
+    }
+
+    function send() {
+      var key,
+       origin  = send[ORIGIN],
+       body    = this.body,
+       url     = this.url,
+       options = this.options,
+       async   = options.asynchronous,
+       headers = options.headers,
+       timeout = options.timeout;
+
+      // reset flags
+      this.isAborted  = createGetter('isAborted', false);
+      this.isTimedout = createGetter('isTimedout', false);
+
+      // reset response values
+      this.headerJSON   =
+      this.responseJSON =
+      this.responseXML  = null;
+      this.readyState   = origin.Number(0);
+      this.responseText = origin.String('');
+      this.status       = origin.Number(0);
+      this.statusText   = origin.String('');
+
+      // non-http requests don't use http status codes
+      // return true if request url is http(s) or, if relative, the pages url is http(s)
+      this.isSuccess = createIsSuccess(
+        reHTTP.test(url) || (url.slice(0, 6).indexOf(':') < 0 ?
+          reHTTP.test(location.protocol) : false));
+
+      // start timeout timer if provided
+      if (timeout != null) {
+        this._timerId = setTimeout(curry(onTimeout, this), timeout * this.timerMultiplier);
+      }
+
+      onStateChange(this, null, 0);
+
+      try {
+        // attach onreadystatechange event after open() to avoid some browsers
+        // firing duplicate readyState events
+        xhr.open(this.method.toUpperCase(), url, async, options.username, options.password);
+        xhr.onreadystatechange = curry(onStateChange, this);
+
+        // set headers
+        // use regular for...in because we aren't worried about shadowed properties
+        for (key in headers) {
+          xhr.setRequestHeader(key, headers[key]);
+        }
+
+        // if body is a string ensure it's a primitive
+        xhr.send(fuse.Object.isString(body) ? String(body) : body);
+
+        // force Firefox to handle readyState 4 for synchronous requests
+        if (!async) {
+          onStateChange(this);
+        }
+      }
+      catch (e) {
+        fireException(this, e);
+      }
+      return this;
+    }
+
+    /*------------------------------------------------------------------------*/
+
+    plugin.headerJSON   =
+    plugin.responseJSON =
+    plugin.responseXML  = null;
+    plugin.isAborted    = createGetter('isAborted', false);
+    plugin.isSuccess    = createGetter('isSussess', false);
+    plugin.isTimedout   = createGetter('isTimedout', false);
+
+    plugin.abort = abort;
+    plugin.fire = fire;
+
+    (plugin.getAllHeaders = getAllHeaders)[ORIGIN] =
+    (plugin.getHeader = getHeader)[ORIGIN] =
+    (plugin.send = send)[ORIGIN] = fuse;
+
   })(fuse.ajax.Request.plugin);

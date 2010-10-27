@@ -3,24 +3,18 @@
   /* http://blog.niftysnippets.org/2009/09/simple-efficient-supercalls-in.html*/
 
   fuse.Class = (function() {
-    var Subclass = function() { },
 
-    clone = fuse.Object.clone,
+    var clone = fuse.Object.clone,
+     isArray = fuse.Object.isArray,
+     isFunction = fuse.Object.isFunction,
+     isString = fuse.Object.isString;
 
-    createNamedClass = function(name, LINKED_KEYS) {
-      return Function('clone,LK',
-        'function ' + name + '(){' +
-        'var k,m,c=this;' +
-        'if(m=c.initialize){' +
-        'for(k in LK){c[k]=clone(c[k])}' +
-        'return m.apply(c,arguments);' +
-        '}} return ' + name)(clone, LINKED_KEYS);
-    },
+    function Subclass() { }
 
-    Class = function Class(Superclass, plugins, mixins, statics) {
+    function Class(Superclass, plugins, mixins, statics) {
       var Klass, arg, mixins, plugin, i = 0,
        LINKED_KEYS     = { },
-       args            = slice.call(arguments, 0),
+       args            = Array.prototype.slice.call(arguments, 0),
        defaults        = Class.defaults,
        first           = args[0],
        isAutoUnlinking = true;
@@ -38,12 +32,16 @@
       mixins  = args[1];
 
       // auto execute plugins if they are closures and convert to array if not already
-      if (typeof plugins == 'function') plugins = plugins();
-      if (!isArray(plugins)) plugins = [plugins];
+      if (typeof plugins == 'function') {
+        plugins = plugins();
+      }
+      if (!isArray(plugins)) {
+        plugins = [plugins];
+      }
 
       // search properties for a custom `constructor` method
       while ((plugin = plugins[i++])) {
-        if (hasKey(plugin, 'constructor')) {
+        if (fuse.Object.hasKey(plugin, 'constructor')) {
           // power usage
           if (typeof plugin.constructor == 'function') {
             Klass = plugin.constructor;
@@ -57,7 +55,7 @@
         }
       }
 
-      Klass = Klass || createNamedClass('UnnamedClass', LINKED_KEYS);
+      Klass || (Klass = createNamedClass('UnnamedClass', LINKED_KEYS));
 
       if (Superclass) {
         // note: Safari 2, inheritance won't work with Klass.prototype = new Function;
@@ -79,8 +77,8 @@
       // flag keys of object/array references to be
       // automatically unlinked in the constructor
       if (isAutoUnlinking) {
-        eachKey(Klass.plugin, function(value, key, object) {
-          if (hasKey(object, key) && value && typeof value == 'object') {
+        fuse.Object.each(Klass.plugin, function(value, key, object) {
+          if (value && typeof value == 'object') {
             LINKED_KEYS[key] = 1;
           }
         });
@@ -88,7 +86,17 @@
 
       plugin.constructor = Klass;
       return Klass;
-    };
+    }
+
+    function createNamedClass(name, LINKED_KEYS) {
+      return Function('clone,LK',
+        'function ' + name + '(){' +
+        'var k,m,c=this;' +
+        'if(m=c.initialize){' +
+        'for(k in LK){c[k]=clone(c[k])}' +
+        'return m.apply(c,arguments);' +
+        '}} return ' + name)(clone, LINKED_KEYS);
+    }
 
     return Class;
   })();
@@ -102,20 +110,21 @@
   /*--------------------------------------------------------------------------*/
 
   fuse.Class.defaults.mixins = (function() {
-    var callSuper = function callSuper(method) {
+
+    function callSuper(method) {
       var $super, args, callee = method.callee;
       if (callee) {
         args = method;
         method = callee;
       } else {
-        args = slice.call(arguments, 1);
+        args = Array.prototype.slice.call(arguments, 1);
       }
 
       $super = method.$super || method.superclass;
       return args.length
         ? $super.apply(this, args)
         : $super.call(this);
-    };
+    }
 
     return { 'callSuper': callSuper };
   })();
@@ -123,7 +132,8 @@
   /*--------------------------------------------------------------------------*/
 
   fuse.Class.defaults.statics = (function() {
-    var addMixins = function addMixins() {
+
+    function addMixins() {
       var arg, j, jmax,
        args = arguments, i = -1, imax = args.length,
        Klass = this, prototype = Klass.prototype;
@@ -133,29 +143,27 @@
         // auto execute arg if it's a closures
         if (typeof arg == 'function') arg = arg();
         // force to array, if not one, to support passing arrays
-        if (!isArray(arg)) arg = [arg];
+        if (!fuse.Object.isArray(arg)) arg = [arg];
 
         j = -1; jmax = arg.length;
         while (++j < jmax) {
-          eachKey(arg[j], function(value, key, object) {
-            if (hasKey(object, key)) {
-              if (isFunction(value)) {
-                // flag as mixin if not used as a $super
-                if (!value.$super) {
-                  value._isMixin = true;
-                }
-              } else if (value && typeof value == 'object') {
-                value = fuse.Object.clone(value);
+          fuse.Object.each(arg[j], function(value, key, object) {
+            if (fuse.Object.isFunction(value)) {
+              // flag as mixin if not used as a $super
+              if (!value.$super) {
+                value._isMixin = true;
               }
-              prototype[key] = value;
+            } else if (value && typeof value == 'object') {
+              value = fuse.Object.clone(value);
             }
+            prototype[key] = value;
           });
         }
       }
       return Klass;
-    },
+    }
 
-    addPlugins = function addPlugins() {
+    function addPlugins() {
       var arg, j, jmax, k, plugins, otherMethod,
        args = arguments, i = -1, imax = args.length,
        Klass      = this,
@@ -167,67 +175,65 @@
       while (++i < imax) {
         arg = args[i];
         if (typeof arg == 'function') arg = arg();
-        if (!isArray(arg)) arg = [arg];
+        if (!fuse.Object.isArray(arg)) arg = [arg];
 
         j = -1; jmax = arg.length;
         while (++j < jmax) {
-          eachKey(arg[j], function(value, key, object) {
-            if (hasKey(object, key)) {
-              var protoMethod = prototype[key],
-               superMethod = superProto && superProto[key];
-  
-              // avoid typeof == `function` because Safari 3.1+ mistakes
-              // regexp instances as typeof `function`
-              if (isFunction(value)) {
-                // flag as $super if not used as a mixin
-                if (isFunction(superMethod) && !superMethod._isMixin) {
-                  value.$super = superMethod;
-                }
-                if (isFunction(protoMethod)) {
-                  k = subLength;
-                  while (k--) {
-                    otherMethod = subclasses[k].prototype[key];
-                    if (otherMethod && otherMethod.$super)
-                      otherMethod.$super = value;
-                  }
-                }
-              } else if (value && typeof value == 'object') {
-                value = fuse.Object.clone(value);
+          fuse.Object.each(arg[j], function(value, key, object) {
+            var protoMethod = prototype[key],
+             superMethod = superProto && superProto[key];
+
+            // avoid typeof == `function` because Safari 3.1+ mistakes
+            // regexp instances as typeof `function`
+            if (fuse.Object.isFunction(value)) {
+              // flag as $super if not used as a mixin
+              if (fuse.Object.isFunction(superMethod) && !superMethod._isMixin) {
+                value.$super = superMethod;
               }
-              prototype[key] = value;
+              if (fuse.Object.isFunction(protoMethod)) {
+                k = subLength;
+                while (k--) {
+                  otherMethod = subclasses[k].prototype[key];
+                  if (otherMethod && otherMethod.$super)
+                    otherMethod.$super = value;
+                }
+              }
+            } else if (value && typeof value == 'object') {
+              value = fuse.Object.clone(value);
             }
+            prototype[key] = value;
           });
         }
       }
       return Klass;
-    },
+    }
 
-    addStatics = function addStatics() {
+    function addStatics() {
       var arg, j, jmax, args = arguments,
        i = -1, imax = args.length, Klass = this;
 
       while (++i < imax) {
         arg = args[i];
         if (typeof arg == 'function') arg = arg();
-        if (!isArray(arg)) arg = [arg];
+        if (!fuse.Object.isArray(arg)) arg = [arg];
 
         j = -1; jmax = arg.length;
         while (++j < jmax) {
-          eachKey(arg[j], function(value, key, object) {
-            if (hasKey(object, key)) Klass[key] = value;
+          fuse.Object.each(arg[j], function(value, key, object) {
+            Klass[key] = value;
           });
         }
       }
       return Klass;
-    },
+    }
 
-    extend = function extend(plugins, mixins, statics) {
+    function extend(plugins, mixins, statics) {
       var Klass = this;
       plugins && Klass.addPlugins(plugins);
       mixins  && Klass.addMixins(mixins);
       statics && Klass.addStatics(statics);
       return Klass;
-    };
+    }
 
     return {
       'addMixins':  addMixins,

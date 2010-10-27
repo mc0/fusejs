@@ -104,7 +104,7 @@
         return fuse.String('');
       }
       value = selectPlugin.getValue.call(this);
-      if (isArray(value) && value.length < 2) {
+      if (fuse.Object.isArray(value) && value.length < 2) {
         value = value[0];
       }
       pair = { };
@@ -159,11 +159,11 @@
     };
 
     selectPlugin.setValue = function setValue(value) {
-      var node, i = -1, element = this.raw || this;
+      var node, i = -1, uid = fuse.uid, element = this.raw || this;
       if (value === null) {
         element.selectedIndex = -1;
       }
-      else if (isArray(value)) {
+      else if (fuse.Object.isArray(value)) {
         // quick indexOf
         value = uid + value.join(uid) + uid;
         while (node = element.options[++i]) {
@@ -185,7 +185,7 @@
     optionPlugin.getValue = getOptionValue;
 
     // handle IE6/7 bug with button elements
-    if (envTest('BUTTON_VALUE_CHANGES_AFFECT_INNER_CONTENT')) {
+    if (fuse.env.test('BUTTON_VALUE_CHANGES_AFFECT_INNER_CONTENT')) {
       buttonPlugin.getValue = function getValue() {
         return buttonPlugin.getAttribute.call(this, 'value');
       };

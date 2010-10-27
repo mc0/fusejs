@@ -31,15 +31,15 @@
   INPUT_BUTTONS = { 'button': 1, 'image': 1, 'reset':  1, 'submit': 1 };
 
   DATA_ID_PROP =
-    envTest('ELEMENT_UNIQUE_NUMBER') ? 'uniqueNumber' : '_fuseId';
+    fuse.env.test('ELEMENT_UNIQUE_NUMBER') ? 'uniqueNumber' : '_fuseId';
 
   PARENT_NODE =
-    isHostType(fuse._docEl, 'parentElement') ? 'parentElement' : 'parentNode';
+    fuse.Object.isHostType(fuse._docEl, 'parentElement') ? 'parentElement' : 'parentNode';
 
   // Safari 2.0.x returns `Abstract View` instead of `window`
   PARENT_WINDOW =
-    isHostType(fuse._doc, 'defaultView') && fuse._doc.defaultView === window ? 'defaultView' :
-    isHostType(fuse._doc, 'parentWindow') ? 'parentWindow' : null;
+    fuse.Object.isHostType(fuse._doc, 'defaultView') && fuse._doc.defaultView === window ? 'defaultView' :
+    fuse.Object.isHostType(fuse._doc, 'parentWindow') ? 'parentWindow' : null;
 
   destroyElement = function(element, parentNode) {
     parentNode || (parentNode = element[PARENT_NODE]);
@@ -55,7 +55,7 @@
 
   getDocument = function getDocument(element) {
     return element.ownerDocument || element.document ||
-      (element.nodeType == DOCUMENT_NODE ? element : fuse._doc);
+      (element.nodeType == 9 ? element : fuse._doc);
   };
 
   getNodeName = fuse._doc.createElement('nav').nodeName == 'NAV'
@@ -90,7 +90,7 @@
     var counter = 0;
 
     return function(text, context) {
-      var head, result, script, suid = uid + '_script' + counter++;
+      var head, result, script, suid = fuse.uid + '_script' + counter++;
       if (text && text != '') {
         fuse[suid] = { 'text': String(text) };
         text = 'fuse.' + suid + '.returned=eval(';
@@ -113,6 +113,7 @@
                'delete arguments}';
 
         script = context.createElement('script');
+        script.async = true;
         setScriptText(script, text);
         head.insertBefore(script, head.firstChild);
         head.removeChild(script);
@@ -135,7 +136,7 @@
     };
   }
 
-  if (envTest('ELEMENT_INNER_HTML')) {
+  if (fuse.env.test('ELEMENT_INNER_HTML')) {
     emptyElement = function(element) {
       element.innerHTML = '';
     };
@@ -149,7 +150,7 @@
     })();
   }
 
-  if (envTest('ELEMENT_SCRIPT_HAS_TEXT_PROPERTY')) {
+  if (fuse.env.test('ELEMENT_SCRIPT_HAS_TEXT_PROPERTY')) {
     getScriptText = function(element) {
       return element.text;
     };

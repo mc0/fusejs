@@ -5,7 +5,7 @@
   (function(docPlugin, elemPlugin) {
     docPlugin.match  =
     elemPlugin.match = function match(selectors) {
-      return isString(selectors)
+      return fuse.Object.isString(selectors)
         ? fuse.dom.selector.match(this, selectors)
         : selectors.match(this);
     };

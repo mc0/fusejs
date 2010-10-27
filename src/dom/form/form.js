@@ -109,7 +109,7 @@
       options.parameters = plugin.serialize.call(this, { 'submit':submit, 'hash':true });
 
       if (params) {
-        if (isString(params)) params = fuse.String.toQueryParams(params);
+        if (fuse.Object.isString(params)) params = fuse.String.toQueryParams(params);
         Obj.extend(options.parameters, params);
       }
       if (plugin.hasAttribute.call(this, 'method') && !options.method) {
@@ -154,7 +154,7 @@
       if (element = elements[0]) {
         do {
           // avoid checking for element ids if we are iterating the default nodeList
-          if (checkString && isString(element) &&
+          if (checkString && fuse.Object.isString(element) &&
              !(element = doc.getElementById(element))) {
             continue;
           } else {
@@ -196,14 +196,14 @@
           }
 
           value = CONTROL_PLUGINS[nodeName].getValue.call(element);
-          if (isArray(value) && value.length < 2) {
+          if (fuse.Object.isArray(value) && value.length < 2) {
             value = value[0];
           }
 
           // property exists and and belongs to result
-          if (hasKey(result, key)) {
+          if (fuse.Object.hasKey(result, key)) {
             // a key is already present; construct an array of values
-            if (!isArray(result[key])) result[key] = [result[key]];
+            if (!fuse.Object.isArray(result[key])) result[key] = [result[key]];
             result[key].push(value);
           } else {
             result[key] = value;

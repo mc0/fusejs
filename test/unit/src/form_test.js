@@ -452,7 +452,7 @@ new Test.Unit.Runner({
 
     // with empty action attribute
     request = $('ffe').request({ 'method': 'post' });
-    this.assert(request.url.contains('/form_test.html'),
+    this.assert(request.url.search(/[\\/]form_test\.html/),
       'wrong default action for form element with empty action attribute');
 
     // with explicit options.submit

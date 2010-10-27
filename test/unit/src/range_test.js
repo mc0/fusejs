@@ -30,14 +30,14 @@ new Test.Unit.Runner({
   },
 
   'testAny': function() {
-    this.assert(!$R(1, 1, true).some());
+    this.assert(!$R(1, 1, true).some(fuse.Function.IDENTITY));
     this.assert($R(0, 3, false).some(function(value) {
       return value == 3;
     }));
   },
 
   'testAll': function() {
-    this.assert($R(1, 1, true).every());
+    this.assert($R(1, 1, true).every(fuse.Function.IDENTITY));
     this.assert($R(0, 3, false).every(function(value) {
       return value <= 3;
     }));

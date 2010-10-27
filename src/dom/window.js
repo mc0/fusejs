@@ -3,7 +3,7 @@
   Window =
   fuse.dom.Window = (function() {
     var isWindow = function(object) {
-      return toString.call(object).indexOf('Window') > -1;
+      return fuse._.toString.call(object).indexOf('Window') > -1;
     },
 
     Decorator = function() { },
@@ -33,7 +33,7 @@
     // weak fallback
     if (!isWindow(window)) {
       isWindow = function(object) {
-        return typeof object.window != 'undefined' && object.window == object;
+        return object != null && object.window == object;
       };
     }
 
