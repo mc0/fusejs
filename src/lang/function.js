@@ -178,10 +178,9 @@
         return arguments.length > 1
           ? Function.bind.apply(Function, prependList(arguments, this))
           : Function.bind(this, thisArg);
-      };
     }
 
-    function bindAdEventListener(thisArg) {
+    function bindAsEventListener(thisArg) {
       return arguments.length > 1
         ? Function.bindAdEventListener.apply(Function, prependList(arguments, this))
         : Function.bindAdEventListener(this, thisArg);

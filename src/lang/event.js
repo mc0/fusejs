@@ -37,7 +37,7 @@
 
     function observe(type, handler) {
       var data = this._events || (this._events = { 'createDispatcher': createDispatcher, 'events': { } }),
-       ec = (data.events[type] || data.events[type] = { 'handlers': [], 'dispatcher': createDispatcher(type) });
+       ec = (data.events[type] || (data.events[type] = { 'handlers': [], 'dispatcher': createDispatcher(type) }));
       ec.handlers.push(handler);
       return this;
     }
