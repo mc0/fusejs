@@ -2,13 +2,20 @@
 
   (function(Function) {
 
-    var concatList = fuse._.concatList, isArray = fuse.Object.isArray,
-     prependList = fuse._.prependList, slice = [].slice;
+    var concatList = fuse._.concatList,
+        fnBind = Function.plugin.bind,
+        isArray = fuse.Object.isArray,
+        prependList = fuse._.prependList,
+        slice = [].slice;
 
     // ES5 15.3.4.5
     var bind = function bind(fn, thisArg) {
       // allows lazy loading the target method
-      var f, context, curried, name, reset;
+      var f,
+          context,
+          curried,
+          name,
+          reset;
       if (isArray(fn)) {
         name = fn[0]; context = fn[1];
       } else {
@@ -41,7 +48,10 @@
 
     function bindAsEventListener(fn, thisArg) {
       // allows lazy loading the target method
-      var f, context, curried, name;
+      var f,
+          context,
+          curried,
+          name;
       if (isArray(fn)) {
         name = fn[0]; context = fn[1];
       } else {
@@ -63,7 +73,11 @@
 
     function curry(fn) {
       // allows lazy loading the target method
-      var f, context, curried, name, reset;
+      var f,
+          context,
+          curried,
+          name,
+          reset;
       if (isArray(fn)) {
         name = fn[0]; context = fn[1];
       } else {
@@ -88,7 +102,11 @@
 
     function delay(fn, timeout) {
       // allows lazy loading the target method
-      var f, context, name, args = slice.call(arguments, 2);
+      var f,
+          context,
+          name,
+          args = slice.call(arguments, 2);
+  
       if (isArray(fn)) {
         name = fn[0]; context = fn[1];
       } else {
@@ -108,7 +126,9 @@
 
     function methodize(fn) {
       // allows lazy loading the target method
-      var f, context, name;
+      var f,
+          context,
+          name;
       if (isArray(fn)) {
         name = fn[0]; context = fn[1]; fn = context[name];
       } else {
@@ -125,7 +145,9 @@
 
     function wrap(fn, wrapper) {
       // allows lazy loading the target method
-      var f, context, name;
+      var f,
+          context,
+          name;
       if (isArray(fn)) {
         name = fn[0]; context = fn[1];
       } else {
@@ -141,7 +163,7 @@
     }
 
     // native support
-    if (fuse.Object.isFunction(Function.plugin.bind)) {
+    if (fuse.Object.isFunction(fnBind)) {
       var __bind = bind;
       bind = function bind(fn, thisArg) {
         // bind with curry
@@ -149,12 +171,12 @@
         if (arguments.length > 2) {
           return isLazy
             ? __bind.apply(null, args)
-            : this.bind.apply(fn, slice.call(args, 1));
+            : fnBind.apply(fn, slice.call(args, 1));
         }
         // simple bind
         return isLazy
           ? __bind(fn, thisArg)
-          : this.bind.call(fn, thisArg);
+          : fnBind.call(fn, thisArg);
       };
     }
 
@@ -166,7 +188,7 @@
     Function.methodize = methodize;
     Function.wrap = wrap;
 
-  })(fuse.Function)
+  })(fuse.Function);
 
   /*--------------------------------------------------------------------------*/
 
@@ -175,9 +197,9 @@
     var plugin = Function.plugin;
 
     function bind(thisArg) {
-        return arguments.length > 1
-          ? Function.bind.apply(Function, prependList(arguments, this))
-          : Function.bind(this, thisArg);
+      return arguments.length > 1
+        ? Function.bind.apply(Function, prependList(arguments, this))
+        : Function.bind(this, thisArg);
     }
 
     function bindAsEventListener(thisArg) {
@@ -212,6 +234,7 @@
       return Function.wrap(this, wrapper);
     }
 
+    plugin.bind = bind;
     plugin.bindAsEventListener = bindAsEventListener;
     plugin.curry = curry;
     plugin.delay = delay;
@@ -219,7 +242,4 @@
     plugin.methodize = methodize;
     plugin.wrap = wrap;
 
-    if (!fuse.Object.isFunction(plugin.bind)) {
-      plugin.bind = bind;
-    }
   })(fuse.Function);

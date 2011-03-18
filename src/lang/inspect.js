@@ -49,6 +49,8 @@
 
   (function() {
 
+    var ORIGIN = '__origin__';
+
     function inspect() {
       var length, object, result, p = fuse._,
        origin = inspect[ORIGIN], proto = (origin.Array || origin.NodeList).prototype;
@@ -75,6 +77,8 @@
 
   (function() {
 
+    var ORIGIN = '__origin__';
+
     function inspect(useDoubleQuotes) {
       var string = this, p = fuse._, origin = inspect[ORIGIN],
        String = origin.String, strProto = String.prototype;
@@ -95,6 +99,8 @@
   /*--------------------------------------------------------------------------*/
 
   (function() {
+
+    var ORIGIN = '__origin__';
 
     function inspect(value) {
       var classOf, object, result = [],
@@ -143,6 +149,8 @@
 
   (function() {
 
+    var ORIGIN = '__origin__';
+
     function inspect() {
       return fuse.Object.isFunction(this._each)
         ? inspect[ORIGIN].String('#<Enumerable:' + this.toArray().inspect() + '>')
@@ -158,6 +166,8 @@
   /*--------------------------------------------------------------------------*/
 
   (function() {
+
+    var ORIGIN = '__origin__';
 
     function inspect() {
       var pair, i = -1, p = fuse._, origin = inspect[ORIGIN],
@@ -185,6 +195,8 @@
   /*--------------------------------------------------------------------------*/
 
   (function() {
+
+    var ORIGIN = '__origin__';
 
     function inspect() {
       var className, element, id, result,
@@ -219,6 +231,8 @@
   /*--------------------------------------------------------------------------*/
 
   (function() {
+
+    var ORIGIN = '__origin__';
 
     function inspect() {
       var origin = inspect[ORIGIN],

@@ -40,6 +40,8 @@
 
   (function(plugin) {
 
+    var ORIGIN = '__origin__';
+
     function getAttribute(name) {
       var result, defaults, p = fuse._, ATTR_NAME = p.ATTR_NAME,
        element = this.raw || this,
@@ -63,8 +65,12 @@
     }
 
     function setAttribute(name, value) {
-      var contentName, isRemoved, node, ATTR_NAME = fuse._.ATTR_NAME,
-       element = this.raw || this, attributes = { };
+      var contentName,
+          isRemoved,
+          node,
+          ATTR_NAME = fuse._.ATTR_NAME,
+          attributes = { },
+          element = this.raw || this;
 
       if (fuse.Object.isHash(name)) {
         attributes = name._object;
@@ -96,13 +102,12 @@
       return this;
     }
 
-    if (fuse.env.test('ELEMENT_HAS_ATTRIBUTE')) {
-      plugin.hasAttribute = function hasAttribute(name) {
-        return (this.raw || this).hasAttribute(name);
-      };
-    }
-    else {
-      plugin.hasAttribute = function hasAttribute(name) {
+    var hasAttribute = function hasAttribute(name) {
+      return (this.raw || this).hasAttribute(name);
+    };
+
+    if (!fuse.env.test('ELEMENT_HAS_ATTRIBUTE')) {
+      hasAttribute = function hasAttribute(name) {
         var defaultProp, p = fuse._, node = this.raw || this, nodeName = p.getNodeName(node);
         if (nodeName == 'INPUT') {
           if (name == 'value') {
@@ -222,21 +227,27 @@
     // capability checks
     (function() {
 
-      var checkbox, input, node, value, doc = fuse._doc,
-       form = doc.createElement('form'), label = doc.createElement('label');
+      var checkbox,
+          input,
+          node,
+          value,
+          doc = fuse._doc,
+          form = doc.createElement('form'),
+          label = doc.createElement('label');
 
-      label.htmlFor = label.className = 'x';
+      label.setAttribute('for', 'x');
+      label.setAttribute('className', 'x');
       label.setAttribute('style', 'display:block');
       form.setAttribute('enctype', 'multipart/form-data');
 
       // translate content name `htmlFor`
-      if (label.getAttribute('htmlFor') == 'x') {
+      if (label.htmlFor == 'x') {
         T.contentNames['for'] = 'htmlFor';
       } else {
         T.contentNames.htmlFor = 'for';
       }
       // translate content name `className`
-      if (label.getAttribute('className') == 'x') {
+      if (label.className == 'x') {
         T.contentNames['class'] = 'className';
       } else {
         T.contentNames.className = 'class';
@@ -293,6 +304,9 @@
     // mandate getAttribute/setAttribute for value
     // http://www.w3.org/TR/DOM-Level-2-HTML/html.html#ID-26091157
     extendByTag(['input', 'textarea'], function() {
+      var __getAttribute = plugin.getAttribute,
+          __setAttribute = plugin.setAttribute;
+
       function getAttribute(name) {
         return name == 'value'
           ? getValue(this.raw || this)
@@ -305,21 +319,21 @@
           : __setAttribute.call(this, name, value);
         return this;
       }
-
-      var __getAttribute = plugin.getAttribute, __setAttribute = plugin.setAttribute;
       return { 'getAttribute': getAttribute, 'setAttribute': setAttribute };
     });
 
     // setter for button element value
     if (fuse.env.test('BUTTON_VALUE_CHANGES_AFFECT_INNER_CONTENT')) {
       extendByTag('button', function() {
+        var __setAttribute = plugin.setAttribute,
+            setValue = setNode('value');
+
         function setAttribute(name, value) {
           name == 'value'
             ? setValue(this.raw || this, value)
             : __setAttribute.call(this, name, value);
           return this;
         }
-        var __setAttribute = plugin.setAttribute, setValue = setNode('value');
         return { 'setAttribute': setAttribute };
       });
     }

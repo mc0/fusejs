@@ -26,6 +26,8 @@
 
   fuse.Template = (function() {
 
+    var ORIGIN = '__origin__';
+
     function Klass() { }
 
     function Template(template, pattern) {
@@ -76,6 +78,8 @@
 
   (function(plugin) {
 
+    var ORIGIN = '__origin__';
+
     function clone() {
       return this.constructor(this.template, this.pattern);
     }
@@ -85,7 +89,7 @@
        p = fuse._, i = 1, template = String(this.template),
        parts = p.strSplit.call(template, this.pattern), length = parts.length,
        escaped = this._escaped = { }, tokens  = this._tokens  = { };
-       
+
       this._lastTemplate = this.template;
 
       for ( ; i < length; i += 4) {
@@ -150,7 +154,7 @@
     }
 
     function parse(object) {
-      var i, o, c, chain, escaped, found, lastIndex, length, prop, 
+      var i, o, c, chain, escaped, found, lastIndex, length, prop,
        token, tokens, result, origin = parse[ORIGIN];
 
       // check if cache has expired
@@ -203,7 +207,7 @@
     /*------------------------------------------------------------------------*/
 
     plugin.clone = clone;
-    plugin.preparse = preparse; 
+    plugin.preparse = preparse;
     (plugin.parse = parse)[ORIGIN] = fuse;
 
   })(fuse.Template.plugin);
@@ -211,6 +215,8 @@
   /*--------------------------------------------------------------------------*/
 
   (function(plugin) {
+
+    var ORIGIN = '__origin__';
 
     function gsub(pattern, replacement) {
       var p = fuse._, origin = gsub[ORIGIN];

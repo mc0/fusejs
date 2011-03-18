@@ -141,7 +141,7 @@
 
       // multiple elements return a NodeList
       if (fragment.nodeType == 11) {
-        result = NodeList();
+        result = fuse.dom.NodeList();
         length = fragment.childNodes.length;
         if (isDecorated) {
           while (length--) {

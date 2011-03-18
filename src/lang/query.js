@@ -11,6 +11,8 @@
 
   (function(Object) {
 
+    var ORIGIN = '__origin__';
+
     function toQueryString(object) {
       var p = fuse._, origin = toQueryString[ORIGIN],
        isArray = Object.isArray, result = [];
@@ -82,6 +84,8 @@
   /*--------------------------------------------------------------------------*/
 
   (function() {
+
+    var ORIGIN = '__origin__';
 
     function toQueryString() {
       return toQueryString[ORIGIN].Object.toQueryString(this._object);

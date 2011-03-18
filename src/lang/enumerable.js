@@ -226,7 +226,7 @@
     mixin.each = each;
     mixin.eachSlice = eachSlice;
     mixin.every = every;
-    mixin.filter = filer;
+    mixin.filter = filter;
     mixin.first = first;
     mixin.inGroupsOf = inGroupsOf;
     mixin.inject = inject;

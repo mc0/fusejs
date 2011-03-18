@@ -47,6 +47,8 @@
       });
     },
 
+    ORIGIN = '__origin__',
+
     ARRAY_CONCAT_ARGUMENTS_BUGGY = (function() {
       // true for Opera
       var array = [];

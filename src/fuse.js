@@ -49,7 +49,7 @@
     rawIndexOf: ''.indexOf,
 
     rawReplace: ''.replace,
-    
+
     addNodeListMethod: function() { },
 
     arrIndexOf: function(value) {
@@ -65,6 +65,9 @@
     },
 
     cloneMethod: (function() {
+
+      var ORIGIN = '__origin__';
+
       function cloneMethod(method, origin) {
         // init on method to avoid problems when cloning itself
         var result, source = String(method);
@@ -75,7 +78,7 @@
           'var ' + cloneMethod.varOrigin + '="' +
           ORIGIN + '";' + source + '; return ' +
           source.match(/^[\s\(]*function([^(]*)\(/)[1])();
-  
+
         result[ORIGIN] = origin;
         return result;
       }
@@ -306,7 +309,10 @@
   //= require "ajax/timed-updater"
   /*--------------------------------------------------------------------------*/
 
-  (function(dom, origin) {
+  (function(dom) {
+
+    var ORIGIN = '__origin__';
+
     if (dom) {
       if (dom.HTMLFormElement) {
         fuse.Object.each(dom.HTMLFormElement.plugin, fuse._.addNodeListMethod);
@@ -314,7 +320,7 @@
       if (dom.HTMLInputElement) {
         fuse.Object.each(dom.HTMLInputElement.plugin, fuse._.addNodeListMethod);
       }
-      
+
       fuse.Object.each(dom.HTMLElement.plugin, fuse._.addNodeListMethod);
       fuse.Object.each(dom.Element.plugin, fuse._.addNodeListMethod);
 
@@ -322,7 +328,9 @@
         // Pave any NodeList methods that fuse.Array shares.
         // Element first(), last(), and contains() may be called by using invoke()
         // Ex: elements.invoke('first');
-        var nlPlugin = dom.NodeList.plugin;
+        var nlPlugin = dom.NodeList.plugin,
+            origin = { 'Number': fuse.Number, 'Array': dom.NodeList };
+
         fuse.Object.each(fuse.Array.plugin, function(value, key) {
           if (value[ORIGIN]) {
             nlPlugin[key] = fuse._.cloneMethod(value, origin);
@@ -336,7 +344,7 @@
         dom.NodeList.fromNodeList = fuse._.cloneMethod(fuse.Array.fromNodeList, origin);
       }
     }
-  })(fuse.dom, { 'Number': fuse.Number, 'Array': NodeList });
+  })(fuse.dom);
 
 })(this);
 

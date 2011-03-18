@@ -11,7 +11,7 @@
 
   (function(plugin) {
 
-    /* create Array statics */
+    var ORIGIN = '__origin__';
 
     function from(iterable) {
       var length, object, result, Array = from[ORIGIN].Array;
@@ -168,8 +168,6 @@
     }
 
     /*------------------------------------------------------------------------*/
-
-    /* create ES5 method equivalents */
 
     // ES5 15.4.4.16
     function every(callback, thisArg) {

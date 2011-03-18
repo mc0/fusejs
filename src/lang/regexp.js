@@ -2,6 +2,8 @@
 
   (function(RegExp) {
 
+    var ORIGIN = '__origin__';
+
     function escape(string) {
       return escape[ORIGIN].String(fuse._.escapeRegExpChars(string));
     }

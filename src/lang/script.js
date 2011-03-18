@@ -53,6 +53,8 @@
 
   (function(plugin) {
 
+    var ORIGIN = '__origin__';
+
     function makeExecuter(context) {
       return context.Function('window',
         'return function (' + fuse.uid + '){' +

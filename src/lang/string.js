@@ -32,6 +32,8 @@
 
   (function(plugin) {
 
+    var ORIGIN = '__origin__';
+
     function capitalize() {
       var string = String(this);
       return capitalize[ORIGIN].String(string.charAt(0).toUpperCase() +

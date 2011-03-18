@@ -62,7 +62,7 @@
     };
 
     plugin.getControls = function getControls() {
-      var node, result = NodeList(), i = 0, j = -1,
+      var node, result = fuse.dom.NodeList(), i = 0, j = -1,
        nodes = (this.raw || this).getElementsByTagName('*');
 
       if (node = nodes[0]) {
@@ -79,7 +79,7 @@
       name = String(typeName || '');
 
       var input, inputs = (this.raw || this).getElementsByTagName('input'),
-       result = NodeList(), i = -1, j = i;
+       result = fuse.dom.NodeList(), i = -1, j = i;
 
       if (!typeName && !name) {
         while (input = inputs[++i]) {

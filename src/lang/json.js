@@ -36,6 +36,8 @@
 
   (function() {
 
+    var ORIGIN = '__origin__';
+
     // ES5 15.12.3
     function toJSON(value) {
       var length, result, i = -1, p = fuse._, origin = toJSON[ORIGIN],
@@ -87,6 +89,8 @@
   /*--------------------------------------------------------------------------*/
 
   (function() {
+
+    var ORIGIN = '__origin__';
 
     // Note from json2.js:
     // Split the second stage into 4 regexp operations in order to work around

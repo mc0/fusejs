@@ -22,7 +22,7 @@
         this.group =
           (name && fuse.query(element.nodeName +
           '[name="' + name + '"]', getDocument(element)).get()) ||
-          NodeList(fuse(element));
+          fuse.dom.NodeList(fuse(element));
 
         this.callback = callback;
         this.lastValue = this.getValue();
@@ -37,7 +37,7 @@
         var value = this.getValue();
         if (String(this.lastValue) != String(value)) {
           this.callback(this.element, value, event);
-          this.lastValue = value;
+          this.lastValue = this.getValue();
         }
       },
 

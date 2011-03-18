@@ -16,14 +16,14 @@
   // tag parsing instructions:
   // http://www.w3.org/TR/REC-xml-names/#ns-using
   fuse._.reTags = (function() {
-    var name   = '[-\\w]+',
-     space     = '[\\x20\\t\\n\\r]',
-     eq        = space + '*=' + space + '*',
-     charRef   = '&#[0-9]+;',
-     entityRef = '&' + name + ';',
-     reference = entityRef + '|' + charRef,
-     attValue  = '"(?:[^<&"]|' + reference + ')*"|\'(?:[^<&\']|' + reference + ')*\'',
-     attribute = '(?:' + name + eq + attValue + '|' + name + ')';
+    var name = '[-\\w]+',
+        space = '[\\x20\\t\\n\\r]',
+        eq = space + '*=' + space + '*',
+        charRef = '&#[0-9]+;',
+        entityRef = '&' + name + ';',
+        reference = entityRef + '|' + charRef,
+        attValue = '"(?:[^<&"]|' + reference + ')*"|\'(?:[^<&\']|' + reference + ')*\'',
+        attribute = '(?:' + name + eq + attValue + '|' + name + ')';
 
     return new RegExp('<'+ name + '(?:' + space + '+' + attribute + ')*' + space + '*/?>|' +
       '</' + name + space + '*>', 'g');
@@ -44,8 +44,10 @@
 
     (function(p) {
 
-      var div = fuse._div, doc = fuse._doc, container = doc.createElement('pre'),
-       textNode = container.appendChild(doc.createTextNode('')),
+      var div = fuse._div,
+          doc = fuse._doc,
+          container = doc.createElement('pre'),
+          textNode = container.appendChild(doc.createTextNode('')),
 
       swapTextToEntities = function(text) {
         textNode.data = String(text);
@@ -107,6 +109,8 @@
   /*--------------------------------------------------------------------------*/
 
   (function(plugin) {
+
+    var ORIGIN = '__origin__';
 
     // entity definitions
     // http://www.w3.org/TR/html401/sgml/intro.html

@@ -2,9 +2,15 @@
 
   (function() {
 
+    var ORIGIN = '__origin__';
+
     function grep(pattern, callback, thisArg) {
-      var item, result, i = -1, Array = grep[ORIGIN].Array,
-       object = Object(this), length = object.length >>> 0;
+      var item,
+          result,
+          i = -1,
+          Array = grep[ORIGIN].Array,
+          object = Object(this),
+          length = object.length >>> 0;
 
       if (!pattern || pattern == '' || fuse.Object.isRegExp(pattern) && !pattern.source) {
         result = Array.prototype.slice.call(object, 0);
@@ -28,6 +34,8 @@
   })();
 
   (function() {
+
+    var ORIGIN = '__origin__';
 
     function grep(pattern, callback, thisArg) {
       if (!pattern || pattern == '' || fuse.Object.isRegExp(pattern) && !pattern.source) {
@@ -54,7 +62,13 @@
   (function() {
 
     function grep(pattern, callback, thisArg) {
-      var key, pair, result, value, i = 0, pairs = this._pairs;
+      var key,
+          pair,
+          result,
+          value,
+          i = 0,
+          pairs = this._pairs;
+
       if (!pattern || pattern == '' || fuse.Object.isRegExp(pattern) && !pattern.source) {
         return this.clone();
       }

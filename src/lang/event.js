@@ -6,9 +6,13 @@
 
     function createDispatcher(type) {
       return function() {
-        var handler, i = -1, debug = fuse.debug,
-         klass = this, args = arguments, ec = klass._events.events[type],
-         handlers = ec && ec.handlers;
+        var handler,
+            i = -1,
+            debug = fuse.debug,
+            klass = this,
+            args = arguments,
+            ec = klass._events.events[type],
+            handlers = ec && ec.handlers;
 
         if (handlers) {
           handlers = handlers.slice(0);
@@ -28,7 +32,8 @@
     }
 
     function fire(type) {
-      var ec, data = this._events;
+      var ec,
+          data = this._events;
       if (data && (ec = data.events[type])) {
         ec.dispatcher.apply(this, Array.prototype.slice.call(arguments, 1))
       }
@@ -37,13 +42,17 @@
 
     function observe(type, handler) {
       var data = this._events || (this._events = { 'createDispatcher': createDispatcher, 'events': { } }),
-       ec = (data.events[type] || (data.events[type] = { 'handlers': [], 'dispatcher': createDispatcher(type) }));
+          ec = data.events[type] || (data.events[type] = { 'handlers': [], 'dispatcher': createDispatcher(type) });
       ec.handlers.push(handler);
       return this;
     }
 
     function stopObserving(type, handler) {
-      var ec, events, foundAt, length, data = this._events;
+      var ec,
+          events,
+          foundAt,
+          length,
+          data = this._events;
 
       if (!data) {
         return this;

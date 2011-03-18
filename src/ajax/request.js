@@ -2,10 +2,15 @@
 
   fuse.ajax.Request = (function() {
 
+    var ORIGIN = '__origin__';
+
     function Klass() { }
 
     function Request(url, options) {
-      var eventType, handler, i = -1,
+      var eventType,
+       handler,
+       i = -1,
+       j = i,
        capitalize = fuse._.capitalize,
        instance = __instance || new Klass,
        origin = instance.send[ORIGIN];
@@ -44,7 +49,7 @@
       return __apply.call(this, thisArg, argArray);
     };
 
-    Request.READY_STATES = 
+    Request.READY_STATES =
      fuse.Array('unsent', 'opened', 'headersReceived', 'loading', 'done');
 
     var __instance, __apply = Klass.apply, __call = Klass.call,
@@ -60,18 +65,18 @@
 
   (function(plugin) {
 
-    var createGetter = fuse._.createGetter,
-     euid            = fuse._.uid + '_error',
-     fireEvent       = fuse.Class.mixins.event.fire,
-     isSameOrigin    = fuse.Object.isSameOrigin,
-     noop            = fuse.Function.NOOP,
-     responders      = fuse.ajax.responders,
-
-     // content-type is case-insensitive
-     // http://www.w3.org/Protocols/rfc2616/rfc2616-sec3.html#sec3.7
-     reHTTP            = /^https?:/,
-     reContentTypeJS   = /^\s*(?:text|application)\/(x-)?(?:java|ecma)script(?:;|\s|$)/i,
-     reContentTypeJSON = /^\s*(?:application\/json)(?:;|\s|$)/i;
+    var ORIGIN = '__origin__',
+        createGetter = fuse._.createGetter,
+        euid            = fuse._.uid + '_error',
+        fireEvent       = fuse.Class.mixins.event.fire,
+        isSameOrigin    = fuse.Object.isSameOrigin,
+        noop            = fuse.Function.NOOP,
+        responders      = fuse.ajax.responders,
+        // content-type is case-insensitive
+        // http://www.w3.org/Protocols/rfc2616/rfc2616-sec3.html#sec3.7
+        reHTTP            = /^https?:/,
+        reContentTypeJS   = /^\s*(?:text|application)\/(x-)?(?:java|ecma)script(?:;|\s|$)/i,
+        reContentTypeJSON = /^\s*(?:application\/json)(?:;|\s|$)/i;
 
     /*------------------------------------------------------------------------*/
 

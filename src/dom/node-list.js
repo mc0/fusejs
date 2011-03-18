@@ -65,7 +65,7 @@
         }
       }
     };
-  })(NodeList.plugin);
+  })(fuse.dom.NodeList.plugin);
 
   /*--------------------------------------------------------------------------*/
 
@@ -78,7 +78,7 @@
     plugin.get = function get(index) {
       var result, object = Object(this), length = object.length >>> 0;
       if (index == null) {
-        result = NodeList();
+        result = fuse.dom.NodeList();
         for (index = 0; index < length; index++) {
           if (index in object) result[index] = Node(object[index]);
         }
@@ -118,4 +118,4 @@
 
     // prevent JScript bug with named function expressions
     var get = null, invoke = null;
-  })(NodeList.plugin);
+  })(fuse.dom.NodeList.plugin);

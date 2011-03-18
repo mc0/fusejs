@@ -5,7 +5,8 @@
   fuse.Object.extend(fuse._, {
 
     buildRangeCache: function(thisArg, callback) {
-      var c = thisArg._cache = fuse.Array(), p = fuse._, i = 0, 
+      var ORIGIN = '__origin__',
+       c = thisArg._cache = fuse.Array(), p = fuse._, i = 0,
        Object = thisArg.clone[ORIGIN].Object,
        value = c.start = thisArg.start = Object(thisArg.start);
 
@@ -90,6 +91,8 @@
 
   (function(plugin) {
 
+    var ORIGIN = '__origin__';
+
     function _each(callback) {
       var c, length, i = 0, p = fuse._;
       if (p.isRangeCacheExpired(this)) {
@@ -170,6 +173,8 @@
 
   (function() {
 
+    var ORIGIN = '__origin__';
+
     function succ() {
       return succ[ORIGIN].Number(fuse._.toInteger(this) + 1);
     }
@@ -178,6 +183,8 @@
   })();
 
   (function() {
+
+    var ORIGIN = '__origin__';
 
     function succ() {
       var index = this.length - 1;

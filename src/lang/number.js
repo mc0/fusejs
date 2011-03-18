@@ -8,6 +8,8 @@
 
   (function(plugin) {
 
+    var ORIGIN = '__origin__';
+
     function abs() {
       return abs[ORIGIN].Number(Math.abs(this));
     }
@@ -31,11 +33,10 @@
     }
 
     function times(callback, thisArg) {
-      var i = -1, length = fuse._.toInteger(this);
-      if (arguments.length == 1) {
-        while (++i < length) callback(i, i);
-      } else {
-        while (++i < length) callback.call(thisArg, i, i);
+      var i = -1,
+          length = fuse._.toInteger(this);
+      while (++i < length) {
+        callback.call(thisArg, i, i);
       }
       return this;
     }
@@ -45,11 +46,16 @@
     }
 
     function toPaddedString(length, radix) {
-      var origin = toPaddedString[ORIGIN], p = fuse._,
-       string = p.toInteger(this).toString(radix || 10);
+      var origin = toPaddedString[ORIGIN],
+          p = fuse._,
+          string = p.toInteger(this).toString(radix || 10);
 
-      if (length <= string.length) return origin.String(string);
-      if (length > p.pad.length) p.pad = Array(length + 1).join('0');
+      if (length <= string.length) {
+        return origin.String(string);
+      }
+      if (length > p.pad.length) {
+        p.pad = Array(length + 1).join('0');
+      }
       return origin.String((p.pad + string).slice(-length));
     }
 

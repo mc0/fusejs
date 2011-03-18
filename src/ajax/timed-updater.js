@@ -60,8 +60,10 @@
       return __apply.call(this, thisArg, argArray);
     };
 
-    var __instance, __apply = Klass.apply, __call = Klass.call,
-     Object = fuse.Object;
+    var __instance,
+        __apply = Klass.apply,
+        __call = Klass.call,
+        Object = fuse.Object;
 
     fuse.Class(fuse.ajax.Base, { 'constructor': TimedUpdater });
     Klass.prototype = TimedUpdater.plugin;
@@ -83,6 +85,7 @@
       this.fire('stop');
     }
 
+    var plugin = TimedUpdater.plugin;
     plugin.start = start;
     plugin.stop = stop;
 

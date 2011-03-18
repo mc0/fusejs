@@ -2,13 +2,14 @@
 
   (function(Object) {
 
-    var NON_HOST_TYPES = { 'boolean': 1, 'number': 1, 'string': 1, 'undefined': 1 },
-     loc = window.location || { },
-     protocol = loc.protocol,
-     port = loc.port,
-     reUrlParts = /([^:]+:)\/\/(?:[^:]+(?:\:[^@]+)?@)?([^\/:$]+)(?:\:(\d+))?/,
-     defaultPort = protocol == 'ftp:' ? 21 : protocol == 'https:' ? 443 : 80,
-     toString = fuse._.toString;
+    var ORIGIN = '__origin__',
+        NON_HOST_TYPES = { 'boolean': 1, 'number': 1, 'string': 1, 'undefined': 1 },
+        loc = window.location || { },
+        protocol = loc.protocol,
+        port = loc.port,
+        reUrlParts = /([^:]+:)\/\/(?:[^:]+(?:\:[^@]+)?@)?([^\/:$]+)(?:\:(\d+))?/,
+        defaultPort = protocol == 'ftp:' ? 21 : protocol == 'https:' ? 443 : 80,
+        toString = fuse._.toString;
 
     function isElement(value) {
       return !!value && value.nodeType == 1;
@@ -95,6 +96,8 @@
   /*--------------------------------------------------------------------------*/
 
   (function(Object) {
+
+    var ORIGIN = '__origin__';
 
     function clone(object, deep) {
       var length, result, constructor, i = -1;
@@ -195,6 +198,8 @@
 
   // ES5 15.2.3.14
   (function(Object) {
+
+    var ORIGIN = '__origin__';
 
     function keys(object) {
       var result = keys[ORIGIN].Array(), i = -1;

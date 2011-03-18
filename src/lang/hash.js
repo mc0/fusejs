@@ -19,27 +19,35 @@
     }
 
     function unset(key) {
-      var data = this._data, i = -1,
-       keys = fuse.Object.isArray(key) ? key : arguments;
+      var data = this._data,
+          i = -1,
+          keys = fuse.Object.isArray(key) ? key : arguments;
 
       while (key = keys[++i])  {
-        if ((fuse.uid + key) in data)
+        if ((fuse.uid + key) in data) {
           unsetByIndex(this, indexOfKey(this, key));
+        }
       }
       return this;
     }
 
     function indexOfKey(hash, key) {
       key = String(key);
-      var i = -1, keys = hash._keys, length = keys.length;
+      var i = -1,
+          keys = hash._keys,
+          length = keys.length;
       while (++i < length) {
-        if (keys[i] == key) return i;
+        if (keys[i] == key) {
+          return i;
+        }
       }
     }
 
     function setValue(hash, key, value) {
       if (!key.length) return hash;
-      var data = hash._data, uidKey = fuse.uid + key, keys = hash._keys;
+      var data = hash._data,
+          uidKey = fuse.uid + key,
+          keys = hash._keys;
 
       // avoid a method call to Hash#hasKey
       if (uidKey in data) {
@@ -58,8 +66,12 @@
 
     function setWithObject(hash, object) {
       if (fuse.Object.isHash(object)) {
-        var pair, i = -1, pairs = object._pairs;
-        while (pair = pairs[++i]) setValue(hash, pair[0], pair[1]);
+        var pair,
+            i = -1,
+            pairs = object._pairs;
+        while (pair = pairs[++i]) {
+          setValue(hash, pair[0], pair[1]);
+        }
       }
       else {
         fuse.Object.each(object, function(value, key) {
@@ -90,6 +102,8 @@
 
   (function(plugin) {
 
+    var ORIGIN = '__origin__';
+
     function clear() {
       this._data   = { };
       this._object = { };
@@ -100,7 +114,12 @@
     }
 
     function clone(deep) {
-      var result, pair, pairs, i = -1, origin = clone[ORIGIN];
+      var result,
+          pair,
+          pairs,
+          i = -1,
+          origin = clone[ORIGIN];
+
       if (deep) {
         result = origin.Hash();
         pairs  = this._pairs;
@@ -122,7 +141,9 @@
     }
 
     function keyOf(value) {
-      var pair, i = -1, pairs = this._pairs;
+      var pair,
+          i = -1,
+          pairs = this._pairs;
       while (pair = pairs[++i]) {
         if (value === pair[1])
           return pair[0];
@@ -135,8 +156,14 @@
     }
 
     function toObject() {
-      var pair, i = -1, pairs = this._pairs, result = toObject[ORIGIN].Object();
-      while (pair = pairs[++i]) result[pair[0]] = pair[1];
+      var pair,
+          i = -1,
+          pairs = this._pairs,
+          result = toObject[ORIGIN].Object();
+
+      while (pair = pairs[++i]) {
+        result[pair[0]] = pair[1];
+      }
       return result;
     }
 
@@ -149,41 +176,58 @@
     /* create optimized enumerable equivalents */
 
     function contains(value) {
-      var item, pair, i = -1, pairs = this._pairs;
+      var item,
+          pair,
+          i = -1,
+          pairs = this._pairs;
       while (pair = pairs[++i]) {
         // basic strict match
         if ((item = pair[1]) === value) return true;
         // match String and Number object instances
-        try { if (item.valueOf() === value.valueOf()) return true; } catch (e) { }
+        try {
+          if (item.valueOf() === value.valueOf()) {
+            return true;
+          }
+        } catch (e) { }
       }
       return false;
     }
 
     function filter(callback, thisArg) {
-      var key, pair, value, i = -1, pairs = this._pairs,
-       result = this.constructor();
+      var key,
+          pair,
+          value,
+          i = -1,
+          pairs = this._pairs,
+          result = this.constructor();
 
       if (typeof callback != 'function') {
         throw new TypeError;
       }
       while (pair = pairs[++i]) {
-        if (callback.call(thisArg, value = pair[1], key = pair[0], this))
+        if (callback.call(thisArg, value = pair[1], key = pair[0], this)) {
           result.set(key, value);
+        }
       }
       return result;
     }
 
     function first(callback, thisArg) {
-      var count, pair, result, i = -1,
-       p = fuse._, pairs = this._pairs;
+      var count,
+          pair,
+          result,
+          i = -1,
+          p = fuse._,
+          pairs = this._pairs;
 
       if (callback == null) {
         if (pairs.length) return p.returnPair(pairs[0]);
       }
       else if (typeof callback == 'function') {
         while (pair = pairs[++i]) {
-          if (callback.call(thisArg, pair[1], pair[0], this))
+          if (callback.call(thisArg, pair[1], pair[0], this)) {
             return p.returnPair(pair);
+          }
         }
       }
       else {
@@ -191,24 +235,35 @@
         result = first[ORIGIN].Array();
         if (!isNaN(count)) {
           count = count < 1 ? 1 : count;
-          while (++i < count && (pair = pairs[i])) result[i] = p.returnPair(pair);
+          while (++i < count && (pair = pairs[i])) {
+            result[i] = p.returnPair(pair);
+          }
         }
         return result;
       }
     }
 
     function last(callback, thisArg) {
-      var count, pad, pair, result, i = -1,
-       p = fuse._, pairs = this._pairs, length = pairs.length;
+      var count,
+          pad,
+          pair,
+          result,
+          i = -1,
+          p = fuse._,
+          pairs = this._pairs,
+          length = pairs.length;
 
       if (callback == null) {
-        if (length) return p.returnPair(this._pairs.last());
+        if (length) {
+          return p.returnPair(this._pairs.last());
+        }
       }
       else if (typeof callback == 'function') {
         while (length--) {
           pair = pairs[length];
-          if (callback.call(thisArg, pair[1], pair[2], this))
+          if (callback.call(thisArg, pair[1], pair[2], this)) {
             return p.returnPair(pair);
+          }
         }
       }
       else {
@@ -217,15 +272,21 @@
         if (!isNaN(count)) {
           count = count < 1 ? 1 : count > length ? length : count;
           pad = length - count;
-          while (++i < count)
+          while (++i < count) {
             result[i] = p.returnPair(pairs[pad + i]);
+          }
         }
         return result;
       }
     }
 
     function map(callback, thisArg) {
-      var key, pair, i = -1, pairs = this._pairs, result = this.constructor();
+      var key,
+          pair,
+          i = -1,
+          pairs = this._pairs,
+          result = this.constructor();
+
       if (typeof callback != 'function') {
         throw new TypeError;
       }
@@ -237,8 +298,14 @@
 
     function partition(callback, thisArg) {
       callback || (callback = fuse.Function.IDENTITY);
-      var key, value, pair, i = -1, origin = partition[ORIGIN],
-       pairs = this._pairs, trues = origin.Hash(), falses = origin.Hash();
+      var key,
+          value,
+          pair,
+          i = -1,
+          origin = partition[ORIGIN],
+          pairs = this._pairs,
+          trues = origin.Hash(),
+          falses = origin.Hash();
 
       while (pair = pairs[++i]) {
         (callback.call(thisArg, value = pair[1], key = pair[0], this) ?
@@ -256,13 +323,19 @@
     }
 
     function zip() {
-      var j, key, length, pair, pairs, values, i = -1,
-       origin   = zip[ORIGIN],
-       hashes   = [this],
-       pairs    = this._pairs,
-       args     = hashes.slice.call(arguments, 0),
-       callback = fuse.Function.IDENTITY,
-       result   = origin.Hash();
+      var j,
+          key,
+          length,
+          pair,
+          pairs,
+          values,
+          i = -1,
+          origin = zip[ORIGIN],
+          hashes = [this],
+          pairs = this._pairs,
+          args = hashes.slice.call(arguments, 0),
+          callback = fuse.Function.IDENTITY,
+          result = origin.Hash();
 
       // if last argument is a function it is the callback
       if (typeof args[args.length - 1] == 'function') {
@@ -277,7 +350,9 @@
       length = hashes.length;
       while (pair = pairs[++i]) {
         j = -1; values = origin.Array(); key = pair[0];
-        while (++j < length) values[j] = hashes[j]._data[fuse.uid + key];
+        while (++j < length) {
+          values[j] = hashes[j]._data[fuse.uid + key];
+        }
         result.set(key, callback(values, key, this));
       }
       return result;

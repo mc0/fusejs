@@ -585,6 +585,4 @@
       plugin['get' + dim] = getDimension;
     })();
 
-    // cleanup
-    i = undef;
   })(HTMLElement.plugin);
