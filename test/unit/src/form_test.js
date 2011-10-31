@@ -134,7 +134,7 @@ new Test.Unit.Runner({
      timedCounter = 0;
 
     // should work the same way was Form.Element.Observer
-    var observer = Form.Observer('form', 
+    var observer = Form.Observer('form',
       function(form, value) { ++timedCounter }, 0.5);
 
     // test it's unchanged yet
@@ -170,10 +170,10 @@ new Test.Unit.Runner({
 
     form.disable();
     this.assertDisabled(input1, input2);
-    
+
     form.enable();
     this.assertEnabled(input1, input2);
-    
+
     input1.disable();
     this.assertDisabled(input1);
 
@@ -505,7 +505,7 @@ new Test.Unit.Runner({
         element[prop] = backup;
       }, this);
     }, this);
-    
+
     // Form.Element#clear should NOT clear button
     // values of any kind.
     this.assertUndefined(fuse.query('button').get(0).clear,
@@ -515,7 +515,7 @@ new Test.Unit.Runner({
   'testFormElementMethodsChaining': function() {
     var methods = $w('clear activate disable enable'),
       formControls = $('form').getControls();
- 
+
     methods.each(function(method) {
       formControls.each(function(element) {
         var returned = element[method]();

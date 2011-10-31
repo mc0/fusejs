@@ -582,7 +582,7 @@ new Test.Unit.Runner({
 
   'testIsSameOrigin': function() {
     if (this.isRunningFromRake) {
-      var loc = window.location, 
+      var loc = window.location,
        url = loc.protocol + '//127.0.0.1' + loc.port + '/response';
 
       $('content').update('same origin policy');

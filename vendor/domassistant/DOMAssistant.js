@@ -86,13 +86,13 @@ var DOMAssistant = function () {
 			"elmsByAttribute",
 			"elmsByTag"
 		],
-		
+
 		harmonize : function () {
 			w.$ = _$;
 			w.$$ = _$$;
 			return this;
 		},
-		
+
 		initCore : function () {
 			this.applyMethod.call(w, "$", this.$);
 			this.applyMethod.call(w, "$$", this.$$);
@@ -162,14 +162,14 @@ var DOMAssistant = function () {
 			})(HTMLArray.prototype);
 			this.attach(this);
 		},
-		
+
 		addMethods : function (name, method) {
 			if (!def(this.allMethods[name])) {
 				this.allMethods[name] = method;
 				this.addHTMLArrayPrototype(name, method);
 			}
 		},
-		
+
 		addMethodsToElm : function (elm) {
 			for (var method in this.allMethods) {
 				if (def(this.allMethods[method])) {
@@ -178,13 +178,13 @@ var DOMAssistant = function () {
 			}
 			return elm;
 		},
-		
+
 		applyMethod : function (method, func) {
 			if (typeof this[method] !== "function") {
 				this[method] = func;
 			}
 		},
-		
+
 		attach : function (plugin) {
 			var publicMethods = plugin.publicMethods;
 			if (!def(publicMethods)) {
@@ -203,7 +203,7 @@ var DOMAssistant = function () {
 				plugin.init();
 			}
 		},
-		
+
 		addHTMLArrayPrototype : function (name, method) {
 			HTMLArray.prototype[name] = function () {
 				var elmsToReturn = new HTMLArray();
@@ -214,7 +214,7 @@ var DOMAssistant = function () {
 				return elmsToReturn;
 			};
 		},
-		
+
 		cleanUp : function (elm) {
 			var children = elm.all || elm.getElementsByTagName("*");
 			for (var i=0, child; (child=children[i++]);) {
@@ -225,11 +225,11 @@ var DOMAssistant = function () {
 			}
 			elm.innerHTML = "";
 		},
-		
+
 		setCache : function (cache) {
 			useCache = cache;
 		},
-		
+
 		$ : function () {
 			var obj = arguments[0];
 			if (arguments.length === 1 && (typeof obj === "object" || (typeof obj === "function" && !!obj.nodeName))) {
@@ -253,7 +253,7 @@ var DOMAssistant = function () {
 			}
 			return elm;
 		},
-		
+
 		$$ : function (id, addMethods) {
 			var elm = (typeof id === "object" || typeof id === "function" && !!id.nodeName)? id : document.getElementById(id),
 				applyMethods = def(addMethods)? addMethods : true,
@@ -272,7 +272,7 @@ var DOMAssistant = function () {
 			}
 			return elm;
 		},
-		
+
 		prev : function () {
 			return DOMAssistant.$$(navigate(this, "previous"));
 		},
@@ -280,7 +280,7 @@ var DOMAssistant = function () {
 		next : function () {
 			return DOMAssistant.$$(navigate(this, "next"));
 		},
-		
+
 		hasChild: function (elm) {
 			return this === document || this !== elm && (this.contains? this.contains(elm) : !!(this.compareDocumentPosition(elm) & 16));
 		},
@@ -317,7 +317,7 @@ var DOMAssistant = function () {
 			}
 			return { start: start, add: add, max: max, modVal: modVal };
 		},
-		
+
 		cssByDOM : function (cssRule) {
 			var prevParents, currentRule, cssSelectors, childOrSiblingRef, nextTag, nextRegExp, current, previous, prevParent, notElm, addElm, iteratorNext, childElm, sequence, anyTag,
 				elm = new HTMLArray(), index = elm.indexOf, prevElm = [], matchingElms = [], cssRules = cssRule.replace(regex.rules, ",").split(","), splitRule = {};
@@ -656,7 +656,7 @@ var DOMAssistant = function () {
 			}
 			return ((elm.length > 1 && cssRules.length > 1) || sort > 0)? sortDocumentOrder(elm) : elm;
 		},
-		
+
 		cssByXpath : function (cssRule) {
 			var ns = { xhtml: "http://www.w3.org/1999/xhtml" },
 				prefix = (document.documentElement.namespaceURI === ns.xhtml)? "xhtml:" : "",
@@ -738,7 +738,7 @@ var DOMAssistant = function () {
 			};
 			return DOMAssistant.cssByXpath.call(this, cssRule);
 		},
-		
+
 		cssSelection : function (cssRule) {
 			if (!cssRule) { return null; }
 			var special = regex.special.test(cssRule);
@@ -749,21 +749,21 @@ var DOMAssistant = function () {
 			} catch (e) {}
 			return ((document.evaluate && !special && !/-of-type/.test(cssRule))? DOMAssistant.cssByXpath : DOMAssistant.cssByDOM).call(this, cssRule);
 		},
-		
+
 		cssSelect : function (cssRule) {
 			return DOMAssistant.cssSelection.call(this, cssRule);
 		},
-		
+
 		elmsByClass : function (className, tag) {
 			var cssRule = (tag || "") + "." + className;
 			return DOMAssistant.cssSelection.call(this, cssRule);
 		},
-		
+
 		elmsByAttribute : function (attr, attrVal, tag, substrMatchSelector) {
 			var cssRule = (tag || "") + "[" + attr + ((attrVal && attrVal !== "*")? ((substrMatchSelector || "") + "=" + attrVal + "]") : "]");
 			return DOMAssistant.cssSelection.call(this, cssRule);
 		},
-		
+
 		elmsByTag : function (tag) {
 			return DOMAssistant.cssSelection.call(this, tag);
 		}
@@ -784,7 +784,7 @@ DOMAssistant.Storage = function () {
 			if (!this[expando] || !data[this[expando]]) { return; }
 			return data[this[expando]][key];
 		},
-		
+
 		store : function (key, val) {
 			var uid = this[expando] || (this[expando] = uniqueId++);
 			data[uid] = data[uid] || {};
@@ -800,7 +800,7 @@ DOMAssistant.Storage = function () {
 			}
 			return this;
 		},
-		
+
 		unstore : function (key) {
 			var uid = this[expando] || (this[expando] = uniqueId++);
 			if (data[uid]) {

@@ -3,7 +3,7 @@
 
 div.style-test { margin-left: 1px }
 
-#style_test_dimensions_container { 
+#style_test_dimensions_container {
   position: absolute;
   top: 0;
   left: 500px;
@@ -18,7 +18,7 @@ div.style-test { margin-left: 1px }
 #floating_style { float: left }
 #op2 { opacity:0.5;filter:alpha(opacity=50)progid:DXImageTransform.Microsoft.Blur(strength=10);}
 
-#scroll_test_1 { 
+#scroll_test_1 {
   margin: 10px;
   padding: 10px;
   position: relative;
@@ -72,7 +72,7 @@ div.style-test { margin-left: 1px }
 }
 
 #unit_px_test_2_1_1 {
-  font-size: 2ex;	
+  font-size: 2ex;
 }
 
 #dimensions-visible,

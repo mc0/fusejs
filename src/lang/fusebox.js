@@ -11,7 +11,7 @@
     doc = window.document,
 
     slice = [].slice,
-    
+
     ACTIVEX_MODE = 1,
 
     PROTO_MODE   = 2,

@@ -128,7 +128,7 @@ new Test.Unit.Runner({
   },
 
   'testEventObserversAreBoundToTheObservedElement': function() {
-    var target, 
+    var target,
      span = $('span'),
      observer = function() { target = this };
 

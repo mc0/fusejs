@@ -84,7 +84,7 @@ new Test.Unit.Runner({
     this.assertNotUndefined(null);
     this.assertNotUndefined(0);
     this.assertNotUndefined('');
-    
+
     this.assertNullOrUndefined(null);
     this.assertNullOrUndefined(undef);
 

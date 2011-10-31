@@ -2,7 +2,7 @@ var EnumObject = fuse.Class({
   'initialize': function(interior) {
     this.interior = interior;
   },
-  
+
   '_each': function(callback) {
     for (key in this.interior) {
       if (fuse.Object.hasKey(this.interior, key))
@@ -27,7 +27,7 @@ var Fixtures = {
   'Emoticons': $w(';-) ;-( :-) :-P'),
 
   'Nicknames': new EnumObject($w('juanbond jdd dperini kangax')),
-  
+
   'Object': { '0':0, '2':2, 'length':3 },
 
   'many': {

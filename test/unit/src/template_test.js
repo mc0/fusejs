@@ -8,7 +8,7 @@ new Test.Unit.Runner({
     this.assertEqual('<tr><td>Sam</td><td>21</td></tr>',
       template.parse(person),
       'Regular object');
-      
+
     this.assertEqual('<tr><td>Sam</td><td>21</td></tr>',
       template.parse($H(person)),
       'Hash object');
@@ -121,7 +121,7 @@ new Test.Unit.Runner({
       'manager':    { 'name': 'John', 'age': 29 },
       'colleagues': [ { 'name': 'Mark' }, { 'name': 'Indy' } ]
     };
- 
+
     this.assertEqual('Stephan is 22 years old, managed by John, 29.\n' +
       'Colleagues include Mark and Indy.',
       fuse.Template(source).parse(subject));

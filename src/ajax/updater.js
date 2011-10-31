@@ -27,7 +27,7 @@
       __instance = null;
       delete options[callbackName];
       fuse.ajax.Request.call(instance, url, options);
-      
+
       if (onDone == Klass) {
         ec.handlers = [];
       } else {
