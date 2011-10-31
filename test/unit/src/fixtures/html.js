@@ -1,7 +1,7 @@
-var largeTextEscaped = '&lt;span&gt;test&lt;/span&gt;', 
+var largeTextEscaped = '&lt;span&gt;test&lt;/span&gt;',
  largeTextUnescaped  = '<span>test</span>';
 
-fuse.Number(2048).times(function(){ 
+fuse.Number(2048).times(function(){
   largeTextEscaped += ' ABC';
   largeTextUnescaped += ' ABC';
 });

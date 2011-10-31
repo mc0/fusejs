@@ -3,14 +3,14 @@
   fuse.Class.mixins.enumerable = { };
 
   (function(mixin) {
- 
+
     var $break = function() { };
 
     function contains(value) {
       var result = 0;
       this.each(function(item) {
         // basic strict match
-        if (item === value && result++) return false; 
+        if (item === value && result++) return false;
         // match String and Number object instances
         try {
           if (item.valueOf() === value.valueOf() && result++) return false;

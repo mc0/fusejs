@@ -87,7 +87,7 @@ new Test.Unit.Runner({
   'testSelectorWithTagNameAndWhitespaceTokenizedAttributeValue': function() {
     this.assertEnumEqual($('link_1', 'link_2'), $$('a[class~="internal"]'),
       "a[class~=\"internal\"]");
- 
+
     this.assertEnumEqual($('link_1', 'link_2'), $$('a[class~=internal]'),
       "a[class~=internal]");
   },
@@ -218,7 +218,7 @@ new Test.Unit.Runner({
     this.assert(span.match('span.span_foo'),
       'class name 1');
 
-    this.assert(span.match('span.span_bar'), 
+    this.assert(span.match('span.span_bar'),
       'class name 2');
 
     this.assert(span.match('span:first-child'),
@@ -536,7 +536,7 @@ new Test.Unit.Runner({
   'testSelectorWithEnabledDisabledChecked': function() {
     this.assertEnumEqual([$('disabled_text_field')],
       $$('#troubleForm > *:disabled'));
- 
+
     this.assertEnumEqual($('troubleForm').getInputs().without($('disabled_text_field'), $('hidden')),
       $$('#troubleForm > *:enabled'));
 
@@ -546,11 +546,11 @@ new Test.Unit.Runner({
 
   'testSelectorWithEmpty': function() {
     $('level3_1').raw.innerHTML = '';
- 
+
     this.assertEnumEqual($('level3_1', 'level3_2', 'level2_3'),
      $$('#level1 *:empty'),
      '#level1 *:empty');
- 
+
     this.assertEnumEqual([],
       $$('#level_only_child:empty'),
       'newlines count as content!');

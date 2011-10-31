@@ -54,7 +54,7 @@ new Test.Unit.Runner({
     call(eventTest);
 
     var lazy = {
-      'test': bind(function() { 
+      'test': bind(function() {
         this.assert(false, 'lazy bindAsEventListener');
       }, this)
     };

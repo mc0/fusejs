@@ -335,7 +335,7 @@
       if (display && display != 'none') {
         data.madeHidden = display;
       }
-      else if (data.hiddenByCss) { 
+      else if (data.hiddenByCss) {
         value = '';
       }
       delete data.hiddenByCss;

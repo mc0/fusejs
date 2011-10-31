@@ -14,7 +14,7 @@ if(typeof dojo != "undefined"){
 //>>excludeStart("acmeExclude", fileName.indexOf("dojo") != -1);
 
 }else if(!this["acme"] && !this["queryPortability"]){
-	// NOTE: 
+	// NOTE:
 	//		the functions and properties are duplicates of things found
 	//		elsewhere in Dojo. They've been copied here to make query.js a
 	//		stand-alone system.  The "acmeExclude" ensures that it *never*
@@ -39,7 +39,7 @@ if(typeof dojo != "undefined"){
 				// 		an iterator function that passes items, indexes,
 				// 		and the array to a callback
 				if(!arr || !arr.length){ return; }
-				for(var i=0,l=arr.length; i<l; ++i){ 
+				for(var i=0,l=arr.length; i<l; ++i){
 					callback.call(thisObject||window, arr[i], i, arr);
 				}
 			},
@@ -93,7 +93,7 @@ if(typeof dojo != "undefined"){
 		designed to take any valid CSS3 selector and return the nodes matching
 		the selector. To do this quickly, it processes queries in several
 		steps, applying caching where profitable.
-		
+
 		The steps (roughly in reverse order of the way they appear in the code):
 			1.) check to see if we already have a "query dispatcher"
 				- if so, use that with the given parameterization. Skip to step 4.
@@ -168,7 +168,7 @@ if(typeof dojo != "undefined"){
 	////////////////////////////////////////////////////////////////////////
 
 	var getQueryParts = function(query){
-		//	summary: 
+		//	summary:
 		//		state machine for query tokenization
 		//	description:
 		//		instead of using a brittle and slow regex-based CSS parser,
@@ -184,7 +184,7 @@ if(typeof dojo != "undefined"){
 		//		below.
 
 
-		// NOTE: 
+		// NOTE:
 		//		this code is designed to run fast and compress well. Sacrifices
 		//		to readability and maintainability have been made.  Your best
 		//		bet when hacking the tokenizer is to put The Donnas on *really*
@@ -202,7 +202,7 @@ if(typeof dojo != "undefined"){
 		}
 
 		var ts = function(/*Integer*/ s, /*Integer*/ e){
-			// trim and slice. 
+			// trim and slice.
 
 			// take an index to start a string slice from and an end position
 			// and return a trimmed copy of that sub-string
@@ -210,12 +210,12 @@ if(typeof dojo != "undefined"){
 		}
 
 		// the overall data graph of the full query, as represented by queryPart objects
-		var queryParts = []; 
+		var queryParts = [];
 
 
 		// state keeping vars
-		var inBrackets = -1, inParens = -1, inMatchFor = -1, 
-			inPseudo = -1, inClass = -1, inId = -1, inTag = -1, 
+		var inBrackets = -1, inParens = -1, inMatchFor = -1,
+			inPseudo = -1, inClass = -1, inId = -1, inTag = -1,
 			lc = "", cc = "", pStart;
 
 		// iteration vars
@@ -279,9 +279,9 @@ if(typeof dojo != "undefined"){
 			// needs to do any iteration. Many simple selectors don't, and
 			// we can avoid significant construction-time work by advising
 			// the system to skip them
-			currentPart.loops = (	
-					currentPart.pseudos.length || 
-					currentPart.attrs.length || 
+			currentPart.loops = (
+					currentPart.pseudos.length ||
+					currentPart.attrs.length ||
 					currentPart.classes.length	);
 
 			currentPart.oquery = currentPart.query = ts(pStart, x); // save the full expression as a string
@@ -311,9 +311,9 @@ if(typeof dojo != "undefined"){
 				currentPart.infixOper = queryParts.pop();
 				currentPart.query = currentPart.infixOper.query + " " + currentPart.query;
 				/*
-				console.debug(	"swapping out the infix", 
-								currentPart.infixOper, 
-								"and attaching it to", 
+				console.debug(	"swapping out the infix",
+								currentPart.infixOper,
+								"and attaching it to",
 								currentPart);
 				*/
 			}
@@ -322,7 +322,7 @@ if(typeof dojo != "undefined"){
 			currentPart = null;
 		}
 
-		// iterate over the query, character by character, building up a 
+		// iterate over the query, character by character, building up a
 		// list of query part objects
 		for(; lc=cc, cc=query.charAt(x), x < ql; x++){
 			//		cc: the current character in the match
@@ -330,7 +330,7 @@ if(typeof dojo != "undefined"){
 
 			// someone is trying to escape something, so don't try to match any
 			// fragments. We assume we're inside a literal.
-			if(lc == "\\"){ continue; } 
+			if(lc == "\\"){ continue; }
 			if(!currentPart){ // a part was just ended or none has yet been created
 				// NOTE: I hate all this alloc, but it's shorter than writing tons of if's
 				pStart = x;
@@ -373,7 +373,7 @@ if(typeof dojo != "undefined"){
 				// the beginning of a match, which should be a tag name. This
 				// might fault a little later on, but we detect that and this
 				// iteration will still be fine.
-				inTag = x; 
+				inTag = x;
 			}
 
 			if(inBrackets >= 0){
@@ -392,19 +392,19 @@ if(typeof dojo != "undefined"){
 					var cmf = _cp.matchFor;
 					if(cmf){
 						// try to strip quotes from the matchFor value. We want
-						// [attrName=howdy] to match the same 
+						// [attrName=howdy] to match the same
 						//	as [attrName = 'howdy' ]
 						if(	(cmf.charAt(0) == '"') || (cmf.charAt(0)  == "'") ){
 							_cp.matchFor = cmf.slice(1, -1);
 						}
 					}
-					// end the attribute by adding it to the list of attributes. 
+					// end the attribute by adding it to the list of attributes.
 					currentPart.attrs.push(_cp);
 					_cp = null; // necessary?
 					inBrackets = inMatchFor = -1;
 				}else if(cc == "="){
 					// if the last char was an operator prefix, make sure we
-					// record it along with the "=" operator. 
+					// record it along with the "=" operator.
 					var addToCc = ("|~^$*".indexOf(lc) >=0 ) ? lc : "";
 					_cp.type = addToCc+cc;
 					_cp.attr = ts(inBrackets+1, x-addToCc.length);
@@ -434,7 +434,7 @@ if(typeof dojo != "undefined"){
 				endAll();
 				inPseudo = x;
 			}else if(cc == "["){
-				// start of an attribute match. 
+				// start of an attribute match.
 				endAll();
 				inBrackets = x;
 				// provide a new structure for the attribute match to fill-in
@@ -448,15 +448,15 @@ if(typeof dojo != "undefined"){
 				// expression if we're already inside a pseudo-selector match
 				if(inPseudo >= 0){
 					// provide a new structure for the pseudo match to fill-in
-					_cp = { 
-						name: ts(inPseudo+1, x), 
+					_cp = {
+						name: ts(inPseudo+1, x),
 						value: null
 					}
 					currentPart.pseudos.push(_cp);
 				}
 				inParens = x;
 			}else if(
-				(cc == " ") && 
+				(cc == " ") &&
 				// if it's a space char and the last char is too, consume the
 				// current one without doing more work
 				(lc != cc)
@@ -466,7 +466,7 @@ if(typeof dojo != "undefined"){
 		}
 		return queryParts;
 	};
-	
+
 
 	////////////////////////////////////////////////////////////////////////
 	// DOM query infrastructure
@@ -528,7 +528,7 @@ if(typeof dojo != "undefined"){
 			}
 		},
 		"$=": function(attr, value){
-			// E[foo$="bar"]	
+			// E[foo$="bar"]
 			//		an E element whose "foo" attribute value ends exactly
 			//		with the string "bar"
 			var tval = " "+value;
@@ -538,7 +538,7 @@ if(typeof dojo != "undefined"){
 			}
 		},
 		"~=": function(attr, value){
-			// E[foo~="bar"]	
+			// E[foo~="bar"]
 			//		an E element whose "foo" attribute value is a list of
 			//		space-separated values, one of which is exactly equal
 			//		to "bar"
@@ -616,9 +616,9 @@ if(typeof dojo != "undefined"){
 		root["_l"] = l;
 		ci = -1;
 		for(var te = root["firstElementChild"]||root["firstChild"]; te; te = te[_ns]){
-			if(_simpleNodeTest(te)){ 
+			if(_simpleNodeTest(te)){
 				te["_i"] = ++i;
-				if(node === te){ 
+				if(node === te){
 					// NOTE:
 					// 	shortcutting the return at this step in indexing works
 					// 	very well for benchmarking but we avoid it here since
@@ -651,7 +651,7 @@ if(typeof dojo != "undefined"){
 		"first-child": function(){ return _lookLeft; },
 		"last-child": function(){ return _lookRight; },
 		"only-child": function(name, condition){
-			return function(node){ 
+			return function(node){
 				if(!_lookLeft(node)){ return false; }
 				if(!_lookRight(node)){ return false; }
 				return true;
@@ -682,7 +682,7 @@ if(typeof dojo != "undefined"){
 		},
 		"not": function(name, condition){
 			var p = getQueryParts(condition)[0];
-			var ignores = { el: 1 }; 
+			var ignores = { el: 1 };
 			if(p.tag != "*"){
 				ignores.tag = 1;
 			}
@@ -825,7 +825,7 @@ if(typeof dojo != "undefined"){
 
 		if(!("id" in ignores)){
 			if(query.id){
-				ff = agree(ff, function(elem){ 
+				ff = agree(ff, function(elem){
 					return (!!elem && (elem.id == query.id));
 				});
 			}
@@ -833,7 +833,7 @@ if(typeof dojo != "undefined"){
 
 		if(!ff){
 			if(!("default" in ignores)){
-				ff = yesman; 
+				ff = yesman;
 			}
 		}
 		return ff;
@@ -884,14 +884,14 @@ if(typeof dojo != "undefined"){
 					_simpleNodeTest(te) &&
 					(!bag || _isUnique(te, bag)) &&
 					(filterFunc(te, x))
-				){ 
+				){
 					ret.push(te);
 				}
 			}
 			return ret;
 		};
 	};
-	
+
 	/*
 	// thanks, Dean!
 	var itemIsAfterRoot = d.isIE ? function(item, root){
@@ -979,7 +979,7 @@ if(typeof dojo != "undefined"){
 		var filterFunc = getSimpleFilterFunc(query, { el: 1 });
 		var qt = query.tag;
 		var wildcardTag = ("*" == qt);
-		var ecs = getDoc()["getElementsByClassName"]; 
+		var ecs = getDoc()["getElementsByClassName"];
 
 		if(!oper){
 			// if there's no infix operator, then it's a descendant query. ID
@@ -989,8 +989,8 @@ if(typeof dojo != "undefined"){
 				// testing shows that the overhead of yesman() is acceptable
 				// and can save us some bytes vs. re-defining the function
 				// everywhere.
-				filterFunc = (!query.loops && wildcardTag) ? 
-					yesman : 
+				filterFunc = (!query.loops && wildcardTag) ?
+					yesman :
 					getSimpleFilterFunc(query, { el: 1, id: 1 });
 
 				retFunc = function(root, arr){
@@ -1005,9 +1005,9 @@ if(typeof dojo != "undefined"){
 					}
 				}
 			}else if(
-				ecs && 
+				ecs &&
 				// isAlien check. Workaround for Prototype.js being totally evil/dumb.
-				/\{\s*\[native code\]\s*\}/.test(String(ecs)) && 
+				/\{\s*\[native code\]\s*\}/.test(String(ecs)) &&
 				query.classes.length &&
 				!cssCaseBug
 			){
@@ -1173,8 +1173,8 @@ if(typeof dojo != "undefined"){
 	// We need te detect the right "internal" webkit version to make this work.
 	var wk = "WebKit/";
 	var is525 = (
-		d.isWebKit && 
-		(nua.indexOf(wk) > 0) && 
+		d.isWebKit &&
+		(nua.indexOf(wk) > 0) &&
 		(parseFloat(nua.split(wk)[1]) > 528)
 	);
 
@@ -1185,7 +1185,7 @@ if(typeof dojo != "undefined"){
 
 	var qsa = "querySelectorAll";
 	var qsaAvail = (
-		!!getDoc()[qsa] && 
+		!!getDoc()[qsa] &&
 		// see #5832
 		(!d.isSafari || (d.isSafari > 3.1) || is525 )
 	);
@@ -1214,7 +1214,7 @@ if(typeof dojo != "undefined"){
 		var domCached = _queryFuncCacheDOM[query];
 		if(domCached){ return domCached; }
 
-		// TODO: 
+		// TODO:
 		//		today we're caching DOM and QSA branches separately so we
 		//		recalc useQSA every time. If we had a way to tag root+query
 		//		efficiently, we'd be in good shape to do a global cache.
@@ -1228,11 +1228,11 @@ if(typeof dojo != "undefined"){
 			forceDOM = true;
 		}
 
-		var useQSA = ( 
+		var useQSA = (
 			qsaAvail && (!forceDOM) &&
 			// as per CSS 3, we can't currently start w/ combinator:
 			//		http://www.w3.org/TR/css3-selectors/#w3cselgrammar
-			(specials.indexOf(qcz) == -1) && 
+			(specials.indexOf(qcz) == -1) &&
 			// IE's QSA impl sucks on pseudos
 			(!d.isIE || (query.indexOf(":") == -1)) &&
 
@@ -1245,11 +1245,11 @@ if(typeof dojo != "undefined"){
 			//		elements, even though according to spec, selected options should
 			//		match :checked. So go nonQSA for it:
 			//		http://bugs.dojotoolkit.org/ticket/5179
-			(query.indexOf(":contains") == -1) && (query.indexOf(":checked") == -1) && 
+			(query.indexOf(":contains") == -1) && (query.indexOf(":checked") == -1) &&
 			(query.indexOf("|=") == -1) // some browsers don't grok it
 		);
 
-		// TODO: 
+		// TODO:
 		//		if we've got a descendant query (e.g., "> .thinger" instead of
 		//		just ".thinger") in a QSA-able doc, but are passed a child as a
 		//		root, it should be possible to give the item a synthetic ID and
@@ -1258,7 +1258,7 @@ if(typeof dojo != "undefined"){
 
 
 		if(useQSA){
-			var tq = (specials.indexOf(query.charAt(query.length-1)) >= 0) ? 
+			var tq = (specials.indexOf(query.charAt(query.length-1)) >= 0) ?
 						(query + " *") : query;
 			return _queryFuncCacheQSA[query] = function(root){
 				try{
@@ -1285,9 +1285,9 @@ if(typeof dojo != "undefined"){
 		}else{
 			// DOM branch
 			var parts = query.split(/\s*,\s*/);
-			return _queryFuncCacheDOM[query] = ((parts.length < 2) ? 
+			return _queryFuncCacheDOM[query] = ((parts.length < 2) ?
 				// if not a compound query (e.g., ".foo, .bar"), cache and return a dispatcher
-				getStepQueryFunc(query) : 
+				getStepQueryFunc(query) :
 				// if it *is* a complex query, break it up into its
 				// constituent parts and return a dispatcher that will
 				// merge the parts when run
@@ -1317,7 +1317,7 @@ if(typeof dojo != "undefined"){
 		}else{
 			return node.uniqueID;
 		}
-	} : 
+	} :
 	function(node){
 		return (node._uid || (node._uid = ++_zipIdx));
 	};
@@ -1326,7 +1326,7 @@ if(typeof dojo != "undefined"){
 	// to flatten a list of unique items, but rather just tell if the item in
 	// question is already in the bag. Normally we'd just use hash lookup to do
 	// this for us but IE's DOM is busted so we can't really count on that. On
-	// the upside, it gives us a built in unique ID function. 
+	// the upside, it gives us a built in unique ID function.
 	var _isUnique = function(node, bag){
 		if(!bag){ return 1; }
 		var id = _nodeUID(node);
@@ -1338,7 +1338,7 @@ if(typeof dojo != "undefined"){
 	// returning a list of "uniques", hopefully in doucment order
 	var _zipIdxName = "_zipIdx";
 	var _zip = function(arr){
-		if(arr && arr.nozip){ 
+		if(arr && arr.nozip){
 			return (qlc._wrap) ? qlc._wrap(arr) : arr;
 		}
 		// var ret = new d._NodeListCtor();
@@ -1350,14 +1350,14 @@ if(typeof dojo != "undefined"){
 		if(arr.length < 2){ return ret; }
 
 		_zipIdx++;
-		
+
 		// we have to fork here for IE and XML docs because we can't set
 		// expandos on their nodes (apparently). *sigh*
 		if(d.isIE && caseSensitive){
 			var szidx = _zipIdx+"";
 			arr[0].setAttribute(_zipIdxName, szidx);
 			for(var x = 1, te; te = arr[x]; x++){
-				if(arr[x].getAttribute(_zipIdxName) != szidx){ 
+				if(arr[x].getAttribute(_zipIdxName) != szidx){
 					ret.push(te);
 				}
 				te.setAttribute(_zipIdxName, szidx);
@@ -1365,7 +1365,7 @@ if(typeof dojo != "undefined"){
 		}else if(d.isIE && arr.commentStrip){
 			try{
 				for(var x = 1, te; te = arr[x]; x++){
-					if(_isElement(te)){ 
+					if(_isElement(te)){
 						ret.push(te);
 					}
 				}
@@ -1373,7 +1373,7 @@ if(typeof dojo != "undefined"){
 		}else{
 			if(arr[0]){ arr[0][_zipIdxName] = _zipIdx; }
 			for(var x = 1, te; te = arr[x]; x++){
-				if(arr[x][_zipIdxName] != _zipIdx){ 
+				if(arr[x][_zipIdxName] != _zipIdx){
 					ret.push(te);
 				}
 				te[_zipIdxName] = _zipIdx;
@@ -1403,7 +1403,7 @@ if(typeof dojo != "undefined"){
 		//			* class selectors (e.g., `.foo`)
 		//			* node type selectors like `span`
 		//			* ` ` descendant selectors
-		//			* `>` child element selectors 
+		//			* `>` child element selectors
 		//			* `#foo` style ID selectors
 		//			* `*` universal selector
 		//			* `~`, the immediately preceeded-by sibling selector
@@ -1428,14 +1428,14 @@ if(typeof dojo != "undefined"){
 		//		palette of selectors and when combined with functions for
 		//		manipulation presented by dojo.NodeList, many types of DOM
 		//		manipulation operations become very straightforward.
-		//		
+		//
 		//		Unsupported Selectors:
 		//		----------------------
 		//
 		//		While dojo.query handles many CSS3 selectors, some fall outside of
 		//		what's resaonable for a programmatic node querying engine to
 		//		handle. Currently unsupported selectors include:
-		//		
+		//
 		//			* namespace-differentiated selectors of any form
 		//			* all `::` pseduo-element selectors
 		//			* certain pseduo-selectors which don't get a lot of day-to-day use:
@@ -1444,10 +1444,10 @@ if(typeof dojo != "undefined"){
 		//			|	* `:root`, `:active`, `:hover`, `:visisted`, `:link`,
 		//				  `:enabled`, `:disabled`
 		//			* `:*-of-type` pseudo selectors
-		//		
+		//
 		//		dojo.query and XML Documents:
 		//		-----------------------------
-		//		
+		//
 		//		`dojo.query` (as of dojo 1.2) supports searching XML documents
 		//		in a case-sensitive manner. If an HTML document is served with
 		//		a doctype that forces case-sensitivity (e.g., XHTML 1.1
@@ -1557,12 +1557,12 @@ if(typeof dojo != "undefined"){
 		// NOTE:
 		// 		Opera in XHTML mode doesn't detect case-sensitivity correctly
 		// 		and it's not clear that there's any way to test for it
-		caseSensitive = (root.contentType && root.contentType=="application/xml") || 
+		caseSensitive = (root.contentType && root.contentType=="application/xml") ||
 						(d.isOpera && (root.doctype || od.toString() == "[object XMLDocument]")) ||
-						(!!od) && 
+						(!!od) &&
 						(d.isIE ? od.xml : (root.xmlVersion||od.xmlVersion));
 
-		// NOTE: 
+		// NOTE:
 		//		adding "true" as the 2nd argument to getQueryFunc is useful for
 		//		testing the DOM branch without worrying about the
 		//		behavior/performance of the QSA branch.

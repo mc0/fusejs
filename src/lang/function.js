@@ -106,7 +106,7 @@
           context,
           name,
           args = slice.call(arguments, 2);
-  
+
       if (isArray(fn)) {
         name = fn[0]; context = fn[1];
       } else {

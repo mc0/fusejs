@@ -19,7 +19,7 @@
     },
 
     NOOP = fuse.Function.NOOP,
-    
+
     Event = fuse.dom.Event,
 
     addDispatcher = Event._addDispatcher,

@@ -25,7 +25,7 @@
 
 * Make fuse.dom.Element#show work with elements hidden by stylesheet rules. [jddalton Joe Gornick]
 
-* Add table of default attribute values so fuse.dom.Element#getAttribute may consistently resolve them across browsers. [fabiomcosta, jddalton] 
+* Add table of default attribute values so fuse.dom.Element#getAttribute may consistently resolve them across browsers. [fabiomcosta, jddalton]
 
 * Add ability to exit early from fuse.Object.each() by returning false from the callback and allow setting the `this` of the callback. [jddalton]
 
@@ -257,7 +257,7 @@
 
 * Support fallback for Safari 2.x event.isMiddleClick() support. [Prototype LH #731] [Arthur Schreiber, Frank, jddalton]
 
-* Make setOpacity() method treat a value of 1 and an empty string differently. [Prototype LH #684] [david brillard, jddalton] 
+* Make setOpacity() method treat a value of 1 and an empty string differently. [Prototype LH #684] [david brillard, jddalton]
 
 * Make setStyle() method avoid throwing errors when passing falsy values. [Prototype LH #558] [garrett, jddalton]
 
@@ -661,7 +661,7 @@
 * Change Fuse.Ajax.Request.Event names to those defined by the W3C XMLHttpRequest draft. [jddalton]
   Note: Backwards compatibility warning.
 
-* Ensure onSuccess/onFailure responders are fired regardless of provided request options.onXXX status callbacks. [Prototype LH #263, #334] [Darrin Holst, jddalton] 
+* Ensure onSuccess/onFailure responders are fired regardless of provided request options.onXXX status callbacks. [Prototype LH #263, #334] [Darrin Holst, jddalton]
 
 * Skip global/request onSuccess/onFailure events if the request is aborted. [Diego Perini, fearphage, jddalton]
 
@@ -698,7 +698,7 @@
 
 * Optimize Fuse.Range `max`, `min`, 'size', and `toArray` methods. [Prototype LH #117] [jddalton, Michael M Slusarz]
 
-* Stop escaping quotes in Fuse.String#escapeHTML and stop stripping tags in Fuse.String#unescapeHTML. [Prototype LH #722, #729] [jddalton, mck, SWilk, T.J. Crowder, Tobie Langel] 
+* Stop escaping quotes in Fuse.String#escapeHTML and stop stripping tags in Fuse.String#unescapeHTML. [Prototype LH #722, #729] [jddalton, mck, SWilk, T.J. Crowder, Tobie Langel]
 
 * Fix IE bug where Fuse.String#match(pattern) incorrectly sets the pattern's `lastIndex` property. [jddalton]
 
@@ -743,7 +743,7 @@
 
 * Change Array method internals from Fuse.Object -> Object usage and throw a TypeError if `this` is null/undefined. [jddalton]
 
-* Ensure the `object` argument of Fuse.Object.hasKey() is coerced to an object in all forks of the method. [jddalton] 
+* Ensure the `object` argument of Fuse.Object.hasKey() is coerced to an object in all forks of the method. [jddalton]
 
 * Ensure LINK elements collected in the dom-loaded solution have a `rel` attribute of `stylesheet` (case-insensitive). [jddalton, Simo Kinnunen]
 
@@ -809,7 +809,7 @@
 
 * Allow Fusebox to remove the iframes used to create the native sandboxes in Opera 9.5-10a. [jddalton]
 
-* Add support for Peppy and Dojo Acme JavaScript CSS Selector engines and update other engines. [jddalton] 
+* Add support for Peppy and Dojo Acme JavaScript CSS Selector engines and update other engines. [jddalton]
 
 * Correct many coding issues related to the unit test rewrites. [jddalton]
   Note: Backwards compatibility warning.
@@ -818,7 +818,7 @@
      * Ajax.Response#getResponseHeader -> Ajax.Response#getHeader
      * Fuse.Util.$$() -> Fuse.query()
      * Remove Fuse.RegExp#match alias of Fuse.RegExp#test
- 
+
    - New Fixes/Optimizations
      * Make Fuse.Class, Fuse.Range and others perform as if by a new expression when they, the constructors, are called as a function.
      * Ensure, for IE, that Element#writeAttribute coerces values to strings before setting them. [kangax]
@@ -1116,16 +1116,16 @@
 * Optimize Class.create() and Class#addMethods and switch to using `this._super()`. [Joey Hurst, jddalton, John Resig]
   Note: Backwards compatibility warning.
     - The $super variable is no longer used to access a super's method.
-      Intead use `this._super()` in the body of the subclassed method. 
+      Intead use `this._super()` in the body of the subclassed method.
 
 * Rename Object.isOwnProperty() to Object.hasKey() and add Hash#hasKey. [apm, jddalton]
 
 * Remove internal use of the $super variable in Fuse. [jddalton]
 
 * Allow Element.addMethods() and Event.addMethods() to add `toString` and other special methods. [jddalton]
-  Note: Additions to HTMLElement.prototype will be ignored if HTML<tagName>Element.prototype has an existing 
+  Note: Additions to HTMLElement.prototype will be ignored if HTML<tagName>Element.prototype has an existing
   property with the same name. Extending elements by tagName will get around the issue.
-  
+
 * Ensure correct use of the delete operator. [jddalton]
 
 * Allow IE8 to utilize the Element and Event prototype objects. [Andrew Dupont, jddalton]
@@ -1390,7 +1390,7 @@
   - Adopt new coding pattern [jddalton, kangax, Tobie Langel]
   - Restructure file system to accommodate custom builds [jddalton, T.J Crowder, Tobie Langel]
   - Backwards compatibility change for Ajax.Responders.responders property [jddalton]
-  - Update .gitignore files to ingore raked and temporary files [bkerley] 
+  - Update .gitignore files to ingore raked and temporary files [bkerley]
   - Adjust edge case unit tests [jddalton]
 
 * unit test: Make Ajax unit tests work in Safari 2, stop Dom unit tests from crashing Opera 9.2x on OS X, and perform minor cleanup on Form and Dom unit tests. [jddalton]
@@ -1662,7 +1662,7 @@
 
 * Fix Element#getStyle returns null if value is "auto" in browsers supporting getComputedStyle(). [Rails Trac #10116] [kangax, ylucas]
 
-* unit test: Add unit tests for #10150, no patch needed because issue is already resolved. [jddalton] 
+* unit test: Add unit tests for #10150, no patch needed because issue is already resolved. [jddalton]
 
 * Fix Element read/write attribute methods for the 'encType' form attribute in IE. [Rails Trac #11126] [kangax, NoiseEee]
 
@@ -1825,7 +1825,7 @@
 
 * Add logic to Element#getStyle in Opera that fixes inaccurate reporting of computed 'width' and 'height' properties. [Andrew Dupont]
 
-* Ensure that an Ajax.Request's parameters option can be a Hash.  [Rails Trac #10172]  [kangax, sam] 
+* Ensure that an Ajax.Request's parameters option can be a Hash.  [Rails Trac #10172]  [kangax, sam]
 
 * Ensure no comment nodes are returned in Selector queries (IE improperly returns comment nodes on getElementsByTagName("*")). Change Element#descendants to use Element#getElementsBySelector in order to avoid this issue. [Rails Trac #10220] [Jeff Gobel, Andrew Dupont]
 
@@ -1931,13 +1931,13 @@
 * Complete rewrite of the Hash class.
 
   !! BACKWARDS COMPATIBILITY CHANGE !! This new version of Hash is NOT backwards compatible with the former Hash class.
-  
+
   Properties are now hidden away in an private store to prevent the risk of collision with Hash's instance and mixed-in methods.
   This implies that properties of the hash can no longer be set, accessed or deleted directly: use the new Hash#get(key), Hash#set(key, value) and Hash#unset(key) instance methods instead.
-  
+
   - Make $H(object) equivalent to new Hash(object). Both now return a new (cloned) instance of Hash in all circumstances.
   - Make Hash#merge non-destructive.
-  
+
   - Add Hash#update (a destructive version of Hash#merge).
   - Add Hash#clone (returns a new, cloned instance of Hash).
   - Add Hash#toObject (returns a clone of the contained object).
@@ -1960,8 +1960,8 @@
   - The Event.DOMEvents array is no longer present.  If an event name does not include a namespace, the event is treated as a native event.
 
 * Clean up the new class API.  [sam, Tobie Langel]
-  - Add Class#addMethods for adding instance methods to classes.  
-  - Remove Class.extend and Class.mixin.  
+  - Add Class#addMethods for adding instance methods to classes.
+  - Remove Class.extend and Class.mixin.
   - Class.create now takes a variable number of arguments: if the first argument is a class, the newly created class inherits from that class; all other arguments are treated as successive calls to addMethods.
 
 * Fix contentloaded event initialization in IE.  [Rails Trac #9457, #9488, #9707]  [Mislav Marohnić]
@@ -2050,7 +2050,7 @@
 
 * Make the eventName and handler arguments to Event.stopObserving optional.  If no handler is specified, all handlers for the given event are unregistered.  If no event name is specified, all observed events on the element are unregistered.  [sam]
 
-* Add cross-support for the DOMContentLoaded event through a Prototype custom event on document called "contentloaded".  The DOMContentLoaded event fires before window.load, when the entire HTML document, but not necessarily its images, stylesheets or other assets, has loaded.  Based on [6596].  [sam, Mislav Marohnić] 
+* Add cross-support for the DOMContentLoaded event through a Prototype custom event on document called "contentloaded".  The DOMContentLoaded event fires before window.load, when the entire HTML document, but not necessarily its images, stylesheets or other assets, has loaded.  Based on [6596].  [sam, Mislav Marohnić]
   Example:
     document.observe("contentloaded", function() {
       $$("a").invoke("identify"); // give all <a> tags an ID
@@ -2074,7 +2074,7 @@
  - Added Class.extend for dynamically adding methods to existing classes (while preserving inheritance chain). Can also be used for mixins.
  - The 'constructor' property of a class instance always points back to the proper class. Class objects themselves have two special properties: 'superclass' and 'subclasses' (which default to 'null' and '[]', respectively). Allows for powerful introspection.
  - Added Object.isFunction [sam]
- 
+
 * Add Function#argumentNames, which returns an ordered array of the function's named arguments.  [sam]
 
 * Prevent a crash in Safari 1.3 on String#stripScripts and String#extractScripts. [Rails Trac #8332] [grant, Tobie Langel]
@@ -2091,7 +2091,7 @@
   - Element#replace/update/insert uses the argument's toElement or toHTML method if present (toElement has precedence if both are present).
   - Element#replace and Element#update now also accept DOM elements.
   - Element#replace better handles table-related elements in IE and Opera.
-  
+
 * Add Object.isArray and Object.isElement (returns true if the object is a DOM node of type 1). [Tobie Langel]
 
 * Add Object.toHTML (uses the object's toHTML method if present or else passes the object to String.interpret). [Tobie Langel]
@@ -2102,7 +2102,7 @@
     $('id').setStyle({fontSize: '12px', cssFloat: 'left', opacity: 0.5});
 
   !! BACKWARDS COMPATIBILITY CHANGE !!
-  
+
   If you have code that looks like this:
     $('id').setStyle({'font-size': '12px'});
   You need to replace it with either of the following:
@@ -2114,7 +2114,7 @@
 * Make Element#readAttribute work for cloned elements in IE. [Rails Trac #8481] [chem, Tobie Langel]
 
 * Template enhancements.  [Rails Trac #8166]  [Christophe Porteneuve]
-  - Added String#interpolate as a shortcut for new Template(...).evaluate(...). 
+  - Added String#interpolate as a shortcut for new Template(...).evaluate(...).
   - If you pass String#interpolate or Template#evaluate an object with a toTemplateReplacements() method, the return value of that method will be used as the replacement object.
   - You can now substitute properties of template replacement values in template strings, using dot or bracket notation (or both).  Example:
     "#{name.last}, #{name.first[0]}. (#{location})".interpolate({
@@ -2134,10 +2134,10 @@
 * Add Element#adjacent as a shortcut to selecting all adjacent nodes (and their children) that match a CSS selector.  [Thomas Fuchs]
 
 * Enhance the Enumerable and Array APIs to more closely match those of JavaScript 1.6 as implemented in Firefox 1.5.  [Rails Trac #6650, #8409]  [Mislav Marohnić, Sylvain Zimmer]
-  - Add Array#lastIndexOf, and change Array#indexOf not to overwrite the native method. 
+  - Add Array#lastIndexOf, and change Array#indexOf not to overwrite the native method.
   - Make Enumerable use Array.prototype.forEach instead of _each when possible (slight speed increase).
-  - Add "filter", "entries", "every", and "some" Array aliases. 
-  - All Enumerable methods now have an additional parameter, "context", which, if present, specifies the object to which the iterators' "this" is bound. 
+  - Add "filter", "entries", "every", and "some" Array aliases.
+  - All Enumerable methods now have an additional parameter, "context", which, if present, specifies the object to which the iterators' "this" is bound.
   - Function#bind and #curry now return the receiving function if the binding object is undefined.
 
 * Temporary workaround for Prototype.BrowserFeatures.SpecificElementExtensions incorrectly evaluating to true on iPhone. (needs further investigation)  [sam]
@@ -2200,7 +2200,7 @@
 
 * Minor cleanup of the position methods  [sam]
 
-* Fix Element#clonePosition to call viewportOffset.  [Rails Trac #8372]  [graemenelson, Christophe Porteneuve] 
+* Fix Element#clonePosition to call viewportOffset.  [Rails Trac #8372]  [graemenelson, Christophe Porteneuve]
 
 * Prevent an error being thrown by $$ when #id does not exist in $$("div #id").  [Rails Trac #8325]  [Tobie Langel, ecke]
 
@@ -2279,7 +2279,7 @@
     $H({a:'b',c:null}).toQueryString()           -> 'a=b&c='
     $H('a=b&c'.toQueryParams()).toQueryString()  -> 'a=b&c'
     $H('a=b&c='.toQueryParams()).toQueryString() -> 'a=b&c='
-    
+
 * Fix issues with Selector an+b logic, :not support, attribute selector double quotes, plus performance improvements.  [Rails Trac #7873, #7901].  [Andrew Dupont]
 
 * Fix Form.disable to work again on non-form elements.  [Rails Trac #6887]  [Mislav Marohnić]
@@ -2374,7 +2374,7 @@
   - Add Element.getWidth()
   - Make Element.replace() call .toString() on the html argument (alike .update())
   - Fix an issue with Element.get/setStyle() and Safari with 'float'
-  - Add a bunch of missing unit tests 
+  - Add a bunch of missing unit tests
 
 * Fix an issue with Element.setStyle({opacity:''}) setting the opacity to 0 instead of removing the set inline opacity style.  [Thomas Fuchs]
 
@@ -2456,7 +2456,7 @@
       <div class="widget" widget_id="8">...</div>
       <div class="widget" widget_id="9">...</div>
     </div>
-    
+
     $$('div.widget').invoke('readAttribute', 'widget_id')
     // ["7", "8", "9"]
 
@@ -2486,7 +2486,7 @@
   - Make better use of Element.Methods and Form.Methods/Form.Element.Methods
 
 * A slew of Ajax improvements.  [Rails Trac #6366]  [mislav, sam]
-  
+
   Public-facing changes include:
   - HTTP method can be specified in either lowercase or uppercase, and uppercase is always used when opening the XHR connection
   - Added 'encoding' option (for POST) with a default of 'UTF-8'
@@ -2560,12 +2560,12 @@
 * Add Element.up, Element.down, Element.previous, and Element.next for easily traversing the DOM.  (Inspired by Thomas Fuchs' original implementation of Element.up: http://pastie.caboo.se/7702) [sam]
 
   Examples:
-    <div id="sidebar">                  -> $('nav').up() or $('menu').up('div') 
+    <div id="sidebar">                  -> $('nav').up() or $('menu').up('div')
       <ul id="nav">                     -> $('sidebar').down()  or $('sidebar').down('ul') or $('menu').previous()
         <li>...</li>                    -> $('sidebar').down(1) or $('sidebar').down('li')
         <li>...</li>                    -> $('sidebar').down(2) or $('sidebar').down('li', 2) or $('sidebar').down('li').next('li')
         <li class="selected">...</li>   -> $('sidebar').down('li.selected')
-      </ul>                             
+      </ul>
       <ul id="menu">                    -> $('sidebar').down('ul').next()
         ...
 
@@ -2602,9 +2602,9 @@
   The following methods now return their first argument: Element.toggle, Element.hide, Element.show, Element.remove, Element.update, Element.replace, Element.addClassName, Element.removeClassName, Element.observe, Element.stopObserving, Element.cleanWhitespace, Element.scrollTo, Element.setStyle, Element.makePositioned, Element.undoPositioned, Element.makeClipping, Element.undoClipping, Form.reset, Form.disable, Form.enable, Form.focusFirstElement, Form.Element.focus, Form.Element.select, Form.Element.clear, Form.Element.activate, Form.Element.disable, Form.Element.enable.
 
 * For consistency, Element.toggle, Element.show, Element.hide, Field.clear, and Field.present no longer take an arbitrary number of arguments. [sam]
-  
+
   !! BACKWARDS COMPATIBILITY CHANGE !!
-  
+
   If you have code that looks like this:
     Element.show('page', 'sidebar', 'content');
   You need to replace it with code like this:
@@ -2682,7 +2682,7 @@
     $$('form#foo input[type=text]').each(function(input) {
       input.setStyle({color: 'red'});
     });
-  
+
 * Send Accept header containing 'text/javascript, text/html, application/xml, text/xml */*'' to inform Rails that we prefer RJS, but we'll take HTML or XML or whatever if you can't deliver the goods [DHH]
 
 * Make $$ work in IE. [Rails Trac #3715] [rubyonrails@brainsick.com]
@@ -2707,7 +2707,7 @@
   Example: Find all <img> elements inside <p> elements with class "summary", all inside
            the <div> with id "page". Hide each matched <img> tag.
              $$('div#page p.summary img').each(Element.hide)
-     
+
 * Add a Selector class for matching elements by single CSS selector tokens. [sam]
 
 * Add Test.Unit.Assertions.assertEnumEqual for comparing Enumerables in tests. [sam]
@@ -2720,7 +2720,7 @@
 
 * Move Prototype to Rails SVN. [sam]
   http://dev.rubyonrails.org/svn/rails/spinoffs/prototype/
-  
+
 * Make the console nicer. [sam]
 
 * Prune the source tree. [sam]

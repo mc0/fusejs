@@ -27,7 +27,7 @@
           }
           instance.timer = setTimeout(function() { instance.start() },
             instance.decay * instance.frequency * instance.timerMultiplier);
-  
+
           dispatcher(request, json);
         }
       };

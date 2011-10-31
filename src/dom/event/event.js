@@ -318,7 +318,7 @@
 
     plugin.cancel = function cancel() {
       var p = fuse._,
-      
+
       setCancelled = function(object) {
         object.isCancelled = p.createGetter('isCancelled', true);
         return object;
@@ -346,7 +346,7 @@
 
     plugin.stopBubbling = function stopBubbling() {
       var p = fuse._,
-      
+
       setBubbling = function(object) {
         object.isBubbling = p.createGetter('isBubbling', false);
         return object;
@@ -374,7 +374,7 @@
 
     plugin.getTarget = function getTarget() {
       var p = fuse._,
-      
+
       setTarget = function(object, value) {
         object.getTarget = p.createGetter('getTarget', value);
         return value;

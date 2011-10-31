@@ -364,7 +364,7 @@
     };
 
     plugin.wrap = function wrap(wrapper, attributes) {
-      var rawWrapper, element = this.raw || this, 
+      var rawWrapper, element = this.raw || this,
        parentNode = element[PARENT_NODE],
        options = { 'attrs': attributes, 'context': element }
 

@@ -46,7 +46,7 @@ new Test.Unit.Runner({
     this.assertEnumEqual(['x', undef], results,
       'Should contain an undefined value.');
   },
-  
+
   'testRegExpTest': function() {
     var pattern = fuse.RegExp('^', 'g');
     pattern.test('');
@@ -124,7 +124,7 @@ new Test.Unit.Runner({
       'Should execute the function for each replacement.');
 
     fuse.String('xy').replace(/x(z)?/, function() {
-      args = slice.call(arguments, 0); 
+      args = slice.call(arguments, 0);
     });
 
     this.assertEnumEqual(['x', undefined, 0, 'xy'], args,
@@ -336,7 +336,7 @@ new Test.Unit.Runner({
 
     this.assertEqual('hello  \n  world',  string.trim(),
       'String#trim should remove all types of whitespace.');
- 
+
     this.assertEqual('hello  \n  world' + whitespace, string.trimLeft(),
       'String#trimLeft should remove all types of whitespace.');
 

@@ -81,7 +81,7 @@
     winLoadDispatcher = createDispatcher(0, 'load'),
 
     fixReadyState     = typeof fuse._doc.readyState != 'string',
-    
+
     domLoadWrapper = function(event) {
       var doc = fuse._doc, docEl = fuse._docEl, decorated = fuse(doc);
       if (!decorated.isLoaded()) {
